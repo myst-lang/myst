@@ -1,0 +1,7 @@
+# Build artifacts and dependencies
+/lib/
+/bin/
+/.shards/
+
+# The myst executable
+myst
