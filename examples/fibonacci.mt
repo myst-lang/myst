@@ -32,9 +32,7 @@ fib("hello")  #=> "hello is not a valid argument for fibonnaci!"
 # Obviously, calculating fibonnaci recursively is slow. It can easily be sped
 # up using memoization to avoid calculating the same numbers more than once.
 
-numbers = []
-numbers[0] = 1
-numbers[1] = 1
+numbers = [1, 1]
 
 def fib(n : Integer)
   return if n < 0

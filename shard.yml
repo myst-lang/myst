@@ -8,5 +8,3 @@ authors:
 targets:
   myst:
     main: src/myst.cr
-
-
