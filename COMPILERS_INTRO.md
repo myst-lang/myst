@@ -167,4 +167,4 @@ Additionally, most Virtual Machine guides explain the process of interpreting by
 
 That middle step of converting the AST from an interpreter example into the bytecode for a VM is often missing, meaning that many newcomers don't understand how to go from one to the next, and get stuck, frustrated, and often dispirited about continuing to learn and improving their learning projects to become practical compilers.
 
-If you still have any questions, feel free to [open an issue about it](https://github.com/myst-lang/myst) or hop in the [Myst Language Discord server](not yet) so I can improve this guide or the Myst language to make it more readily accessible to everyone.
+If you still have any questions, feel free to [open an issue about it](https://github.com/myst-lang/myst/issues/new) or hop in the [Myst Language Discord server](https://discord.me/myst) so I can improve this guide or the Myst language to make it more readily accessible to everyone.
