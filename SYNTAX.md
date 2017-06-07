@@ -105,7 +105,7 @@ API_VERSION
 
 Identifiers that start with an uppercase letter are enforced to be constant. That is, they can only be assigned once. Attempting to re-assign a constant will result in a `ConstantReassignmentError`.
 
-Identifiers can also be prefixed with modifiers that affect their meaning in some contexts. These will be covered later on in this document, but the same rule for naming applies.
+Identifiers can also be prefixed with modifiers that affect their meaning in some contexts. These will be covered later on in this document, but the naming rule for variables and functions should be applied for them.
 
 
 ## Collection Literals
@@ -117,17 +117,22 @@ Collection literals are used to build collection objects without having to name 
 [1, 2, 3]
 # Lists can be arbitrarily nested, and contain values of any type.
 [1, "hello", [:nested, true], nil]
+# Insert an existing list into another using a splat.
+list1 = [1, 2, 3]
+list2 = [0, *list1, 4] #=> [0, 1, 2, 3, 4]
 
 # Maps are created by specifying keys-value pairs in curly brackets.
 # By default, keys are symbols, with the prefix colon becoming a suffix.
 {key: value, another: "hello"}
 # To use a key with a different type, or to interpret the key name from
 # an expression, wrap the key with angle brackets:
+a = :variable
 {
   normal:     true,   # the key is the symbol `:normal`
-  <"hello">:  'h',    # the key is evaluated as the string "hello"
-  <2*3>:      6,      # the key is evaluated as the integer `6`
+  <"hello">:  'h',    # the key is the string "hello"
+  <2*3>:      6,      # the key is the integer `6`
   <[1, 2]>:   :list,  # the key is the list [1, 2]
+  <a>:        :var,   # the key is the symbol `:variable`
 }
 ```
 
@@ -168,9 +173,13 @@ Note that logical operations (`&&` and `||`) are short-circuiting, meaning if th
 Also note that the result of logical operations is not a boolean `true` or `false`, but rather the value that determined the result. For example, the expression `1 && 1` returns the integer `1`, and the expression `nil || "hello"` returns the string "hello", because integers and strings are truthy values.
 
 
-# Assignments
+## Assignments
 
-Assignments in Myst come in two forms. The first is simple assignment as it appears most common languages today, using a single equals sign (`=`) to assign the right-hand-side expression's value to the left-hand-side. Myst also supports conditional assignment, multiple assignment, and decompositional assignment, as shown in the examples below.
+Assignments in Myst come in two forms: simple assignment and pattern-matched assignment.
+
+### Simple assignment
+
+The first is simple assignment as it appears most common languages today, using a single equals sign (`=`) to assign the right-hand-side expression's value to the left-hand-side. Myst also supports conditional assignment, multiple assignment, and decompositional assignment, as shown in the examples below.
 
 ```ruby
 # normal assignment
@@ -199,23 +208,37 @@ a, _, c = array
 
 # variadic decomposition: collect multiple elements into one variable
 head, *rest = [1, 2, 3] #=> `head` is 1, `rest` is [2, 3]
-a, *_, c = [1, 2, 3, 4] #=> `a` is 1, `c` is 3
+a, *_, c, d = [1, 2, 3, 4, 5] #=> `a` is 1, `c` is 4, `d` is 5
 ```
+
+### Pattern-matched assignment
 
 The second form of assignment is akin to the [match operator in Elixir](https://elixir-lang.org/getting-started/pattern-matching.html#the-match-operator), enabling structured decomposition and pattern-matching on arbitrary expressions.
 
-Elixir _only_ implements pattern-matched assignment, and so it uses the single equal sign as the operator. However, since Myst supports both simple _and_ pattern-matched assignment, it distinguishes them by using a distinct "matching" operator, `=:`, to designate pattern-matched assignment.
+Elixir _only_ implements pattern-matched assignment, and so its use of the single equal sign as the operator is straightforward, though not intuitive for many newcomers. Because of this, and because Myst supports both simple _and_ pattern-matched assignment, it distinguishes them by using a distinct "matching" operator (`=:`) to designate pattern-matched assignment.
 
-Pattern-matched assignment creates an expectation that the value on the right-hand-side will conform to the structure expressed on the left-hand-side. If the structure is not matched, a `MatchFailure` is raised with the right-hand-side and the failing match as members.
+Pattern-matched assignment creates an expectation that the value on the right-hand-side will conform to the structure expressed on the left-hand-side. If the structure is not matched, a `MatchFailure` is raised.
 
-Pattern-matched assignment could be considered a misnomer, as an assignment is not actually required. In fact, pattern-matching is often useful for simply expecting a value out of an expression.
+In some ways, pattern-matched assignment could be considered a misnomer, as an assignment is not actually required. In fact, pattern-matching is often useful for simply expecting a value out of an expression.
 
 ```ruby
 # Pattern matching without assignment
 a = 1
 1 =: a #=> success, and execution continues
 2 =: a #=> failure, so a `MatchFailure` is raised.
+```
 
+The above is essentially shorthand for the following:
+
+```ruby
+a = 1
+raise MatchFailure.new(1, a) unless 1 == a
+raise MatchFailure.new(2, 1) unless 2 == a
+```
+
+The more common use case of pattern matching, however, is destructuring collections into various parts. This is similar to multiple assignment, but also supports destructuring maps, and interpolation of values to match against.
+
+```ruby
 # Destructuring lists
 array = [1, 2, 3]
 [1, a, 3] =: array #=> success, `a` is set to 2
@@ -234,26 +257,47 @@ map = {a: 1, b: 3, <3>: "hello"}
 # key interpolation works like normal
 x = 3
 {<x>: a} =: map
-# values can also be interpolated
+# values can also be interpolated. Without the brackets, `x` would capture any
+# value, rather than interpolating the value of `x` as the expected structure.
 {b: <x>} =: map #=> equivalent to `{b: 3} =: map`
 ```
 
 
-# Flow control
+## Flow control
 
-Myst's flow control structures are almost directly taken from Ruby. There are no native discrete iteration constructs (e.g., `for..in` or `foreach`).
+Myst's flow control structures are almost directly taken from Ruby. However, there are no discrete iteration constructs (e.g., `for..in` or `foreach`).
 
 ```ruby
 # conditions as blocks
 if a
   # only if `a` is truthy
+elif b
+  # only if `a` is falsey and `b` is truthy
+else
+  # only if neither of the above runs
 end
 unless b
   # only if `b` is falsey
 end
-# conditions as suffixes
+# looping as a block
+while a
+  # do until `a` is falsey
+end
+until a
+  # do as long as `a` is falsey
+end
+# conditions/looping as suffixes
 a = 1 if 2 == 2
 a = 1 unless 1 == 2
+a += 1 while a < 10
+a -= 1 until a < 10
+# Jumping dispatch
+case x
+when y
+  # do when y =: x
+else
+  # do when no `when` runs
+end
 # return immediately with optional arguments
 return
 return a, b
@@ -269,22 +313,149 @@ next a, b
 ```
 
 
-# Functions
+## Functions
 
-Functions in Myst are a combination of Ruby's argument and block syntax with Elixir's pattern matching semantics.
+Functions in Myst are an amalgamation of Ruby's parameter layout syntax with Elixir's pattern matching semantics and guard clauses mixed in.
 
+### Parameter layout
+In general, parameters for a function are defined in the following order:
+
+1. Required positional parameters
+2. Optional positional parameters
+3. Optional capture of remaining position parameters
+4. Named parameters (optional and required)
+5. Optional named parameters
+6. Optional capture of remaining named parameters
+7. Optional explicit block parameter
+
+In code, using all of these argument types together would look like this:
+
+```ruby
+def func(positional, b=1, *args, named: 2, d:, **kwargs, &block); end
 ```
-# argument order
+
+In the above function head, `args` will be a zero-or-more element list, collecting any remaining positional arguments after the first 2 have matched (`a` and `b`). `kwargs` will similarly be a Map of any named arguments that are not matched to any of the preceding parameters (`named` and `d`).
+
+Additionally, `b` is an optional parameter. If it is not assigned a value by the function call, it will default to the value `1`. `named:` is also an optional parameter. If it is not assigned a value, it will default to `2`. Notice that the order of named parameters is not important; named parameters with default values may appear before required named parameters.
+
+### Pattern matching
+
+Function parameters also support the destructuring syntax used in pattern-matching assignment:
+
+```ruby
+def func(0, [1, b], {a: a, <"hello">: 2}); end
+```
+
+This function matches a call with three positional arguments. The first element must be equal to `0`. The second must be a two-element list whose first element is equal to `1`, and the third must be a map with the keys `:a` and `"hello"`. The value of `:a` in the third argument is captured into the variable `a`, and the value of `"hello"` in the third argument must be equal to 2.
+
+If any of these constraints are not met, the function call will raise a `FunctionMatchFailure`.
+
+Pattern-matched arguments can also be captured as a whole using the matching operator:
+
+```ruby
+def func(0, [1, b], map =: {a: a, <"hello">: 2}); end
+```
+
+In this case, all of the constraints of the previous function head must be met, but the original value of the second argument will also be captured into `map`. The match operator (`=:`) is used to distinguish a pattern constraint from a default value, which uses a single equals sign (`=`). The semantics of the expression also match normal pattern-matching semantics, where any pattern is accepted and captured into the left-hand-side.
+
+Note that because of this syntax, pattern-matching is only supported for positional arguments. However, this is only because a clean, unambiguous syntax for matching named arguments has not been found. If one arises, it will likely be accepted.
+
+### Guard clauses
+
+A unique syntax feature of Myst is infixed guard clauses. These are arbitrary expressions that constrain the values of parameters inside of the function. These clauses are expressed using a pipe character (`|`) between the parameter name and the expression. The parameter name will be syntactically copied to the beginning of the expression, so any binary expression or function call is a valid guard clause. For example:
+
+```ruby
+def func(a, b| < 1, c=1|.truthy?, d:|.not_nil?); end
+```
+
+This function head has three guard clauses. For the function to match, the second positional argument, `b`, must make the expression `b < 1` be truthy; the third, `c`, must make the expression `c.truthy?` evaluate as truthy, and the named argument `d` must make the expression `d.not_nil?` be truthy.
+
+### Type restriction
+
+A shorthand for type restriction on parameters is also available:
+
+```ruby
+def func(a=1 : Integer, b: "hello" : String|.length > 3); end
+```
+
+This shorthand essentially acts as a guard clause of `.is_a?(T)`, where `T` is the type that is given in the restriction. The function head above matches when the first argument (`a`) is an Integer value and `b` is a String value whose length is greater than 3. Both parameters also have default values that will be used only if the parameters are not provided. If a value is provided for the parameter, but does not meet the type restriction, a `FunctionMatchFailure` is still raised, rather than using the default parameter.
+
+### Procs
+
+A `Proc` is an anonymous function that can be defined anywhere, and called like a normal function with `.call()`. Proc definitions use a stab-arrow (`->`) operator to start their definition, followed by a formal parameter definition like a normal function, then by a code block (`do...end` or `{...}`).
+
+```ruby
+add = ->(a=1 : Integer| > 0, b : Integer) do; end
+add.call(1, 2)
+```
+
+### Blocks as arguments
+
+While a `Proc` can be assigned to a variable via simple assignment, a block is only allowed as a function argument. A function that accepts a block argument may either explicitly declare a block parameter as the last argument using an ampersand (`&`), or accept the argument implicitly by calling `yield` anywhere in the function body.
+
+```ruby
+def func(a, b, &block)
+  # The given block is captured as a Proc.
+  block.call(a)
+  # Yielding with an explicit block is not allowed
+  yield a #=> fails to compile
+end
+```
+
+Taking a block implicitly requires no change to the function head:
+
+```ruby
+def func(a, b)
+  yield a
+  yield b
+end
+```
+
+The above function yields to the given block twice. The first time, it is given an argument of `a`, and the second time, it is given an argument of `b`. Implicit blocks do not allow the function to capture the given block. If the block needs to be stored, it should be taken as an explicit argument.
+
+
+### Call syntax
+
+Now that we've seen all of the ways a function can be defined, we can fully cover how functions are called. In general, calls match the syntax of function heads, but do not include any of the guard clause or type restriction syntax. Consider this function definition:
+
+```ruby
 def func(positional, b=1, *args, named: 2, d:, **kwargs); end
-# decompositive arguments
-def func([1, b], {a: a, <b>: 2}); end
-# pattern-matched arguments
-def func(a, nil, b=.is_a?(B), c: .not_nil?); end
-# type restriction shorthand
-def func(a=:default : Symbol, b: 3 : Integer)
+```
+
+A call to this function could take multiple forms:
+
+```ruby
+# only providing the required arguments
+func(1, d: 2)
+# providing all explicit arguments
+func(1, 2, named: 3, d: 4)
+# providing extra arguments, collected in `args` and `kwargs`.
+func(1, 2, 3, 4, a: 5, named: 7, d: 8, e: 9)
+#=> `args` is [3, 4], `kwargs` is {a: 5, e: 9}
+```
+
+Function calls can also use key interpolation for named arguments:
+
+```ruby
+def func(symbol: 1, <"string">: 2); end
+
+x = "string"
+y = :symbol
+func(<x>: 3, <y>: 4)
+```
+
+Providing too many or too few arguments to a function is defined to accept will raise a `FunctionMatchFailure`.
+
+### Overloading
+
+Because functions in Myst allow for constraints on the values that are passed to a function, the language also allows functions to be defined multiple times. There are no cases where defining a function a second time will cause an error. In fact, redefining a function with the same constraints will still create a second version of the function.
+
+When determining which function to use for a function call, Myst will attempt to match function heads in the order that they are defined in the source code. Once a function head is matched, that function is called, and matching stops. This makes it easy to create cascading restrictions on arguments, a good example of which is the classic [Recursive Fibonnaci implementation](examples/fibonnaci.mt).
+
+
+```ruby
 # procs/lambdas are equivalent
 ->{ |a, b| }
-def func(a, &explicit_block); explicit_block.call(); end
 # function call with block
 func &a_proc
 func{ |a, b=.not_nil?| }
@@ -292,14 +463,12 @@ func do |a, b : B)|
 end
 ```
 
-Pattern matching allows for function overloads with equal arity. If no function head matches all of the call arguments, a `FunctionMatchError` will raise.
 
-
+```ruby
 # Blocks
-# basic scope block
 begin
   # try this first
-rescue <ExceptionType>: ex
+rescue ex : ExceptionType
   # if `begin` fails with ExceptionType, do this
 rescue ex
   # if `begin` or `resuce` fails with any exception.
