@@ -382,11 +382,14 @@ This shorthand essentially acts as a guard clause of `.is_a?(T)`, where `T` is t
 
 ### Procs
 
-A `Proc` is an anonymous function that can be defined anywhere, and called like a normal function with `.call()`. Proc definitions use a stab-arrow (`->`) operator to start their definition, followed by a formal parameter definition like a normal function, then by a code block (`do...end` or `{...}`).
+A `Proc` is an anonymous function that can be defined anywhere, and called like a normal function with `.call()`. Proc definitions use a stab-arrow (`->`) operator to start their definition, followed by parameter declaration in parenthesis, then by a code block (`do...end` or `{...}`).
 
 ```ruby
-add = ->(a=1 : Integer| > 0, b : Integer) do; end
-add.call(1, 2)
+proc1 = ->(a=1 : Integer| > 0, b : Integer) do; end
+proc1.call(1, 2)
+# Procs with no arguments still include the parenthesis
+proc2 = ->() {}
+proc2.call()
 ```
 
 ### Blocks as arguments
@@ -444,24 +447,32 @@ y = :symbol
 func(<x>: 3, <y>: 4)
 ```
 
-Providing too many or too few arguments to a function is defined to accept will raise a `FunctionMatchFailure`.
+To provide a block directly to a function, use either the `{}` or `do...end` block syntax immediately following the call:
+
+```ruby
+func(with, arguments) do |some, parameters: 1|
+end
+```
+
+To pass an existing Proc to a function, or to convert an Object to a Proc, use an ampersand (`&`).
+
+```ruby
+proc1 = ->(some, parameters: 1) {}
+func(with, arguments, &proc1)
+```
+
+Unlike most other languages with blocks, the two syntaxes for blocks are semantically identically. In languages like Ruby and Crystal, blocks specified with `{}` are implicitly _right_ associative, while blocks specified with `do...end` are _left_ associative, which can lead to confusion when parenthesis are omitted, so Myst enforces a single convention to simplify mental overhead.
+
+Providing too many or too few arguments to a function will raise a `FunctionMatchFailure`. This also applies to block arguments. A function that _explicitly_ accepts a block argument will not match if a block is not provided. Functions that _implicitly_ accept blocks _will_ match without a block provided, but will fail if the function tries to `yield`.
 
 ### Overloading
 
 Because functions in Myst allow for constraints on the values that are passed to a function, the language also allows functions to be defined multiple times. There are no cases where defining a function a second time will cause an error. In fact, redefining a function with the same constraints will still create a second version of the function.
 
-When determining which function to use for a function call, Myst will attempt to match function heads in the order that they are defined in the source code. Once a function head is matched, that function is called, and matching stops. This makes it easy to create cascading restrictions on arguments, a good example of which is the classic [Recursive Fibonnaci implementation](examples/fibonnaci.mt).
+When determining which function to use for a function call, Myst will attempt to match function heads in the order that they are defined in the source code. Once a function head is matched, that function is called, and matching stops. This makes it easy to create cascading restrictions on arguments, a good example of which is the [Recursive Fibonnaci implementation](examples/fibonnaci.mt).
 
 
-```ruby
-# procs/lambdas are equivalent
-->{ |a, b| }
-# function call with block
-func &a_proc
-func{ |a, b=.not_nil?| }
-func do |a, b : B)|
-end
-```
+## Exception handling
 
 
 ```ruby
