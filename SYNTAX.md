@@ -315,17 +315,30 @@ next a, b
 
 ## Functions
 
-Functions in Myst are an amalgamation of Ruby's parameter layout syntax with Elixir's pattern matching semantics and guard clauses mixed in. There are three possible syntaxes for declaring a function parameter:
+Functions in Myst are an amalgamation of Ruby's parameter layout syntax with Elixir's pattern matching semantics and guard clauses mixed in. The general format of a parameter looks like this:
 
 ```ruby
-# For normal positional parameters, everything but `name` is optional
-name = default : Type|guard_expression
-# For named parameters a colon is used in place of the equals sign,
-# with no space after the name
-name: default : Type|guard_expression
-# For pattern-matched parameters, `pattern` is the only requirement.
+# For normal positional parameters, use and equals sign after `name`.
 pattern =: name = default : Type|guard_expression
+# For named parameters a colon is used in place of the equals sign, with no
+# space after the name.
+pattern =: name: default : Type|guard_expression
 ```
+
+By default, `name` is the only required field in a parameter definition. However, if `pattern` is given, `name` becomes optional. With that, all of the following are valid parameter formats:
+
+```ruby
+a
+a=1
+a: 1| > 0
+1
+[1, 2] =: numbers
+{field: value} : Map
+person|.age > 10
+[head, *rest] =: list|.length > 2
+```
+
+Note that in order to use a guard expression, the parameter must include a `name` field. That is, a parameter definition like `1| > 0` is invalid, and will raise a `ParameterFormatException`
 
 ### Parameter layout
 In general, parameters for a function are defined in the following order:
