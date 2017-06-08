@@ -315,7 +315,17 @@ next a, b
 
 ## Functions
 
-Functions in Myst are an amalgamation of Ruby's parameter layout syntax with Elixir's pattern matching semantics and guard clauses mixed in.
+Functions in Myst are an amalgamation of Ruby's parameter layout syntax with Elixir's pattern matching semantics and guard clauses mixed in. There are three possible syntaxes for declaring a function parameter:
+
+```ruby
+# For normal positional parameters, everything but `name` is optional
+name = default : Type|guard_expression
+# For named parameters a colon is used in place of the equals sign,
+# with no space after the name
+name: default : Type|guard_expression
+# For pattern-matched parameters, `pattern` is the only requirement.
+pattern =: name = default : Type|guard_expression
+```
 
 ### Parameter layout
 In general, parameters for a function are defined in the following order:
@@ -340,7 +350,7 @@ Additionally, `b` is an optional parameter. If it is not assigned a value by the
 
 ### Pattern matching
 
-Function parameters also support the destructuring syntax used in pattern-matching assignment:
+Function parameters also support the destructuring syntax used in pattern-matching assignment. In fact, all parameters in all functions are given their values using the matching operator, for functions that only name parameters and default values, this makes no real difference, as the left-hand-side is a catch-all variable expression. However, destructuring parameters in function heads can be extremely powerful.
 
 ```ruby
 def func(0, [1, b], {a: a, <"hello">: 2}); end
@@ -350,10 +360,10 @@ This function matches a call with three positional arguments. The first element 
 
 If any of these constraints are not met, the function call will raise a `FunctionMatchFailure`.
 
-Pattern-matched arguments can also be captured as a whole using the matching operator:
+Pattern-matched arguments can also be explicitly pattern matched and captured as a whole using a matching operator in the function head:
 
 ```ruby
-def func(0, [1, b], map =: {a: a, <"hello">: 2}); end
+def func(0, [1, b], {a: a, <"hello">: 2} =: map); end
 ```
 
 In this case, all of the constraints of the previous function head must be met, but the original value of the second argument will also be captured into `map`. The match operator (`=:`) is used to distinguish a pattern constraint from a default value, which uses a single equals sign (`=`). The semantics of the expression also match normal pattern-matching semantics, where any pattern is accepted and captured into the left-hand-side.
@@ -474,25 +484,56 @@ When determining which function to use for a function call, Myst will attempt to
 
 ## Exception handling
 
+As you may have noticed from the previous sections, Myst has the concept of Exceptions, which means that they need to be handled in some way. The way that Myst allows developers to handle exceptions is most similar to Crystal, which is almost identical to Ruby in this regard.
+
+### Raising
+
+To start, exceptions in Myst are created using the `raise` keyword with an argument that is used as the exception object. For example, in the Pattern matching section, an example of a match operator equivalent was shown:
 
 ```ruby
-# Blocks
+raise MatchFailure.new(a, b) unless a == b
+```
+
+### Capturing
+
+Once an exception has been raised, developers can capture it using a `begin...rescue...end` block. The default case catches all exceptions:
+
+```ruby
 begin
-  # try this first
-rescue ex : ExceptionType
-  # if `begin` fails with ExceptionType, do this
-rescue ex
-  # if `begin` or `resuce` fails with any exception.
-  # `ex` is not required
-else
-  # if `begin` ran with no exceptions
-ensure
-  # run this no matter what
+  # try this code
+rescue
+  # if an exception occurs, capture it and run this code.
 end
-# Note: rescue/else/ensure can also be used with blocks created by `do`.
+```
 
+This can be useful if the type of exception is not important and any error should be captured, though this is often not a good solution, as it makes attempting to solve the exception more difficult.
 
-# Dependency loading, adopted from Ruby
-require "a_library"
-require "a/local/file"
+To help with that, `rescue` can define a parameter to capture an argument. This is a pattern-matched parameter, meaning that all of the pattern-matched parameter syntax from functions is supported:
+
+```ruby
+begin
+  # try this code
+rescue {callstack: callstack} =: ex : NoMethodError
+  # deal with a `NoMethodError` exception
+rescue ex : FunctionMatchFailure
+  # deal with a FunctionMatchFailure
+rescue
+  # deal with any other error
+end
+```
+
+If an Exception is not captured by any of the `rescue` clauses in the block, it is propogated up the callstack until it is captured. If it is captured, execution of the containing block continues with the next expression after the block.
+
+Myst also supports two other clause types in `begin` blocks: `else` and `ensure`. These are only allowed to appear after all of the `rescue` clauses in a block, and if both are present, `else` must appear before `ensure`.
+
+```ruby
+begin
+  # try this code
+rescue
+  # deal with any exceptions
+else
+  # if an exception was _not_ raised, run this code
+ensure
+  # run this code no matter what, even if the exception was not caught
+end
 ```
