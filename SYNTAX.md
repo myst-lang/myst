@@ -537,3 +537,19 @@ ensure
   # run this code no matter what, even if the exception was not caught
 end
 ```
+
+
+## Code loading
+
+Myst adopts the code loading system used in Ruby, but simplifies it even further. While this system is definitively less powerful than the loading systems in languages like JavaScript and Go, for example, it's simplicity makes it a good fit in Myst, as it avoids [drawn out debates over necessary features](https://github.com/crystal-lang/crystal/issues/4439).
+
+In Myst, there is only one way to load code from another file: `require`. By default, Myst tracks files that have been loaded into a program and ensures that each file is only ever loaded once. This behavior can be bypassed by adding `, force_reload: true` after the name of the file being loaded:
+
+```ruby
+# load code from `other_source.mt`.
+require "other_source.mt"
+# code is already loaded, so this has no effect.
+require "other_source.mt"
+# unloads code from `other_source.mt`, then reloads it back into the program.
+require "other_source.mt", force_reload: true
+```
