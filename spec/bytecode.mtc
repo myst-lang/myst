@@ -1,5 +1,0 @@
-LABEL start
-PUSH 1
-PUSH 2
-ADD
-JUMP start

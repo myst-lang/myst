@@ -16,26 +16,37 @@ module Myst
 
       # Flow control
       LABEL       # LABEL name - Insert a jumpable label with the given name.
-      JUMP        # JUMP x|l - Jump to instruction x or the one labeled l.
+      JUMP        # JUMP n|l - Jump to instruction n or the one labeled l.
+
+      # DEBUG
+      PRINT_STACK
+
+      def modifies_program_counter?
+        [JUMP].includes?(self)
+      end
     end
 
 
     struct Instruction
-      property command : InstructionType
+      property type : InstructionType
       property args : Array(String)
 
       def initialize(comm : String, @args=[] of String)
-        @command = InstructionType.parse(comm)
+        @type = InstructionType.parse(comm)
       end
 
-      def initialize(@command : InstructionType, @args=[] of String); end
+      def initialize(@type : InstructionType, @args=[] of String); end
 
       def to_s
-        "#{command}\t#{args.join(' ')}"
+        "#{type}\t#{args.join(' ')}"
       end
 
       def to_s(io : IO)
         io << to_s
+      end
+
+      def modifies_program_counter?
+        type.modifies_program_counter?
       end
     end
   end
