@@ -29,11 +29,18 @@ module Myst
         @instructions.concat(new_code)
       end
 
+      def reset
+        @program_counter = 0
+        @stack = [] of MTValue
+        @labels = {} of String => Int32
+        @symbol_table = SymbolTable.new
+      end
+
 
       # Execution
 
       def current_instruction
-        @instructions[@program_counter]
+        @instructions[@program_counter]?
       end
 
       def advance_program_counter
