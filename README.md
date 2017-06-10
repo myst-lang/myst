@@ -9,9 +9,14 @@ Myst is a practical dynamic language designed from experience, rather than resea
 More goals are sure to come as the language develops, but these are the driving points for now.
 
 
+# Roadmap
+
+At this point, there isn't much of a roadmap for Myst other than what is laid out in the [Syntax document](SYNTAX.md). Once a working language with basic features (simple functions, control flow, all value types) is ready, a more defined roadmap of the remaining features will be made.
+
+
 # Get Involved
 
-Right now, Myst is a personal project, but I have no intention of keeping it that way! If you have an idea or find a bug, [file an issue for it!](https://github.com/myst-lang/myst/issues/new) If you just want to get involved in the community, [join our Discord server!](https://discord.me/myst). Any and all help is appreciated, even if that just means trying out the language for a day!
+Right now, Myst is a personal project, but I have no intention of keeping it that way! If you have an idea or find a bug, [file an issue for it!](https://github.com/myst-lang/myst/issues/new) If you just want to get involved in the community, [join our Discord server!](https://discord.me/myst) Any and all help is appreciated, even if that just means trying out the language for a day!
 
 
 # Contributing
