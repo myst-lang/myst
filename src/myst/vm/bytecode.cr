@@ -7,7 +7,11 @@ module Myst
         instruction_buffer = [] of Instruction
         File.open(file_name) do |io|
           io.each_line do |line|
-            args = line.split(' ')
+            # Ignore comments and blank lines
+            next if line.blank? || line.strip.starts_with?('#')
+            args = line.strip.split(' ')
+            # Skip blank lines
+            next if args.size == 0
             inst = Instruction.new(args[0])
             inst.args = args[1..-1] if args.size > 1
             instruction_buffer << inst

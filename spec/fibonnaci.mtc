@@ -1,13 +1,19 @@
+# Seed the first two values
 PUSH 1
 STORE n-1
 PUSH 1
 STORE n-2
-LABEL start
+
+# main loop
+LABEL loop
+# Add previous two values
 LOAD n-1
 LOAD n-2
 ADD
+# print the result
 PRINT_STACK
+# store n-1 as n-2, and the new result as n-1
 LOAD n-1
 STORE n-2
 STORE n-1
-JUMP start
+JUMP loop
