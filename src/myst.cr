@@ -8,6 +8,6 @@ unless source_file
 end
 
 vm = Myst::VM::VM.new
-vm.load(source_file)
-vm.dump(STDOUT)
+vm.load_isequence(source_file)
+vm.isequences[source_file].disasm(STDOUT)
 vm.run
