@@ -6,7 +6,7 @@ Myst bytecode is a binary stream of instructions for the Myst Virtual Machine to
 ## Instructions
 
 |  section   |   command    | opcode |  args |  pop  |   push  |
-| ---------- | ------------ | ------ | ----- | ----- | ------- |
+|------------|--------------|--------|-------|-------|---------|
 | nop        | nop          | 0x00   |       |       |         |
 | variables  | getlocal     | 0x01   | name  |       | value   |
 |            | setlocal     | 0x02   | name  | value |         |
@@ -35,6 +35,7 @@ Myst bytecode is a binary stream of instructions for the Myst Virtual Machine to
 | transform  | buildmap     | 0x80   | size  | *size | map     |
 |            | buildarray   | 0x81   | size  | *size | array   |
 |            | splat        | 0x90   |       | array | a,b,... |
+| io         | write        | 0xa0   |       | value |         |
 
 
 ## Instruction layout

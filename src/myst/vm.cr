@@ -3,7 +3,7 @@ require "./vm/*"
 module Myst
   module VM
     class VM
-      alias MTValue = Float64
+      alias MTValue = String | Symbol | Float64 | Int64
 
       property isequences       : Hash(String, InstructionSequence)
       property program_counter  : Int32
@@ -50,6 +50,38 @@ module Myst
       end
 
       def run
+        @isequences.each do |name, sequence|
+          sequence.instructions.each do |inst|
+            execute(inst)
+          end
+        end
+      end
+
+
+      def execute(nop : Instruction::Nop)
+        # No op
+      end
+
+      def execute(op : Instruction::Push)
+        stack.push(op.value.as(Instruction::IntLiteral).value)
+      end
+
+      def execute(op : Instruction::Add)
+        b = stack.pop.as(Int64)
+        a = stack.pop.as(Int64)
+
+        stack.push(a + b)
+      end
+
+      def execute(op : Instruction::Write)
+        a = stack.last
+
+        puts a
+      end
+
+
+      def execute(base : Instruction::Base)
+        raise "Unsupported instruction: `#{base.display_name}`"
       end
     end
   end

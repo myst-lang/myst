@@ -33,6 +33,8 @@ module Myst
           end
 
           def initialize({{ *arguments.map{ |a| "@#{a.var}".id } }}); end
+
+          {{yield}}
         end
 
         {% TYPES[opcode] = name.id %}
