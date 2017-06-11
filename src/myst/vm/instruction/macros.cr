@@ -34,6 +34,10 @@ module Myst
 
           def initialize({{ *arguments.map{ |a| "@#{a.var}".id } }}); end
 
+          def opcode : UInt8
+            {{opcode}}
+          end
+
           {{yield}}
         end
 
