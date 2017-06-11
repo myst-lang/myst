@@ -2,8 +2,8 @@
 
 Myst is a practical dynamic language designed from experience, rather than research. The primary goals of the language are:
 
-- **Be easy to understand:** Avoid special characters wherever possible. Expressions should flow in syntax as they do in thought. Don't surprise the user. Developers with a background in Ruby, Elixir, Crystal, or other similar languages should feel right at home, though feature parity is not a goal with any of these.
-- **Be reasonably fast:** As a language that compiles to bytecode, users should expect a decent level of performance. There are no concrete goals for performance yet, but being competitive with similar languages is a long-term target.
+- **Be easy to understand:** Avoid special characters wherever possible. Expressions should flow in syntax as they do in thought. Don't surprise the user. Developers with a background in Ruby, Elixir, Crystal, or other similar languages should feel right at home, though feature parity with any of these is not a goal.
+- **Be reasonably fast:** Myst compiles to bytecode, so it should be expected to perform competitively with established languages like Python and Ruby, and comparably with others like Elixir. It's okay to trade flexibility for performance.
 - **Be extendable:** The compiler should be easy for users to extend. Flexibility like LISP is not a goal, but users should be able to interact with the compiler and/or VM via a direct API, rather than hacks.
 
 More goals are sure to come as the language develops, but these are the driving points for now.
