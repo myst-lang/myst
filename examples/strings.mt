@@ -1,1 +1,1 @@
-"hello\n"*2
+"hello\n"*"other"

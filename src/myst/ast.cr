@@ -48,17 +48,24 @@ module Myst
 
     # Expressions
 
-    ast_node UnaryExpression,
-      operator  : Token,
-      operand   : Node
+    ast_node SimpleAssignment,
+      target    : Node,
+      value     : Node
 
     ast_node BinaryExpression,
       operator  : Token,
       left      : Node,
       right     : Node
 
+    ast_node UnaryExpression,
+      operator  : Token,
+      operand   : Node
+
 
     # Literals
+
+    ast_node Identifier,
+      name      : String
 
     ast_node IntegerLiteral,
       value     : String

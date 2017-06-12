@@ -13,6 +13,10 @@ module Myst
       recurse node.children
     end
 
+    visit AST::SimpleAssignment do
+      io << "#{node.type_name}\n".colorize(:green)
+      recurse [node.target, node.value]
+    end
 
     visit AST::BinaryExpression do
       io << "#{node.type_name}".colorize(:cyan)
@@ -26,6 +30,11 @@ module Myst
       recurse [node.operand]
     end
 
+
+    visit AST::Identifier do
+      io << "#{node.type_name}".colorize(:dark_gray)
+      io << "(#{node.name})\n"
+    end
 
     visit AST::IntegerLiteral, AST::FloatLiteral do
       io << "#{node.type_name}".colorize(:yellow)

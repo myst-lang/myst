@@ -79,6 +79,9 @@ module Myst
       when '\0'
         @current_token.type = Token::Type::EOF
         read_char
+      when '='
+        @current_token.type = Token::Type::EQUAL
+        read_char
       when '+'
         @current_token.type = Token::Type::PLUS
         read_char
@@ -107,9 +110,9 @@ module Myst
         consume_numeric
       when .ascii_whitespace?
         consume_whitespace
-      # When a token isn't matched, raise an error
+      # Everything else should be tried as an identifier
       else
-        raise SyntaxError.new(Location.new, "Unexpected character `#{current_char}`. Current buffer: `#{@reader.buffer_value}`.")
+        consume_identifier
       end
 
       @current_token.raw = @reader.buffer_value
@@ -175,12 +178,9 @@ module Myst
       # Replace escape codes
       @current_token.value = @reader.buffer_value.gsub(/\\./) do |code|
         case code
-        when "\\n"
-          '\n'
-        when "\\\""
-          '"'
-        when "\\t"
-          '\t'
+        when "\\n"  then '\n'
+        when "\\\"" then '"'
+        when "\\t"  then '\t'
         end
       end
       # Strip the containing quote characters
@@ -191,6 +191,24 @@ module Myst
       @current_token.type = Token::Type::WHITESPACE
 
       while read_char.ascii_whitespace?; end
+    end
+
+    def consume_identifier
+      # Identifiers must start with a letter or an underscore
+      unless current_char.ascii_letter? || current_char == '_'
+        raise SyntaxError.new(Location.new, "Unexpected character `#{current_char}`. Current buffer: `#{@reader.buffer_value}`.")
+      end
+
+      loop do
+        if current_char.ascii_alphanumeric? || current_char == '_'
+          read_char
+        else
+          break
+        end
+      end
+
+      @current_token.type = Token::Type::IDENT
+      @current_token.value = @reader.buffer_value
     end
   end
 end

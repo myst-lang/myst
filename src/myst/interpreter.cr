@@ -4,9 +4,11 @@ require "./interpreter/*"
 module Myst
   class Interpreter < Visitor
     property stack : StackMachine
+    property symbol_table : SymbolTable
 
     def initialize
       @stack = StackMachine.new
+      @symbol_table = SymbolTable.new
     end
 
     macro recurse(node)
@@ -21,6 +23,18 @@ module Myst
       node.children.each{ |child| recurse(child) }
     end
 
+
+    # Assignments
+
+    visit AST::SimpleAssignment do
+      recurse(node.value)
+      target = node.target
+
+      # If the target is an identifier, recursing is unnecessary.
+      if target.is_a?(AST::Identifier)
+        @symbol_table[target.name] = stack.pop
+      end
+    end
 
 
     # Arithmetic operations
@@ -73,6 +87,10 @@ module Myst
 
 
     # Literals
+
+    visit AST::Identifier do
+      stack.push(@symbol_table[node.name])
+    end
 
     visit AST::IntegerLiteral do
       stack.push(Value.new(node.value.to_i64))

@@ -53,7 +53,19 @@ module Myst
     end
 
     def parse_expression
-      return parse_additive_expression
+      parse_assignment_expression
+    end
+
+    def parse_assignment_expression
+      left = parse_additive_expression
+      case current_token.type
+      when Token::Type::EQUAL
+        advance
+        right = parse_assignment_expression
+        return AST::SimpleAssignment.new(left, right)
+      else
+        return left
+      end
     end
 
     def parse_additive_expression
@@ -108,6 +120,10 @@ module Myst
         expression = parse_expression
         expect(Token::Type::RPAREN)
         return expression
+      when Token::Type::IDENT
+        token = current_token
+        advance
+        return AST::Identifier.new(token.value)
       else
         raise ParseError.new(current_token.type)
       end
