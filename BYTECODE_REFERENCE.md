@@ -5,37 +5,36 @@ Myst bytecode is a binary stream of instructions for the Myst Virtual Machine to
 
 ## Instructions
 
-|  section   |   command    | opcode |  args |  pop  |   push  |
-|------------|--------------|--------|-------|-------|---------|
-| nop        | nop          | 0x00   |       |       |         |
-| variables  | getlocal     | 0x01   | name  |       | value   |
-|            | setlocal     | 0x02   | name  | value |         |
-| stack      | push         | 0x10   | value |       | value   |
-|            | pop          | 0x11   |       | value |         |
-| math       | add          | 0x20   |       | b,a   | a+b     |
-|            | subtract     | 0x21   |       | b,a   | a-b     |
-|            | multiply     | 0x22   |       | b,a   | a*b     |
-|            | divide       | 0x23   |       | b,a   | a/b     |
-|            | power        | 0x24   |       | b,a   | a**b    |
-|            | negate       | 0x25   |       | a     | -a      |
-| comparison | equal        | 0x30   |       | b,a   | a==b    |
-|            | notequal     | 0x31   |       | b,a   | !(a==b) |
-|            | lessthan     | 0x32   |       | b,a   | a<b     |
-|            | lessequal    | 0x33   |       | b,a   | a<=b    |
-|            | greaterequal | 0x34   |       | b,a   | a>=b    |
-|            | greaterthan  | 0x35   |       | b,a   | a>b     |
-| logic      | and          | 0x40   |       | b,a   | a&&b    |
-|            | or           | 0x41   |       | b,a   | a or b  |
-|            | not          | 0x42   |       | val   | !val    |
-| flow       | label        | 0x50   | name  |       |         |
-|            | jump         | 0x51   | idx   |       |         |
-|            | jumpto       | 0x52   | label |       |         |
-|            | jumpif       | 0x53   | idx   | val   |         |
-|            | jumpunless   | 0x54   | idx   | val   |         |
-| transform  | buildmap     | 0x80   | size  | *size | map     |
-|            | buildarray   | 0x81   | size  | *size | array   |
-|            | splat        | 0x90   |       | array | a,b,... |
-| io         | write        | 0xa0   |       | value |         |
+|  section   |   command    | opcode |  args  |  pop  |   push  |
+|------------|--------------|--------|--------|-------|---------|
+| nop        | nop          | 0x00   |        |       |         |
+| variables  | getlocal     | 0x01   | name   |       | value   |
+|            | setlocal     | 0x02   | name   | value |         |
+| stack      | push         | 0x10   | value  |       | value   |
+|            | pop          | 0x11   |        | value |         |
+| math       | add          | 0x20   |        | b,a   | a+b     |
+|            | subtract     | 0x21   |        | b,a   | a-b     |
+|            | multiply     | 0x22   |        | b,a   | a*b     |
+|            | divide       | 0x23   |        | b,a   | a/b     |
+|            | power        | 0x24   |        | b,a   | a**b    |
+|            | negate       | 0x25   |        | a     | -a      |
+| comparison | equal        | 0x30   |        | b,a   | a==b    |
+|            | notequal     | 0x31   |        | b,a   | !(a==b) |
+|            | lessthan     | 0x32   |        | b,a   | a<b     |
+|            | lessequal    | 0x33   |        | b,a   | a<=b    |
+|            | greaterequal | 0x34   |        | b,a   | a>=b    |
+|            | greaterthan  | 0x35   |        | b,a   | a>b     |
+| logic      | and          | 0x40   |        | b,a   | a&&b    |
+|            | or           | 0x41   |        | b,a   | a or b  |
+|            | not          | 0x42   |        | val   | !val    |
+| flow       | label        | 0x50   | name   |       |         |
+|            | jump         | 0x51   | target |       |         |
+|            | jumpif       | 0x52   | target | val   |         |
+|            | jumpunless   | 0x53   | target | val   |         |
+| transform  | buildarray   | 0x80   | size   | *size | array   |
+|            | buildmap     | 0x81   | size   | *size | map     |
+|            | splat        | 0x90   |        | array | a,b,... |
+| io         | write        | 0xa0   |        | value |         |
 
 
 ## Instruction layout
