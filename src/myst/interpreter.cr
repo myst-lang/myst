@@ -58,14 +58,14 @@ module Myst
         when a.is_string? && b.is_int?
           stack.push(Value.new(a.as_string * b.as_int))
         else
-          raise "`-` is not supported for #{a.type} and #{b.type}"
+          raise "`*` is not supported for #{a.type} and #{b.type}"
         end
       when Token::Type::SLASH
         case
         when a.is_numeric? && b.is_numeric?
           stack.push(Value.new(a.as_numeric + b.as_numeric))
         else
-          raise "`-` is not supported for #{a.type} and #{b.type}"
+          raise "`/` is not supported for #{a.type} and #{b.type}"
         end
       end
     end
