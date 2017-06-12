@@ -18,6 +18,7 @@ module Myst
         end
       end
 
+
       macro def_instruction(name, opcode, *arguments)
         class {{name.id}} < Nop
           {% for arg in arguments %}
@@ -35,7 +36,6 @@ module Myst
           end
 
           def initialize({{ *arguments.map{ |a| "@#{a.var}".id } }}); end
-
 
           {{yield}}
         end
