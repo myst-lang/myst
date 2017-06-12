@@ -94,6 +94,9 @@ module Myst
       when '\n'
         @current_token.type = Token::Type::NEWLINE
         read_char
+      when '"'
+        @current_token.type = Token::Type::STRING
+        consume_string
       when '('
         @current_token.type = Token::Type::LPAREN
         read_char
@@ -148,7 +151,40 @@ module Myst
 
       @current_token.value = @reader.buffer_value.tr("_", "")
       @current_token.type = has_decimal ? Token::Type::FLOAT : Token::Type::INTEGER
-      @current_token.type
+    end
+
+    def consume_string
+      # Read the starting quote character
+      read_char
+
+      loop do
+        case current_char
+        when '"'
+          # Read the closing quote, then stop
+          read_char
+          break
+        when '\\'
+          # Read two characters to naively support escaped characters.
+          read_char
+          read_char
+        else
+          read_char
+        end
+      end
+
+      # Replace escape codes
+      @current_token.value = @reader.buffer_value.gsub(/\\./) do |code|
+        case code
+        when "\\n"
+          '\n'
+        when "\\\""
+          '"'
+        when "\\t"
+          '\t'
+        end
+      end
+      # Strip the containing quote characters
+      @current_token.value = @current_token.value[1..-2]
     end
 
     def consume_whitespace

@@ -39,9 +39,14 @@ module Myst
 
     ast_node Empty
 
+
+    # Lists
+
     ast_node Block,
       children  : Array(Node)
 
+
+    # Expressions
 
     ast_node UnaryExpression,
       operator  : Token,
@@ -53,10 +58,15 @@ module Myst
       right     : Node
 
 
+    # Literals
+
     ast_node IntegerLiteral,
       value     : String
 
     ast_node FloatLiteral,
+      value     : String
+
+    ast_node StringLiteral,
       value     : String
   end
 end

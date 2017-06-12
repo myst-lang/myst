@@ -43,8 +43,6 @@ module Myst
         block.children << parse_expression
       end
 
-      expect(Token::Type::EOF)
-
       block
     end
 
@@ -101,6 +99,10 @@ module Myst
         token = current_token
         advance
         return AST::FloatLiteral.new(token.value)
+      when Token::Type::STRING
+        token = current_token
+        advance
+        return AST::StringLiteral.new(token.value)
       when Token::Type::LPAREN
         expect(Token::Type::LPAREN)
         expression = parse_expression

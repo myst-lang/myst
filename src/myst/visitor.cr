@@ -3,7 +3,6 @@ module Myst
     macro visit(*node_types)
       {% for node_type in node_types %}
         def visit(node : {{node_type}}, io : IO)
-          children = node.children
           {{yield}}
         end
       {% end %}

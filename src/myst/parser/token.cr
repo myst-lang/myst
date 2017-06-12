@@ -5,8 +5,8 @@ module Myst
     enum Type
       INTEGER     # [0-9]+
       FLOAT       # [0-9][_0-9]*\.[0-9]+
-      SINGLEQUOTE # '
-      DOUBLEQUOTE # "
+      STRING      # "hello"
+      CHAR        # 'c'
 
       KEYWORD     # if, else, while, def,...
       IDENT       # [a-zA-Z][_a-zA-Z0-9]*

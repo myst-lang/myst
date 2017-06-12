@@ -13,6 +13,7 @@ module Myst
       recurse node.children
     end
 
+
     visit AST::BinaryExpression do
       io << "#{node.type_name}".colorize(:cyan)
       io << "|#{node.operator}\n"
@@ -25,10 +26,18 @@ module Myst
       recurse [node.operand]
     end
 
+
     visit AST::IntegerLiteral, AST::FloatLiteral do
       io << "#{node.type_name}".colorize(:yellow)
       io << "(#{node.value})\n"
     end
+
+    visit AST::StringLiteral do
+      io << "#{node.type_name}".colorize(:yellow)
+      io << "(#{node.value})\n"
+    end
+
+
 
     COLORS = [
       # :green, :blue, :magenta, :cyan,
@@ -43,13 +52,13 @@ module Myst
 
         str.lines.each_with_index do |line, line_index|
           if line_index == 0
-            if children.size > 1 && child_index < children.size-1
+            if node.children.size > 1 && child_index < node.children.size-1
               io << "├─".colorize(current_color)
             else
               io << "└─".colorize(current_color)
             end
           else
-            if children.size > 1 && child_index < children.size-1
+            if node.children.size > 1 && child_index < node.children.size-1
               io << "│ ".colorize(current_color)
             else
               io << "  ".colorize(current_color)
