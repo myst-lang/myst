@@ -12,6 +12,8 @@ Myst bytecode is a binary stream of instructions for the Myst Virtual Machine to
 |            | setlocal     | 0x02   | name   | value |         |
 | stack      | push         | 0x10   | value  |       | value   |
 |            | pop          | 0x11   |        | value |         |
+|            | dup          | 0x12   |        | val   | val,val |
+|            | dupn         | 0x13   | n      | *n    | *n,*n   |
 | math       | add          | 0x20   |        | b,a   | a+b     |
 |            | subtract     | 0x21   |        | b,a   | a-b     |
 |            | multiply     | 0x22   |        | b,a   | a*b     |

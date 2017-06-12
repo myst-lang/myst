@@ -15,6 +15,9 @@ module Myst
       def_instruction Push,         0x10,
         value : MTValue
       def_instruction Pop,          0x11
+      def_instruction Dup,          0x12
+      def_instruction DupN,         0x13,
+        size : MTValue
 
       # Math
       def_instruction Add,          0x20
