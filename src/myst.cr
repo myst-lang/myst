@@ -1,4 +1,6 @@
-require "./myst/vm"
+require "./myst/parser"
+require "./myst/visitors/tree_dump_visitor"
+require "./myst/interpreter"
 
 source_file = ARGV[0]?
 
@@ -7,8 +9,17 @@ unless source_file
   exit 1
 end
 
-vm = Myst::VM::VM.new
-vm.load_isequence(source_file)
-# Dump instruction sequence
-vm.isequences[source_file].disasm(STDOUT)
-vm.run
+# Parse the lexemes into an AST
+parser = Myst::Parser.new(IO::Memory.new(File.read(source_file)))
+program = parser.parse_block
+
+# Print the AST to the console for debugging
+visitor = Myst::TreeDumpVisitor.new
+output = IO::Memory.new
+program.accept(visitor, output)
+puts "\nAST DEBUG:"
+puts output.to_s.strip
+
+# Interpret the program
+interpreter = Myst::Interpreter.new
+program.accept(interpreter, STDOUT)
