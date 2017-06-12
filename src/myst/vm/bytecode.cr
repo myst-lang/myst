@@ -3,8 +3,8 @@ module Myst
     module Bytecode
       extend self
 
-      def from_file(file_name : String) : Array(Instruction::Base)
-        instruction_buffer = [] of Instruction::Base
+      def from_file(file_name : String) : Array(Instruction::Nop)
+        instruction_buffer = [] of Instruction::Nop
         File.open(file_name) do |io|
           while opcode = io.read_byte
             instruction_buffer.push(Instruction.parse_next(io))

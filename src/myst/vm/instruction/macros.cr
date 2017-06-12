@@ -1,9 +1,7 @@
-require "./base"
-
 module Myst
   module VM
     module Instruction
-      TYPES = { -1 => Base }
+      TYPES = { 0x00 => Nop }
 
       macro def_parser
         def self.parse_next(io : IO)
@@ -21,10 +19,14 @@ module Myst
       end
 
       macro def_instruction(name, opcode, *arguments)
-        class {{name.id}} < Base
+        class {{name.id}} < Nop
           {% for arg in arguments %}
             getter {{arg}}
           {% end %}
+
+          def self.opcode : UInt8
+            {{opcode}}_u8
+          end
 
           def initialize(io : IO)
             {% for arg in arguments %}
@@ -34,9 +36,6 @@ module Myst
 
           def initialize({{ *arguments.map{ |a| "@#{a.var}".id } }}); end
 
-          def opcode : UInt8
-            {{opcode}}
-          end
 
           {{yield}}
         end

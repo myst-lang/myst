@@ -3,8 +3,6 @@ require "./vm/*"
 module Myst
   module VM
     class VM
-      alias MTValue = String | Symbol | Float64 | Int64
-
       property isequences       : Hash(String, InstructionSequence)
       property program_counter  : Int32
       property stack            : Array(MTValue)
@@ -63,12 +61,12 @@ module Myst
       end
 
       def execute(op : Instruction::Push)
-        stack.push(op.value.as(Instruction::IntLiteral).value)
+        stack.push(op.value)
       end
 
       def execute(op : Instruction::Add)
-        b = stack.pop.as(Int64)
-        a = stack.pop.as(Int64)
+        b = stack.pop
+        a = stack.pop
 
         stack.push(a + b)
       end
@@ -76,12 +74,7 @@ module Myst
       def execute(op : Instruction::Write)
         a = stack.last
 
-        puts a
-      end
-
-
-      def execute(base : Instruction::Base)
-        raise "Unsupported instruction: `#{base.display_name}`"
+        puts a.to_s
       end
     end
   end

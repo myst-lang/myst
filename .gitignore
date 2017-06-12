@@ -5,3 +5,4 @@
 
 # The myst executable
 /myst
+/bytecode_generator
