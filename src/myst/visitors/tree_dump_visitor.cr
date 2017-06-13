@@ -18,7 +18,7 @@ module Myst
       recurse [node.target, node.value]
     end
 
-    visit AST::BinaryExpression do
+    visit AST::LogicalExpression, AST::EqualityExpression, AST::RelationalExpression, AST::BinaryExpression do
       io << "#{node.type_name}".colorize(:cyan)
       io << "|#{node.operator}\n"
       recurse [node.left, node.right]
@@ -36,12 +36,7 @@ module Myst
       io << "(#{node.name})\n"
     end
 
-    visit AST::IntegerLiteral, AST::FloatLiteral do
-      io << "#{node.type_name}".colorize(:yellow)
-      io << "(#{node.value})\n"
-    end
-
-    visit AST::StringLiteral do
+    visit AST::IntegerLiteral, AST::FloatLiteral, AST::StringLiteral, AST::BooleanLiteral do
       io << "#{node.type_name}".colorize(:yellow)
       io << "(#{node.value})\n"
     end

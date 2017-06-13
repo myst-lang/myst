@@ -79,9 +79,48 @@ module Myst
       when '\0'
         @current_token.type = Token::Type::EOF
         read_char
+      when '&'
+        @current_token.type = Token::Type::AMPERSAND
+        read_char
+        if current_char == '&'
+          @current_token.type = Token::Type::ANDAND
+          read_char
+        end
+      when '|'
+        @current_token.type = Token::Type::PIPE
+        read_char
+        if current_char == '|'
+          @current_token.type = Token::Type::OROR
+          read_char
+        end
       when '='
         @current_token.type = Token::Type::EQUAL
         read_char
+        if current_char == '='
+          @current_token.type = Token::Type::EQUALEQUAL
+          read_char
+        end
+      when '!'
+        @current_token.type = Token::Type::NOT
+        read_char
+        if current_char == '='
+          @current_token.type = Token::Type::NOTEQUAL
+          read_char
+        end
+      when '<'
+        @current_token.type = Token::Type::LESS
+        read_char
+        if current_char == '='
+          @current_token.type = Token::Type::LESSEQUAL
+          read_char
+        end
+      when '>'
+        @current_token.type = Token::Type::GREATER
+        read_char
+        if current_char == '='
+          @current_token.type = Token::Type::GREATEREQUAL
+          read_char
+        end
       when '+'
         @current_token.type = Token::Type::PLUS
         read_char
@@ -106,6 +145,20 @@ module Myst
       when ')'
         @current_token.type = Token::Type::RPAREN
         read_char
+      when 't'
+        if read_char == 'r' && read_char == 'u' && read_char == 'e'
+          read_char
+          @current_token.type = Token::Type::TRUE
+        else
+          consume_identifier
+        end
+      when 'f'
+        if read_char == 'a' && read_char == 'l' && read_char == 's' && read_char == 'e'
+          read_char
+          @current_token.type = Token::Type::FALSE
+        else
+          consume_identifier
+        end
       when .ascii_number?
         consume_numeric
       when .ascii_whitespace?

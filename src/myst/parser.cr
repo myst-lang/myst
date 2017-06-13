@@ -57,12 +57,60 @@ module Myst
     end
 
     def parse_assignment_expression
-      left = parse_additive_expression
+      left = parse_logical_or_expression
       case current_token.type
       when Token::Type::EQUAL
         advance
         right = parse_assignment_expression
         return AST::SimpleAssignment.new(left, right)
+      else
+        return left
+      end
+    end
+
+    def parse_logical_or_expression
+      left = parse_logical_and_expression
+      case (operator = current_token).type
+      when Token::Type::OROR
+        advance
+        right = parse_logical_or_expression
+        return AST::LogicalExpression.new(operator, left, right)
+      else
+        return left
+      end
+    end
+
+    def parse_logical_and_expression
+      left = parse_equality_operation
+      case (operator = current_token).type
+      when Token::Type::ANDAND
+        advance
+        right = parse_logical_and_expression
+        return AST::LogicalExpression.new(operator, left, right)
+      else
+        return left
+      end
+    end
+
+    def parse_equality_operation
+      left = parse_relational_expression
+      case (operator = current_token).type
+      when Token::Type::EQUALEQUAL, Token::Type::NOTEQUAL
+        advance
+        right = parse_assignment_expression
+        return AST::EqualityExpression.new(operator, left, right)
+      else
+        return left
+      end
+    end
+
+    def parse_relational_expression
+      left = parse_additive_expression
+      case (operator = current_token).type
+      when Token::Type::LESS, Token::Type::LESSEQUAL, Token::Type::GREATER, Token::Type::GREATEREQUAL
+        advance
+        right = parse_additive_expression
+        return AST::RelationalExpression.new(operator, left, right)
       else
         return left
       end
@@ -124,6 +172,14 @@ module Myst
         token = current_token
         advance
         return AST::VariableReference.new(token.value)
+      when Token::Type::TRUE
+        token = current_token
+        advance
+        return AST::BooleanLiteral.new(true)
+      when Token::Type::FALSE
+        token = current_token
+        advance
+        return AST::BooleanLiteral.new(false)
       else
         raise ParseError.new(current_token.type)
       end

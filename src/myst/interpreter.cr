@@ -19,9 +19,14 @@ module Myst
       raise "Unsupported node `#{node.class.name}`"
     end
 
+
+
+    # Lists
+
     visit AST::Block do
       node.children.each{ |child| recurse(child) }
     end
+
 
 
     # Assignments
@@ -37,7 +42,85 @@ module Myst
     end
 
 
-    # Arithmetic operations
+
+    # Binary Expressions
+
+    visit AST::LogicalExpression do
+      recurse(node.left)
+      recurse(node.right)
+
+      b = stack.pop
+      a = stack.pop
+
+      case node.operator.type
+      when Token::Type::ANDAND
+        stack.push(Value.new(a.raw && b.raw))
+      when Token::Type::OROR
+        stack.push(Value.new(a.raw || b.raw))
+      end
+    end
+
+    visit AST::EqualityExpression do
+      recurse(node.left)
+      recurse(node.right)
+
+      b = stack.pop
+      a = stack.pop
+
+      case node.operator.type
+      when Token::Type::EQUALEQUAL
+        stack.push(Value.new(a.raw == b.raw))
+      when Token::Type::NOTEQUAL
+        stack.push(Value.new(a.raw != b.raw))
+      end
+    end
+
+    visit AST::RelationalExpression do
+      recurse(node.left)
+      recurse(node.right)
+
+      b = stack.pop
+      a = stack.pop
+
+      case node.operator.type
+      when Token::Type::LESS
+        case
+        when a.is_numeric? && b.is_numeric?
+          stack.push(Value.new(a.as_numeric < b.as_numeric))
+        when a.is_string? && b.is_string?
+          stack.push(Value.new(a.as_string < b.as_string))
+        else
+          raise "`<` is not supported for #{a.type} and #{b.type}"
+        end
+      when Token::Type::LESSEQUAL
+        case
+        when a.is_numeric? && b.is_numeric?
+          stack.push(Value.new(a.as_numeric <= b.as_numeric))
+        when a.is_string? && b.is_string?
+          stack.push(Value.new(a.as_string <= b.as_string))
+        else
+          raise "`<=` is not supported for #{a.type} and #{b.type}"
+        end
+      when Token::Type::GREATEREQUAL
+        case
+        when a.is_numeric? && b.is_numeric?
+          stack.push(Value.new(a.as_numeric >= b.as_numeric))
+        when a.is_string? && b.is_string?
+          stack.push(Value.new(a.as_string >= b.as_string))
+        else
+          raise "`>=` is not supported for #{a.type} and #{b.type}"
+        end
+      when Token::Type::GREATER
+        case
+        when a.is_numeric? && b.is_numeric?
+          stack.push(Value.new(a.as_numeric > b.as_numeric))
+        when a.is_string? && b.is_string?
+          stack.push(Value.new(a.as_string > b.as_string))
+        else
+          raise "`>` is not supported for #{a.type} and #{b.type}"
+        end
+      end
+    end
 
     visit AST::BinaryExpression do
       recurse(node.left)
@@ -101,6 +184,10 @@ module Myst
     end
 
     visit AST::StringLiteral do
+      stack.push(Value.new(node.value))
+    end
+
+    visit AST::BooleanLiteral do
       stack.push(Value.new(node.value))
     end
   end

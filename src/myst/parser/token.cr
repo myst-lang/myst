@@ -3,32 +3,48 @@ require "./location"
 module Myst
   class Token
     enum Type
-      INTEGER     # [0-9]+
-      FLOAT       # [0-9][_0-9]*\.[0-9]+
-      STRING      # "hello"
-      CHAR        # 'c'
+      INTEGER       # [0-9]+
+      FLOAT         # [0-9][_0-9]*\.[0-9]+
+      STRING        # "hello"
+      CHAR          # 'c'
 
-      KEYWORD     # if, else, while, def,...
-      IDENT       # [a-zA-Z][_a-zA-Z0-9]*
+      KEYWORD       # if, else, while, def,...
+      TRUE          # true
+      FALSE         # false
+      IDENT         # [a-zA-Z][_a-zA-Z0-9]*
 
-      PLUS        # +
-      MINUS       # -
-      STAR        # *
-      SLASH       # /
+      PLUS          # +
+      MINUS         # -
+      STAR          # *
+      SLASH         # /
 
-      EQUAL       # =
+      EQUAL         # =
+      NOT           # !
+      LESS          # <
+      LESSEQUAL     # <=
+      GREATEREQUAL  # >=
+      GREATER       # >
 
-      LPAREN      # (
-      RPAREN      # )
-      LBRACE      # [
-      RBRACE      # ]
-      LCURLY      # {
-      RCURLY      # }
+      NOTEQUAL      # !=
+      EQUALEQUAL    # ==
 
-      NEWLINE     # \n
-      WHITESPACE  # space, tab, etc.
-      EOF         # End of File
-      UNKNOWN     # Unresolved type
+      ANDAND        # &&
+      OROR          # ||
+
+      AMPERSAND     # &
+      PIPE          # |
+
+      LPAREN        # (
+      RPAREN        # )
+      LBRACE        # [
+      RBRACE        # ]
+      LCURLY        # {
+      RCURLY        # }
+
+      NEWLINE       # \n
+      WHITESPACE    # space, tab, etc.
+      EOF           # End of File
+      UNKNOWN       # Unresolved type
 
       def unary_operator?
         self == PLUS || self == MINUS

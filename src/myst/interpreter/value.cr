@@ -1,6 +1,6 @@
 module Myst
   class Value
-    alias BaseType = Int64 | Float64 | String | Nil
+    alias BaseType = Int64 | Float64 | String | Bool | Nil
 
     property raw : BaseType
 
@@ -8,18 +8,22 @@ module Myst
     def initialize(@raw : Int64); end
     def initialize(@raw : Float64); end
     def initialize(@raw : String); end
+    def initialize(@raw : Bool); end
+    def initialize(@raw : BaseType); end
 
 
     def is_int?;      raw.is_a?(Int64); end
     def is_float?;    raw.is_a?(Float64); end
     def is_numeric?;  raw.is_a?(Int64 | Float64); end
     def is_string?;   raw.is_a?(String); end
+    def is_bool?;     raw.is_a?(Bool); end
     def is_nil?;      raw.is_a?(Nil); end
 
     def as_int;       raw.as(Int64); end
     def as_float;     raw.as(Float64); end
     def as_numeric;   raw.as(Int64 | Float64); end
     def as_string;    raw.as(String); end
+    def as_bool;      raw.as(Bool); end
 
     def not_nil!;     raw.not_nil!; end
 
@@ -32,6 +36,8 @@ module Myst
         "Float"
       when String
         "String"
+      when Bool
+        "Bool"
       when Nil
         "Nil"
       end

@@ -52,6 +52,21 @@ module Myst
       target    : Node,
       value     : Node
 
+    ast_node LogicalExpression,
+      operator  : Token,
+      left      : Node,
+      right     : Node
+
+    ast_node EqualityExpression,
+      operator  : Token,
+      left      : Node,
+      right     : Node
+
+    ast_node RelationalExpression,
+      operator  : Token,
+      left      : Node,
+      right     : Node
+
     ast_node BinaryExpression,
       operator  : Token,
       left      : Node,
@@ -75,5 +90,8 @@ module Myst
 
     ast_node StringLiteral,
       value     : String
+
+    ast_node BooleanLiteral,
+      value     : Bool
   end
 end
