@@ -123,7 +123,7 @@ module Myst
       when Token::Type::IDENT
         token = current_token
         advance
-        return AST::Identifier.new(token.value)
+        return AST::VariableReference.new(token.value)
       else
         raise ParseError.new(current_token.type)
       end

@@ -31,7 +31,7 @@ module Myst
     end
 
 
-    visit AST::Identifier do
+    visit AST::VariableReference do
       io << "#{node.type_name}".colorize(:dark_gray)
       io << "(#{node.name})\n"
     end

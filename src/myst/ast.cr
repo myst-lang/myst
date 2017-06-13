@@ -64,7 +64,7 @@ module Myst
 
     # Literals
 
-    ast_node Identifier,
+    ast_node VariableReference,
       name      : String
 
     ast_node IntegerLiteral,

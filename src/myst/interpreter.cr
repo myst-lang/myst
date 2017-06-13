@@ -31,7 +31,7 @@ module Myst
       target = node.target
 
       # If the target is an identifier, recursing is unnecessary.
-      if target.is_a?(AST::Identifier)
+      if target.is_a?(AST::VariableReference)
         @symbol_table[target.name] = stack.pop
       end
     end
@@ -88,7 +88,7 @@ module Myst
 
     # Literals
 
-    visit AST::Identifier do
+    visit AST::VariableReference do
       stack.push(@symbol_table[node.name])
     end
 
