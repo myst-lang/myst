@@ -25,31 +25,105 @@ module Myst
     end
 
     def accept(type : Token::Type)
-      if @current_token.type == type
+      token = @current_token
+      if token.type == type
         advance
+        token
+      else
+        false
       end
     end
 
     def expect(type : Token::Type)
-      current_type = @current_token.type
-      raise ParseError.new(current_type, type) unless accept(type)
+      token = @current_token
+      raise ParseError.new(token.type, type) unless accept(type)
+      token
     end
 
 
     def parse_block : AST::Block
       block = AST::Block.new([] of AST::Node)
 
-      until @current_token.type == Token::Type::EOF
-        block.children << parse_expression
+      until @current_token.type == Token::Type::EOF || @current_token.type == Token::Type::END
+        block.children << parse_statement
       end
 
       block
     end
 
     def parse_statement
-      expr = parse_expression
-      expect(Token::Type::NEWLINE)
-      expr
+      case current_token.type
+      when Token::Type::DEF
+        parse_function_definition
+      else
+        expr = parse_expression
+      end
+    end
+
+    def parse_function_definition
+      expect(Token::Type::DEF)
+      name = expect(Token::Type::IDENT).value
+      paren_wrapped = accept(Token::Type::LPAREN)
+      parameters = parse_parameter_list
+      expect(Token::Type::RPAREN) if paren_wrapped
+      body = parse_block
+
+      expect(Token::Type::END)
+
+      return AST::FunctionDefinition.new(name, parameters, body)
+    end
+
+
+    def parse_function_args
+      args = AST::ExpressionList.new([] of AST::Node)
+      if accept(Token::Type::LPAREN)
+        return args if accept(Token::Type::RPAREN)
+        args = parse_expression_list
+        expect(Token::Type::RPAREN)
+        return args
+      else
+        return args if accept(Token::Type::NEWLINE)
+        args = parse_expression_list
+        return args
+      end
+    end
+
+    # Function parameters can include named arguments, defaults, type
+    # restrictions, patterns, and guard clauses, while function arguments
+    # can only be regular expressions. As such, the two must be parsed
+    # independently.
+    def parse_parameter_list
+      args = [] of AST::FunctionParameter
+      args << parse_parameter
+      while current_token.type == Token::Type::COMMA
+        advance
+        args << parse_parameter
+      end
+      return AST::ParameterList.new(args)
+    end
+
+    def parse_parameter
+      # Currently parameters can only be simple identifiers
+      case current_token.type
+      when Token::Type::IDENT
+        token = current_token
+        advance
+        return AST::FunctionParameter.new(token.value)
+      else
+        raise "Advanced function parameters are not yet supported."
+      end
+    end
+
+    def parse_expression_list
+      args = [] of AST::Node
+      args << parse_expression
+      # Expressions are delimited by commas. If no comma follows an
+      # expression, the list has been fully consumed.
+      while current_token.type == Token::Type::COMMA
+        advance
+        args << parse_expression
+      end
+      return AST::ExpressionList.new(args)
     end
 
     def parse_expression
@@ -145,7 +219,18 @@ module Myst
         advance
         return AST::UnaryExpression.new(operator, parse_primary_expression)
       else
-        return parse_primary_expression
+        return parse_postfix_expression
+      end
+    end
+
+    def parse_postfix_expression
+      function = parse_primary_expression
+      case (operator = current_token).type
+      when Token::Type::LPAREN
+        args = parse_function_args
+        return AST::FunctionCall.new(function, args)
+      else
+        return function
       end
     end
 

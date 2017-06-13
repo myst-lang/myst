@@ -8,7 +8,8 @@ module Myst
       STRING        # "hello"
       CHAR          # 'c'
 
-      KEYWORD       # if, else, while, def,...
+      DEF           # def
+      END           # end
       TRUE          # true
       FALSE         # false
       IDENT         # [a-zA-Z][_a-zA-Z0-9]*
@@ -41,10 +42,17 @@ module Myst
       LCURLY        # {
       RCURLY        # }
 
+      COMMA         # ,
+      POINT         # .
+
       NEWLINE       # \n
       WHITESPACE    # space, tab, etc.
       EOF           # End of File
       UNKNOWN       # Unresolved type
+
+      def keyword?
+        [DEF, END, TRUE, FALSE].includes?(self)
+      end
 
       def unary_operator?
         self == PLUS || self == MINUS

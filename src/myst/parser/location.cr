@@ -6,5 +6,13 @@ module Myst
 
     def initialize(@line=0, @col=0, @length=0)
     end
+
+    def to_s
+      "#{@line}:#{@col}:#{@length}"
+    end
+
+    def to_s(io : IO)
+      io << to_s
+    end
   end
 end

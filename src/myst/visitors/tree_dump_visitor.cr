@@ -8,9 +8,21 @@ module Myst
       io << "\n"
     end
 
-    visit AST::Block do
-      io << "#{node.type_name}".colorize(:red).mode(:bold) << "\n"
+    visit AST::Block, AST::ExpressionList, AST::ParameterList do
+      io << "#{node.type_name}".colorize(:red).mode(:bold)
+      io << "/#{node.children.size}\n"
       recurse node.children
+    end
+
+    visit AST::FunctionDefinition do
+      io << "#{node.type_name}"
+      io << "|#{node.name}\n"
+      recurse node.children
+    end
+
+    visit AST::FunctionParameter do
+      io << "#{node.type_name}".colorize(:cyan)
+      io << "|#{node.name}\n"
     end
 
     visit AST::SimpleAssignment do
@@ -28,6 +40,11 @@ module Myst
       io << "#{node.type_name}".colorize(:cyan)
       io << "|#{node.operator}\n"
       recurse [node.operand]
+    end
+
+    visit AST::FunctionCall do
+      io << "#{node.type_name}\n".colorize(:white)
+      recurse node.children
     end
 
 

@@ -5,10 +5,12 @@ module Myst
   class Interpreter < Visitor
     property stack : StackMachine
     property symbol_table : SymbolTable
+    property function_table : FunctionTable
 
     def initialize
       @stack = StackMachine.new
       @symbol_table = SymbolTable.new
+      @function_table = FunctionTable.new
     end
 
     macro recurse(node)
@@ -23,7 +25,7 @@ module Myst
 
     # Lists
 
-    visit AST::Block do
+    visit AST::Block, AST::ExpressionList do
       node.children.each{ |child| recurse(child) }
     end
 
@@ -39,6 +41,10 @@ module Myst
       if target.is_a?(AST::VariableReference)
         @symbol_table[target.name] = stack.pop
       end
+    end
+
+    visit AST::FunctionDefinition do
+      @function_table.define(node.name, Functor.new(node))
     end
 
 
@@ -165,6 +171,33 @@ module Myst
           raise "`/` is not supported for #{a.type} and #{b.type}"
         end
       end
+    end
+
+
+
+    # Postfix Expressions
+
+    visit AST::FunctionCall do
+      functor = case (func = node.function)
+      when AST::VariableReference
+        @function_table[func.name]
+      else
+        raise "Function calls must use an identifier as the name."
+      end
+
+      recurse(node.arguments)
+      # Functions get a new scope. This will need to be rethought when
+      # classes/modules are supported, or nesting function calls happens.
+      @symbol_table.push_scope()
+      functor[0].parameters.children.each do |param|
+        # Pop arguments from the stack into the variables named by the
+        # parameters for the function.
+        @symbol_table.assign(param.name, stack.pop(), recurse: false)
+      end
+      recurse functor[0].body
+      @symbol_table.pop_scope()
+
+      puts stack
     end
 
 

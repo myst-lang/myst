@@ -37,6 +37,7 @@ module Myst
       end
     end
 
+
     ast_node Empty
 
 
@@ -45,8 +46,27 @@ module Myst
     ast_node Block,
       children  : Array(Node)
 
+    ast_node ExpressionList,
+      children  : Array(Node)
+
+    ast_node ParameterList,
+      children  : Array(FunctionParameter)
+
+
+
+    # Statements
+
+    ast_node FunctionDefinition,
+      name        : String,
+      parameters  : ParameterList,
+      body        : Block
+
+
 
     # Expressions
+
+    ast_node FunctionParameter,
+      name      : String
 
     ast_node SimpleAssignment,
       target    : Node,
@@ -75,6 +95,11 @@ module Myst
     ast_node UnaryExpression,
       operator  : Token,
       operand   : Node
+
+    ast_node FunctionCall,
+      function  : Node,
+      arguments : ExpressionList
+
 
 
     # Literals

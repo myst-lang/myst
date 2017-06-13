@@ -79,6 +79,12 @@ module Myst
       when '\0'
         @current_token.type = Token::Type::EOF
         read_char
+      when ','
+        @current_token.type = Token::Type::COMMA
+        read_char
+      when '.'
+        @current_token.type = Token::Type::POINT
+        read_char
       when '&'
         @current_token.type = Token::Type::AMPERSAND
         read_char
@@ -145,6 +151,20 @@ module Myst
       when ')'
         @current_token.type = Token::Type::RPAREN
         read_char
+      when 'd'
+        if read_char == 'e' && read_char == 'f'
+          read_char
+          @current_token.type = Token::Type::DEF
+        else
+          consume_identifier
+        end
+      when 'e'
+        if read_char == 'n' && read_char == 'd'
+          read_char
+          @current_token.type = Token::Type::END
+        else
+          consume_identifier
+        end
       when 't'
         if read_char == 'r' && read_char == 'u' && read_char == 'e'
           read_char

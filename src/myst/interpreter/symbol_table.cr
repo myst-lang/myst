@@ -17,11 +17,19 @@ module Myst
     end
 
     def []=(identifier : String, value : Value)
-      found = scopes.reverse_each do |scope|
-        if scope[identifier]?
-          scope[identifier] = value
-          break true
+      assign(identifier, value, recurse: true)
+    end
+
+    def assign(identifier : String, value : Value, recurse=true)
+      found = if recurse
+        scopes.reverse_each do |scope|
+          if scope[identifier]?
+            scope[identifier] = value
+            break true
+          end
         end
+      else
+        false
       end
 
       unless found

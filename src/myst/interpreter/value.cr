@@ -1,14 +1,12 @@
+require "./functor"
+
 module Myst
   class Value
-    alias BaseType = Int64 | Float64 | String | Bool | Nil
+    alias BaseType = Int64 | Float64 | String | Bool | Functor | Nil
 
     property raw : BaseType
 
     def initialize; @raw = nil; end
-    def initialize(@raw : Int64); end
-    def initialize(@raw : Float64); end
-    def initialize(@raw : String); end
-    def initialize(@raw : Bool); end
     def initialize(@raw : BaseType); end
 
 
@@ -17,12 +15,14 @@ module Myst
     def is_numeric?;  raw.is_a?(Int64 | Float64); end
     def is_string?;   raw.is_a?(String); end
     def is_bool?;     raw.is_a?(Bool); end
+    def is_functor?;  raw.is_a?(Functor); end
     def is_nil?;      raw.is_a?(Nil); end
 
     def as_int;       raw.as(Int64); end
     def as_float;     raw.as(Float64); end
     def as_numeric;   raw.as(Int64 | Float64); end
     def as_string;    raw.as(String); end
+    def as_functor;   raw.as(Functor); end
     def as_bool;      raw.as(Bool); end
 
     def not_nil!;     raw.not_nil!; end
@@ -38,6 +38,8 @@ module Myst
         "String"
       when Bool
         "Bool"
+      when Functor
+        "Functor"
       when Nil
         "Nil"
       end
