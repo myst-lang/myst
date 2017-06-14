@@ -205,7 +205,7 @@ module Myst
       case (operator = current_token).type
       when Token::Type::EQUALEQUAL, Token::Type::NOTEQUAL
         advance
-        right = parse_assignment_expression
+        right = parse_equality_operation
         return AST::EqualityExpression.new(operator, left, right)
       else
         return left
