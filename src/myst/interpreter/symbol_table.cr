@@ -1,48 +1,58 @@
+require "./scope"
+
 module Myst
   class SymbolTable
-    alias Scope = Hash(String, Value)
-
-    property scopes : Array(Scope)
+    property current_scope : Scope
 
     def initialize
-      @scopes = [Scope.new]
+      @current_scope = Scope.new
+    end
+
+    def []?(identifier : String)
+      scope = @current_scope
+      while scope
+        return scope[identifier] if scope[identifier]?
+        break if scope.restrictive?
+        scope = scope.parent
+      end
     end
 
     def [](identifier : String)
-      scopes.reverse_each do |scope|
-        return scope[identifier] if scope[identifier]?
-      end
-
-      raise IndexError.new
+      self[identifier] || raise IndexError.new
     end
+
 
     def []=(identifier : String, value : Value)
-      assign(identifier, value, recurse: true)
+      assign(identifier, value)
     end
 
-    def assign(identifier : String, value : Value, recurse=true)
-      found = if recurse
-        scopes.reverse_each do |scope|
-          if scope[identifier]?
-            scope[identifier] = value
-            break true
-          end
-        end
+
+    def assign(identifier : String, value : Value, make_new=false)
+      if make_new
+        return @current_scope[identifier] = value
       else
-        false
-      end
+        scope = @current_scope
+        while scope
+          return scope[identifier] = value if scope[identifier]?
+          break if scope.restrictive?
+          scope = scope.parent
+        end
 
-      unless found
-        scopes.last[identifier] = value
+        return @current_scope[identifier] = value
       end
     end
 
-    def push_scope
-      scopes.push(Scope.new)
+
+    def push_scope(scope : Scope = Scope.new)
+      # Only set the parent of the scope if one doesn't exist. This allows
+      # for implicit block scopes (`do...end`), as well as function scopes
+      # where a context (parent scope) is needed.
+      scope.parent = @current_scope unless scope.parent
+      @current_scope = scope
     end
 
     def pop_scope
-      scopes.pop
+      @current_scope = @current_scope.parent.not_nil!
     end
   end
 end

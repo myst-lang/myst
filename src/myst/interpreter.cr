@@ -25,8 +25,20 @@ module Myst
 
     # Lists
 
-    visit AST::Block, AST::ExpressionList do
-      node.children.each{ |child| recurse(child) }
+    visit AST::Block do
+      node.children.each_with_index do |child, index|
+        recurse(child)
+        # The last expression in a block is the implicit return value, so
+        # it should stay on the stack.
+        stack.pop() unless index == node.children.size - 1
+      end
+      puts stack
+    end
+
+    visit AST::ExpressionList do
+      node.children.each do |child|
+        recurse(child)
+      end
     end
 
 
@@ -39,12 +51,17 @@ module Myst
 
       # If the target is an identifier, recursing is unnecessary.
       if target.is_a?(AST::VariableReference)
-        @symbol_table[target.name] = stack.pop
+        # The return value of an assignment is the value being assigned,
+        # so there is no need to pop it from the stack. This also ensures
+        # that the value is treated as a reference, rather than a copy.
+        @symbol_table[target.name] = stack.last
       end
     end
 
     visit AST::FunctionDefinition do
-      @function_table.define(node.name, Functor.new(node))
+      functor = Functor.new(node)
+      @function_table.define(node.name, functor)
+      stack.push(Value.new(functor))
     end
 
 
@@ -188,16 +205,14 @@ module Myst
       recurse(node.arguments)
       # Functions get a new scope. This will need to be rethought when
       # classes/modules are supported, or nesting function calls happens.
-      @symbol_table.push_scope()
-      functor[0].parameters.children.each do |param|
+      @symbol_table.push_scope(Scope.new(restrictive: true))
+      functor[0].parameters.children.reverse_each do |param|
         # Pop arguments from the stack into the variables named by the
         # parameters for the function.
-        @symbol_table.assign(param.name, stack.pop(), recurse: false)
+        @symbol_table.assign(param.name, stack.pop(), make_new: true)
       end
       recurse functor[0].body
       @symbol_table.pop_scope()
-
-      puts stack
     end
 
 
@@ -205,7 +220,11 @@ module Myst
     # Literals
 
     visit AST::VariableReference do
-      stack.push(@symbol_table[node.name])
+      if value = @symbol_table[node.name]?
+        stack.push(value)
+      else
+        raise "Undefined variable `#{node.name}` in current scope."
+      end
     end
 
     visit AST::IntegerLiteral do
