@@ -159,16 +159,35 @@ module Myst
           consume_identifier
         end
       when 'e'
-        if read_char == 'n' && read_char == 'd'
+        read_char
+        case current_char
+        when 'l'
           read_char
-          @current_token.type = Token::Type::END
-        else
-          consume_identifier
-        end
-      when 't'
-        if read_char == 'r' && read_char == 'u' && read_char == 'e'
-          read_char
-          @current_token.type = Token::Type::TRUE
+          case current_char
+          when 'i'
+            if read_char == 'f'
+              read_char
+              @current_token.type = Token::Type::ELIF
+            else
+              consume_identifier
+            end
+          when 's'
+            if read_char == 'e'
+              read_char
+              @current_token.type = Token::Type::ELSE
+            else
+              consume_identifier
+            end
+          else
+            consume_identifier
+          end
+        when 'n'
+          if read_char == 'd'
+            read_char
+            @current_token.type = Token::Type::END
+          else
+            consume_identifier
+          end
         else
           consume_identifier
         end
@@ -176,6 +195,27 @@ module Myst
         if read_char == 'a' && read_char == 'l' && read_char == 's' && read_char == 'e'
           read_char
           @current_token.type = Token::Type::FALSE
+        else
+          consume_identifier
+        end
+      when 'i'
+        if read_char == 'f'
+          read_char
+          @current_token.type = Token::Type::IF
+        else
+          consume_identifier
+        end
+      when 'u'
+        if read_char == 'n' && read_char == 'l' && read_char == 'e' && read_char == 's' && read_char == 's'
+          read_char
+          @current_token.type = Token::Type::UNLESS
+        else
+          consume_identifier
+        end
+      when 't'
+        if read_char == 'r' && read_char == 'u' && read_char == 'e'
+          read_char
+          @current_token.type = Token::Type::TRUE
         else
           consume_identifier
         end

@@ -27,6 +27,9 @@ module Myst
 
     def not_nil!;     raw.not_nil!; end
 
+    def truthy?; raw; end
+    def falsey?; !raw; end
+
 
     def type
       case raw

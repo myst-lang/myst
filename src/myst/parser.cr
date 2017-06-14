@@ -44,7 +44,7 @@ module Myst
     def parse_block : AST::Block
       block = AST::Block.new([] of AST::Node)
 
-      until @current_token.type == Token::Type::EOF || @current_token.type == Token::Type::END
+      until @current_token.type == Token::Type::EOF || @current_token.type.block_terminator?
         block.children << parse_statement
       end
 
@@ -55,6 +55,8 @@ module Myst
       case current_token.type
       when Token::Type::DEF
         parse_function_definition
+      when Token::Type::IF, Token::Type::UNLESS
+        parse_conditional_expression
       else
         expr = parse_expression
       end
@@ -72,7 +74,6 @@ module Myst
 
       return AST::FunctionDefinition.new(name, parameters, body)
     end
-
 
     def parse_function_args
       args = AST::ExpressionList.new([] of AST::Node)
@@ -139,6 +140,40 @@ module Myst
         return AST::SimpleAssignment.new(left, right)
       else
         return left
+      end
+    end
+
+    def parse_conditional_expression
+      case (inversion = current_token).type
+      when Token::Type::IF, Token::Type::UNLESS
+        advance
+        condition = parse_expression
+        body = parse_block
+        alternative = parse_conditional_alternative
+        expect(Token::Type::END)
+        return AST::ConditionalExpression.new(inversion, condition, body, alternative)
+      else
+        return parse_logical_or_expression
+      end
+    end
+
+    def parse_conditional_alternative
+      case (inversion = current_token).type
+      when Token::Type::ELIF
+        advance
+        condition = parse_expression
+        body = parse_block
+        alternative = parse_conditional_alternative
+        return AST::ConditionalExpression.new(inversion, condition, body, alternative)
+      when Token::Type::ELSE
+        advance
+        body = parse_block
+        return AST::ConditionalExpression.new(inversion, nil, body, nil)
+      when Token::Type::END
+        advance
+        return nil
+      else
+        raise "Unexpected token `#{inversion}`. Expected `ELSE`, `ELIF`, or `END`."
       end
     end
 

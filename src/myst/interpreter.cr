@@ -32,13 +32,22 @@ module Myst
         # it should stay on the stack.
         stack.pop() unless index == node.children.size - 1
       end
-      puts stack
     end
 
     visit AST::ExpressionList do
       node.children.each do |child|
         recurse(child)
       end
+    end
+
+
+
+    # Statements
+
+    visit AST::FunctionDefinition do
+      functor = Functor.new(node)
+      @function_table.define(node.name, functor)
+      stack.push(Value.new(functor))
     end
 
 
@@ -58,12 +67,38 @@ module Myst
       end
     end
 
-    visit AST::FunctionDefinition do
-      functor = Functor.new(node)
-      @function_table.define(node.name, functor)
-      stack.push(Value.new(functor))
-    end
 
+
+    # Conditionals
+
+    visit AST::ConditionalExpression do
+      case node.inversion.type
+      when Token::Type::IF, Token::Type::ELIF
+        recurse(node.condition.not_nil!)
+        if stack.pop().truthy?
+          recurse(node.body)
+        else
+          if node.alternative
+            recurse(node.alternative.not_nil!)
+          else
+            stack.push(Value.new)
+          end
+        end
+      when Token::Type::UNLESS
+        recurse(node.condition.not_nil!)
+        unless stack.pop().truthy?
+          recurse(node.body)
+        else
+          if node.alternative
+            recurse(node.alternative.not_nil!)
+          else
+            stack.push(Value.new)
+          end
+        end
+      when Token::Type::ELSE
+        recurse(node.body)
+      end
+    end
 
 
     # Binary Expressions
@@ -167,14 +202,14 @@ module Myst
       when Token::Type::MINUS
         case
         when a.is_numeric? && b.is_numeric?
-          stack.push(Value.new(a.as_numeric + b.as_numeric))
+          stack.push(Value.new(a.as_numeric - b.as_numeric))
         else
           raise "`-` is not supported for #{a.type} and #{b.type}"
         end
       when Token::Type::STAR
         case
         when a.is_numeric? && b.is_numeric?
-          stack.push(Value.new(a.as_numeric + b.as_numeric))
+          stack.push(Value.new(a.as_numeric * b.as_numeric))
         when a.is_string? && b.is_int?
           stack.push(Value.new(a.as_string * b.as_int))
         else
@@ -183,7 +218,7 @@ module Myst
       when Token::Type::SLASH
         case
         when a.is_numeric? && b.is_numeric?
-          stack.push(Value.new(a.as_numeric + b.as_numeric))
+          stack.push(Value.new(a.as_numeric / b.as_numeric))
         else
           raise "`/` is not supported for #{a.type} and #{b.type}"
         end
@@ -211,7 +246,7 @@ module Myst
         # parameters for the function.
         @symbol_table.assign(param.name, stack.pop(), make_new: true)
       end
-      recurse functor[0].body
+      recurse(functor[0].body)
       @symbol_table.pop_scope()
     end
 

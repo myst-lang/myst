@@ -63,6 +63,7 @@ module Myst
 
 
 
+
     # Expressions
 
     ast_node FunctionParameter,
@@ -71,6 +72,12 @@ module Myst
     ast_node SimpleAssignment,
       target    : Node,
       value     : Node
+
+    ast_node ConditionalExpression,
+      inversion   : Token,
+      condition   : Node?,
+      body        : Block,
+      alternative : Node?
 
     ast_node LogicalExpression,
       operator  : Token,

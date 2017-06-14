@@ -9,7 +9,12 @@ module Myst
       CHAR          # 'c'
 
       DEF           # def
+      IF            # if
+      UNLESS        # unless
+      ELIF          # elif
+      ELSE          # else
       END           # end
+
       TRUE          # true
       FALSE         # false
       IDENT         # [a-zA-Z][_a-zA-Z0-9]*
@@ -51,7 +56,11 @@ module Myst
       UNKNOWN       # Unresolved type
 
       def keyword?
-        [DEF, END, TRUE, FALSE].includes?(self)
+        [DEF, IF, UNLESS, ELIF, ELSE, END].includes?(self)
+      end
+
+      def block_terminator?
+        [ELIF, ELSE, END].includes?(self)
       end
 
       def unary_operator?
