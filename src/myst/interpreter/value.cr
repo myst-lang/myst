@@ -49,7 +49,11 @@ module Myst
     end
 
 
-    # IO
+    # Conversion
+
+    def to_b
+      !!raw
+    end
 
     def to_s
       @raw.to_s

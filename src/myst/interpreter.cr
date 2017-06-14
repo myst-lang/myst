@@ -104,17 +104,31 @@ module Myst
     # Binary Expressions
 
     visit AST::LogicalExpression do
-      recurse(node.left)
-      recurse(node.right)
-
-      b = stack.pop
-      a = stack.pop
-
       case node.operator.type
       when Token::Type::ANDAND
-        stack.push(Value.new(a.raw && b.raw))
+        recurse(node.left)
+        a = stack.pop()
+
+        if a.falsey?
+          stack.push(a)
+          return
+        end
+
+        recurse(node.right)
+        b = stack.pop()
+        stack.push(b)
       when Token::Type::OROR
-        stack.push(Value.new(a.raw || b.raw))
+        recurse(node.left)
+        a = stack.pop()
+
+        if a.truthy?
+          stack.push(a)
+          return
+        end
+
+        recurse(node.right)
+        b = stack.pop()
+        stack.push(b)
       end
     end
 
