@@ -170,7 +170,6 @@ module Myst
         body = parse_block
         return AST::ConditionalExpression.new(inversion, nil, body, nil)
       when Token::Type::END
-        advance
         return nil
       else
         raise "Unexpected token `#{inversion}`. Expected `ELSE`, `ELIF`, or `END`."

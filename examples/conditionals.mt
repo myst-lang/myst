@@ -8,5 +8,7 @@ def fib(n)
   end
 end
 
-fib(0)
-fib(8)
+if 1 < 2
+  fib(0)
+  fib(8)
+end
