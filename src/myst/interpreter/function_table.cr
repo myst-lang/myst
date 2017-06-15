@@ -16,8 +16,12 @@ module Myst
     end
 
     # Get the list of possible definitions for a function name.
+    def []?(name)
+      @functions[name]?
+    end
+
     def [](name) : Array(Functor)
-      @functions[name]
+      self[name]? || raise "No function for #{name}."
     end
   end
 end

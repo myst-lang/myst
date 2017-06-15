@@ -244,24 +244,38 @@ module Myst
     # Postfix Expressions
 
     visit AST::FunctionCall do
-      functor = case (func = node.function)
+      case (func = node.function)
       when AST::VariableReference
-        @function_table[func.name]
-      else
-        raise "Function calls must use an identifier as the name."
-      end
+        if functors = @function_table[func.name]?
+          matched_functor = functors[0]
+          recurse(node.arguments)
+          # Functions get a new scope. This will need to be rethought when
+          # classes/modules are supported, or nesting function calls happens.
+          @symbol_table.push_scope(Scope.new(restrictive: true))
+          matched_functor.parameters.children.reverse_each do |param|
+            # Pop arguments from the stack into the variables named by the
+            # parameters for the function.
+            @symbol_table.assign(param.name, stack.pop(), make_new: true)
+          end
+          recurse(matched_functor.body)
+          @symbol_table.pop_scope()
+        # If a function to call wasn't found, try to lookup a Kernel method.
+        else
+          recurse(node.arguments)
+          {% for method in Kernel.methods %}
+            if func.name == {{method.name.stringify}}
+              args = [] of Value
+              node.arguments.children.each do |arg|
+                args << stack.pop
+              end
 
-      recurse(node.arguments)
-      # Functions get a new scope. This will need to be rethought when
-      # classes/modules are supported, or nesting function calls happens.
-      @symbol_table.push_scope(Scope.new(restrictive: true))
-      functor[0].parameters.children.reverse_each do |param|
-        # Pop arguments from the stack into the variables named by the
-        # parameters for the function.
-        @symbol_table.assign(param.name, stack.pop(), make_new: true)
+              return Kernel.{{method.name}}(args)
+            end
+          {% end %}
+        end
+      else
+        raise "Function names must be identifiers."
       end
-      recurse(functor[0].body)
-      @symbol_table.pop_scope()
     end
 
 

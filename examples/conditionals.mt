@@ -6,4 +6,4 @@ def fib(n)
   end
 end
 
-fib(10)
+puts(fib(10))
