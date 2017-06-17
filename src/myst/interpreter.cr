@@ -47,7 +47,7 @@ module Myst
     visit AST::FunctionDefinition do
       functor = Functor.new(node)
       @function_table.define(node.name, functor)
-      stack.push(Value.new(functor))
+      stack.push(TFunctor.new)
     end
 
 
@@ -81,7 +81,7 @@ module Myst
           if node.alternative
             recurse(node.alternative.not_nil!)
           else
-            stack.push(Value.new)
+            stack.push(TNil.new)
           end
         end
       when Token::Type::UNLESS
@@ -92,7 +92,7 @@ module Myst
           if node.alternative
             recurse(node.alternative.not_nil!)
           else
-            stack.push(Value.new)
+            stack.push(TNil.new)
           end
         end
       when Token::Type::ELSE
@@ -109,7 +109,7 @@ module Myst
         recurse(node.left)
         a = stack.pop()
 
-        if a.falsey?
+        unless a.truthy?
           stack.push(a)
           return
         end
@@ -132,111 +132,14 @@ module Myst
       end
     end
 
-    visit AST::EqualityExpression do
+    visit AST::EqualityExpression, AST::RelationalExpression, AST::BinaryExpression do
       recurse(node.left)
       recurse(node.right)
 
       b = stack.pop
       a = stack.pop
 
-      case node.operator.type
-      when Token::Type::EQUALEQUAL
-        stack.push(Value.new(a.raw == b.raw))
-      when Token::Type::NOTEQUAL
-        stack.push(Value.new(a.raw != b.raw))
-      end
-    end
-
-    visit AST::RelationalExpression do
-      recurse(node.left)
-      recurse(node.right)
-
-      b = stack.pop
-      a = stack.pop
-
-      case node.operator.type
-      when Token::Type::LESS
-        case
-        when a.is_numeric? && b.is_numeric?
-          stack.push(Value.new(a.as_numeric < b.as_numeric))
-        when a.is_string? && b.is_string?
-          stack.push(Value.new(a.as_string < b.as_string))
-        else
-          raise "`<` is not supported for #{a.type} and #{b.type}"
-        end
-      when Token::Type::LESSEQUAL
-        case
-        when a.is_numeric? && b.is_numeric?
-          stack.push(Value.new(a.as_numeric <= b.as_numeric))
-        when a.is_string? && b.is_string?
-          stack.push(Value.new(a.as_string <= b.as_string))
-        else
-          raise "`<=` is not supported for #{a.type} and #{b.type}"
-        end
-      when Token::Type::GREATEREQUAL
-        case
-        when a.is_numeric? && b.is_numeric?
-          stack.push(Value.new(a.as_numeric >= b.as_numeric))
-        when a.is_string? && b.is_string?
-          stack.push(Value.new(a.as_string >= b.as_string))
-        else
-          raise "`>=` is not supported for #{a.type} and #{b.type}"
-        end
-      when Token::Type::GREATER
-        case
-        when a.is_numeric? && b.is_numeric?
-          stack.push(Value.new(a.as_numeric > b.as_numeric))
-        when a.is_string? && b.is_string?
-          stack.push(Value.new(a.as_string > b.as_string))
-        else
-          raise "`>` is not supported for #{a.type} and #{b.type}"
-        end
-      end
-    end
-
-    visit AST::BinaryExpression do
-      recurse(node.left)
-      recurse(node.right)
-
-      b = stack.pop
-      a = stack.pop
-
-      case node.operator.type
-      when Token::Type::PLUS
-        case
-        when a.is_numeric? && b.is_numeric?
-          stack.push(Value.new(a.as_numeric + b.as_numeric))
-        when a.is_numeric? && !b.is_numeric?
-          raise "`+` is not supported for Numeric + Non-Numeric"
-        when a.is_string? && !b.is_nil?
-          stack.push(Value.new(a.as_string + b.to_s))
-        else
-          raise "`+` is not supported for #{a.type} and #{b.type}"
-        end
-      when Token::Type::MINUS
-        case
-        when a.is_numeric? && b.is_numeric?
-          stack.push(Value.new(a.as_numeric - b.as_numeric))
-        else
-          raise "`-` is not supported for #{a.type} and #{b.type}"
-        end
-      when Token::Type::STAR
-        case
-        when a.is_numeric? && b.is_numeric?
-          stack.push(Value.new(a.as_numeric * b.as_numeric))
-        when a.is_string? && b.is_int?
-          stack.push(Value.new(a.as_string * b.as_int))
-        else
-          raise "`*` is not supported for #{a.type} and #{b.type}"
-        end
-      when Token::Type::SLASH
-        case
-        when a.is_numeric? && b.is_numeric?
-          stack.push(Value.new(a.as_numeric / b.as_numeric))
-        else
-          raise "`/` is not supported for #{a.type} and #{b.type}"
-        end
-      end
+      stack.push(Calculator.do(node.operator, a, b))
     end
 
 
@@ -291,19 +194,19 @@ module Myst
     end
 
     visit AST::IntegerLiteral do
-      stack.push(Value.new(node.value.to_i64))
+      stack.push(TInteger.new(node.value.to_i64))
     end
 
     visit AST::FloatLiteral do
-      stack.push(Value.new(node.value.to_f64))
+      stack.push(TFloat.new(node.value.to_f64))
     end
 
     visit AST::StringLiteral do
-      stack.push(Value.new(node.value))
+      stack.push(TString.new(node.value))
     end
 
     visit AST::BooleanLiteral do
-      stack.push(Value.new(node.value))
+      stack.push(TBoolean.new(node.value))
     end
   end
 end
