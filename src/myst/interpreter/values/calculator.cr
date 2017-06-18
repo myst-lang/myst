@@ -64,12 +64,12 @@ module Myst
     def equal(left, right) : TBoolean
       # Left and right cannot be equal if their are different types
       return TBoolean.new(false) unless typeof(left) == typeof(right)
-      simple_op_for :==, TInteger, TFloat, TBoolean, TString, TNil, TList, TObject, TFunctor, returns: TBoolean
+      simple_op_for :==, TInteger, TFloat, TBoolean, TString, TSymbol, TNil, TList, TObject, TFunctor, returns: TBoolean
       return TBoolean.new(false)
     end
 
     def not_equal(left, right) : TBoolean
-      simple_op_for :!=, TInteger, TFloat, TBoolean, TString, TNil, TList, TObject, TFunctor, returns: TBoolean
+      simple_op_for :!=, TInteger, TFloat, TBoolean, TString, TSymbol, TNil, TList, TObject, TFunctor, returns: TBoolean
       return TBoolean.new(true)
     end
 
