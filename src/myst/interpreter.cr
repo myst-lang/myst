@@ -172,6 +172,35 @@ module Myst
       end
     end
 
+    visit AST::AccessExpression do
+      recurse(node.target)
+      recurse(node.key)
+      key     = stack.pop
+      target  = stack.pop
+
+      if target.is_a?(TList) && key.is_a?(TInteger)
+        stack.push(target.reference(key))
+      else
+        raise "Access only supported for lists with integer keys. Got #{target.class}[#{key.class}]"
+      end
+    end
+
+    visit AST::AccessSetExpression do
+      recurse(node.target)
+      recurse(node.key)
+      recurse(node.value)
+      value   = stack.pop
+      key     = stack.pop
+      target  = stack.pop
+
+      if target.is_a?(TList) && key.is_a?(TInteger)
+        target.set(key, value)
+        stack.push(target.reference(key))
+      else
+        raise "Access only supported for lists with integer keys. Got #{target.class}[#{key.class}]"
+      end
+    end
+
 
 
     # Literals
@@ -198,6 +227,13 @@ module Myst
 
     visit AST::BooleanLiteral do
       stack.push(TBoolean.new(node.value))
+    end
+
+    visit AST::ListLiteral do
+      list = TList.new([] of Value)
+      recurse(node.elements)
+      node.elements.children.each{ |el| list.push(stack.pop) }
+      stack.push(list)
     end
   end
 end

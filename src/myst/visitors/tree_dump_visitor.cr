@@ -62,6 +62,16 @@ module Myst
       recurse node.children
     end
 
+    visit AST::AccessExpression do
+      io << "#{node.type_name}\n".colorize(:white)
+      recurse [node.target, node.key]
+    end
+
+    visit AST::AccessSetExpression do
+      io << "#{node.type_name}\n".colorize(:white)
+      recurse [node.target, node.key, node.value]
+    end
+
 
     visit AST::VariableReference do
       io << "#{node.type_name}".colorize(:dark_gray)
@@ -71,6 +81,11 @@ module Myst
     visit AST::IntegerLiteral, AST::FloatLiteral, AST::StringLiteral, AST::BooleanLiteral do
       io << "#{node.type_name}".colorize(:yellow)
       io << "(#{node.value})\n"
+    end
+
+    visit AST::ListLiteral do
+      io << "#{node.type_name}\n".colorize(:yellow)
+      recurse [node.elements]
     end
 
 

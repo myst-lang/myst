@@ -151,6 +151,12 @@ module Myst
       when ')'
         @current_token.type = Token::Type::RPAREN
         read_char
+      when '['
+        @current_token.type = Token::Type::LBRACE
+        read_char
+      when ']'
+        @current_token.type = Token::Type::RBRACE
+        read_char
       when 'd'
         if read_char == 'e' && read_char == 'f'
           read_char

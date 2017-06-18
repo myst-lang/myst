@@ -127,6 +127,15 @@ module Myst
       function  : Node,
       arguments : ExpressionList
 
+    ast_node AccessExpression,
+      target  : Node,
+      key     : Node
+
+    ast_node AccessSetExpression,
+      target  : Node,
+      key     : Node,
+      value   : Node
+
 
 
     # Literals
@@ -145,5 +154,8 @@ module Myst
 
     ast_node BooleanLiteral,
       value     : Bool
+
+    ast_node ListLiteral,
+      elements  : ExpressionList
   end
 end

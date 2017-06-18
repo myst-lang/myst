@@ -64,12 +64,12 @@ module Myst
     def equal(left, right) : TBoolean
       # Left and right cannot be equal if their are different types
       return TBoolean.new(false) unless typeof(left) == typeof(right)
-      simple_op_for :==, TInteger, TFloat, TBoolean, TString, TNil, TArray, TObject, TFunctor, returns: TBoolean
+      simple_op_for :==, TInteger, TFloat, TBoolean, TString, TNil, TList, TObject, TFunctor, returns: TBoolean
       return TBoolean.new(false)
     end
 
     def not_equal(left, right) : TBoolean
-      simple_op_for :!=, TInteger, TFloat, TBoolean, TString, TNil, TArray, TObject, TFunctor, returns: TBoolean
+      simple_op_for :!=, TInteger, TFloat, TBoolean, TString, TNil, TList, TObject, TFunctor, returns: TBoolean
       return TBoolean.new(true)
     end
 
@@ -112,14 +112,14 @@ module Myst
     # Arithmetic
 
     def add(left, right)
-      simple_op_for :+, TInteger, TFloat, TString, TArray
+      simple_op_for :+, TInteger, TFloat, TString, TList
       simple_mixed_type_op TInteger, :+, TFloat
       simple_mixed_type_op TFloat, :+, TInteger
       raise "Addition is not supported for #{left.class} and #{right.class}"
     end
 
     def subtract(left, right)
-      simple_op_for :-, TInteger, TFloat, TArray
+      simple_op_for :-, TInteger, TFloat, TList
       simple_mixed_type_op TInteger, :-, TFloat
       simple_mixed_type_op TFloat, :-, TInteger
       raise "Subtraction not supported for #{left.class} and #{right.class}"

@@ -286,13 +286,23 @@ module Myst
     end
 
     def parse_postfix_expression
-      function = parse_primary_expression
+      receiver = parse_primary_expression
       case (operator = current_token).type
       when Token::Type::LPAREN
         args = parse_function_args
-        return AST::FunctionCall.new(function, args)
+        return AST::FunctionCall.new(receiver, args)
+      when Token::Type::LBRACE
+        expect(Token::Type::LBRACE)
+        key = parse_expression
+        expect(Token::Type::RBRACE)
+        if current_token.type == Token::Type::EQUAL
+          advance
+          value = parse_expression
+          return AST::AccessSetExpression.new(receiver, key, value)
+        end
+        return AST::AccessExpression.new(receiver, key)
       else
-        return function
+        return receiver
       end
     end
 
@@ -310,15 +320,6 @@ module Myst
         token = current_token
         advance
         return AST::StringLiteral.new(token.value)
-      when Token::Type::LPAREN
-        expect(Token::Type::LPAREN)
-        expression = parse_expression
-        expect(Token::Type::RPAREN)
-        return expression
-      when Token::Type::IDENT
-        token = current_token
-        advance
-        return AST::VariableReference.new(token.value)
       when Token::Type::TRUE
         token = current_token
         advance
@@ -327,6 +328,20 @@ module Myst
         token = current_token
         advance
         return AST::BooleanLiteral.new(false)
+      when Token::Type::IDENT
+        token = current_token
+        advance
+        return AST::VariableReference.new(token.value)
+      when Token::Type::LPAREN
+        expect(Token::Type::LPAREN)
+        expression = parse_expression
+        expect(Token::Type::RPAREN)
+        return expression
+      when Token::Type::LBRACE
+        expect(Token::Type::LBRACE)
+        elements = parse_expression_list
+        expect(Token::Type::RBRACE)
+        return AST::ListLiteral.new(elements)
       else
         raise ParseError.new(current_token.type)
       end
