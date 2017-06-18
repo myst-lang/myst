@@ -145,13 +145,20 @@ module Myst
 
     def parse_conditional_expression
       case (inversion = current_token).type
-      when Token::Type::IF, Token::Type::UNLESS
+      when Token::Type::IF
         advance
         condition = parse_expression
         body = parse_block
         alternative = parse_conditional_alternative
         expect(Token::Type::END)
-        return AST::ConditionalExpression.new(inversion, condition, body, alternative)
+        return AST::IfExpression.new(condition, body, alternative)
+      when Token::Type::UNLESS
+        advance
+        condition = parse_expression
+        body = parse_block
+        alternative = parse_conditional_alternative
+        expect(Token::Type::END)
+        return AST::UnlessExpression.new(condition, body, alternative)
       else
         return parse_logical_or_expression
       end
@@ -164,11 +171,11 @@ module Myst
         condition = parse_expression
         body = parse_block
         alternative = parse_conditional_alternative
-        return AST::ConditionalExpression.new(inversion, condition, body, alternative)
+        return AST::ElifExpression.new(condition, body, alternative)
       when Token::Type::ELSE
         advance
         body = parse_block
-        return AST::ConditionalExpression.new(inversion, nil, body, nil)
+        return AST::ElseExpression.new(body)
       when Token::Type::END
         return nil
       else

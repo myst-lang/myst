@@ -70,33 +70,34 @@ module Myst
 
     # Conditionals
 
-    visit AST::ConditionalExpression do
-      case node.inversion.type
-      when Token::Type::IF, Token::Type::ELIF
-        recurse(node.condition.not_nil!)
-        if stack.pop().truthy?
-          recurse(node.body)
-        else
-          if node.alternative
-            recurse(node.alternative.not_nil!)
-          else
-            stack.push(TNil.new)
-          end
-        end
-      when Token::Type::UNLESS
-        recurse(node.condition.not_nil!)
-        unless stack.pop().truthy?
-          recurse(node.body)
-        else
-          if node.alternative
-            recurse(node.alternative.not_nil!)
-          else
-            stack.push(TNil.new)
-          end
-        end
-      when Token::Type::ELSE
+    visit AST::IfExpression, AST::ElifExpression do
+      recurse(node.condition.not_nil!)
+      if stack.pop().truthy?
         recurse(node.body)
+      else
+        if node.alternative
+          recurse(node.alternative.not_nil!)
+        else
+          stack.push(TNil.new)
+        end
       end
+    end
+
+    visit AST::UnlessExpression do
+      recurse(node.condition.not_nil!)
+      unless stack.pop().truthy?
+        recurse(node.body)
+      else
+        if node.alternative
+          recurse(node.alternative.not_nil!)
+        else
+          stack.push(TNil.new)
+        end
+      end
+    end
+
+    visit AST::ElseExpression do
+      recurse(node.body)
     end
 
 

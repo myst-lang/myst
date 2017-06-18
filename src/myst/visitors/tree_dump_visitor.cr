@@ -30,10 +30,14 @@ module Myst
       recurse [node.target, node.value]
     end
 
-    visit AST::ConditionalExpression do
-      io << "#{node.type_name}".colorize(:blue)
-      io << "|#{node.inversion.value}\n"
+    visit AST::IfExpression, AST::UnlessExpression, AST::ElifExpression do
+      io << "#{node.type_name}\n".colorize(:blue)
       recurse [node.condition, node.body, node.alternative].compact
+    end
+
+    visit AST::ElseExpression do
+      io << "#{node.type_name}\n".colorize(:blue)
+      recurse [node.body]
     end
 
     visit AST::LogicalExpression, AST::EqualityExpression, AST::RelationalExpression, AST::BinaryExpression do

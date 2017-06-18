@@ -7,3 +7,7 @@ def fib(n)
 end
 
 puts(fib(10))
+
+unless 1 == 2
+  puts("1 is not 2")
+end

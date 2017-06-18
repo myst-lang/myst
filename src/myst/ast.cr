@@ -73,11 +73,23 @@ module Myst
       target    : Node,
       value     : Node
 
-    ast_node ConditionalExpression,
-      inversion   : Token,
-      condition   : Node?,
+    ast_node IfExpression,
+      condition   : Node,
       body        : Block,
       alternative : Node?
+
+    ast_node UnlessExpression,
+      condition   : Node,
+      body        : Block,
+      alternative : Node?
+
+    ast_node ElifExpression,
+      condition   : Node,
+      body        : Block,
+      alternative : Node?
+
+    ast_node ElseExpression,
+      body        : Block
 
     ast_node LogicalExpression,
       operator  : Token,
