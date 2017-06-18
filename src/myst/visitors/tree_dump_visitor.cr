@@ -78,7 +78,7 @@ module Myst
       io << "(#{node.name})\n"
     end
 
-    visit AST::IntegerLiteral, AST::FloatLiteral, AST::StringLiteral, AST::BooleanLiteral do
+    visit AST::IntegerLiteral, AST::FloatLiteral, AST::StringLiteral, AST::SymbolLiteral, AST::BooleanLiteral do
       io << "#{node.type_name}".colorize(:yellow)
       io << "(#{node.value})\n"
     end

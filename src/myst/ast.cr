@@ -152,6 +152,9 @@ module Myst
     ast_node StringLiteral,
       value     : String
 
+    ast_node SymbolLiteral,
+      value     : String
+
     ast_node BooleanLiteral,
       value     : Bool
 

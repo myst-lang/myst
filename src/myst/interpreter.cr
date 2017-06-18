@@ -225,6 +225,10 @@ module Myst
       stack.push(TString.new(node.value))
     end
 
+    visit AST::SymbolLiteral do
+      stack.push(TSymbol.new(node.value))
+    end
+
     visit AST::BooleanLiteral do
       stack.push(TBoolean.new(node.value))
     end

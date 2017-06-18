@@ -75,6 +75,9 @@ module Myst
     def read_token : Token
       advance_token
 
+      # By default, assume a token will be an identifier
+      @current_token.type = Token::Type::IDENT
+
       case current_char
       when '\0'
         @current_token.type = Token::Type::EOF
@@ -145,6 +148,9 @@ module Myst
       when '"'
         @current_token.type = Token::Type::STRING
         consume_string
+      when ':'
+        @current_token.type = Token::Type::SYMBOL
+        consume_symbol
       when '('
         @current_token.type = Token::Type::LPAREN
         read_char
@@ -327,8 +333,25 @@ module Myst
         when "\\t"  then '\t'
         end
       end
+
       # Strip the containing quote characters
       @current_token.value = @current_token.value[1..-2]
+    end
+
+    def consume_symbol
+      # Read the starting colon
+      read_char
+
+      case current_char
+      when '"'
+        # Quoted values allow for spaces in symbol names
+        consume_string
+      else
+        consume_identifier
+      end
+
+      # Strip the initial colon
+      @current_token.value = @current_token.value[1..-1]
     end
 
     def consume_whitespace
@@ -351,7 +374,6 @@ module Myst
         end
       end
 
-      @current_token.type = Token::Type::IDENT
       @current_token.value = @reader.buffer_value
     end
   end

@@ -7,6 +7,7 @@ module Myst
       FLOAT         # [0-9][_0-9]*\.[0-9]+
       STRING        # "hello"
       CHAR          # 'c'
+      SYMBOL        # :symbol
 
       DEF           # def
       IF            # if
@@ -51,6 +52,7 @@ module Myst
 
       COMMA         # ,
       POINT         # .
+      COLON         # :
 
       NEWLINE       # \n
       WHITESPACE    # space, tab, etc.
@@ -71,6 +73,10 @@ module Myst
 
       def binary_operator?
         self == PLUS || self == MINUS || self == STAR || self == SLASH
+      end
+
+      def operator?
+        unary_operator? || binary_operator?
       end
     end
 

@@ -1,0 +1,3 @@
+puts(:a)
+:what
+:true
