@@ -1,6 +1,6 @@
 def func(a, b)
   a + b
-  x
+  a
 end
 
 x = 1

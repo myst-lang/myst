@@ -5,12 +5,11 @@ module Myst
   class Interpreter < Visitor
     property stack : StackMachine
     property symbol_table : SymbolTable
-    property function_table : FunctionTable
 
     def initialize
       @stack = StackMachine.new
       @symbol_table = SymbolTable.new
-      @function_table = FunctionTable.new
+      @symbol_table.push_scope(Kernel::SCOPE)
     end
 
     macro recurse(node)
@@ -45,9 +44,9 @@ module Myst
     # Statements
 
     visit AST::FunctionDefinition do
-      functor = Functor.new(node)
-      @function_table.define(node.name, functor)
-      stack.push(TFunctor.new)
+      functor = TFunctor.new(node)
+      @symbol_table[node.name] = functor
+      stack.push(functor)
     end
 
 
@@ -107,28 +106,16 @@ module Myst
       case node.operator.type
       when Token::Type::ANDAND
         recurse(node.left)
-        a = stack.pop()
-
-        unless a.truthy?
-          stack.push(a)
-          return
-        end
-
+        return unless stack.last.truthy?
+        stack.pop
+        # Recursing the right node should leave it's result on the stack
         recurse(node.right)
-        b = stack.pop()
-        stack.push(b)
       when Token::Type::OROR
         recurse(node.left)
-        a = stack.pop()
-
-        if a.truthy?
-          stack.push(a)
-          return
-        end
-
+        return if stack.last.truthy?
+        stack.pop
+        # Recursing the right node should leave it's result on the stack
         recurse(node.right)
-        b = stack.pop()
-        stack.push(b)
       end
     end
 
@@ -149,32 +136,19 @@ module Myst
     visit AST::FunctionCall do
       case (func = node.function)
       when AST::VariableReference
-        if functors = @function_table[func.name]?
-          matched_functor = functors[0]
+        functor = @symbol_table[func.name]?
+        if functor.is_a?(TFunctor)
           recurse(node.arguments)
-          # Functions get a new scope. This will need to be rethought when
-          # classes/modules are supported, or nesting function calls happens.
-          @symbol_table.push_scope(Scope.new(restrictive: true))
-          matched_functor.parameters.children.reverse_each do |param|
-            # Pop arguments from the stack into the variables named by the
-            # parameters for the function.
+          @symbol_table.push_scope(functor.scope.full_clone)
+          functor.parameters.children.reverse_each do |param|
             @symbol_table.assign(param.name, stack.pop(), make_new: true)
           end
-          recurse(matched_functor.body)
+          recurse(functor.body)
           @symbol_table.pop_scope()
-        # If a function to call wasn't found, try to lookup a Kernel method.
-        else
+        elsif functor.is_a?(TNativeFunctor)
           recurse(node.arguments)
-          {% for method in Kernel.methods %}
-            if func.name == {{method.name.stringify}}
-              args = [] of Value
-              node.arguments.children.each do |arg|
-                args << stack.pop
-              end
-
-              return Kernel.{{method.name}}(args)
-            end
-          {% end %}
+          args = node.arguments.children.map{ |arg| stack.pop }
+          stack.push(functor.call(args))
         end
       else
         raise "Function names must be identifiers."

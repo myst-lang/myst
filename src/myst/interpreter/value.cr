@@ -1,5 +1,3 @@
-require "./functor"
-
 module Myst
   abstract class Value
     # All values except `false` and `nil` are considered truthy. By defining
@@ -8,6 +6,7 @@ module Myst
       true
     end
   end
+
 
   class Primitive(T) < Value
     property value : T
@@ -45,6 +44,7 @@ module Myst
       io << inspect
     end
   end
+
 
   class TObject < Value
     property data : Scope
