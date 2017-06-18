@@ -40,6 +40,11 @@ module Myst
       recurse [node.body]
     end
 
+    visit AST::WhileExpression, AST::UntilExpression do
+      io << "#{node.type_name}\n".colorize(:blue)
+      recurse [node.condition, node.body]
+    end
+
     visit AST::LogicalExpression, AST::EqualityExpression, AST::RelationalExpression, AST::BinaryExpression do
       io << "#{node.type_name}".colorize(:cyan)
       io << "|#{node.operator}\n"

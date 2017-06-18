@@ -13,6 +13,8 @@ module Myst
       UNLESS        # unless
       ELIF          # elif
       ELSE          # else
+      WHILE         # while
+      UNTIL         # until
       END           # end
 
       TRUE          # true

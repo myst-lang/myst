@@ -11,3 +11,15 @@ puts(fib(10))
 unless 1 == 2
   puts("1 is not 2")
 end
+
+x = 5
+
+until x == 0
+  puts(x)
+  x = x - 1
+end
+
+while fib(x) < 10
+  puts(fib(x))
+  x = x + 1
+end

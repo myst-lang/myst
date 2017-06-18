@@ -57,6 +57,8 @@ module Myst
         parse_function_definition
       when Token::Type::IF, Token::Type::UNLESS
         parse_conditional_expression
+      when Token::Type::WHILE, Token::Type::UNTIL
+        parse_conditional_loop
       else
         expr = parse_expression
       end
@@ -144,7 +146,7 @@ module Myst
     end
 
     def parse_conditional_expression
-      case (inversion = current_token).type
+      case current_token.type
       when Token::Type::IF
         advance
         condition = parse_expression
@@ -165,7 +167,7 @@ module Myst
     end
 
     def parse_conditional_alternative
-      case (inversion = current_token).type
+      case current_token.type
       when Token::Type::ELIF
         advance
         condition = parse_expression
@@ -179,7 +181,26 @@ module Myst
       when Token::Type::END
         return nil
       else
-        raise "Unexpected token `#{inversion}`. Expected `ELSE`, `ELIF`, or `END`."
+        raise "Unexpected token `#{current_token}`. Expected `ELSE`, `ELIF`, or `END`."
+      end
+    end
+
+    def parse_conditional_loop
+      case current_token.type
+      when Token::Type::WHILE
+        advance
+        condition = parse_expression
+        body = parse_block
+        expect(Token::Type::END)
+        return AST::WhileExpression.new(condition, body)
+      when Token::Type::UNTIL
+        advance
+        condition = parse_expression
+        body = parse_block
+        expect(Token::Type::END)
+        return AST::UntilExpression.new(condition, body)
+      else
+        return parse_logical_or_expression
       end
     end
 

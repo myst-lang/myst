@@ -91,6 +91,14 @@ module Myst
     ast_node ElseExpression,
       body        : Block
 
+    ast_node WhileExpression,
+      condition   : Node,
+      body        : Block
+
+    ast_node UntilExpression,
+      condition   : Node,
+      body        : Block
+
     ast_node LogicalExpression,
       operator  : Token,
       left      : Node,

@@ -206,9 +206,27 @@ module Myst
           consume_identifier
         end
       when 'u'
-        if read_char == 'n' && read_char == 'l' && read_char == 'e' && read_char == 's' && read_char == 's'
+        if read_char == 'n'
           read_char
-          @current_token.type = Token::Type::UNLESS
+          puts current_char
+          case current_char
+          when 'l'
+            if read_char == 'e' && read_char == 's' && read_char == 's'
+              read_char
+              @current_token.type = Token::Type::UNLESS
+            else
+              consume_identifier
+            end
+          when 't'
+            if read_char == 'i' && read_char == 'l'
+              read_char
+              @current_token.type = Token::Type::UNTIL
+            else
+              consume_identifier
+            end
+          else
+            consume_identifier
+          end
         else
           consume_identifier
         end
@@ -216,6 +234,13 @@ module Myst
         if read_char == 'r' && read_char == 'u' && read_char == 'e'
           read_char
           @current_token.type = Token::Type::TRUE
+        else
+          consume_identifier
+        end
+      when 'w'
+        if read_char == 'h' && read_char == 'i' && read_char == 'l' && read_char == 'e'
+          read_char
+          @current_token.type = Token::Type::WHILE
         else
           consume_identifier
         end

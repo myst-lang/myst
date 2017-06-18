@@ -100,6 +100,22 @@ module Myst
       recurse(node.body)
     end
 
+    visit AST::WhileExpression do
+      recurse(node.condition)
+      while stack.pop().truthy?
+        recurse(node.body)
+        recurse(node.condition)
+      end
+    end
+
+    visit AST::UntilExpression do
+      recurse(node.condition)
+      until stack.pop().truthy?
+        recurse(node.body)
+        recurse(node.condition)
+      end
+    end
+
 
     # Binary Expressions
 
