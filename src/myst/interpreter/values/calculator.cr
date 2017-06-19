@@ -136,6 +136,7 @@ module Myst
     end
 
     def divide(left, right)
+      simple_op_for :/, TInteger, TFloat
       # Only numeric types can be divided
       simple_mixed_type_op TInteger, :/, TFloat
       simple_mixed_type_op TFloat, :/, TInteger

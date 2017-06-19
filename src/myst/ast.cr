@@ -136,6 +136,10 @@ module Myst
       key     : Node,
       value   : Node
 
+    ast_node MapEntryDefinition,
+      key     : Node,
+      value   : Node
+
 
 
     # Literals
@@ -159,6 +163,9 @@ module Myst
       value     : Bool
 
     ast_node ListLiteral,
+      elements  : ExpressionList
+
+    ast_node MapLiteral,
       elements  : ExpressionList
   end
 end

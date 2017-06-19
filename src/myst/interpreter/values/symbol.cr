@@ -15,16 +15,19 @@ module Myst
 
     property name : String
 
-
     def initialize(@value : UInt64, @name : String); end
-
-
-    def to_s
-      @name
-    end
 
 
     simple_op :==, TSymbol, returns: TBoolean
     simple_op :!=, TSymbol, returns: TBoolean
+
+
+    def to_s
+      if @name.includes?(' ')
+        "\"#{@name}\""
+      else
+        @name
+      end
+    end
   end
 end

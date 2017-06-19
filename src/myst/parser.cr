@@ -117,6 +117,25 @@ module Myst
       end
     end
 
+    def parse_map_entry_list
+      args = [] of AST::Node
+      args << parse_map_entry
+      while current_token.type == Token::Type::COMMA
+        advance
+        args << parse_map_entry
+      end
+      return AST::ExpressionList.new(args)
+    end
+
+    def parse_map_entry
+      # Any token IMMEDIATELY followed by a colon is considered a valid key
+      key = current_token
+      read_token
+      expect(Token::Type::COLON)
+      value = parse_expression
+      return AST::MapEntryDefinition.new(AST::SymbolLiteral.new(key.value), value)
+    end
+
     def parse_expression_list
       args = [] of AST::Node
       args << parse_expression
@@ -320,7 +339,7 @@ module Myst
         token = current_token
         advance
         return AST::StringLiteral.new(token.value)
-      when Token::Type::SYMBOL
+      when Token::Type::COLON
         token = current_token
         advance
         return AST::SymbolLiteral.new(token.value)
@@ -346,6 +365,11 @@ module Myst
         elements = parse_expression_list
         expect(Token::Type::RBRACE)
         return AST::ListLiteral.new(elements)
+      when Token::Type::LCURLY
+        expect(Token::Type::LCURLY)
+        elements = parse_map_entry_list
+        expect(Token::Type::RCURLY)
+        return AST::MapLiteral.new(elements)
       else
         raise ParseError.new(current_token.type)
       end

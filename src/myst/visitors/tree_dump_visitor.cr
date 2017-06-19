@@ -72,6 +72,11 @@ module Myst
       recurse [node.target, node.key, node.value]
     end
 
+    visit AST::MapEntryDefinition do
+      io << "#{node.type_name}\n".colorize(:dark_gray)
+      recurse [node.key, node.value]
+    end
+
 
     visit AST::VariableReference do
       io << "#{node.type_name}".colorize(:dark_gray)
@@ -83,7 +88,7 @@ module Myst
       io << "(#{node.value})\n"
     end
 
-    visit AST::ListLiteral do
+    visit AST::ListLiteral, AST::MapLiteral do
       io << "#{node.type_name}\n".colorize(:yellow)
       recurse [node.elements]
     end

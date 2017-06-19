@@ -149,8 +149,7 @@ module Myst
         @current_token.type = Token::Type::STRING
         consume_string
       when ':'
-        @current_token.type = Token::Type::SYMBOL
-        consume_symbol
+        consume_symbol_or_colon
       when '('
         @current_token.type = Token::Type::LPAREN
         read_char
@@ -162,6 +161,12 @@ module Myst
         read_char
       when ']'
         @current_token.type = Token::Type::RBRACE
+        read_char
+      when '{'
+        @current_token.type = Token::Type::LCURLY
+        read_char
+      when '}'
+        @current_token.type = Token::Type::RCURLY
         read_char
       when 'd'
         if read_char == 'e' && read_char == 'f'
@@ -338,7 +343,7 @@ module Myst
       @current_token.value = @current_token.value[1..-2]
     end
 
-    def consume_symbol
+    def consume_symbol_or_colon
       # Read the starting colon
       read_char
 
@@ -346,12 +351,17 @@ module Myst
       when '"'
         # Quoted values allow for spaces in symbol names
         consume_string
+      when .ascii_whitespace?
       else
         consume_identifier
       end
 
-      # Strip the initial colon
-      @current_token.value = @current_token.value[1..-1]
+      if @current_token.value.size > 1
+        @current_token.type = Token::Type::SYMBOL
+        @current_token.value = @current_token.value[1..-1]
+      else
+        @current_token.type = Token::Type::COLON
+      end
     end
 
     def consume_whitespace

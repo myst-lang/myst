@@ -239,5 +239,26 @@ module Myst
       node.elements.children.each{ |el| list.push(stack.pop) }
       stack.push(list)
     end
+
+    visit AST::MapLiteral do
+      # The elements should push value pairs onto the stack:
+      # STACK
+      # | value
+      # | key
+      # | value
+      # V key
+      recurse(node.elements)
+      map = TMap.new
+      node.elements.children.each do |el|
+        value, key = stack.pop, stack.pop
+        map.assign(key, value)
+      end
+      stack.push(map)
+    end
+
+    visit AST::MapEntryDefinition do
+      recurse(node.key)
+      recurse(node.value)
+    end
   end
 end
