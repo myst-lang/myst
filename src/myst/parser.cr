@@ -339,7 +339,7 @@ module Myst
         token = current_token
         advance
         return AST::StringLiteral.new(token.value)
-      when Token::Type::COLON
+      when Token::Type::COLON, Token::Type::SYMBOL
         token = current_token
         advance
         return AST::SymbolLiteral.new(token.value)

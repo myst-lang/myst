@@ -178,10 +178,17 @@ module Myst
       key     = stack.pop
       target  = stack.pop
 
-      if target.is_a?(TList) && key.is_a?(TInteger)
+      case target
+      when TList
+        if key.is_a?(TInteger)
+          stack.push(target.reference(key))
+        else
+          raise "Access for lists only supports integer keys. Got #{key.class}"
+        end
+      when TMap
         stack.push(target.reference(key))
       else
-        raise "Access only supported for lists with integer keys. Got #{target.class}[#{key.class}]"
+        raise "Access is not supported for #{target.class}."
       end
     end
 
@@ -193,11 +200,19 @@ module Myst
       key     = stack.pop
       target  = stack.pop
 
-      if target.is_a?(TList) && key.is_a?(TInteger)
+      case target
+      when TList
+        if key.is_a?(TInteger)
+          target.set(key, value)
+          stack.push(target.reference(key))
+        else
+          raise "Access for lists only supports integer keys. Got #{key.class}"
+        end
+      when TMap
         target.set(key, value)
         stack.push(target.reference(key))
       else
-        raise "Access only supported for lists with integer keys. Got #{target.class}[#{key.class}]"
+        raise "Access is not supported for #{target.class}."
       end
     end
 

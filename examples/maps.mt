@@ -1,7 +1,7 @@
 map = {
   a: 1,
   bc: 10,
-  "string symbol": 1/4
+  "string symbol": 4/2
 }
 
-puts(map)
+puts(map[:a] + map[:"string symbol"])

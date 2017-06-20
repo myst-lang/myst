@@ -34,7 +34,7 @@ module Myst
       @value[key]? || TNil.new
     end
 
-    def set(key : TInteger, new_value : Value)
+    def set(key : Value, new_value : Value)
       @value[key] = new_value
     end
 
