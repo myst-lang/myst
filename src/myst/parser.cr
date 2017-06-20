@@ -7,7 +7,8 @@ module Myst
 
     SKIPPED_TOKENS = [
       Token::Type::WHITESPACE,
-      Token::Type::NEWLINE
+      Token::Type::NEWLINE,
+      Token::Type::COMMENT
     ]
 
 

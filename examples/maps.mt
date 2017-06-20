@@ -15,6 +15,7 @@ def func(a, b)
   a + b
 end
 
+# Examples of key interpolation
 interpolant = {
   <1>: :integer,
   <2.4>: :float,

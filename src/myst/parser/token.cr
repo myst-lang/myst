@@ -54,6 +54,7 @@ module Myst
       POINT         # .
       COLON         # :
 
+      COMMENT       # # comment
       NEWLINE       # \n
       WHITESPACE    # space, tab, etc.
       EOF           # End of File

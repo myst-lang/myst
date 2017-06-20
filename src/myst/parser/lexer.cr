@@ -145,6 +145,9 @@ module Myst
       when '\n'
         @current_token.type = Token::Type::NEWLINE
         read_char
+      when '#'
+        @current_token.type = Token::Type::COMMENT
+        consume_comment
       when '"'
         @current_token.type = Token::Type::STRING
         consume_string
@@ -362,6 +365,10 @@ module Myst
       else
         @current_token.type = Token::Type::COLON
       end
+    end
+
+    def consume_comment
+      until read_char == '\n'; end
     end
 
     def consume_whitespace
