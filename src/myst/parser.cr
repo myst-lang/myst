@@ -128,12 +128,19 @@ module Myst
     end
 
     def parse_map_entry
-      # Any token IMMEDIATELY followed by a colon is considered a valid key
       key = current_token
       read_token
+      # Any token IMMEDIATELY followed by a colon is considered a valid key
+      case key.type
+      when Token::Type::LESS
+        key = parse_postfix_expression
+        expect(Token::Type::GREATER)
+      else
+        key = AST::SymbolLiteral.new(key.value)
+      end
       expect(Token::Type::COLON)
       value = parse_expression
-      return AST::MapEntryDefinition.new(AST::SymbolLiteral.new(key.value), value)
+      return AST::MapEntryDefinition.new(key, value)
     end
 
     def parse_expression_list

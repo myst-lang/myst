@@ -28,6 +28,10 @@ module Myst
       simple_op({{operator}}, {{type}}, returns: {{type}})
     end
 
+    def hash
+      @value.hash
+    end
+
     def to_s
       @value.to_s
     end
