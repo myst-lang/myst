@@ -42,7 +42,14 @@ module Myst
     def to_s
       value_strings = @value.map do |key, value|
         # Show simplified syntax for symbol keys
-        key.is_a?(TSymbol) ? "#{key}: #{value}" : "<#{key}>: #{value}"
+        case key
+        when TSymbol
+          "#{key}: #{value}"
+        when TString
+          "<\"#{key}\">: #{value}"
+        else
+          "<#{key}>: #{value}"
+        end
       end
 
       "{#{value_strings.join(", ")}}"
