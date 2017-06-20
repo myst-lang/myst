@@ -1,3 +1,12 @@
+# Unlike C-based languages, conditional statements do not use parenthesis
+# around their condition. Instead, a single space is used to delimit from the
+# keyword.
+
+# Suffix conditionals are not yet supported, but they are on the roadmap.
+
+
+# This example also shows a basic function definition and call. This will be
+# expanded upon in another example.
 def fib(n)
   if n <= 1
     1
