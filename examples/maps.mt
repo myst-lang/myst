@@ -28,3 +28,4 @@ interpolant = {
 
 puts(interpolant[7])
 puts(interpolant[:what])
+puts(interpolant[[1,2,3]])

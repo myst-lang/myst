@@ -15,11 +15,19 @@ module Myst
     end
 
     def ==(other : TMap) : TBoolean
-      TBoolean.new(false)
+      @value.each do |(key, value)|
+        return TBoolean.new(false) if value != other.value[key]
+      end
+
+      TBoolean.new(true)
     end
 
     def !=(other : TMap) : TBoolean
-      TBoolean.new(true)
+      @value.each do |(key, value)|
+        return TBoolean.new(true) if value != other.value[key]
+      end
+
+      TBoolean.new(false)
     end
 
     simple_op :+, TMap
