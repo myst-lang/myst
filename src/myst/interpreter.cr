@@ -249,23 +249,26 @@ module Myst
     end
 
     visit AST::ListLiteral do
-      list = TList.new([] of Value)
       recurse(node.elements)
-      node.elements.children.each{ |el| list.push(stack.pop) }
-      stack.push(list)
+      elements = node.elements.children.map{ |el| stack.pop }
+      stack.push(TList.new(elements.reverse))
     end
 
     visit AST::MapLiteral do
       # The elements should push value pairs onto the stack:
       # STACK
-      # | value
-      # | key
-      # | value
-      # V key
+      # | value2
+      # | key2
+      # | value1
+      # V key1
       recurse(node.elements)
-      map = TMap.new
-      node.elements.children.each do |el|
+      map_entries = node.elements.children.map do |el|
         value, key = stack.pop, stack.pop
+        {key, value}
+      end
+
+      map = TMap.new
+      map_entries.reverse_each do |key, value|
         map.assign(key, value)
       end
       stack.push(map)

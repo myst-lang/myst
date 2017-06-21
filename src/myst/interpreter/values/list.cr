@@ -11,11 +11,19 @@ module Myst
     end
 
     def ==(other : TList) : TBoolean
-      TBoolean.new(false)
+      @value.each_with_index do |el, idx|
+        return TBoolean.new(false) if el != other.value[idx]
+      end
+
+      TBoolean.new(true)
     end
 
     def !=(other : TList) : TBoolean
-      TBoolean.new(true)
+      @value.each_with_index do |el, idx|
+        return TBoolean.new(true) if el != other.value[idx]
+      end
+
+      TBoolean.new(false)
     end
 
     simple_op :+, TList

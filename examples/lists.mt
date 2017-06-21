@@ -8,3 +8,7 @@ while x <= n
 end
 
 puts(memory[n])
+
+puts([1, 2, 3] == [1, 2, 3])
+
+puts([1, 2, 3])
