@@ -68,10 +68,8 @@ module Myst
 
     visit AST::PatternMatchingAssignment do
       recurse(node.value)
-      value = stack.pop()
-      matcher = Matcher.new(node.pattern, value, @symbol_table.current_scope)
-      result = matcher.match()
-      stack.push(TNil.new)
+      matcher = Matcher.new(node.pattern, stack.pop(), @symbol_table.current_scope)
+      stack.push(matcher.match())
     end
 
 
