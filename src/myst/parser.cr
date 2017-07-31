@@ -19,25 +19,29 @@ module Myst
     end
 
 
-    def advance
-      while SKIPPED_TOKENS.includes?(read_token.type)
+    def advance(allowed_tokens=SKIPPED_TOKENS)
+      while allowed_tokens.includes?(read_token.type)
       end
       @current_token
     end
 
-    def accept(type : Token::Type)
+    def advance_without_newline
+      advance(SKIPPED_TOKENS - [Token::Type::NEWLINE])
+    end
+
+    def accept(type : Token::Type, do_advance=true)
       token = @current_token
       if token.type == type
-        advance
+        advance if do_advance
         token
       else
         false
       end
     end
 
-    def expect(type : Token::Type)
+    def expect(type : Token::Type, do_advance=true)
       token = @current_token
-      raise ParseError.new(token.type, type) unless accept(type)
+      raise ParseError.new(token.type, type) unless accept(type, do_advance: do_advance)
       token
     end
 
@@ -61,7 +65,7 @@ module Myst
       when Token::Type::WHILE, Token::Type::UNTIL
         parse_conditional_loop
       else
-        expr = parse_expression
+        parse_expression
       end
     end
 
@@ -167,6 +171,10 @@ module Myst
         advance
         right = parse_assignment_expression
         return AST::SimpleAssignment.new(left, right)
+      when Token::Type::MATCH
+        advance
+        right = parse_assignment_expression
+        return AST::PatternMatchingAssignment.new(left, right)
       else
         return left
       end
@@ -306,7 +314,7 @@ module Myst
     def parse_unary_expression
       if (operator = current_token).type.unary_operator?
         advance
-        return AST::UnaryExpression.new(operator, parse_primary_expression)
+        return AST::UnaryExpression.new(operator, parse_postfix_expression)
       else
         return parse_postfix_expression
       end
@@ -314,10 +322,12 @@ module Myst
 
     def parse_postfix_expression
       receiver = parse_primary_expression
-      case (operator = current_token).type
+      # Postfix expressions must start on the same line as the receiver.
+      advance
+      expr = case (operator = current_token).type
       when Token::Type::LPAREN
         args = parse_function_args
-        return AST::FunctionCall.new(receiver, args)
+        AST::FunctionCall.new(receiver, args)
       when Token::Type::LBRACE
         expect(Token::Type::LBRACE)
         key = parse_expression
@@ -325,43 +335,39 @@ module Myst
         if current_token.type == Token::Type::EQUAL
           advance
           value = parse_expression
-          return AST::AccessSetExpression.new(receiver, key, value)
+          AST::AccessSetExpression.new(receiver, key, value)
+        else
+          AST::AccessExpression.new(receiver, key)
         end
-        return AST::AccessExpression.new(receiver, key)
       else
-        return receiver
+        receiver
       end
+
+      expr
     end
 
     def parse_primary_expression
       case current_token.type
       when Token::Type::INTEGER
         token = current_token
-        advance
         return AST::IntegerLiteral.new(token.value)
       when Token::Type::FLOAT
         token = current_token
-        advance
         return AST::FloatLiteral.new(token.value)
       when Token::Type::STRING
         token = current_token
-        advance
         return AST::StringLiteral.new(token.value)
       when Token::Type::COLON, Token::Type::SYMBOL
         token = current_token
-        advance
         return AST::SymbolLiteral.new(token.value)
       when Token::Type::TRUE
         token = current_token
-        advance
         return AST::BooleanLiteral.new(true)
       when Token::Type::FALSE
         token = current_token
-        advance
         return AST::BooleanLiteral.new(false)
       when Token::Type::IDENT
         token = current_token
-        advance
         return AST::VariableReference.new(token.value)
       when Token::Type::LPAREN
         expect(Token::Type::LPAREN)
@@ -371,12 +377,12 @@ module Myst
       when Token::Type::LBRACE
         expect(Token::Type::LBRACE)
         elements = parse_expression_list
-        expect(Token::Type::RBRACE)
+        expect(Token::Type::RBRACE, do_advance: false)
         return AST::ListLiteral.new(elements)
       when Token::Type::LCURLY
         expect(Token::Type::LCURLY)
         elements = parse_map_entry_list
-        expect(Token::Type::RCURLY)
+        expect(Token::Type::RCURLY, do_advance: false)
         return AST::MapLiteral.new(elements)
       else
         raise ParseError.new(current_token.type)

@@ -105,8 +105,12 @@ module Myst
       when '='
         @current_token.type = Token::Type::EQUAL
         read_char
-        if current_char == '='
+        case current_char
+        when '='
           @current_token.type = Token::Type::EQUALEQUAL
+          read_char
+        when ':'
+          @current_token.type = Token::Type::MATCH
           read_char
         end
       when '!'

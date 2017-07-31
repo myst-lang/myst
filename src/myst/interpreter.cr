@@ -66,6 +66,14 @@ module Myst
       end
     end
 
+    visit AST::PatternMatchingAssignment do
+      recurse(node.value)
+      value = stack.pop()
+      matcher = Matcher.new(node.pattern, value, @symbol_table.current_scope)
+      result = matcher.match()
+      stack.push(TNil.new)
+    end
+
 
 
     # Conditionals
@@ -143,7 +151,7 @@ module Myst
       b = stack.pop
       a = stack.pop
 
-      stack.push(Calculator.do(node.operator, a, b))
+      stack.push(Calculator.do(node.operator.type, a, b))
     end
 
 
@@ -228,25 +236,10 @@ module Myst
       end
     end
 
-    visit AST::IntegerLiteral do
-      stack.push(TInteger.new(node.value.to_i64))
+    visit AST::IntegerLiteral, AST::FloatLiteral, AST::StringLiteral, AST::SymbolLiteral, AST::BooleanLiteral do
+      stack.push(Value.from_literal(node))
     end
 
-    visit AST::FloatLiteral do
-      stack.push(TFloat.new(node.value.to_f64))
-    end
-
-    visit AST::StringLiteral do
-      stack.push(TString.new(node.value))
-    end
-
-    visit AST::SymbolLiteral do
-      stack.push(TSymbol.new(node.value))
-    end
-
-    visit AST::BooleanLiteral do
-      stack.push(TBoolean.new(node.value))
-    end
 
     visit AST::ListLiteral do
       recurse(node.elements)

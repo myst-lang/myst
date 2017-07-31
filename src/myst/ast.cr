@@ -73,6 +73,10 @@ module Myst
       target    : Node,
       value     : Node
 
+    ast_node PatternMatchingAssignment,
+      pattern   : Node,
+      value     : Node
+
     ast_node IfExpression,
       condition   : Node,
       body        : Block,
@@ -147,6 +151,7 @@ module Myst
     ast_node VariableReference,
       name      : String
 
+
     ast_node IntegerLiteral,
       value     : String
 
@@ -161,6 +166,7 @@ module Myst
 
     ast_node BooleanLiteral,
       value     : Bool
+
 
     ast_node ListLiteral,
       elements  : ExpressionList

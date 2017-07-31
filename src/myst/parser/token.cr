@@ -28,6 +28,7 @@ module Myst
       SLASH         # /
 
       EQUAL         # =
+      MATCH         # =:
       NOT           # !
       LESS          # <
       LESSEQUAL     # <=

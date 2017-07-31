@@ -30,6 +30,11 @@ module Myst
       recurse [node.target, node.value]
     end
 
+    visit AST::PatternMatchingAssignment do
+      io << "#{node.type_name}\n".colorize(:green)
+      recurse [node.pattern, node.value]
+    end
+
     visit AST::IfExpression, AST::UnlessExpression, AST::ElifExpression do
       io << "#{node.type_name}\n".colorize(:blue)
       recurse [node.condition, node.body, node.alternative].compact

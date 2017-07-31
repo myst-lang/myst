@@ -13,8 +13,8 @@ module Myst
     # Perform a calculating operation. That is, any operation applied to two
     # operands to generate a new result value. Logical operations are not
     # included, as they short-circuit and thus may not evaluate both operands.
-    def do(operator : Token, left : Value, right : Value) : Value
-      case operator.type
+    def do(operator : Token::Type, left : Value, right : Value) : Value
+      case operator
       when Token::Type::EQUALEQUAL
         return equal(left, right)
       when Token::Type::NOTEQUAL

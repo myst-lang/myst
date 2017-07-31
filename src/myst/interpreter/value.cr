@@ -5,6 +5,23 @@ module Myst
     def truthy?
       true
     end
+
+    def self.from_literal(literal : AST::Node)
+      case literal
+      when AST::IntegerLiteral
+        TInteger.new(literal.value.to_i64)
+      when AST::FloatLiteral
+        TFloat.new(literal.value.to_f64)
+      when AST::StringLiteral
+        TString.new(literal.value)
+      when AST::SymbolLiteral
+        TSymbol.new(literal.value)
+      when AST::BooleanLiteral
+        TBoolean.new(literal.value)
+      else
+        raise "#{literal.class} cannot be converted to a Value."
+      end
+    end
   end
 
 
