@@ -148,7 +148,7 @@ module Myst
     end
 
     def parse_value_interpolation_expression
-      return AST::ValueInterpolation.new(parse_postfix_expression)
+      return AST::ValueInterpolation.new(parse_primary_expression)
     end
 
     def parse_expression_list
@@ -374,7 +374,7 @@ module Myst
         return AST::VariableReference.new(token.value)
       when Token::Type::LESS
         expect(Token::Type::LESS)
-        expression = AST::ValueInterpolation.new(parse_primary_expression)
+        expression = parse_value_interpolation_expression
         advance
         expect(Token::Type::GREATER, do_advance: false)
         return expression
