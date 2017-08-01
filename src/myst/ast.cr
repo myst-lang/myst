@@ -144,6 +144,9 @@ module Myst
       key     : Node,
       value   : Node
 
+    ast_node ValueInterpolation,
+      value   : Node
+
 
 
     # Literals

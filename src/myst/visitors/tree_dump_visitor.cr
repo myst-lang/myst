@@ -82,6 +82,11 @@ module Myst
       recurse [node.key, node.value]
     end
 
+    visit AST::ValueInterpolation do
+      io << "#{node.type_name}\n".colorize(:white)
+      recurse [node.value]
+    end
+
 
     visit AST::VariableReference do
       io << "#{node.type_name}".colorize(:dark_gray)

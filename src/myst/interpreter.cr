@@ -3,8 +3,11 @@ require "./interpreter/*"
 
 module Myst
   class Interpreter < Visitor
+    include Matcher
+
     property stack : StackMachine
     property symbol_table : SymbolTable
+
 
     def initialize
       @stack = StackMachine.new
@@ -12,8 +15,12 @@ module Myst
       @symbol_table.push_scope(Kernel::SCOPE)
     end
 
-    macro recurse(node)
-      {{node}}.accept(self, io)
+    macro recurse(node, io_override=nil)
+      {% if io_override %}
+        {{node}}.accept(self, {{io_override}})
+      {% else %}
+        {{node}}.accept(self, io)
+      {% end %}
     end
 
     visit AST::Node do
@@ -69,9 +76,9 @@ module Myst
     end
 
     visit AST::PatternMatchingAssignment do
-      recurse(node.value)
-      matcher = Matcher.new(node.pattern, stack.pop(), @symbol_table.current_scope)
-      stack.push(matcher.match())
+      recurse(node.value, io)
+      result = match(node.pattern, stack.pop(), io)
+      stack.push(result)
     end
 
 
@@ -269,6 +276,10 @@ module Myst
 
     visit AST::MapEntryDefinition do
       recurse(node.key)
+      recurse(node.value)
+    end
+
+    visit AST::ValueInterpolation do
       recurse(node.value)
     end
   end

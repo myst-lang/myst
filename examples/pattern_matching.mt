@@ -11,7 +11,8 @@ x = 1
 # and should generally be avoided, but is useful for more complex matches seen
 # later on.
 x = 1
-v =: x
+v = 1 =: x
+puts(v) #=> 1
 
 # Variables can also be assigned with pattern-matching assignment. Using an
 # identifier on the left-hand-side of a match expression will assign the
@@ -27,5 +28,16 @@ x =: list[2]
 # successfully (both are the value `1`), then `b` is bound to `"hello"`, and
 # `c` is bound to `false`.
 [1, b, c] =: [1, "hello", false]
-puts(b)
-puts(c)
+puts(b) #=> "hello"
+puts(c) #=> false
+
+# Nested values are also supported in decomposition.
+[1, b, ["nested", c], map] =: [1, 2, ["nested", "lists"], {a: 1, b: 2}]
+puts(c) #=> "lists"
+puts(map) #=> {a: 1, b: 2}
+
+# Pattern matching is performed left-to-right. Normally, this is not important,
+# but combined with variable re-use and value interpolation, this makes pattern
+# matchinde extremely powerful when enforcing structures.
+[a, <(a*3)>] =: ["hi", "hihihi"]
+puts(a) #=> "hi"

@@ -135,10 +135,9 @@ module Myst
     def parse_map_entry
       key = current_token
       read_token
-      # Any token IMMEDIATELY followed by a colon is considered a valid key
       case key.type
       when Token::Type::LESS
-        key = parse_postfix_expression
+        key = parse_value_interpolation_expression
         expect(Token::Type::GREATER)
       else
         key = AST::SymbolLiteral.new(key.value)
@@ -146,6 +145,10 @@ module Myst
       expect(Token::Type::COLON)
       value = parse_expression
       return AST::MapEntryDefinition.new(key, value)
+    end
+
+    def parse_value_interpolation_expression
+      return AST::ValueInterpolation.new(parse_postfix_expression)
     end
 
     def parse_expression_list
@@ -369,10 +372,16 @@ module Myst
       when Token::Type::IDENT
         token = current_token
         return AST::VariableReference.new(token.value)
+      when Token::Type::LESS
+        expect(Token::Type::LESS)
+        expression = AST::ValueInterpolation.new(parse_primary_expression)
+        advance
+        expect(Token::Type::GREATER, do_advance: false)
+        return expression
       when Token::Type::LPAREN
         expect(Token::Type::LPAREN)
         expression = parse_expression
-        expect(Token::Type::RPAREN)
+        expect(Token::Type::RPAREN, do_advance: false)
         return expression
       when Token::Type::LBRACE
         expect(Token::Type::LBRACE)
