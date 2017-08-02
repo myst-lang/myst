@@ -13,7 +13,7 @@ module Myst
       @parameters = definition.parameters
       @arity      = @parameters.children.size
       @body       = definition.body
-      @scope      = Scope.new(restrictive: true)
+      @scope      = Scope.new(restrictive: false)
 
       @scope[definition.name] = self
     end

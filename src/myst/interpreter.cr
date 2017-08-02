@@ -179,11 +179,11 @@ module Myst
           @symbol_table.pop_scope()
         elsif functor.is_a?(TNativeFunctor)
           recurse(node.arguments)
-          args = node.arguments.children.map{ |arg| stack.pop }
+          args = node.arguments.children.map{ |arg| stack.pop() }.reverse
           stack.push(functor.call(args))
         end
       else
-        raise "Function names must be identifiers."
+        raise "Function names currently must be identifiers."
       end
     end
 
