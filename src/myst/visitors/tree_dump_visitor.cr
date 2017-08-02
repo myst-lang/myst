@@ -14,7 +14,7 @@ module Myst
       recurse node.children
     end
 
-    visit AST::FunctionDefinition do
+    visit AST::ModuleDefinition, AST::FunctionDefinition do
       io << "#{node.type_name}"
       io << "|#{node.name}\n"
       recurse node.children
@@ -65,6 +65,11 @@ module Myst
     visit AST::FunctionCall do
       io << "#{node.type_name}\n".colorize(:white)
       recurse node.children
+    end
+
+    visit AST::MemberAccessExpression do
+      io << "#{node.type_name}\n".colorize(:white)
+      recurse [node.receiver, node.member]
     end
 
     visit AST::AccessExpression do

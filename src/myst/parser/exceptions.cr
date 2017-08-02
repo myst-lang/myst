@@ -13,14 +13,14 @@ module Myst
   end
 
   class ParseError < BaseException
-    property got : Token::Type
+    property got : Token
     property expected : Token::Type?
 
     def initialize(@got, @expected=nil)
       @message = if @expected
-        "Expected token `#{@expected}`, got #{@got} instead."
+        "Expected token `#{@expected}`, got #{@got.type} instead (at #{@got.location})"
       else
-        "Unexpected token `#{@got}`."
+        "Unexpected token `#{@got.type}` (at #{@got.location})"
       end
     end
   end

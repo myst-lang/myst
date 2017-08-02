@@ -1,5 +1,5 @@
 module Myst
-  class Scope
+  class Scope < Value
     property data   : Hash(String, Value)
     property parent : Scope?
     property? restrictive : Bool

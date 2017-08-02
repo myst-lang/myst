@@ -9,6 +9,7 @@ module Myst
       CHAR          # 'c'
       SYMBOL        # :symbol
 
+      MODULE        # module
       DEF           # def
       IF            # if
       UNLESS        # unless
@@ -61,8 +62,9 @@ module Myst
       EOF           # End of File
       UNKNOWN       # Unresolved type
 
+
       def keyword?
-        [DEF, IF, UNLESS, ELIF, ELSE, END].includes?(self)
+        [MODULE, DEF, IF, UNLESS, ELIF, ELSE, END].includes?(self)
       end
 
       def block_terminator?

@@ -61,6 +61,10 @@ module Myst
       parameters  : ParameterList,
       body        : Block
 
+    ast_node ModuleDefinition,
+      name        : String,
+      body        : Block
+
 
 
 
@@ -130,6 +134,10 @@ module Myst
     ast_node FunctionCall,
       function  : Node,
       arguments : ExpressionList
+
+    ast_node MemberAccessExpression,
+      receiver  : Node,
+      member    : Node
 
     ast_node AccessExpression,
       target  : Node,

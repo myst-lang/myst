@@ -65,15 +65,6 @@ module Myst
       io << inspect
     end
   end
-
-
-  class TObject < Value
-    property data : Scope
-
-    def initialize
-      @data = Scope.new
-    end
-  end
 end
 
 

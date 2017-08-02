@@ -229,6 +229,13 @@ module Myst
         else
           consume_identifier
         end
+      when 'm'
+        if read_char == 'o' && read_char == 'd' && read_char == 'u' && read_char == 'l' && read_char == 'e'
+          read_char
+          @current_token.type = Token::Type::MODULE
+        else
+          consume_identifier
+        end
       when 'u'
         if read_char == 'n'
           read_char

@@ -4,6 +4,7 @@ require "./ast"
 module Myst
   class Parser < Lexer
     property current_token  : Token
+    property allow_newlines : Bool = true
 
     SKIPPED_TOKENS = [
       Token::Type::WHITESPACE,
@@ -18,30 +19,25 @@ module Myst
       advance
     end
 
-
     def advance(allowed_tokens=SKIPPED_TOKENS)
-      while allowed_tokens.includes?(read_token.type)
-      end
+      allowed_tokens -= [Token::Type::NEWLINE] unless @allow_newlines
+      while allowed_tokens.includes?(read_token.type); end
       @current_token
     end
 
-    def advance_without_newline
-      advance(SKIPPED_TOKENS - [Token::Type::NEWLINE])
-    end
-
-    def accept(type : Token::Type, do_advance=true)
+    def accept(type : Token::Type)
       token = @current_token
       if token.type == type
-        advance if do_advance
+        advance
         token
       else
-        false
+        nil
       end
     end
 
-    def expect(type : Token::Type, do_advance=true)
+    def expect(type : Token::Type)
       token = @current_token
-      raise ParseError.new(token.type, type) unless accept(type, do_advance: do_advance)
+      raise ParseError.new(token, type) unless accept(type)
       token
     end
 
@@ -58,6 +54,8 @@ module Myst
 
     def parse_statement
       case current_token.type
+      when Token::Type::MODULE
+        parse_module_definition
       when Token::Type::DEF
         parse_function_definition
       when Token::Type::IF, Token::Type::UNLESS
@@ -67,6 +65,15 @@ module Myst
       else
         parse_expression
       end
+    end
+
+    def parse_module_definition
+      expect(Token::Type::MODULE)
+      name = expect(Token::Type::IDENT).value
+      body = parse_block
+      expect(Token::Type::END)
+
+      return AST::ModuleDefinition.new(name, body)
     end
 
     def parse_function_definition
@@ -82,20 +89,6 @@ module Myst
       return AST::FunctionDefinition.new(name, parameters, body)
     end
 
-    def parse_function_args
-      args = AST::ExpressionList.new([] of AST::Node)
-      if accept(Token::Type::LPAREN)
-        return args if accept(Token::Type::RPAREN)
-        args = parse_expression_list
-        expect(Token::Type::RPAREN)
-        return args
-      else
-        return args if accept(Token::Type::NEWLINE)
-        args = parse_expression_list
-        return args
-      end
-    end
-
     # Function parameters can include named arguments, defaults, type
     # restrictions, patterns, and guard clauses, while function arguments
     # can only be regular expressions. As such, the two must be parsed
@@ -103,8 +96,7 @@ module Myst
     def parse_parameter_list
       args = [] of AST::FunctionParameter
       args << parse_parameter
-      while current_token.type == Token::Type::COMMA
-        advance
+      while accept(Token::Type::COMMA)
         args << parse_parameter
       end
       return AST::ParameterList.new(args)
@@ -125,30 +117,28 @@ module Myst
     def parse_map_entry_list
       args = [] of AST::Node
       args << parse_map_entry
-      while current_token.type == Token::Type::COMMA
-        advance
+      while accept(Token::Type::COMMA)
         args << parse_map_entry
       end
       return AST::ExpressionList.new(args)
     end
 
     def parse_map_entry
-      key = current_token
-      read_token
-      case key.type
-      when Token::Type::LESS
+      if accept(Token::Type::LESS)
         key = parse_value_interpolation_expression
         expect(Token::Type::GREATER)
       else
-        key = AST::SymbolLiteral.new(key.value)
+        key = AST::SymbolLiteral.new(current_token.value)
       end
+      read_token
       expect(Token::Type::COLON)
       value = parse_expression
       return AST::MapEntryDefinition.new(key, value)
     end
 
     def parse_value_interpolation_expression
-      return AST::ValueInterpolation.new(parse_primary_expression)
+      interp = parse_primary_expression
+      return AST::ValueInterpolation.new(interp)
     end
 
     def parse_expression_list
@@ -156,8 +146,7 @@ module Myst
       args << parse_expression
       # Expressions are delimited by commas. If no comma follows an
       # expression, the list has been fully consumed.
-      while current_token.type == Token::Type::COMMA
-        advance
+      while accept(Token::Type::COMMA)
         args << parse_expression
       end
       return AST::ExpressionList.new(args)
@@ -323,78 +312,80 @@ module Myst
       end
     end
 
-    def parse_postfix_expression
-      receiver = parse_primary_expression
-      # Postfix expressions must start on the same line as the receiver.
-      advance
-      expr = case (operator = current_token).type
-      when Token::Type::LPAREN
-        args = parse_function_args
-        AST::FunctionCall.new(receiver, args)
-      when Token::Type::LBRACE
-        expect(Token::Type::LBRACE)
+    def parse_postfix_expression(receiver : AST::Node? = nil)
+      # Postfix expressions must _start_ on the same line as their receiver.
+      # After the expression has started, newlines are allowed.
+      @allow_newlines = false
+      receiver ||= parse_primary_expression
+      # After the receiver has been parsed, `current_token` must be a postfix
+      # operator to create a postfix expression. After the operator, newlines
+      # are allowed, so they can be enabled here in advance.
+      @allow_newlines = true
+
+      expr = case
+      when accept(Token::Type::POINT)
+        member = parse_primary_expression
+        return parse_postfix_expression(AST::MemberAccessExpression.new(receiver, member))
+      when accept(Token::Type::LPAREN)
+        args = parse_expression_list
+        @allow_newlines = false
+        expect(Token::Type::RPAREN)
+        return parse_postfix_expression(AST::FunctionCall.new(receiver, args))
+      when accept(Token::Type::LBRACE)
         key = parse_expression
+        @allow_newlines = false
         expect(Token::Type::RBRACE)
-        if current_token.type == Token::Type::EQUAL
-          advance
+        if accept(Token::Type::EQUAL)
           value = parse_expression
-          AST::AccessSetExpression.new(receiver, key, value)
+          return parse_postfix_expression(AST::AccessSetExpression.new(receiver, key, value))
         else
-          AST::AccessExpression.new(receiver, key)
+          return parse_postfix_expression(AST::AccessExpression.new(receiver, key))
         end
       else
-        receiver
+        # If this is _not_ a postfix expression, advance again to consume any
+        # newlines that may have been missed while assuming this was a postfix
+        # expression.
+        accept(Token::Type::NEWLINE)
+        return receiver
       end
-
-      expr
     end
 
     def parse_primary_expression
-      case current_token.type
-      when Token::Type::INTEGER
-        token = current_token
+      case
+      when token = accept(Token::Type::INTEGER)
         return AST::IntegerLiteral.new(token.value)
-      when Token::Type::FLOAT
-        token = current_token
+      when token = accept(Token::Type::FLOAT)
         return AST::FloatLiteral.new(token.value)
-      when Token::Type::STRING
-        token = current_token
+      when token = accept(Token::Type::STRING)
         return AST::StringLiteral.new(token.value)
-      when Token::Type::COLON, Token::Type::SYMBOL
-        token = current_token
+      when token = accept(Token::Type::COLON)
         return AST::SymbolLiteral.new(token.value)
-      when Token::Type::TRUE
-        token = current_token
+      when token = accept(Token::Type::SYMBOL)
+        return AST::SymbolLiteral.new(token.value)
+      when accept(Token::Type::TRUE)
         return AST::BooleanLiteral.new(true)
-      when Token::Type::FALSE
-        token = current_token
+      when accept(Token::Type::FALSE)
         return AST::BooleanLiteral.new(false)
-      when Token::Type::IDENT
-        token = current_token
+      when token = accept(Token::Type::IDENT)
         return AST::VariableReference.new(token.value)
-      when Token::Type::LESS
-        expect(Token::Type::LESS)
+      when accept(Token::Type::LESS)
         expression = parse_value_interpolation_expression
-        advance
-        expect(Token::Type::GREATER, do_advance: false)
+        expect(Token::Type::GREATER)
         return expression
-      when Token::Type::LPAREN
-        expect(Token::Type::LPAREN)
+      when accept(Token::Type::LPAREN)
         expression = parse_expression
-        expect(Token::Type::RPAREN, do_advance: false)
+        expect(Token::Type::RPAREN)
         return expression
-      when Token::Type::LBRACE
-        expect(Token::Type::LBRACE)
+      when accept(Token::Type::LBRACE)
         elements = parse_expression_list
-        expect(Token::Type::RBRACE, do_advance: false)
+        expect(Token::Type::RBRACE)
         return AST::ListLiteral.new(elements)
-      when Token::Type::LCURLY
-        expect(Token::Type::LCURLY)
+      when accept(Token::Type::LCURLY)
         elements = parse_map_entry_list
-        expect(Token::Type::RCURLY, do_advance: false)
+        expect(Token::Type::RCURLY)
         return AST::MapLiteral.new(elements)
       else
-        raise ParseError.new(current_token.type)
+        raise ParseError.new(current_token)
       end
     end
   end
