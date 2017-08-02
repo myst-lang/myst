@@ -129,15 +129,15 @@ module Myst
         expect(Token::Type::GREATER)
       else
         key = AST::SymbolLiteral.new(current_token.value)
+        read_token
       end
-      read_token
       expect(Token::Type::COLON)
       value = parse_expression
       return AST::MapEntryDefinition.new(key, value)
     end
 
     def parse_value_interpolation_expression
-      interp = parse_primary_expression
+      interp = parse_postfix_expression
       return AST::ValueInterpolation.new(interp)
     end
 
@@ -358,8 +358,6 @@ module Myst
         return AST::FloatLiteral.new(token.value)
       when token = accept(Token::Type::STRING)
         return AST::StringLiteral.new(token.value)
-      when token = accept(Token::Type::COLON)
-        return AST::SymbolLiteral.new(token.value)
       when token = accept(Token::Type::SYMBOL)
         return AST::SymbolLiteral.new(token.value)
       when accept(Token::Type::TRUE)
@@ -369,18 +367,26 @@ module Myst
       when token = accept(Token::Type::IDENT)
         return AST::VariableReference.new(token.value)
       when accept(Token::Type::LESS)
+        @allow_newlines = true
+        accept(Token::Type::NEWLINE)
         expression = parse_value_interpolation_expression
         expect(Token::Type::GREATER)
         return expression
       when accept(Token::Type::LPAREN)
+        @allow_newlines = true
+        accept(Token::Type::NEWLINE)
         expression = parse_expression
         expect(Token::Type::RPAREN)
         return expression
       when accept(Token::Type::LBRACE)
+        @allow_newlines = true
+        accept(Token::Type::NEWLINE)
         elements = parse_expression_list
         expect(Token::Type::RBRACE)
         return AST::ListLiteral.new(elements)
       when accept(Token::Type::LCURLY)
+        @allow_newlines = true
+        accept(Token::Type::NEWLINE)
         elements = parse_map_entry_list
         expect(Token::Type::RCURLY)
         return AST::MapLiteral.new(elements)

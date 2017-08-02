@@ -2,7 +2,7 @@ var = 3
 
 map = {
   a: 1,
-  bc: 10,
+  bc: var,
   "string symbol": 4/2
 }
 
@@ -23,7 +23,7 @@ interpolant = {
   <[1, 2, 3]>: :list,
   <var>: :variable,
   <func(3, 4)>: :expression,
-  <:what>: :no
+  <:what>: :no # don't do this
 }
 
 puts(interpolant[7])
