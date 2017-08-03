@@ -324,7 +324,7 @@ module Myst
 
       expr = case
       when accept(Token::Type::POINT)
-        member = parse_primary_expression
+        member = expect(Token::Type::IDENT).value
         return parse_postfix_expression(AST::MemberAccessExpression.new(receiver, member))
       when accept(Token::Type::LPAREN)
         args = parse_expression_list

@@ -1,7 +1,7 @@
 require "../value"
 
 module Myst::Kernel
-  # _write(fd, data)
+  # _mt_write(fd, data)
   #
   # Write the given value (as-is) to the given file descriptor. No conversions
   # will be done on the data; the bytes passed in are written directly to the

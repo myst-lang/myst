@@ -32,13 +32,19 @@ module Myst
     # Lists
 
     visit AST::Block do
-      node.children.each_with_index do |child, index|
-        recurse(child)
-        # All expressions push a value onto the stack. The top-level expression
-        # will return an unused value, which should be popped from the stack to
-        # avoid leaking memory. However, the last expression in a block is the
-        # implicit return value, so it should stay on the stack.
-        stack.pop() unless index == node.children.size - 1
+      # If the block has no statements, push a nil value onto the stack as an
+      # implicit return value.
+      if node.children.empty?
+        stack.push(TNil.new)
+      else
+        node.children.each_with_index do |child, index|
+          recurse(child)
+          # All expressions push a value onto the stack. The top-level expression
+          # will return an unused value, which should be popped from the stack to
+          # avoid leaking memory. However, the last expression in a block is the
+          # implicit return value, so it should stay on the stack.
+          stack.pop() unless index == node.children.size - 1
+        end
       end
     end
 
@@ -52,8 +58,17 @@ module Myst
 
     # Statements
 
+    visit AST::ModuleDefinition do
+      _module = TObject.new
+      @symbol_table[node.name] = _module
+      @symbol_table.push_scope(_module)
+      recurse(node.body)
+      @symbol_table.pop_scope
+      stack.push(_module)
+    end
+
     visit AST::FunctionDefinition do
-      functor = TFunctor.new(node)
+      functor = TFunctor.new(node, @symbol_table.current_scope)
       @symbol_table[node.name] = functor
       stack.push(functor)
     end
@@ -166,24 +181,24 @@ module Myst
     # Postfix Expressions
 
     visit AST::FunctionCall do
-      case (func = node.function)
-      when AST::VariableReference
-        functor = @symbol_table[func.name]?
-        if functor.is_a?(TFunctor)
-          recurse(node.arguments)
-          @symbol_table.push_scope(functor.scope.full_clone)
-          functor.parameters.children.reverse_each do |param|
-            @symbol_table.assign(param.name, stack.pop(), make_new: true)
-          end
-          recurse(functor.body)
-          @symbol_table.pop_scope()
-        elsif functor.is_a?(TNativeFunctor)
-          recurse(node.arguments)
-          args = node.arguments.children.map{ |arg| stack.pop() }.reverse
-          stack.push(functor.call(args))
+      recurse(node.receiver)
+      func = stack.pop
+
+      case func
+      when TFunctor
+        recurse(node.arguments)
+        @symbol_table.push_scope(func.scope.full_clone)
+        func.parameters.children.reverse_each do |param|
+          @symbol_table.assign(param.name, stack.pop(), make_new: true)
         end
+        recurse(func.body)
+        @symbol_table.pop_scope()
+      when TNativeFunctor
+        recurse(node.arguments)
+        args = node.arguments.children.map{ |arg| stack.pop() }.reverse
+        stack.push(func.call(args))
       else
-        raise "Function names currently must be identifiers."
+        raise "#{func} is not a functor value."
       end
     end
 
@@ -231,6 +246,18 @@ module Myst
       end
     end
 
+    visit AST::MemberAccessExpression do
+      recurse(node.receiver)
+      receiver = stack.pop
+
+      case receiver
+      when TObject
+        member_name = node.member
+        stack.push(receiver[member_name])
+      else
+        raise "#{receiver} does not allow member access."
+      end
+    end
 
 
     # Literals

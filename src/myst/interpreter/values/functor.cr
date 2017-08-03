@@ -8,12 +8,12 @@ module Myst
     property body       : AST::Block
     property scope      : Scope
 
-    def initialize(definition : AST::FunctionDefinition)
+    def initialize(definition : AST::FunctionDefinition, parent_scope)
       @name       = definition.name
       @parameters = definition.parameters
       @arity      = @parameters.children.size
       @body       = definition.body
-      @scope      = Scope.new(restrictive: false)
+      @scope      = Scope.new(parent: parent_scope)
 
       @scope[definition.name] = self
     end

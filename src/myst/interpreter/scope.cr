@@ -2,9 +2,8 @@ module Myst
   class Scope < Value
     property data   : Hash(String, Value)
     property parent : Scope?
-    property? restrictive : Bool
 
-    def initialize(@parent=nil, @restrictive=false, @data=Hash(String, Value).new); end
+    def initialize(@parent=nil, @data=Hash(String, Value).new); end
 
     def [](name : String)
       @data[name]
@@ -19,7 +18,7 @@ module Myst
     end
 
     def full_clone
-      new_scope = Scope.new(parent, restrictive?)
+      new_scope = Scope.new(parent)
       data.each do |key, value|
         new_scope[key] = value
       end

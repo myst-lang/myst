@@ -1,4 +1,4 @@
-module Kernel
+module IO
   STDIN  = 0
   STDOUT = 1
   STDERR = 2
@@ -9,4 +9,4 @@ module Kernel
   end
 end
 
-puts("Hello")
+IO.puts("Hello")

@@ -68,8 +68,8 @@ module Myst
     end
 
     visit AST::MemberAccessExpression do
-      io << "#{node.type_name}\n".colorize(:white)
-      recurse [node.receiver, node.member]
+      io << "#{node.type_name}|#{node.member}\n".colorize(:white)
+      recurse [node.receiver]
     end
 
     visit AST::AccessExpression do

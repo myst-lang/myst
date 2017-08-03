@@ -17,7 +17,6 @@ module Myst
       scope = current_scope
       while scope
         return scope[identifier] if scope[identifier]?
-        break if scope.restrictive?
         scope = scope.parent
       end
     end
@@ -39,7 +38,6 @@ module Myst
         scope = current_scope
         while scope
           return scope[identifier] = value if scope[identifier]?
-          break if scope.restrictive?
           scope = scope.parent
         end
 

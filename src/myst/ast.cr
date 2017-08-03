@@ -132,12 +132,12 @@ module Myst
       operand   : Node
 
     ast_node FunctionCall,
-      function  : Node,
+      receiver  : Node,
       arguments : ExpressionList
 
     ast_node MemberAccessExpression,
       receiver  : Node,
-      member    : Node
+      member    : String
 
     ast_node AccessExpression,
       target  : Node,
