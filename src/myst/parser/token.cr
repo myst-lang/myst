@@ -9,6 +9,7 @@ module Myst
       CHAR          # 'c'
       SYMBOL        # :symbol
 
+      REQUIRE       # require
       MODULE        # module
       DEF           # def
       IF            # if

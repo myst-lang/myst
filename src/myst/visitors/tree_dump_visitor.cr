@@ -14,8 +14,14 @@ module Myst
       recurse node.children
     end
 
+    visit AST::RequireStatement do
+      io << "#{node.type_name}".colorize(:red)
+      io << "/#{node.children.size}\n"
+      recurse node.children
+    end
+
     visit AST::ModuleDefinition, AST::FunctionDefinition do
-      io << "#{node.type_name}"
+      io << "#{node.type_name}".colorize(:blue).mode(:bold)
       io << "|#{node.name}\n"
       recurse node.children
     end

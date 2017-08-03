@@ -1,11 +1,11 @@
 module Myst
   class Reader
-    property source : IO::Memory
+    property source : IO
     property buffer : IO::Memory
     property pos : Int32
     property current_char : Char
 
-    def initialize(@source : IO::Memory)
+    def initialize(@source : IO)
       @buffer = IO::Memory.new
       @pos = 0
       @current_char = read_char

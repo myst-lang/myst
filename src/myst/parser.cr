@@ -12,8 +12,11 @@ module Myst
       Token::Type::COMMENT
     ]
 
+    def self.for_file(source_file)
+      new(File.open(source_file), File.expand_path(File.dirname(source_file)))
+    end
 
-    def initialize(source : IO::Memory)
+    def initialize(source : IO, working_dir : String)
       super
       # Immediately consume a token to set `current_token`.
       advance
@@ -54,6 +57,8 @@ module Myst
 
     def parse_statement
       case current_token.type
+      when Token::Type::REQUIRE
+        parse_require_statement
       when Token::Type::MODULE
         parse_module_definition
       when Token::Type::DEF
@@ -65,6 +70,12 @@ module Myst
       else
         parse_expression
       end
+    end
+
+    def parse_require_statement
+      expect(Token::Type::REQUIRE)
+      path = parse_expression
+      return AST::RequireStatement.new(path, @working_dir)
     end
 
     def parse_module_definition

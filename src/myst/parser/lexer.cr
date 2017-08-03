@@ -6,6 +6,14 @@ module Myst
   class Lexer
     # Source code being lexed.
     property reader : Reader
+    # Full path to the source file used by this lexer. For STDIN and other
+    # non-local input methods, this will be `nil`.
+    property source_file : String?
+    # Full path to the directory of the source. For STDIN and other non-local
+    # input methods, this will be the value of `pwd` where program Myst was
+    # run.
+    property working_dir : String
+
     # Current line number in the source.
     property row : Int32
     # Current column number in the source.
@@ -19,8 +27,11 @@ module Myst
     property tokens : Array(Token)
 
 
-    def initialize(source : IO::Memory)
+
+    def initialize(source : IO, source_file : String? = nil)
       @reader = Reader.new(source)
+      @source_file = source_file
+      @working_dir = source_file ? File.dirname(source_file) : `pwd`
 
       @row = 1
       @col = 0
@@ -40,12 +51,17 @@ module Myst
     # Move to a new token with a new buffer.
     def advance_token
       @current_token = Token.new
+      @current_token.location.file  = @source_file
       @current_token.location.line  = @row
       @current_token.location.col   = @col
     end
 
     def current_char : Char
       @reader.current_char
+    end
+
+    def current_location
+      @current_token.location
     end
 
     # Consume a single character from the source.
@@ -57,6 +73,7 @@ module Myst
       end
 
       @col += 1
+      @current_token.location.length += 1
 
       @reader.read_char
     end
@@ -236,6 +253,20 @@ module Myst
         else
           consume_identifier
         end
+      when 'r'
+        if read_char == 'e' && read_char == 'q' && read_char == 'u' && read_char == 'i' && read_char == 'r' && read_char == 'e'
+          read_char
+          @current_token.type = Token::Type::REQUIRE
+        else
+          consume_identifier
+        end
+      when 't'
+        if read_char == 'r' && read_char == 'u' && read_char == 'e'
+          read_char
+          @current_token.type = Token::Type::TRUE
+        else
+          consume_identifier
+        end
       when 'u'
         if read_char == 'n'
           read_char
@@ -261,13 +292,6 @@ module Myst
         else
           consume_identifier
         end
-      when 't'
-        if read_char == 'r' && read_char == 'u' && read_char == 'e'
-          read_char
-          @current_token.type = Token::Type::TRUE
-        else
-          consume_identifier
-        end
       when 'w'
         if read_char == 'h' && read_char == 'i' && read_char == 'l' && read_char == 'e'
           read_char
@@ -285,7 +309,6 @@ module Myst
       end
 
       @current_token.raw = @reader.buffer_value
-      @current_token.location.length = @current_token.raw.size
 
       @reader.buffer.clear
       @reader.buffer << current_char
@@ -304,7 +327,7 @@ module Myst
           read_char
 
           if has_decimal
-            raise SyntaxError.new(Location.new, "Unexpected second decimal in `#{@reader.buffer_value}`")
+            raise SyntaxError.new(current_location, "Unexpected second decimal in `#{@reader.buffer_value}`")
           else
             has_decimal = true
           end
@@ -312,7 +335,7 @@ module Myst
           read_char
 
           if has_decimal
-            raise SyntaxError.new(Location.new, "Unexecpted underscore after decimal point in `#{@reader.buffer_value}`")
+            raise SyntaxError.new(current_location, "Unexecpted underscore after decimal point in `#{@reader.buffer_value}`")
           end
         when .ascii_number?
           read_char
@@ -391,7 +414,7 @@ module Myst
     def consume_identifier
       # Identifiers must start with a letter or an underscore
       unless current_char.ascii_letter? || current_char == '_'
-        raise SyntaxError.new(Location.new, "Unexpected character `#{current_char}`. Current buffer: `#{@reader.buffer_value}`.")
+        raise SyntaxError.new(current_location, "Unexpected character `#{current_char}`. Current buffer: `#{@reader.buffer_value}`.")
       end
 
       loop do

@@ -65,6 +65,9 @@ module Myst
       name        : String,
       body        : Block
 
+    ast_node RequireStatement,
+      path        : Node,
+      working_dir : String
 
 
 

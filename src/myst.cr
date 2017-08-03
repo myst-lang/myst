@@ -37,22 +37,23 @@ if source_file.empty?
   exit 1
 end
 
-unless File.exists?(source_file) && File.readable?(source_file)
-  STDERR.puts("File '#{source_file}' is not available (unreadable or does not exist).")
+
+# Parse the program into an AST
+begin
+  # Enforce that the main program file is not nil. This should never be an
+  # issue, as this is the first file to be loaded, so `require` _should_ always
+  # work (if the file cannot be loaded, an error will be raised instead).
+  program = Myst::DependencyLoader.require(Myst::TString.new(source_file), nil).not_nil!
+rescue e
+  STDERR.puts(e.message)
   exit 1
 end
 
 
-# Parse the lexemes into an AST
-parser = Myst::Parser.new(IO::Memory.new(File.read(source_file)))
-program = parser.parse_block
-
-# Print the AST to the console for debugging
-visitor = Myst::TreeDumpVisitor.new
-output = IO::Memory.new
-program.accept(visitor, output)
-
 if show_ast
+  visitor = Myst::TreeDumpVisitor.new
+  output = IO::Memory.new
+  program.accept(visitor, output)
   puts output.to_s.strip
 end
 

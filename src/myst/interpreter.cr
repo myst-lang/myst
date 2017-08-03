@@ -58,6 +58,19 @@ module Myst
 
     # Statements
 
+    visit AST::RequireStatement do
+      recurse(node.path)
+      result = DependencyLoader.require(stack.pop, node.working_dir)
+
+      # If the code was loaded into a node, visit it to evalute it's contents.
+      if result.is_a?(AST::Node)
+        recurse(result)
+      else
+        # If the code was _not_ loaded, return a false value.
+        stack.push(TBoolean.new(false))
+      end
+    end
+
     visit AST::ModuleDefinition do
       _module = TObject.new
       @symbol_table[node.name] = _module
