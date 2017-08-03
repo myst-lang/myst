@@ -28,11 +28,25 @@ module Myst
   class Primitive(T) < Value
     property value : T
 
+    METHODS = Scope.new
+
+    def native_methods
+      METHODS
+    end
+
     def initialize(@value : T)
     end
 
     def initialize(other : self)
       @value = other.value
+    end
+
+    macro make_public_op(name, arity)
+      METHODS["{{name.id}}"] = TNativeFunctor.new("{{name.id}}", {{arity+1}}) do |args|
+        this = args.shift
+        next TNil.new unless this.is_a?({{@type}})
+        {{ yield }}
+      end
     end
 
     macro simple_op(operator, type, returns)
@@ -45,20 +59,9 @@ module Myst
       simple_op({{operator}}, {{type}}, returns: {{type}})
     end
 
-    def hash
-      @value.hash
-    end
-
-    def to_s
-      @value.to_s
-    end
-
-    def to_s(io : IO)
-      io << to_s
-    end
 
     def inspect
-      "<#{self.class.name}: #{to_s}>"
+      "<#{self.class.name}: #{@value}>"
     end
 
     def inspect(io : IO)

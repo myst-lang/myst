@@ -9,22 +9,23 @@ module Myst::Kernel
   #
   # Until a binary data type is defined, this method will only allow strings
   # as input.
-  def _mt_write(arguments : Array(Value))
-    if (fd_value = arguments.shift).is_a?(TInteger)
-      fd = fd_value.value
+  add_kernel_method :_mt_write, 2 do
+    _fd = args.shift
+    _data = args.shift
+
+    if _fd.is_a?(TInteger)
+      fd = _fd.value
     else
       raise "_mt_write: file descriptor must be an Integer"
     end
 
-    if (data_value = arguments.shift).is_a?(TString)
-      data = data_value.value.to_slice
+    if _data.is_a?(TString)
+      data = _data.value.to_slice
       LibC.write(fd, data.pointer(data.size).as(Void*), data.size)
     else
       raise "_mt_write: data for writing must be a String."
     end
 
-    return TNil.new.as(Value)
+    TNil.new.as(Value)
   end
-
-  add_kernel_method :_mt_write, 2
 end

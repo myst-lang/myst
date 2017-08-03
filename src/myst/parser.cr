@@ -338,9 +338,13 @@ module Myst
         member = expect(Token::Type::IDENT).value
         return parse_postfix_expression(AST::MemberAccessExpression.new(receiver, member))
       when accept(Token::Type::LPAREN)
-        args = parse_expression_list
-        @allow_newlines = false
-        expect(Token::Type::RPAREN)
+        if accept(Token::Type::RPAREN)
+          args = AST::ExpressionList.new([] of AST::Node)
+        else
+          args = parse_expression_list
+          @allow_newlines = false
+          expect(Token::Type::RPAREN)
+        end
         return parse_postfix_expression(AST::FunctionCall.new(receiver, args))
       when accept(Token::Type::LBRACE)
         key = parse_expression
@@ -392,13 +396,21 @@ module Myst
       when accept(Token::Type::LBRACE)
         @allow_newlines = true
         accept(Token::Type::NEWLINE)
-        elements = parse_expression_list
-        expect(Token::Type::RBRACE)
+        if accept(Token::Type::RBRACE)
+          elements = AST::ExpressionList.new([] of AST::Node)
+        else
+          elements = parse_expression_list
+          expect(Token::Type::RBRACE)
+        end
         return AST::ListLiteral.new(elements)
       when accept(Token::Type::LCURLY)
         @allow_newlines = true
         accept(Token::Type::NEWLINE)
-        elements = parse_map_entry_list
+        if accept(Token::Type::RCURLY)
+          elements = AST::ExpressionList.new([] of AST::Node)
+        else
+          elements = parse_map_entry_list
+        end
         expect(Token::Type::RCURLY)
         return AST::MapLiteral.new(elements)
       else

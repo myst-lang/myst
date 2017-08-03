@@ -19,5 +19,10 @@ module Myst
 
     simple_op :/, TInteger
     simple_op :/, TFloat, returns: TFloat
+
+
+    make_public_op(:to_s, 0) do
+      TString.new(this.value.to_s)
+    end
   end
 end

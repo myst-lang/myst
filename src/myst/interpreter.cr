@@ -208,8 +208,9 @@ module Myst
         @symbol_table.pop_scope()
       when TNativeFunctor
         recurse(node.arguments)
-        args = node.arguments.children.map{ |arg| stack.pop() }.reverse
-        stack.push(func.call(args))
+        args = [] of Value
+        func.arity.times{ args << stack.pop() }
+        stack.push(func.call(args.reverse))
       else
         raise "#{func} is not a functor value."
       end
@@ -262,11 +263,18 @@ module Myst
     visit AST::MemberAccessExpression do
       recurse(node.receiver)
       receiver = stack.pop
+      member_name = node.member
 
       case receiver
       when TObject
-        member_name = node.member
         stack.push(receiver[member_name])
+      when Primitive
+        if native_method = receiver.native_methods[member_name]?
+          stack.push(receiver)
+          stack.push(native_method)
+        else
+          stack.push(TNil.new)
+        end
       else
         raise "#{receiver} does not allow member access."
       end

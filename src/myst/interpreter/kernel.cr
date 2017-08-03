@@ -4,7 +4,9 @@ module Myst::Kernel
   SCOPE = Scope.new
 
   macro add_kernel_method(name, arity)
-    SCOPE["{{name.id}}"] = TNativeFunctor.new("{{name.id}}", {{arity}}, ->Kernel.{{name.id}}(Array(Value)))
+    SCOPE["{{name.id}}"] = TNativeFunctor.new("{{name.id}}", {{arity}}) do |args|
+      {{ yield }}
+    end
   end
 end
 
