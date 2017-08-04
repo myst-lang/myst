@@ -12,16 +12,16 @@ module IO
     "h" * count
   end
 
-  def write(data)
-    # `_mt_write` is a native functor for writing to file descriptors. In most
+  def puts(data)
+    # `write` is a native functor for writing to file descriptors. In most
     # cases it should be avoided, as the standard library provides `IO.puts`
     # and other interfaces around it.
-    _mt_write(STDOUT, data+"\n")
+    write(STDOUT, data+"\n")
   end
 
   module Nested
     def test(data)
-      write(data)
+      puts(data)
     end
   end
 end
@@ -31,6 +31,6 @@ end
 # This example "reads" 10 characters from the IO, then outputs them to the
 # standard output.
 text = IO.read(10)
-IO.write(text)
+IO.puts(text)
 
 IO.Nested.test(text*2)

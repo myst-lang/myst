@@ -22,7 +22,7 @@ module Myst
     end
 
     def [](identifier : String)
-      self[identifier] || raise IndexError.new
+      self[identifier]? || raise IndexError.new
     end
 
 

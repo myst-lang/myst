@@ -72,9 +72,14 @@ module Myst
     end
 
     visit AST::ModuleDefinition do
-      _module = TObject.new
-      @symbol_table[node.name] = _module
-      @symbol_table.push_scope(_module)
+      _module = begin
+        if @symbol_table[node.name]?
+          @symbol_table[node.name]
+        else
+          @symbol_table[node.name] = TObject.new
+        end
+      end
+      @symbol_table.push_scope(_module.as(Scope))
       recurse(node.body)
       @symbol_table.pop_scope
       stack.push(_module)
@@ -266,7 +271,7 @@ module Myst
       member_name = node.member
 
       case receiver
-      when TObject
+      when TObject, Scope
         stack.push(receiver[member_name])
       when Primitive
         if native_method = Kernel::PRIMITIVE_APIS[receiver.type_name][member_name]?
