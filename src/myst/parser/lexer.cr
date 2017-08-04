@@ -193,9 +193,18 @@ module Myst
         @current_token.type = Token::Type::RCURLY
         read_char
       when 'd'
-        if read_char == 'e' && read_char == 'f'
+        read_char
+        case current_char
+        when 'e'
+          if read_char == 'f'
+            read_char
+            @current_token.type = Token::Type::DEF
+          else
+            consume_identifier
+          end
+        when 'o'
           read_char
-          @current_token.type = Token::Type::DEF
+          @current_token.type = Token::Type::DO
         else
           consume_identifier
         end

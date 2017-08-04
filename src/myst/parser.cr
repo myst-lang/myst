@@ -345,7 +345,8 @@ module Myst
           @allow_newlines = false
           expect(Token::Type::RPAREN)
         end
-        return parse_postfix_expression(AST::FunctionCall.new(receiver, args))
+        block = parse_optional_block
+        return parse_postfix_expression(AST::FunctionCall.new(receiver, args, block))
       when accept(Token::Type::LBRACE)
         key = parse_expression
         @allow_newlines = false
@@ -415,6 +416,30 @@ module Myst
         return AST::MapLiteral.new(elements)
       else
         raise ParseError.new(current_token)
+      end
+    end
+
+
+    def parse_optional_block
+      if block_start = accept(Token::Type::DO)
+        block_name = "block@#{block_start.location.to_s}"
+        @allow_newlines = false
+        if accept(Token::Type::PIPE)
+          params = parse_parameter_list
+          @allow_newlines = true
+          expect(Token::Type::PIPE)
+        else
+          params = AST::ParameterList.new([] of AST::FunctionParameter)
+          @allow_newlines = true
+          advance
+        end
+
+        body = parse_block
+        expect(Token::Type::END)
+
+        return AST::FunctionDefinition.new(block_name, params, body)
+      else
+        return nil
       end
     end
   end

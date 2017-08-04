@@ -12,6 +12,7 @@ module Myst
       REQUIRE       # require
       MODULE        # module
       DEF           # def
+      DO            # do
       IF            # if
       UNLESS        # unless
       ELIF          # elif

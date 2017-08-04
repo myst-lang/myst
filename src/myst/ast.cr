@@ -136,7 +136,8 @@ module Myst
 
     ast_node FunctionCall,
       receiver  : Node,
-      arguments : ExpressionList
+      arguments : ExpressionList,
+      block     : FunctionDefinition?
 
     ast_node MemberAccessExpression,
       receiver  : Node,
