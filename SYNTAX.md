@@ -486,7 +486,7 @@ proc1 = ->(some, parameters: 1) {}
 func(with, arguments, &proc1)
 ```
 
-Unlike most other languages with blocks, the two syntaxes for blocks are semantically identically. In languages like Ruby and Crystal, blocks specified with `{}` are implicitly _right_ associative, while blocks specified with `do...end` are _left_ associative, which can lead to confusion when parenthesis are omitted, so Myst enforces a single convention to simplify mental overhead.
+Unlike most other languages with blocks, the two syntaxes for blocks are semantically identically. In languages like Ruby and Crystal, blocks specified with `{}` are implicitly _right_ associative, while blocks specified with `do...end` are _left_ associative, which can lead to confusion when parenthesis are omitted, so Myst always enforces _left associativity_ to simplify mental overhead.
 
 Providing too many or too few arguments to a function will raise a `FunctionMatchFailure`. This also applies to block arguments. A function that _explicitly_ accepts a block argument will not match if a block is not provided. Functions that _implicitly_ accept blocks _will_ match without a block provided, but will fail if the function tries to `yield`.
 
