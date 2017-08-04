@@ -6,6 +6,8 @@ module Myst
       true
     end
 
+    abstract def type_name
+
     def self.from_literal(literal : AST::Node)
       case literal
       when AST::IntegerLiteral
@@ -28,11 +30,8 @@ module Myst
   class Primitive(T) < Value
     property value : T
 
-    METHODS = Scope.new
-
-    def native_methods
-      METHODS
-    end
+    def self.type_name; T.name; end
+    def type_name; self.class.type_name; end
 
     def initialize(@value : T)
     end
@@ -41,13 +40,6 @@ module Myst
       @value = other.value
     end
 
-    macro make_public_op(name, arity)
-      METHODS["{{name.id}}"] = TNativeFunctor.new("{{name.id}}", {{arity+1}}) do |args|
-        this = args.shift
-        next TNil.new unless this.is_a?({{@type}})
-        {{ yield }}
-      end
-    end
 
     macro simple_op(operator, type, returns)
       def {{operator.id}}(other : {{type.id}}) : {{returns.id}}

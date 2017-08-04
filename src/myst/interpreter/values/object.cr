@@ -1,3 +1,8 @@
+require "../scope"
+
 module Myst
-  alias TObject = Scope
+  class TObject < Scope
+    def self.type_name; "Object"; end
+    def type_name; self.class.type_name; end
+  end
 end

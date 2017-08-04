@@ -12,6 +12,9 @@ module Myst
       end
     end
 
+    def self.type_name; "Symbol"; end
+    def type_name; self.class.type_name; end
+
 
     property name : String
 
@@ -20,14 +23,5 @@ module Myst
 
     simple_op :==, TSymbol, returns: TBoolean
     simple_op :!=, TSymbol, returns: TBoolean
-
-
-    def to_s
-      if @name.includes?(' ')
-        "\"#{@name}\""
-      else
-        @name
-      end
-    end
   end
 end

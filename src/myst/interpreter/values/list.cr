@@ -1,5 +1,8 @@
 module Myst
   class TList < Primitive(Array(Value))
+    def self.type_name; "List"; end
+    def type_name; self.class.type_name; end
+
     def initialize(@value : Array(Value)); end
 
     def initialize(other_list : TList)

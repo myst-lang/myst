@@ -269,7 +269,7 @@ module Myst
       when TObject
         stack.push(receiver[member_name])
       when Primitive
-        if native_method = receiver.native_methods[member_name]?
+        if native_method = Kernel::PRIMITIVE_APIS[receiver.type_name][member_name]?
           stack.push(receiver)
           stack.push(native_method)
         else

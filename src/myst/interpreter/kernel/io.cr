@@ -23,7 +23,7 @@ module Myst::Kernel
       data = _data.value.to_slice
       LibC.write(fd, data.pointer(data.size).as(Void*), data.size)
     else
-      raise "_mt_write: data for writing must be a String."
+      raise "_mt_write: data for writing must be a String, got #{_data.type_name}."
     end
 
     TNil.new.as(Value)

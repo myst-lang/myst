@@ -4,6 +4,9 @@ module Myst
   # special-case maps with only single-type keys (symbols or floats, in
   # particular) could help.
   class TMap < Primitive(Hash(Value, Value))
+    def self.type_name; "Map"; end
+    def type_name; self.class.type_name; end
+
     def initialize(@value : Array(Value)); end
 
     def initialize(other_map : TMap)

@@ -8,6 +8,9 @@ module Myst
     property body       : AST::Block
     property scope      : Scope
 
+    def self.type_name; "Functor"; end
+    def type_name; self.class.type_name; end
+
     def initialize(definition : AST::FunctionDefinition, parent_scope)
       @name       = definition.name
       @parameters = definition.parameters

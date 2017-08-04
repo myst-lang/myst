@@ -1,5 +1,8 @@
 module Myst
   class TInteger < Primitive(Int64)
+    def self.type_name; "Integer"; end
+    def type_name; self.class.type_name; end
+
     simple_op :==, TInteger, returns: TBoolean
     simple_op :!=, TInteger, returns: TBoolean
 
@@ -19,10 +22,5 @@ module Myst
 
     simple_op :/, TInteger
     simple_op :/, TFloat, returns: TFloat
-
-
-    make_public_op(:to_s, 0) do
-      TString.new(this.value.to_s)
-    end
   end
 end

@@ -3,6 +3,8 @@ module Myst
     property data   : Hash(String, Value)
     property parent : Scope?
 
+    def type_name; "Scope"; end
+
     def initialize(@parent=nil, @data=Hash(String, Value).new); end
 
     def [](name : String)
@@ -29,7 +31,7 @@ module Myst
     def inspect
       String.build do |str|
         str << "{"
-        str << data.map{ |key, value| "#{key}: #{value.class}"}.join(", ")
+        str << data.map{ |key, value| "#{key}: #{value.type_name}"}.join(", ")
         str << "}"
       end
     end
