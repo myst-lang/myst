@@ -405,15 +405,17 @@ This shorthand essentially acts as a guard clause of `.is_a?(T)`, where `T` is t
 
 ### Procs
 
-A `Proc` is an anonymous function that can be defined anywhere, and called like a normal function with `.call()`. Proc definitions use a stab-arrow (`->`) operator to start their definition, followed by parameter declaration in parenthesis, then by a code block (`do...end` or `{...}`).
+A `Proc` is an anonymous function that can be defined anywhere, and called like a normal function with `()`. Proc definitions use a stab-arrow (`->`) operator to start their definition, followed by parameter declarations in parenthesis, then by a code block (`do...end` or `{...}`).
 
 ```ruby
 proc1 = ->(a=1 : Integer| > 0, b : Integer) do; end
-proc1.call(1, 2)
+proc1(1, 2)
 # Procs with no arguments still include the parenthesis
 proc2 = ->() {}
-proc2.call()
+proc2()
 ```
+
+Note that this is nearly equivalent to defining a function with the standard `def` structure. The only difference is that the newly-defined function is not added to the current scope (when assigned to a variable, that variable will be assigned, but the function itself will not persist past that variable).
 
 ### Blocks as arguments
 
@@ -422,7 +424,7 @@ While a `Proc` can be assigned to a variable via simple assignment, a block is o
 ```ruby
 def func(a, b, &block)
   # The given block is captured as a Proc.
-  block.call(a)
+  block(a)
   # Yielding with an explicit block is not allowed
   yield a #=> fails to compile
 end
