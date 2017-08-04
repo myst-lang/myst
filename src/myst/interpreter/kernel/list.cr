@@ -3,6 +3,11 @@ module Myst::Kernel
     include PrimitiveAPI
 
     primitive_func(TList, :each, 0) do
+      expect_block_arg
+
+      this.value.each do |e|
+        yield_to_block(e)
+      end
       TNil.new
     end
 

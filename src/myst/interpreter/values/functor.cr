@@ -21,6 +21,11 @@ module Myst
       @scope[definition.name] = self
     end
 
+    # This method allows functors to act as if they are `AST::Node`s.
+    def accept(visitor : Visitor, io : IO)
+      @body.accept(visitor, io)
+    end
+
 
     def ==(other : TFunctor) : TBoolean
       TBoolean.new(false)

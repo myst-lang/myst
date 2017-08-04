@@ -19,8 +19,8 @@ end
 # Blocks can also take multiple arguments. A simple example is when iterating
 # a Map, where the provided block takes two arguments, the key and the value.
 {a: 1, b: 2}.each() do |key, value|
-  IO.write(0, key.to_s())
-  IO.write(0, value.to_s())
+  IO.write(0, key.to_s()+"\n")
+  IO.write(0, value.to_s()+"\n")
 end
 
 
@@ -28,7 +28,7 @@ end
 # block is defined), this allows functions do define behavior that can operate
 # on outside values.
 x = 0
-["hello", "world"].each() do |elem|
+[0, 1, 2, 3].each() do |elem|
   x = x + 1
 end
-IO.write(0, x.to_s()) #=> 2
+IO.write(0, x.to_s()) #=> 4
