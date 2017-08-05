@@ -164,7 +164,23 @@ module Myst
     end
 
     def parse_expression
-      parse_assignment_expression
+      case current_token.type
+      when Token::Type::YIELD
+        @allow_newlines = false
+        advance
+        @allow_newlines = true
+        if accept(Token::Type::LPAREN)
+          args = parse_expression_list
+          expect(Token::Type::RPAREN)
+        else
+          args = AST::ExpressionList.new([] of AST::Node)
+          accept(Token::Type::NEWLINE)
+        end
+
+        return AST::YieldExpression.new(args)
+      else
+        parse_assignment_expression
+      end
     end
 
     def parse_assignment_expression

@@ -31,4 +31,22 @@ x = 0
 [0, 1, 2, 3].each() do |elem|
   x = x + 1
 end
-IO.write(0, x.to_s()) #=> 4
+IO.write(0, x.to_s()+"\n") #=> 4
+
+
+# Defining a method that takes a block is currently only supported implicitly.
+# That is, the block argument cannot be specified in the function head and can
+# only be called using `yield`.
+def pairs(element1, element2, element3)
+  # `yield` acts exactly like any other function call, and all parameter syntax
+  # rules can be used.
+  yield(element1, element2)
+  yield(element1, element3)
+  yield(element2, element3)
+end
+
+pairs(1, 2, 3) do |elem1, elem2|
+  IO.write(0, "Pair: ")
+  IO.write(0, elem1.to_s() + ", " + elem2.to_s())
+  IO.write(0, "\n")
+end

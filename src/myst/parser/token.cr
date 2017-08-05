@@ -21,6 +21,8 @@ module Myst
       UNTIL         # until
       END           # end
 
+      YIELD         # yield
+
       TRUE          # true
       FALSE         # false
       IDENT         # [a-zA-Z][_a-zA-Z0-9]*

@@ -308,6 +308,13 @@ module Myst
         else
           consume_identifier
         end
+      when 'y'
+        if read_char == 'i' && read_char == 'e' && read_char == 'l' && read_char == 'd'
+          read_char
+          @current_token.type = Token::Type::YIELD
+        else
+          consume_identifier
+        end
       when .ascii_number?
         consume_numeric
       when .ascii_whitespace?
