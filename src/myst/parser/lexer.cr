@@ -293,7 +293,7 @@ module Myst
       read_char
       case current_char
       when '"'
-        # Quoted values allow for spaces in symbol names
+        # Quoted values allow for arbitrary symbol names
         consume_string
       when .ascii_whitespace?
       else
