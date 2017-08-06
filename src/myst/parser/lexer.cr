@@ -78,8 +78,6 @@ module Myst
       @reader.read_char
     end
 
-    # Get the next character from the source without advancing the reader.
-    # Returns a null byte if no characters remain.
     def peek_char : Char
       @reader.peek_char
     end
@@ -206,6 +204,11 @@ module Myst
         check_for_keyword
       end
 
+      finalize_token
+    end
+
+    # Assign the tokens final value and add it to the consumed tokens list.
+    def finalize_token
       @current_token.raw = @reader.buffer_value
 
       @reader.buffer.clear
@@ -214,7 +217,6 @@ module Myst
       @tokens << @current_token
       @current_token
     end
-
 
     # Attempt to lex the current buffer as a keyword. If one is found, the
     # token type will be set appropriately. If not, the token type will not
@@ -232,19 +234,15 @@ module Myst
       loop do
         case current_char
         when '.'
-          read_char
-
-          if has_decimal
-            raise SyntaxError.new(current_location, "Unexpected second decimal in `#{@reader.buffer_value}`")
-          else
+          if !has_decimal && peek_char.ascii_number?
+            read_char
             has_decimal = true
+          else
+            assign_numeric_value(has_decimal)
+            break
           end
         when '_'
           read_char
-
-          if has_decimal
-            raise SyntaxError.new(current_location, "Unexecpted underscore after decimal point in `#{@reader.buffer_value}`")
-          end
         when .ascii_number?
           read_char
         else
@@ -252,6 +250,10 @@ module Myst
         end
       end
 
+      assign_numeric_value(has_decimal)
+    end
+
+    private def assign_numeric_value(has_decimal)
       @current_token.value = @reader.buffer_value.tr("_", "")
       @current_token.type = has_decimal ? Token::Type::FLOAT : Token::Type::INTEGER
     end

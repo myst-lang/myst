@@ -29,6 +29,13 @@ def tokenize(source : String)
   parser.tokens
 end
 
+# Assert that the given source causes a syntax error
+def assert_syntax_error(source : String)
+  expect_raises(SyntaxError) do
+    tokenize(source)
+  end
+end
+
 # Assert that given source is accepted by the parser. The given source will not
 # be executed by this method.
 # Currently, this method just invokes the parser to ensure no errors occur.

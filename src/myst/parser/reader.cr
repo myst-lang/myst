@@ -23,14 +23,10 @@ module Myst
     end
 
     def peek_char : Char
-      char = @source.read_char
-      char = '\0' unless char.is_a?(Char)
-
-      if @source.size == 0
-        char
+      if (slice = @source.peek) && !slice.empty?
+        slice[0].chr
       else
-        @source.pos -= 1
-        char
+        '\0'
       end
     end
 
