@@ -67,8 +67,31 @@ module Myst
       UNKNOWN       # Unresolved type
 
 
+      def self.keywords
+        [REQUIRE, YIELD, MODULE, DEF, DO, IF, UNLESS, ELIF, ELSE, END, WHILE, UNTIL, TRUE, FALSE]
+      end
+
+      def self.keyword_map
+        {
+          "require" => REQUIRE,
+          "yield" => YIELD,
+          "module" => MODULE,
+          "def" => DEF,
+          "do" => DO,
+          "if" => IF,
+          "unless" => UNLESS,
+          "elif" => ELIF,
+          "else" => ELSE,
+          "end" => END,
+          "while" => WHILE,
+          "until" => UNTIL,
+          "true" => TRUE,
+          "false" => FALSE
+        }
+      end
+
       def keyword?
-        [MODULE, DEF, IF, UNLESS, ELIF, ELSE, END].includes?(self)
+        self.class.keywords.includes?(self)
       end
 
       def block_terminator?

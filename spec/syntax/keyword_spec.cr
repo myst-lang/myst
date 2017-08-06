@@ -1,0 +1,43 @@
+require "../spec_helper"
+
+private def assert_token_type(source, token_type)
+  token = tokenize(source).first
+  token.type.should eq(token_type)
+end
+
+
+describe "Tokenizer" do
+  keywords = {
+    "require" => Token::Type::REQUIRE,
+    "module"  => Token::Type::MODULE,
+    "def"     => Token::Type::DEF,
+    "do"      => Token::Type::DO,
+    "if"      => Token::Type::IF,
+    "unless"  => Token::Type::UNLESS,
+    "elif"    => Token::Type::ELIF,
+    "else"    => Token::Type::ELSE,
+    "while"   => Token::Type::WHILE,
+    "until"   => Token::Type::UNTIL,
+    "end"     => Token::Type::END,
+    "yield"   => Token::Type::YIELD,
+    "true"    => Token::Type::TRUE,
+    "false"   => Token::Type::FALSE
+  }
+
+  it "lexes all keywords appropriately" do
+    keywords.each do |kw, token_type|
+      assert_token_type kw, token_type
+    end
+  end
+
+  it "only matches keywords in lowercase" do
+    keywords.keys.each do |kw|
+      assert_token_type kw.upcase, Token::Type::IDENT
+    end
+  end
+
+  it "lexes keywords with lower precedence than identifiers" do
+    assert_token_type "if_true", Token::Type::IDENT
+    assert_token_type "modulef", Token::Type::IDENT
+  end
+end

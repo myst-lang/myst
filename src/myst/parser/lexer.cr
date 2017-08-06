@@ -192,136 +192,18 @@ module Myst
       when '}'
         @current_token.type = Token::Type::RCURLY
         read_char
-      when 'd'
-        read_char
-        case current_char
-        when 'e'
-          if read_char == 'f'
-            read_char
-            @current_token.type = Token::Type::DEF
-          else
-            consume_identifier
-          end
-        when 'o'
-          read_char
-          @current_token.type = Token::Type::DO
-        else
-          consume_identifier
-        end
-      when 'e'
-        read_char
-        case current_char
-        when 'l'
-          read_char
-          case current_char
-          when 'i'
-            if read_char == 'f'
-              read_char
-              @current_token.type = Token::Type::ELIF
-            else
-              consume_identifier
-            end
-          when 's'
-            if read_char == 'e'
-              read_char
-              @current_token.type = Token::Type::ELSE
-            else
-              consume_identifier
-            end
-          else
-            consume_identifier
-          end
-        when 'n'
-          if read_char == 'd'
-            read_char
-            @current_token.type = Token::Type::END
-          else
-            consume_identifier
-          end
-        else
-          consume_identifier
-        end
-      when 'f'
-        if read_char == 'a' && read_char == 'l' && read_char == 's' && read_char == 'e'
-          read_char
-          @current_token.type = Token::Type::FALSE
-        else
-          consume_identifier
-        end
-      when 'i'
-        if read_char == 'f'
-          read_char
-          @current_token.type = Token::Type::IF
-        else
-          consume_identifier
-        end
-      when 'm'
-        if read_char == 'o' && read_char == 'd' && read_char == 'u' && read_char == 'l' && read_char == 'e'
-          read_char
-          @current_token.type = Token::Type::MODULE
-        else
-          consume_identifier
-        end
-      when 'r'
-        if read_char == 'e' && read_char == 'q' && read_char == 'u' && read_char == 'i' && read_char == 'r' && read_char == 'e'
-          read_char
-          @current_token.type = Token::Type::REQUIRE
-        else
-          consume_identifier
-        end
-      when 't'
-        if read_char == 'r' && read_char == 'u' && read_char == 'e'
-          read_char
-          @current_token.type = Token::Type::TRUE
-        else
-          consume_identifier
-        end
-      when 'u'
-        if read_char == 'n'
-          read_char
-          puts current_char
-          case current_char
-          when 'l'
-            if read_char == 'e' && read_char == 's' && read_char == 's'
-              read_char
-              @current_token.type = Token::Type::UNLESS
-            else
-              consume_identifier
-            end
-          when 't'
-            if read_char == 'i' && read_char == 'l'
-              read_char
-              @current_token.type = Token::Type::UNTIL
-            else
-              consume_identifier
-            end
-          else
-            consume_identifier
-          end
-        else
-          consume_identifier
-        end
-      when 'w'
-        if read_char == 'h' && read_char == 'i' && read_char == 'l' && read_char == 'e'
-          read_char
-          @current_token.type = Token::Type::WHILE
-        else
-          consume_identifier
-        end
-      when 'y'
-        if read_char == 'i' && read_char == 'e' && read_char == 'l' && read_char == 'd'
-          read_char
-          @current_token.type = Token::Type::YIELD
-        else
-          consume_identifier
-        end
       when .ascii_number?
         consume_numeric
       when .ascii_whitespace?
         consume_whitespace
-      # Everything else should be tried as an identifier
       else
+        # Everything else should be tried as either a keyword or an identifier.
+        # First, attempt to lex an identifier, then check if the identifier as
+        # a whole constitutes a keyword. This should prevent misclassifications
+        # for sequences like `definition` and `required` that would otherwise
+        # be considered a keyword followed by an identifier.
         consume_identifier
+        check_for_keyword
       end
 
       @current_token.raw = @reader.buffer_value
@@ -331,6 +213,16 @@ module Myst
 
       @tokens << @current_token
       @current_token
+    end
+
+
+    # Attempt to lex the current buffer as a keyword. If one is found, the
+    # token type will be set appropriately. If not, the token type will not
+    # be changed.
+    def check_for_keyword
+      if kw_type = Token::Type.keyword_map[@reader.buffer_value]?
+        @current_token.type = kw_type
+      end
     end
 
 
@@ -399,7 +291,6 @@ module Myst
     def consume_symbol_or_colon
       # Read the starting colon
       read_char
-
       case current_char
       when '"'
         # Quoted values allow for spaces in symbol names

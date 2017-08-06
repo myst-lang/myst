@@ -35,7 +35,11 @@ module Myst
     end
 
     def finished? : Bool
-      pos-2 >= @source.size
+      if slice = @source.peek
+        slice.empty?
+      else
+        true
+      end
     end
 
     def buffer_value
