@@ -7,8 +7,8 @@ while x <= n
   x = x + 1
 end
 
-puts(memory[n])
+IO.puts(memory[n])
 
-puts([1, 2, 3] == [1, 2, 3])
+IO.puts([1, 2, 3] == [1, 2, 3])
 
-puts([1, 2, 3])
+IO.puts([1, 2, 3])

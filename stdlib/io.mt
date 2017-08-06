@@ -11,9 +11,3 @@ module IO
     print(arg.to_s() + "\n")
   end
 end
-
-
-IO.print("Hello, ")
-IO.puts("world")
-IO.puts(1 + 2)
-IO.write(IO.STDERR, "oops.\n")

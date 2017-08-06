@@ -3,7 +3,7 @@
 #
 # Note: the namespacing shorthand introduced later in Ruby is not yet
 # supported. Module names like `IO::Buffered` will result in a syntax error.
-module IO
+module SampleIO
   STDIN = 0
   STDOUT = 1
   STDERR = 2
@@ -16,7 +16,7 @@ module IO
     # `write` is a native functor for writing to file descriptors. In most
     # cases it should be avoided, as the standard library provides `IO.puts`
     # and other interfaces around it.
-    write(STDOUT, data+"\n")
+    IO.puts(data)
   end
 
   module Nested
@@ -30,7 +30,7 @@ end
 #
 # This example "reads" 10 characters from the IO, then outputs them to the
 # standard output.
-text = IO.read(10)
-IO.puts(text)
+text = SampleIO.read(10)
+SampleIO.puts(text)
 
-IO.Nested.test(text*2)
+SampleIO.Nested.test(text*2)

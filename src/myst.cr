@@ -60,5 +60,7 @@ end
 unless dry_run
   # Interpret the program
   interpreter = Myst::Interpreter.new
+  prelude = Myst::DependencyLoader.require(Myst::TString.new("stdlib/prelude.mt"), nil).not_nil!
+  prelude.accept(interpreter, STDOUT)
   program.accept(interpreter, STDOUT)
 end

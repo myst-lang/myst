@@ -13,14 +13,14 @@
 #   hello
 #   world
 "hello world".split().each() do |word|
-  IO.write(0, word+"\n")
+  IO.puts(word)
 end
 
 # Blocks can also take multiple arguments. A simple example is when iterating
 # a Map, where the provided block takes two arguments, the key and the value.
 {a: 1, b: 2}.each() do |key, value|
-  IO.write(0, key.to_s()+"\n")
-  IO.write(0, value.to_s()+"\n")
+  IO.puts(key.to_s())
+  IO.puts(value.to_s())
 end
 
 
@@ -31,7 +31,7 @@ x = 0
 [0, 1, 2, 3].each() do |elem|
   x = x + 1
 end
-IO.write(0, x.to_s()+"\n") #=> 4
+IO.puts(x.to_s()) #=> 4
 
 
 # Defining a method that takes a block is currently only supported implicitly.
@@ -46,7 +46,5 @@ def pairs(element1, element2, element3)
 end
 
 pairs(1, 2, 3) do |elem1, elem2|
-  IO.write(0, "Pair: ")
-  IO.write(0, elem1.to_s() + ", " + elem2.to_s())
-  IO.write(0, "\n")
+  IO.puts("Pair: " + elem1.to_s() + ", " + elem2.to_s())
 end

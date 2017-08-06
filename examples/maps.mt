@@ -8,7 +8,7 @@ map = {
 
 map["hello"] = 5
 
-puts(map[:a] + map[:"string symbol"])
+IO.puts(map[:a] + map[:"string symbol"])
 
 
 def func(a, b)

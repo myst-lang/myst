@@ -18,7 +18,7 @@ require "./examples/modules.mt"
 
 # The `modules` file loaded above defines an `IO` module, which is now
 # available in the current scope.
-IO.write("calling required module method")
+IO.puts("calling required module method")
 
 
 # Requiring a file inside of a module will import the contents into that scope.
