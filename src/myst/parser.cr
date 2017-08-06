@@ -17,7 +17,7 @@ module Myst
     end
 
     def initialize(source : IO, working_dir : String)
-      super
+      super(source, working_dir: working_dir)
       # Immediately consume a token to set `current_token`.
       advance
     end

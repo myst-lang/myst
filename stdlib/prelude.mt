@@ -10,4 +10,4 @@
 # it includes the most commonly used modules that most (if not all) programs
 # will use constantly.
 
-require "stdlib/io.mt"
+require "./io.mt"

@@ -14,7 +14,7 @@
 
 # If this example lives at `examples/require.mt`, the following `require` will
 # attempt to load `examples/modules.mt`.
-require "./examples/modules.mt"
+require "./modules.mt"
 
 # The `modules` file loaded above defines an `IO` module, which is now
 # available in the current scope.
@@ -25,7 +25,7 @@ IO.puts("calling required module method")
 # The following imports the `IO` module defined in `./modules.mt` into the
 # `Scoped` module. This is useful for preventing global namespace pollution.
 module Scoped
-  require "./examples/functions.mt"
+  require "./functions.mt"
 end
 
 Scoped.func(1, 2)
@@ -33,6 +33,6 @@ Scoped.func(1, 2)
 
 # The path for a require can also be determined by any expression that
 # evaluates to a String value.
-base_path = "./examples/"
+base_path = "./"
 path_to_load = "functions.mt"
 require base_path + path_to_load

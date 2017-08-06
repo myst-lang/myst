@@ -28,10 +28,10 @@ module Myst
 
 
 
-    def initialize(source : IO, source_file : String? = nil)
+    def initialize(source : IO, source_file : String? = nil, working_dir : String? = nil)
       @reader = Reader.new(source)
       @source_file = source_file
-      @working_dir = source_file ? File.dirname(source_file) : `pwd`
+      @working_dir = working_dir || (source_file ? File.dirname(source_file) : `pwd`)
 
       @row = 1
       @col = 0

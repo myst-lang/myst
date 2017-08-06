@@ -21,7 +21,7 @@ module Myst
           # Until Myst is distributed as a binary and meant to be installable
           # as a global command, just the execution's local path will be
           # considered as a load path.
-          ["./"]
+          [Dir.current]
         end
       end
     end
