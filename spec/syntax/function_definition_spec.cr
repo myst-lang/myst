@@ -33,7 +33,24 @@ describe "Function Definition" do
 
   it "is valid with multiple parameters" do
     assert_valid %q(
-      def some_func(param1, param2)
+      def some_func(param1, param2, param3)
+      end
+    )
+  end
+
+  it "is invalid with parameters starting on a newline" do
+    assert_invalid %q(
+      def some_func
+        (thing1, thing2)
+      end
+    )
+  end
+
+  it "is valid with parameters on multiple lines" do
+    assert_valid %q(
+      def some_func(param1,
+                    param2,
+                    param3)
       end
     )
   end

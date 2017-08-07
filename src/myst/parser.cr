@@ -448,15 +448,19 @@ module Myst
 
 
     def parse_optional_block
+      params = AST::ParameterList.new([] of AST::FunctionParameter)
+
+      @allow_newlines = false
       if block_start = accept(Token::Type::DO)
+        @allow_newlines = true
         block_name = "block@#{block_start.location.to_s}"
-        @allow_newlines = false
+
         if accept(Token::Type::PIPE)
-          params = parse_parameter_list
-          @allow_newlines = true
-          expect(Token::Type::PIPE)
+          unless accept(Token::Type::PIPE)
+            params = parse_parameter_list
+            expect(Token::Type::PIPE)
+          end
         else
-          params = AST::ParameterList.new([] of AST::FunctionParameter)
           @allow_newlines = true
           advance
         end
