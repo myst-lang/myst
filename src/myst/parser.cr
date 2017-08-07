@@ -88,11 +88,22 @@ module Myst
     end
 
     def parse_function_definition
+      @allow_newlines = false
       expect(Token::Type::DEF)
       name = expect(Token::Type::IDENT).value
-      paren_wrapped = accept(Token::Type::LPAREN)
-      parameters = parse_parameter_list
-      expect(Token::Type::RPAREN) if paren_wrapped
+      @allow_newlines = true
+
+      parameters = AST::ParameterList.new([] of AST::FunctionParameter)
+      if accept(Token::Type::LPAREN)
+        # If the next token is a closing parenthesis, don't expect arguments.
+        unless accept(Token::Type::RPAREN)
+          parameters = parse_parameter_list
+          expect(Token::Type::RPAREN)
+        end
+      else
+        expect(Token::Type::NEWLINE)
+      end
+
       body = parse_block
 
       expect(Token::Type::END)
