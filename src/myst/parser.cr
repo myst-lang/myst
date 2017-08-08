@@ -79,8 +79,11 @@ module Myst
     end
 
     def parse_module_definition
+      @allow_newlines = false
       expect(Token::Type::MODULE)
       name = expect(Token::Type::IDENT).value
+      @allow_newlines = true
+      expect(Token::Type::NEWLINE)
       body = parse_block
       expect(Token::Type::END)
 
