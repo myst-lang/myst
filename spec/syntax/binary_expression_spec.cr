@@ -6,6 +6,8 @@ private BINARY_OPERATORS = ["+", "-", "*", "/", "=", "=:", "<", "<=",
 private NON_UNARY_OPERATORS = [ "*", "/", "=", "=:", "<", "<=",
                                 "==", "!=", ">=", ">", "&&", "||"]
 
+private CHAINABLE_OPERATORS = ["*", "/", "=", "=:", "==", "!=", "&&", "||"]
+
 describe "Binary Expression" do
   {% for op in BINARY_OPERATORS %}
     it "is valid with a {{op.id}} operator between two values" do
@@ -31,6 +33,21 @@ describe "Binary Expression" do
     it "is valid with no spacing around the {{op.id}} operator" do
       assert_valid %q(
         1{{op.id}}1
+      )
+    end
+
+  {% end %}
+
+  {% for op in CHAINABLE_OPERATORS %}
+    it "{{op.id}} is chainable with itself" do
+      assert_valid %q(
+        1 {{op.id}} 1 {{op.id}} 1 {{op.id}} 1
+      )
+    end
+
+    it "{{op.id}} is chainable with other binary operators" do
+      assert_valid %q(
+        1 {{op.id}} 1 == 2 {{op.id}} 2
       )
     end
   {% end %}

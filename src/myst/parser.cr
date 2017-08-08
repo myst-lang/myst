@@ -353,7 +353,7 @@ module Myst
         @allow_newlines = false
         advance
         @allow_newlines = true
-        return AST::UnaryExpression.new(operator, parse_postfix_expression)
+        return AST::UnaryExpression.new(operator, parse_unary_expression)
       else
         return parse_postfix_expression
       end
