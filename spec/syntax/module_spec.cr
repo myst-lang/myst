@@ -10,6 +10,13 @@ describe "Function Definition" do
     end
   end
 
+  it "is invalid with spaces in the name" do
+    assert_invalid %q(
+      module Bad Name
+      end
+    )
+  end
+
   it "is valid without parentheses with no parameters" do
     assert_valid %q(
       module AModule
