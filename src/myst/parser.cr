@@ -350,7 +350,9 @@ module Myst
 
     def parse_unary_expression
       if (operator = current_token).type.unary_operator?
+        @allow_newlines = false
         advance
+        @allow_newlines = true
         return AST::UnaryExpression.new(operator, parse_postfix_expression)
       else
         return parse_postfix_expression

@@ -71,6 +71,7 @@ module Myst
         [REQUIRE, YIELD, MODULE, DEF, DO, IF, UNLESS, ELIF, ELSE, END, WHILE, UNTIL, TRUE, FALSE]
       end
 
+
       def self.keyword_map
         {
           "require" => REQUIRE,
@@ -98,12 +99,22 @@ module Myst
         [ELIF, ELSE, END].includes?(self)
       end
 
+
+      def self.unary_operators
+        [PLUS, MINUS, NOT]
+      end
+
+      def self.binary_operators
+        [ PLUS, MINUS, STAR, SLASH, EQUAL, MATCH, LESS, LESSEQUAL,
+          GREATEREQUAL, GREATER, NOTEQUAL, EQUALEQUAL, ANDAND, OROR]
+      end
+
       def unary_operator?
-        self == PLUS || self == MINUS
+        self.class.unary_operators.includes?(self)
       end
 
       def binary_operator?
-        self == PLUS || self == MINUS || self == STAR || self == SLASH
+        self.class.binary_operators.includes?(self)
       end
 
       def operator?
@@ -116,6 +127,7 @@ module Myst
     property value    : String?
     property raw      : String
     property location : Location
+
 
     def initialize(@type=Type::UNKNOWN, @value=nil, @raw="", @location=Location.new)
     end
