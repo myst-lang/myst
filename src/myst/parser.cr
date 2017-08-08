@@ -72,6 +72,10 @@ module Myst
       end
     end
 
+    def expect_delimiter
+      expect(Token::Type::NEWLINE)
+    end
+
     def parse_require_statement
       expect(Token::Type::REQUIRE)
       path = parse_expression
@@ -441,8 +445,8 @@ module Myst
           elements = AST::ExpressionList.new([] of AST::Node)
         else
           elements = parse_map_entry_list
+          expect(Token::Type::RCURLY)
         end
-        expect(Token::Type::RCURLY)
         return AST::MapLiteral.new(elements)
       else
         raise ParseError.new(current_token)
