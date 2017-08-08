@@ -99,11 +99,9 @@ describe "Access Expression" do
     end
 
     it "can follow any primary or postfix expression" do
-      assert_valid %q(list[1] = 1)
-      assert_valid %q(list[1][2] = 2)
-      assert_valid %q(make_list()[1] = 3)
-      assert_valid %q(object.list[1] = 4)
-      assert_valid %q(([1] + [2, 3])[2] = 5)
+      assert_valid %q(list[1].thing)
+      assert_valid %q(list[1](2).member)
+      assert_valid %q(object.list.element)
     end
   end
 end
