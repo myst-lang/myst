@@ -45,10 +45,12 @@ module Myst
     end
 
 
-    def parse_block : AST::Block
+    def parse_block(terminators = [] of Token::Type) : AST::Block
+      terminators << Token::Type::END
+
       block = AST::Block.new([] of AST::Node)
 
-      until @current_token.type == Token::Type::EOF || @current_token.type.block_terminator?
+      until @current_token.type == Token::Type::EOF || terminators.includes?(@current_token.type)
         block.children << parse_statement
       end
 
@@ -222,14 +224,14 @@ module Myst
       when Token::Type::IF
         advance
         condition = parse_expression
-        body = parse_block
+        body = parse_block([Token::Type::ELSE, Token::Type::ELIF])
         alternative = parse_conditional_alternative
         expect(Token::Type::END)
         return AST::IfExpression.new(condition, body, alternative)
       when Token::Type::UNLESS
         advance
         condition = parse_expression
-        body = parse_block
+        body = parse_block([Token::Type::ELSE, Token::Type::ELIF])
         alternative = parse_conditional_alternative
         expect(Token::Type::END)
         return AST::UnlessExpression.new(condition, body, alternative)
@@ -243,7 +245,7 @@ module Myst
       when Token::Type::ELIF
         advance
         condition = parse_expression
-        body = parse_block
+        body = parse_block([Token::Type::ELSE, Token::Type::ELIF])
         alternative = parse_conditional_alternative
         return AST::ElifExpression.new(condition, body, alternative)
       when Token::Type::ELSE
@@ -253,7 +255,7 @@ module Myst
       when Token::Type::END
         return nil
       else
-        raise "Unexpected token `#{current_token}`. Expected `ELSE`, `ELIF`, or `END`."
+        raise ParseError.new(current_token, [Token::Type::ELSE, Token::Type::ELIF, Token::Type::END])
       end
     end
 

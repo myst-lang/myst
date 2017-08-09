@@ -96,7 +96,7 @@ module Myst
       end
 
       def block_terminator?
-        [ELIF, ELSE, END].includes?(self)
+        self == END
       end
 
 

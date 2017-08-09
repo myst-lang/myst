@@ -14,7 +14,7 @@ module Myst
 
   class ParseError < BaseException
     property got : Token
-    property expected : Token::Type?
+    property expected : Token::Type | Array(Token::Type) | Nil
 
     def initialize(@got, @expected=nil)
       @message = if @expected

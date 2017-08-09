@@ -17,6 +17,12 @@ describe "Function Definition" do
     )
   end
 
+  it "is invalid without a closing `end` keyword" do
+    assert_invalid %q(
+      module AModule
+    )
+  end
+
   it "is valid without parentheses with no parameters" do
     assert_valid %q(
       module AModule
