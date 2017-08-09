@@ -1,6 +1,6 @@
 require "../spec_helper"
 
-describe "Function Definition" do
+describe "Function Call" do
   it "allows any valid identifier as a name" do
     ["a", "baf24", "__fa1asf_1s", "AF_AF_ASF"].each do |name|
       assert_valid %Q(#{name}())
@@ -30,6 +30,24 @@ describe "Function Definition" do
     it "is valid with block params" do
       assert_valid %q(
         some_func() do |x, y|
+        end
+      )
+    end
+
+    it "is valid with a single-expression body" do
+      assert_valid %q(
+        some_func() do |x, y|
+          1 + 1
+        end
+      )
+    end
+
+    it "is valid with a multi-expression body" do
+      assert_valid %q(
+        some_func() do |x, y|
+          a = 1
+          b = 1
+          a + b
         end
       )
     end
