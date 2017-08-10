@@ -6,6 +6,11 @@ module Myst
       true
     end
 
+    # Same as above for `same?`, primarily used for specs.
+    def same?
+      false
+    end
+
     abstract def type_name
 
     def self.from_literal(literal : AST::Node)
@@ -38,6 +43,10 @@ module Myst
 
     def initialize(other : self)
       @value = other.value
+    end
+
+    def same?(other : self)
+      @value == other.value
     end
 
 
