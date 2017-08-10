@@ -64,9 +64,11 @@ def assert_true(source)
   stack.last.should be(TBoolean.new(true))
 end
 
-def assert_false(source)
+# Similar to `assert_true`, but only check for truthiness, not that the value
+# is necessarily a boolean.
+def assert_truthy(source)
   stack = run_program(source)[2].stack
-  stack.last.should be(TBoolean.new(false))
+  stack.last.truthy?.should eq(true)
 end
 
 # Run the given source and assert that the output from running the program

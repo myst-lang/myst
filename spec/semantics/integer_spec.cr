@@ -13,6 +13,12 @@ describe "Integer Semantics" do
     assert_true %q(10 / 2 != 3 + 1)
   end
 
+  it "is always truthy" do
+    assert_truthy %q(1)
+    assert_truthy %q(0)
+    assert_truthy %q(150)
+  end
+
   it "understands addition" do
     assert_true %q(1 + 1 == 2)
     assert_true %q(4 + 10 == 14)

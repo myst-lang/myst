@@ -13,6 +13,12 @@ describe "Float Semantics" do
     assert_true %q(10.0 / 2.0 != 3.0 + 1.0)
   end
 
+  it "is always truthy" do
+    assert_truthy %q(1.0)
+    assert_truthy %q(0.0)
+    assert_truthy %q(150.252)
+  end
+
   it "understands addition" do
     assert_true %q(1.0 + 1.0 == 2.0)
     assert_true %q(4.0 + 10.0 == 14.0)
