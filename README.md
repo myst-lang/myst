@@ -15,7 +15,7 @@ At this point, there isn't much of a roadmap for Myst other than what is laid ou
 
 # Get Involved
 
-Right now, Myst is a personal project, but I have no intention of keeping it that way! If you have an idea or find a bug, [file an issue for it!](https://github.com/myst-lang/myst/issues/new) If you just want to get involved in the community, [join our Discord server!](https://discord.me/myst) Any and all help is appreciated, even if that just means trying out the language for a day!
+Right now, Myst is a personal project, but I have no intention of keeping it that way! If you have an idea or find a bug, [file an issue for it!](https://github.com/myst-lang/myst/issues/new) If you just want to get involved in the community, [join our Discord server!](https://discord.gg/8FtMeac) Any and all help is appreciated, even if that just means trying out the language for a day!
 
 
 # Contributing
