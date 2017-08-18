@@ -7,8 +7,6 @@ module Myst
     def self.type_name; "Map"; end
     def type_name; self.class.type_name; end
 
-    def initialize(@value : Array(Value)); end
-
     def initialize(other_map : TMap)
       @value = other_map.value
     end
