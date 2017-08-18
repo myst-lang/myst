@@ -1,12 +1,10 @@
-require "./visitor"
-
 module Myst
   module AST
     class Node
       property type_name : String?
 
-      def accept(visitor : Visitor, io : IO)
-        visitor.visit(self, io)
+      def accept(visitor)
+        visitor.visit(self)
       end
 
       @[AlwaysInline]
@@ -25,6 +23,7 @@ module Myst
         @type_name ||= {{@type.name}}.name.split("::").last
       end
     end
+
 
     macro ast_node(name, *properties)
       class {{name.id}} < Node

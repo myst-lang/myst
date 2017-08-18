@@ -1,13 +1,11 @@
-require "./visitor"
 require "./interpreter/*"
 
 module Myst
-  class Interpreter < Visitor
+  class Interpreter
     include Matcher
 
     property stack : StackMachine
     property symbol_table : SymbolTable
-
 
     def initialize
       @stack = StackMachine.new
@@ -15,15 +13,13 @@ module Myst
       @symbol_table.push_scope(Kernel::SCOPE)
     end
 
-    macro recurse(node, io_override=nil)
-      {% if io_override %}
-        {{node}}.accept(self, {{io_override}})
-      {% else %}
-        {{node}}.accept(self, io)
-      {% end %}
+
+    macro recurse(node)
+      {{node}}.accept(self)
     end
 
-    visit AST::Node do
+
+    def visit(node : AST::Node)
       raise "Unsupported node `#{node.class.name}`"
     end
 
@@ -31,7 +27,7 @@ module Myst
 
     # Lists
 
-    visit AST::Block do
+    def visit(node : AST::Block)
       # If the block has no statements, push a nil value onto the stack as an
       # implicit return value.
       if node.children.empty?
@@ -48,7 +44,7 @@ module Myst
       end
     end
 
-    visit AST::ExpressionList do
+    def visit(node : AST::ExpressionList)
       node.children.each do |child|
         recurse(child)
       end
@@ -58,7 +54,7 @@ module Myst
 
     # Statements
 
-    visit AST::RequireStatement do
+    def visit(node : AST::RequireStatement)
       recurse(node.path)
       result = DependencyLoader.require(stack.pop, node.working_dir)
 
@@ -71,7 +67,7 @@ module Myst
       end
     end
 
-    visit AST::ModuleDefinition do
+    def visit(node : AST::ModuleDefinition)
       _module = begin
         if @symbol_table[node.name]?
           @symbol_table[node.name]
@@ -85,7 +81,7 @@ module Myst
       stack.push(_module)
     end
 
-    visit AST::FunctionDefinition do
+    def visit(node : AST::FunctionDefinition)
       functor = TFunctor.new(node, @symbol_table.current_scope)
       @symbol_table[node.name] = functor
       stack.push(functor)
@@ -95,7 +91,7 @@ module Myst
 
     # Assignments
 
-    visit AST::SimpleAssignment do
+    def visit(node : AST::SimpleAssignment)
       recurse(node.value)
       target = node.target
 
@@ -108,9 +104,9 @@ module Myst
       end
     end
 
-    visit AST::PatternMatchingAssignment do
-      recurse(node.value, io)
-      result = match(node.pattern, stack.pop(), io)
+    def visit(node : AST::PatternMatchingAssignment)
+      recurse(node.value)
+      result = match(node.pattern, stack.pop())
       stack.push(result)
     end
 
@@ -118,7 +114,7 @@ module Myst
 
     # Conditionals
 
-    visit AST::IfExpression, AST::ElifExpression do
+    def visit(node : AST::IfExpression | AST::ElifExpression)
       recurse(node.condition.not_nil!)
       if stack.pop().truthy?
         recurse(node.body)
@@ -131,7 +127,7 @@ module Myst
       end
     end
 
-    visit AST::UnlessExpression do
+    def visit(node : AST::UnlessExpression)
       recurse(node.condition.not_nil!)
       unless stack.pop().truthy?
         recurse(node.body)
@@ -144,11 +140,11 @@ module Myst
       end
     end
 
-    visit AST::ElseExpression do
+    def visit(node : AST::ElseExpression)
       recurse(node.body)
     end
 
-    visit AST::WhileExpression do
+    def visit(node : AST::WhileExpression)
       recurse(node.condition)
       while stack.pop().truthy?
         recurse(node.body)
@@ -156,7 +152,7 @@ module Myst
       end
     end
 
-    visit AST::UntilExpression do
+    def visit(node : AST::UntilExpression)
       recurse(node.condition)
       until stack.pop().truthy?
         recurse(node.body)
@@ -167,7 +163,7 @@ module Myst
 
     # Binary Expressions
 
-    visit AST::LogicalExpression do
+    def visit(node : AST::LogicalExpression)
       case node.operator.type
       when Token::Type::ANDAND
         recurse(node.left)
@@ -184,7 +180,7 @@ module Myst
       end
     end
 
-    visit AST::EqualityExpression, AST::RelationalExpression, AST::BinaryExpression do
+    def visit(node : AST::EqualityExpression | AST::RelationalExpression | AST::BinaryExpression)
       recurse(node.left)
       recurse(node.right)
 
@@ -198,7 +194,7 @@ module Myst
 
     # Postfix Expressions
 
-    visit AST::FunctionCall do
+    def visit(node : AST::FunctionCall)
       recurse(node.receiver)
       func = stack.pop
 
@@ -221,16 +217,16 @@ module Myst
         func.arity.times{ args << stack.pop() }
         if block_def = node.block
           recurse(block_def)
-          stack.push(func.call(args.reverse, stack.pop().as(TFunctor), self, io))
+          stack.push(func.call(args.reverse, stack.pop().as(TFunctor), self))
         else
-          stack.push(func.call(args.reverse, nil, self, io))
+          stack.push(func.call(args.reverse, nil, self))
         end
       else
         raise "#{func} is not a functor value."
       end
     end
 
-    visit AST::AccessExpression do
+    def visit(node : AST::AccessExpression)
       recurse(node.target)
       recurse(node.key)
       key     = stack.pop
@@ -250,7 +246,7 @@ module Myst
       end
     end
 
-    visit AST::AccessSetExpression do
+    def visit(node : AST::AccessSetExpression)
       recurse(node.target)
       recurse(node.key)
       recurse(node.value)
@@ -274,7 +270,7 @@ module Myst
       end
     end
 
-    visit AST::MemberAccessExpression do
+    def visit(node : AST::MemberAccessExpression)
       recurse(node.receiver)
       receiver = stack.pop
       member_name = node.member
@@ -296,7 +292,7 @@ module Myst
 
 
     # Keyword Expressions
-    visit AST::YieldExpression do
+    def visit(node : AST::YieldExpression)
       # Block accessibility is limited to the current scope. If a function
       # given a block in turn calls another function that `yield`s but does not
       # provide a block, the inner function should not be able to `yield` to
@@ -318,7 +314,7 @@ module Myst
 
     # Literals
 
-    visit AST::VariableReference do
+    def visit(node : AST::VariableReference)
       if value = @symbol_table[node.name]?
         stack.push(value)
       else
@@ -326,18 +322,18 @@ module Myst
       end
     end
 
-    visit AST::IntegerLiteral, AST::FloatLiteral, AST::StringLiteral, AST::SymbolLiteral, AST::BooleanLiteral do
+    def visit(node : AST::IntegerLiteral | AST::FloatLiteral | AST::StringLiteral | AST::SymbolLiteral | AST::BooleanLiteral)
       stack.push(Value.from_literal(node))
     end
 
 
-    visit AST::ListLiteral do
+    def visit(node : AST::ListLiteral)
       recurse(node.elements)
       elements = node.elements.children.map{ |el| stack.pop }
       stack.push(TList.new(elements.reverse))
     end
 
-    visit AST::MapLiteral do
+    def visit(node : AST::MapLiteral)
       # The elements should push value pairs onto the stack:
       # STACK
       # | value2
@@ -357,12 +353,12 @@ module Myst
       stack.push(map)
     end
 
-    visit AST::MapEntryDefinition do
+    def visit(node : AST::MapEntryDefinition)
       recurse(node.key)
       recurse(node.value)
     end
 
-    visit AST::ValueInterpolation do
+    def visit(node : AST::ValueInterpolation)
       recurse(node.value)
     end
   end

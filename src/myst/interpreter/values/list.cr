@@ -15,7 +15,7 @@ module Myst
 
     def ==(other : TList) : TBoolean
       @value.each_with_index do |el, idx|
-        return TBoolean.new(false) if el != other.value[idx]
+        return TBoolean.new(false) unless el == other.value[idx]
       end
 
       TBoolean.new(true)
@@ -23,7 +23,7 @@ module Myst
 
     def !=(other : TList) : TBoolean
       @value.each_with_index do |el, idx|
-        return TBoolean.new(true) if el != other.value[idx]
+        return TBoolean.new(true) unless el == other.value[idx]
       end
 
       TBoolean.new(false)

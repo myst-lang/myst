@@ -1,5 +1,3 @@
-require "../scope"
-
 module Myst
   class TObject < Scope
     def self.type_name; "Object"; end

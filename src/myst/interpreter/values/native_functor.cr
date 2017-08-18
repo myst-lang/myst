@@ -1,6 +1,6 @@
 module Myst
   class TNativeFunctor < Value
-    alias FuncT = (Array(Value), TFunctor?, Interpreter, IO -> Value)
+    alias FuncT = (Array(Value), TFunctor?, Interpreter -> Value)
     property name           : String
     property arity          : Int32
     property impl           : FuncT
@@ -11,8 +11,8 @@ module Myst
     def initialize(@name : String, @arity : Int32, &@impl : FuncT)
     end
 
-    def call(params : Array(Value), block_argument : TFunctor?, interpreter : Interpreter, io : IO) : Value
-      impl.call(params, block_argument, interpreter, io)
+    def call(params : Array(Value), block_argument : TFunctor?, interpreter : Interpreter) : Value
+      impl.call(params, block_argument, interpreter)
     end
 
     def ==(other : TNativeFunctor) : TBoolean

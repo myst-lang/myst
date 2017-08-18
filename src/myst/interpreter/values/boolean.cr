@@ -1,3 +1,5 @@
+require "../value.cr"
+
 module Myst
   class TBoolean < Primitive(Bool)
     def self.type_name; "Boolean"; end

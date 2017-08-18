@@ -1,7 +1,9 @@
 module Myst
   class TSymbol < Primitive(UInt64)
-    SYMBOLS = {} of String => TSymbol
+    def self.type_name; "Symbol"; end
+    def type_name; self.class.type_name; end
 
+    SYMBOLS = {} of String => TSymbol
     @@next_id = 0_u64
 
     def self.new(name : String)
@@ -12,9 +14,6 @@ module Myst
       end
     end
 
-    def self.type_name; "Symbol"; end
-    def type_name; self.class.type_name; end
-
 
     property name : String
 
@@ -23,5 +22,10 @@ module Myst
 
     simple_op :==, TSymbol, returns: TBoolean
     simple_op :!=, TSymbol, returns: TBoolean
+
+
+    def inspect
+      "<#{self.class.name}: #{@name}>"
+    end
   end
 end

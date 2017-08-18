@@ -26,7 +26,7 @@ module Myst
     # Perform pattern matching for the given pattern and value.
     # If the match is successful, this function returns the value.
     # If the match fails, a `MatchError` is raised.
-    def match(pattern : AST::Node, value : Value, io : IO)
+    def match(pattern : AST::Node, value : Value)
       case pattern
       when AST::IntegerLiteral, AST::FloatLiteral, AST::StringLiteral, AST::SymbolLiteral, AST::BooleanLiteral
         return_if_equal(Value.from_literal(pattern), value)
@@ -34,12 +34,12 @@ module Myst
         bind(pattern, value)
         return value
       when AST::ValueInterpolation
-        recurse(pattern, io)
+        recurse(pattern)
         left = stack.pop()
         return_if_equal(left, value)
       when AST::ListLiteral
         if value.is_a?(TList)
-          pattern.elements.children.each_with_index{ |el, idx| match(el, value.value[idx], io) }
+          pattern.elements.children.each_with_index{ |el, idx| match(el, value.value[idx]) }
           return value
         end
       end

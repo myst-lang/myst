@@ -1,3 +1,5 @@
+require "./value.cr"
+
 module Myst
   class Scope < Value
     property data   : Hash(String, Value)

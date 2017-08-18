@@ -70,6 +70,3 @@ module Myst
     end
   end
 end
-
-
-require "./values/*"
