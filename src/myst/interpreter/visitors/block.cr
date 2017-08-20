@@ -11,7 +11,7 @@ class Myst::Interpreter
         # will return an unused value, which should be popped from the stack to
         # avoid leaking memory. However, the last expression in a block is the
         # implicit return value, so it should stay on the stack.
-        stack.pop() unless index == node.children.size - 1
+        stack.pop unless index == node.children.size - 1
       end
     end
   end

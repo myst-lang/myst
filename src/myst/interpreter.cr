@@ -15,8 +15,8 @@ module Myst
     end
 
 
-    macro recurse(node)
-      {{node}}.accept(self)
+    def recurse(node)
+      node.accept(self)
     end
 
 
