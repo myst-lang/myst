@@ -1,8 +1,22 @@
-require "../visitor"
 require "colorize"
 
 module Myst
-  class TreeDumpVisitor < Visitor
+  class TreeDumpVisitor
+    macro visit(*node_types)
+      {% for node_type in node_types %}
+        def visit(node : {{node_type}})
+          {{yield}}
+        end
+      {% end %}
+    end
+
+
+    property io : IO
+
+    def initialize(@io : IO)
+    end
+
+
     visit AST::Node do
       io.puts(node.type_name)
       io << "\n"
@@ -132,7 +146,12 @@ module Myst
     macro recurse(children)
       current_color = COLORS.sample
       {{children}}.each_with_index do |child, child_index|
-        str = String.build{ |str| child.accept(self, str) }
+        str = String.build do |str|
+          old_buf = @io
+          @io = str
+          child.accept(self)
+          @io = old_buf
+        end
 
         str.lines.each_with_index do |line, line_index|
           if line_index == 0

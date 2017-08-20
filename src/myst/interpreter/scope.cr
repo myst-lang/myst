@@ -1,3 +1,5 @@
+require "./value.cr"
+
 module Myst
   class Scope < Value
     property data   : Hash(String, Value)
@@ -25,6 +27,10 @@ module Myst
         new_scope[key] = value
       end
       new_scope
+    end
+
+    def hash
+      data.keys.sum(&.hash)
     end
 
 

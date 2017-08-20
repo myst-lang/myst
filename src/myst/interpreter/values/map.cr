@@ -7,8 +7,6 @@ module Myst
     def self.type_name; "Map"; end
     def type_name; self.class.type_name; end
 
-    def initialize(@value : Array(Value)); end
-
     def initialize(other_map : TMap)
       @value = other_map.value
     end
@@ -17,20 +15,20 @@ module Myst
       @value = {} of Value => Value
     end
 
-    def ==(other : TMap) : TBoolean
+    def ==(other : TMap)
       @value.each do |(key, value)|
-        return TBoolean.new(false) if value != other.value[key]
+        return false if value != other.value[key]
       end
 
-      TBoolean.new(true)
+      true
     end
 
-    def !=(other : TMap) : TBoolean
+    def !=(other : TMap)
       @value.each do |(key, value)|
-        return TBoolean.new(true) if value != other.value[key]
+        return true if value != other.value[key]
       end
 
-      TBoolean.new(false)
+      false
     end
 
     simple_op :+, TMap
@@ -47,6 +45,11 @@ module Myst
 
     def set(key : Value, new_value : Value)
       @value[key] = new_value
+    end
+
+    def hash
+      # Only sum hashes of keys for the sake of speed.
+      @value.keys.sum(&.hash)
     end
 
 

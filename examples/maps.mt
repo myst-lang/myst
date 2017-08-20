@@ -10,7 +10,6 @@ map["hello"] = 5
 
 IO.puts(map[:a] + map[:"string symbol"])
 
-
 def func(a, b)
   a + b
 end
@@ -26,6 +25,6 @@ interpolant = {
   <:what>: :no # don't do this
 }
 
-puts(interpolant[7])
-puts(interpolant[:what])
-puts(interpolant[[1,2,3]])
+IO.puts(interpolant[7])
+IO.puts(interpolant[:what])
+IO.puts(interpolant[[1,2,3]])

@@ -5,7 +5,7 @@ module Myst
     end
 
     macro primitive_func(type, name, arity)
-      METHODS["{{name.id}}"] = TNativeFunctor.new("{{name.id}}", {{arity+1}}) do |args, block, interpreter, io|
+      METHODS["{{name.id}}"] = TNativeFunctor.new("{{name.id}}", {{arity+1}}) do |args, block, interpreter|
         this = args.shift
         next TNil.new unless this.is_a?({{type}})
         {{ yield }}
@@ -25,7 +25,7 @@ module Myst
         interpreter.symbol_table.assign(param.name, interpreter.stack.pop(), make_new: true)
       end
 
-      block.accept(interpreter, io)
+      block.accept(interpreter)
     end
   end
 end

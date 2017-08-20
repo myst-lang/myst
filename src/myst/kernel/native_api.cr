@@ -5,7 +5,7 @@ module Myst
     end
 
     macro native_func(name, arity)
-      METHODS["{{name.id}}"] = TNativeFunctor.new("{{name.id}}", {{arity}}) do |args, block, interpreter, io|
+      METHODS["{{name.id}}"] = TNativeFunctor.new("{{name.id}}", {{arity}}) do |args, block, interpreter|
         {{ yield }}
       end
     end
@@ -23,7 +23,7 @@ module Myst
         interpreter.symbol_table.assign(param.name, interpreter.stack.pop(), make_new: true)
       end
 
-      block.accept(interpreter, io)
+      block.accept(interpreter)
     end
   end
 end

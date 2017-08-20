@@ -1,7 +1,9 @@
 module Myst
   class TSymbol < Primitive(UInt64)
-    SYMBOLS = {} of String => TSymbol
+    def self.type_name; "Symbol"; end
+    def type_name; self.class.type_name; end
 
+    SYMBOLS = {} of String => TSymbol
     @@next_id = 0_u64
 
     def self.new(name : String)
@@ -12,16 +14,31 @@ module Myst
       end
     end
 
-    def self.type_name; "Symbol"; end
-    def type_name; self.class.type_name; end
-
 
     property name : String
 
     def initialize(@value : UInt64, @name : String); end
 
 
-    simple_op :==, TSymbol, returns: TBoolean
-    simple_op :!=, TSymbol, returns: TBoolean
+    def ==(other : TSymbol)
+      self.value == other.value
+    end
+
+    def ==(other : Value)
+      false
+    end
+
+    def !=(other : Value)
+      !(self == other)
+    end
+
+    def hash
+      @value.hash
+    end
+
+
+    def inspect
+      "<#{self.type_name}: #{@name}>"
+    end
   end
 end

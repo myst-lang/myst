@@ -3,13 +3,30 @@ module Myst
     def self.type_name; "String"; end
     def type_name; self.class.type_name; end
 
-    simple_op :==, TString, returns: TBoolean
-    simple_op :!=, TString, returns: TBoolean
+    def ==(other : TString)
+      self.value == other.value
+    end
 
-    simple_op  :<, TString, returns: TBoolean
-    simple_op :<=, TString, returns: TBoolean
-    simple_op :>=, TString, returns: TBoolean
-    simple_op  :>, TString, returns: TBoolean
+    def ==(other : TSymbol)
+      self.value == other.name
+    end
+
+    def ==(other : Value)
+      false
+    end
+
+    def !=(other : Value)
+      !(self == other)
+    end
+
+    def hash
+      self.value.hash
+    end
+
+    simple_op  :<, TString
+    simple_op :<=, TString
+    simple_op :>=, TString
+    simple_op  :>, TString
 
     simple_op :+, TString
     simple_op :*, TInteger, returns: TString

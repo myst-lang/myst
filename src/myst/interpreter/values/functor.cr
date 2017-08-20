@@ -22,17 +22,21 @@ module Myst
     end
 
     # This method allows functors to act as if they are `AST::Node`s.
-    def accept(visitor : Visitor, io : IO)
-      @body.accept(visitor, io)
+    def accept(visitor)
+      @body.accept(visitor)
     end
 
 
-    def ==(other : TFunctor) : TBoolean
-      TBoolean.new(false)
+    def ==(other : TFunctor)
+      false
     end
 
-    def !=(other : TFunctor) : TBoolean
-      TBoolean.new(true)
+    def !=(other : TFunctor)
+      true
+    end
+
+    def hash
+      name.hash + arity
     end
   end
 end

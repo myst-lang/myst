@@ -7,16 +7,20 @@ module Myst
       super(nil)
     end
 
-    def ==(other : TNil) : TBoolean
-      TBoolean.new(true)
+    def ==(other : TNil)
+      true
     end
 
-    def !=(other : TNil) : TBoolean
-      TBoolean.new(false)
+    def !=(other : TNil)
+      false
     end
 
     def truthy?
       false
+    end
+
+    def hash
+      0
     end
   end
 end

@@ -1,8 +1,7 @@
 require "option_parser"
 
-require "./myst/parser"
-require "./myst/visitors/tree_dump_visitor"
-require "./myst/interpreter"
+require "./myst/**"
+include Myst
 
 source_file = ""
 show_ast = false
@@ -43,7 +42,7 @@ begin
   # Enforce that the main program file is not nil. This should never be an
   # issue, as this is the first file to be loaded, so `require` _should_ always
   # work (if the file cannot be loaded, an error will be raised instead).
-  program = Myst::DependencyLoader.require(Myst::TString.new(source_file), nil).not_nil!
+  program = DependencyLoader.require(TString.new(source_file), nil).not_nil!
 rescue e
   STDERR.puts(e.message)
   exit 1
@@ -51,16 +50,14 @@ end
 
 
 if show_ast
-  visitor = Myst::TreeDumpVisitor.new
-  output = IO::Memory.new
-  program.accept(visitor, output)
-  puts output.to_s.strip
+  visitor = TreeDumpVisitor.new(STDOUT)
+  program.accept(visitor)
 end
 
 unless dry_run
   # Interpret the program
-  interpreter = Myst::Interpreter.new
-  prelude = Myst::DependencyLoader.require(Myst::TString.new("stdlib/prelude.mt"), nil).not_nil!
-  prelude.accept(interpreter, STDOUT)
-  program.accept(interpreter, STDOUT)
+  interpreter = Interpreter.new
+  prelude = DependencyLoader.require(TString.new("stdlib/prelude.mt"), nil).not_nil!
+  prelude.accept(interpreter)
+  program.accept(interpreter)
 end
