@@ -1,5 +1,5 @@
-require "./*"
-require "../../parser/token.cr"
+require "./values/*"
+require "../parser/token.cr"
 
 
 module Myst
