@@ -20,12 +20,25 @@ module Myst
     def initialize(@value : UInt64, @name : String); end
 
 
-    simple_op :==, TSymbol, returns: TBoolean
-    simple_op :!=, TSymbol, returns: TBoolean
+    def ==(other : TSymbol)
+      self.value == other.value
+    end
+
+    def ==(other : Value)
+      false
+    end
+
+    def !=(other : Value)
+      !(self == other)
+    end
+
+    def hash
+      @value.hash
+    end
 
 
     def inspect
-      "<#{self.class.name}: #{@name}>"
+      "<#{self.type_name}: #{@name}>"
     end
   end
 end

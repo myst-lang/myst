@@ -15,12 +15,16 @@ module Myst
       impl.call(params, block_argument, interpreter)
     end
 
-    def ==(other : TNativeFunctor) : TBoolean
-      TBoolean.new(impl == other.impl)
+    def ==(other : TNativeFunctor)
+      impl == other.impl
     end
 
-    def !=(other : TNativeFunctor) : TBoolean
-      TBoolean.new(impl != other.impl)
+    def !=(other : TNativeFunctor)
+      impl != other.impl
+    end
+
+    def hash
+      name.hash + arity
     end
   end
 end

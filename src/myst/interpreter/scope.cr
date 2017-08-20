@@ -29,6 +29,10 @@ module Myst
       new_scope
     end
 
+    def hash
+      data.keys.sum(&.hash)
+    end
+
 
     def inspect
       String.build do |str|

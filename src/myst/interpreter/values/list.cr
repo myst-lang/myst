@@ -13,20 +13,20 @@ module Myst
       @value = [] of Value
     end
 
-    def ==(other : TList) : TBoolean
+    def ==(other : TList)
       @value.each_with_index do |el, idx|
-        return TBoolean.new(false) unless el == other.value[idx]
+        return false unless el == other.value[idx]
       end
 
-      TBoolean.new(true)
+      true
     end
 
-    def !=(other : TList) : TBoolean
+    def !=(other : TList)
       @value.each_with_index do |el, idx|
-        return TBoolean.new(true) unless el == other.value[idx]
+        return true unless el == other.value[idx]
       end
 
-      TBoolean.new(false)
+      false
     end
 
     simple_op :+, TList
@@ -47,6 +47,10 @@ module Myst
       end
 
       @value[index.value] = new_value
+    end
+
+    def hash
+      @value.sum(&.hash)
     end
   end
 end

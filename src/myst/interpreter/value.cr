@@ -57,12 +57,14 @@ module Myst
     end
 
     macro simple_op(operator, type)
-      simple_op({{operator}}, {{type}}, returns: {{type}})
+      def {{operator.id}}(other : {{type.id}})
+        self.value {{operator.id}} other.value
+      end
     end
 
 
     def inspect
-      "<#{self.class.name}: #{@value}>"
+      "<#{self.type_name}: #{@value}>"
     end
 
     def inspect(io : IO)

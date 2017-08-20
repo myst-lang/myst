@@ -48,13 +48,9 @@ module Myst
       {% end %}
     end
 
-    macro simple_mixed_type_op(left_type, op, right_type, returns=nil)
+    macro simple_mixed_type_op(left_type, op, right_type, returns)
       if left.is_a?({{left_type.id}}) && right.is_a?({{right_type.id}})
-        {% if returns %}
-          return {{returns.id}}.new(left {{op.id}} right)
-        {% else %}
-          return left {{op.id}} right
-        {% end %}
+        return {{returns.id}}.new(left {{op.id}} right)
       end
     end
 
@@ -113,24 +109,24 @@ module Myst
 
     def add(left, right)
       simple_op_for :+, TInteger, TFloat, TString, TList
-      simple_mixed_type_op TInteger, :+, TFloat
-      simple_mixed_type_op TFloat, :+, TInteger
+      simple_mixed_type_op TInteger, :+, TFloat, returns: TFloat
+      simple_mixed_type_op TFloat, :+, TInteger, returns: TFloat
       raise "Addition is not supported for #{left.class} and #{right.class}"
     end
 
     def subtract(left, right)
       simple_op_for :-, TInteger, TFloat, TList
-      simple_mixed_type_op TInteger, :-, TFloat
-      simple_mixed_type_op TFloat, :-, TInteger
+      simple_mixed_type_op TInteger, :-, TFloat, returns: TFloat
+      simple_mixed_type_op TFloat, :-, TInteger, returns: TFloat
       raise "Subtraction not supported for #{left.class} and #{right.class}"
     end
 
     def multiply(left, right)
       simple_op_for :*, TInteger, TFloat
-      simple_mixed_type_op TInteger, :*, TFloat
-      simple_mixed_type_op TFloat, :*, TInteger
+      simple_mixed_type_op TInteger, :*, TFloat, returns: TFloat
+      simple_mixed_type_op TFloat, :*, TInteger, returns: TFloat
 
-      simple_mixed_type_op TString, :*, TInteger
+      simple_mixed_type_op TString, :*, TInteger, returns: TString
 
       raise "Multiplication is not supported for #{left.class} and #{right.class}"
     end
@@ -138,8 +134,8 @@ module Myst
     def divide(left, right)
       simple_op_for :/, TInteger, TFloat
       # Only numeric types can be divided
-      simple_mixed_type_op TInteger, :/, TFloat
-      simple_mixed_type_op TFloat, :/, TInteger
+      simple_mixed_type_op TInteger, :/, TFloat, returns: TFloat
+      simple_mixed_type_op TFloat, :/, TInteger, returns: TFloat
       raise "Division is not supported for #{left.class} and #{right.class}"
     end
   end

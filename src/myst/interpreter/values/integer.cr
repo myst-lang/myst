@@ -3,24 +3,38 @@ module Myst
     def self.type_name; "Integer"; end
     def type_name; self.class.type_name; end
 
-    simple_op :==, TInteger, returns: TBoolean
-    simple_op :!=, TInteger, returns: TBoolean
+    def ==(other : Value)
+      if other.is_a?(TFloat) || other.is_a?(TInteger)
+        self.value == other.value
+      else
+        false
+      end
+    end
 
-    simple_op  :<, TInteger | TFloat, returns: TBoolean
-    simple_op :<=, TInteger | TFloat, returns: TBoolean
-    simple_op :>=, TInteger | TFloat, returns: TBoolean
-    simple_op  :>, TInteger | TFloat, returns: TBoolean
+    def !=(other : Value)
+      !(self == other)
+    end
+
+    def hash
+      self.value
+    end
+
+    simple_op  :<, TInteger
+    simple_op  :<, TFloat
+    simple_op :<=, TInteger
+    simple_op :<=, TFloat
+    simple_op :>=, TInteger
+    simple_op :>=, TFloat
+    simple_op  :>, TInteger
+    simple_op  :>, TFloat
 
     simple_op :+, TInteger
-    simple_op :+, TFloat, returns: TFloat
-
+    simple_op :+, TFloat
     simple_op :-, TInteger
-    simple_op :-, TFloat, returns: TFloat
-
+    simple_op :-, TFloat
     simple_op :*, TInteger
-    simple_op :*, TFloat, returns: TFloat
-
+    simple_op :*, TFloat
     simple_op :/, TInteger
-    simple_op :/, TFloat, returns: TFloat
+    simple_op :/, TFloat
   end
 end
