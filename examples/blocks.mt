@@ -18,9 +18,9 @@ end
 
 # Blocks can also take multiple arguments. A simple example is when iterating
 # a Map, where the provided block takes two arguments, the key and the value.
-{a: 1, b: 2}.each() do |key, value|
-  IO.puts(key.to_s())
-  IO.puts(value.to_s())
+{a: 1, b: "hello", c: 4}.each() do |key, value|
+  IO.puts(key)
+  IO.puts(value)
 end
 
 
@@ -31,7 +31,7 @@ x = 0
 [0, 1, 2, 3].each() do |elem|
   x = x + 1
 end
-IO.puts(x.to_s()) #=> 4
+IO.puts(x) #=> 4
 
 
 # Defining a method that takes a block is currently only supported implicitly.
