@@ -19,7 +19,7 @@ module Myst
 
     def hash
       # Taken from Java. Numbers are arbitrary primes.
-      self.value ? Int64::MAX : Int64::MIN
+      self.value ? 1231 : 1237
     end
   end
 end
