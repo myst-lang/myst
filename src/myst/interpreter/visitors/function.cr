@@ -5,6 +5,7 @@ class Myst::Interpreter
         functor.add_clause(node)
       else
         raise "Redefinition of `#{node.name}` as a function. Already defined as a #{functor.type_name}"
+      end
     else
       functor = TFunctor.new(node, @symbol_table.current_scope)
       @symbol_table[node.name] = functor
