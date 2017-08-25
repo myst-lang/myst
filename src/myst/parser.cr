@@ -139,14 +139,31 @@ module Myst
     end
 
     def parse_parameter
-      # Currently parameters can only be simple identifiers
+      # Currently parameters can only be identifiers, patterns, or a
+      # pattern-matching assignment expression.
+      #
+      # If an identifier is the first token encountered, a pattern match is not
+      # allowed (as it would be redundant; e.g. `name1 =: name2`).
       case current_token.type
       when Token::Type::IDENT
         token = current_token
         advance
-        return AST::FunctionParameter.new(token.value)
+        return AST::FunctionParameter.new(name: AST::VariableReference.new(token.value))
       else
-        raise "Advanced function parameters are not yet supported."
+        # Parameters not starting with an identifier are assumed to start with
+        # a pattern. If a pattern is given, it may optionally be followed by a
+        # name after a match operator.
+        begin
+          param = AST::FunctionParameter.new
+          param.pattern = parse_primary_expression
+          if accept(Token::Type::MATCH)
+            name = expect(Token::Type::IDENT).value
+            param.name = AST::VariableReference.new(name)
+          end
+          return param
+        rescue ParseError
+          raise "Type restrictions and guard clauses in function parameters are not yet supported."
+        end
       end
     end
 

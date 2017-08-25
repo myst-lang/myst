@@ -66,7 +66,6 @@ module Myst
     end
 
     def match_value(pattern : AST::IntegerLiteral | AST::FloatLiteral | AST::StringLiteral | AST::SymbolLiteral | AST::BooleanLiteral, value : Value)
-      puts "#{pattern.class}"
       return_if_equal(Value.from_literal(pattern), value)
       raise MatchError.new(pattern, value)
     end

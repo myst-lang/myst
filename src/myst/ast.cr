@@ -69,8 +69,26 @@ module Myst
 
     # Expressions
 
-    ast_node FunctionParameter,
-      name      : String
+    # Function Parameters are complex, so currently they are defined outside
+    # the macro for flexibility and brevity. Properties of this class
+    # correspond to their syntax like so:
+    #
+    #     pattern =: name : type | guard
+    #
+    # Currently, only `pattern` and `name` are supported.
+    class FunctionParameter
+      @pattern : Node?
+      def pattern; @pattern.not_nil!; end
+      def pattern?; @pattern; end
+      def pattern=(val : Node?); @pattern = val; end
+
+      @name : VariableReference?
+      def name; @name.not_nil!; end
+      def name?; @name; end
+      def name=(val : Node?); @name = val; end
+
+      def initialize(@pattern = nil, @name = nil); end
+    end
 
     ast_node SimpleAssignment,
       target    : Node,
