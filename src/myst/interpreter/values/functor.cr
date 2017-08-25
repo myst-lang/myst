@@ -2,10 +2,24 @@ require "../../ast"
 
 module Myst
   class TFunctor < Value
+    struct Clause
+      property parameters : Array(AST::FunctionParameter)
+      property arity      : Int32
+      property body       : AST::Block
+      property parent     : Scope
+
+      def initialize(@parameters, @body, @parent)
+        @arity = @parameters.size
+      end
+
+      # This method allows functors to act as if they are `AST::Node`s.
+      def accept(visitor)
+        @body.accept(visitor)
+      end
+    end
+
     property name       : String
-    property parameters : AST::ParameterList
-    property arity      : Int32
-    property body       : AST::Block
+    property clauses    : Array(Clause)
     property parent     : Scope
 
     def self.type_name; "Functor"; end
@@ -13,14 +27,12 @@ module Myst
 
     def initialize(definition : AST::FunctionDefinition, @parent : Scope)
       @name       = definition.name
-      @parameters = definition.parameters
-      @arity      = @parameters.children.size
-      @body       = definition.body
+      @clauses    = [] of Clause
+      add_clause(definition)
     end
 
-    # This method allows functors to act as if they are `AST::Node`s.
-    def accept(visitor)
-      @body.accept(visitor)
+    def add_clause(definition : AST::FunctionDefinition)
+      clauses << Clause.new(definition.parameters, definition.body, @parent)
     end
 
 
@@ -33,7 +45,7 @@ module Myst
     end
 
     def hash
-      name.hash + arity
+      name.hash + clauses.hash
     end
   end
 end

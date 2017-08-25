@@ -107,7 +107,7 @@ module Myst
       name = expect(Token::Type::IDENT).value
       @allow_newlines = true
 
-      parameters = AST::ParameterList.new([] of AST::FunctionParameter)
+      parameters = [] of AST::FunctionParameter
       if accept(Token::Type::LPAREN)
         # If the next token is a closing parenthesis, don't expect arguments.
         unless accept(Token::Type::RPAREN)
@@ -135,7 +135,7 @@ module Myst
       while accept(Token::Type::COMMA)
         args << parse_parameter
       end
-      return AST::ParameterList.new(args)
+      return args
     end
 
     def parse_parameter
@@ -470,7 +470,7 @@ module Myst
 
 
     def parse_optional_block
-      params = AST::ParameterList.new([] of AST::FunctionParameter)
+      params = [] of AST::FunctionParameter
 
       @allow_newlines = false
       if block_start = accept(Token::Type::DO)

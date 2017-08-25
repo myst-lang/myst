@@ -41,9 +41,9 @@ class Myst::Interpreter
 
 
     private def call_functor(args : Args)
-      func = @callable.as(TFunctor)
+      func = @callable.as(TFunctor).clauses.first
       scope = Scope.new(func.parent)
-      func.parameters.children.reverse.each_with_index do |param, idx|
+      func.parameters.reverse.each_with_index do |param, idx|
         scope[param.name] = args.positional[idx]
       end
       scope["$block_argument"] = args.block if args.block?

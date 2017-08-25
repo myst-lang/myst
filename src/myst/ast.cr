@@ -48,16 +48,13 @@ module Myst
     ast_node ExpressionList,
       children  : Array(Node)
 
-    ast_node ParameterList,
-      children  : Array(FunctionParameter)
-
 
 
     # Statements
 
     ast_node FunctionDefinition,
       name        : String,
-      parameters  : ParameterList,
+      parameters  : Array(FunctionParameter),
       body        : Block
 
     ast_node ModuleDefinition,

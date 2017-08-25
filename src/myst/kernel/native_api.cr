@@ -19,11 +19,8 @@ module Myst
         interpreter.stack.push({{arg}})
       {% end %}
 
-      block.parameters.children.reverse_each do |param|
-        interpreter.symbol_table.assign(param.name, interpreter.stack.pop(), make_new: true)
-      end
-
-      block.accept(interpreter)
+      args = Interpreter::Args.new({{args.size}}.times.map{ interpreter.stack.pop }.to_a)
+      Interpreter::Call.new(block, args, interpreter).run
     end
   end
 end
