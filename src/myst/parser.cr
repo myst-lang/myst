@@ -13,12 +13,17 @@ module Myst
     ]
 
     def self.for_file(source_file)
-      new(File.open(source_file), File.expand_path(File.dirname(source_file)))
+      new(File.open(source_file), source_file, File.expand_path(File.dirname(source_file)))
     end
 
     def initialize(source : IO, working_dir : String)
       super(source, working_dir: working_dir)
       # Immediately consume a token to set `current_token`.
+      advance
+    end
+
+    def initialize(source : IO, source_file : String, working_dir : String)
+      super(source, source_file, working_dir)
       advance
     end
 
