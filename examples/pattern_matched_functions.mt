@@ -29,18 +29,20 @@
 # for the function with the patterns `0` and `1`, respectively, for the first
 # argument. The third definition is the default case, accepting any argument
 # under the name `n`.
-def fib(0)
-  1
-end
-def fib(1)
-  1
-end
+def fib(0)  1 end
+def fib(1)  1 end
 def fib(n)
   # Nested calls to the same function are processed just the same as top-level
   # calls. They will attempt to match each clause in order, so this recursion
   # implicitly is able to handle the base cases of 0 and 1 with no explicit
   # conditional logic.
   fib(n-1) + fib(n-2)
+end
+
+# Definitions can also have different arities. In this case, passing no
+# argument will simply return 0.
+def fib
+  0
 end
 
 # The first call here matches the first definition and immediately returns 1.
@@ -50,3 +52,5 @@ IO.puts(fib(0)) #=> 1
 IO.puts(fib(1)) #=> 1
 IO.puts(fib(2)) #=> 2
 IO.puts(fib(5)) #=> 8
+IO.puts(fib())  #=> 0
+
