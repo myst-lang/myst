@@ -1,33 +1,32 @@
+require "../call.cr"
+
 class Myst::Interpreter
   def visit(node : AST::FunctionCall)
     recurse(node.receiver)
     func = stack.pop
 
+    # Collect all of the arguments given to the function
     case func
-    when TFunctor
-      recurse(node.arguments)
-      @symbol_table.push_scope(func.scope.full_clone)
-      func.parameters.children.reverse_each do |param|
-        @symbol_table.assign(param.name, stack.pop(), make_new: true)
-      end
-      if block_def = node.block
-        recurse(block_def)
-        @symbol_table.assign("$block_argument", stack.pop(), make_new: true)
-      end
-      recurse(func.body)
-      @symbol_table.pop_scope()
-    when TNativeFunctor
-      recurse(node.arguments)
-      args = [] of Value
-      func.arity.times{ args << stack.pop() }
-      if block_def = node.block
-        recurse(block_def)
-        stack.push(func.call(args.reverse, stack.pop().as(TFunctor), self))
-      else
-        stack.push(func.call(args.reverse, nil, self))
-      end
+    when Call::CallableT
+      args = Args.new(get_inline_args(node), get_block_arg(node))
+      Call.new(func, args, self).run
     else
       raise "#{func} is not a functor value."
+    end
+  end
+
+
+  private def get_inline_args(node) : Array(Value)
+    recurse(node.arguments)
+    # Shorthand way of popping the same number of arguments as were given at
+    # the call site and maintaining their order.
+    node.arguments.children.map{ stack.pop }.reverse
+  end
+
+  private def get_block_arg(node) : TFunctor?
+    if block_def = node.block
+      recurse(block_def)
+      return stack.pop.as(TFunctor)
     end
   end
 end

@@ -56,7 +56,7 @@ class Myst::Interpreter
         stack.push(receiver)
         stack.push(native_method)
       else
-        stack.push(TNil.new)
+        raise "Unknown method call `#{member_name}` for primitive value `#{receiver.type_name}`."
       end
     else
       raise "#{receiver} does not allow member access."

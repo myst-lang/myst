@@ -19,6 +19,14 @@ module Myst
       node.accept(self)
     end
 
+    def push_scope(scope=Scope.new)
+      @symbol_table.push_scope(scope)
+    end
+
+    def pop_scope
+      @symbol_table.pop_scope
+    end
+
 
     def visit(node : AST::Node)
       raise "Unsupported node `#{node.class.name}`"

@@ -4,6 +4,7 @@ module Myst
     property name           : String
     property arity          : Int32
     property impl           : FuncT
+    property parent         : Scope?
 
     def self.type_name; "NativeFunctor"; end
     def type_name; self.class.type_name; end
@@ -11,8 +12,8 @@ module Myst
     def initialize(@name : String, @arity : Int32, &@impl : FuncT)
     end
 
-    def call(params : Array(Value), block_argument : TFunctor?, interpreter : Interpreter) : Value
-      impl.call(params, block_argument, interpreter)
+    def call(args : Array(Value), block_argument : TFunctor?, interpreter : Interpreter) : Value
+      impl.call(args, block_argument, interpreter)
     end
 
     def ==(other : TNativeFunctor)

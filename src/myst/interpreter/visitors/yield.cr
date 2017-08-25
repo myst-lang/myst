@@ -1,3 +1,5 @@
+require "../call.cr"
+
 class Myst::Interpreter
   def visit(node : AST::YieldExpression)
     # Block accessibility is limited to the current scope. If a function
@@ -7,12 +9,8 @@ class Myst::Interpreter
     # inner function expected a block argument.
     if block = @symbol_table.current_scope["$block_argument"]?.as(TFunctor)
       recurse(node.arguments)
-      @symbol_table.push_scope(block.scope.full_clone)
-      block.parameters.children.reverse_each do |param|
-        @symbol_table.assign(param.name, stack.pop(), make_new: true)
-      end
-      recurse(block.body)
-      @symbol_table.pop_scope()
+      args = Args.new(node.arguments.children.map{ stack.pop }.reverse)
+      Call.new(block, args, self).run
     else
       raise "Attempted to yield when no block was given."
     end
