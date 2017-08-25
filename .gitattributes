@@ -1,0 +1,4 @@
+# For now, treat Myst source files with Ruby syntax highlighting.
+# They are similar enough that this should be fairly accurate.
+# Anything is better than Mathetmatica, though.
+*.mt linguist-language=Ruby
