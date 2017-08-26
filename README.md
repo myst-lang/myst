@@ -31,6 +31,7 @@ The following is a roadmap for a `v0.1.0` of Myst. It is _not necessarily_ compr
   - [ ] `return`
   - [ ] `next`
   - [X] `require`
+  - [ ] `case`/`cond` for sequential conditions
 - [ ] Functions/blocks
   - [X] positional parameters
   - [X] pattern matches
