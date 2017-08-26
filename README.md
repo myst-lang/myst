@@ -10,7 +10,53 @@ More goals are sure to come as the language develops, but these are the driving 
 
 # Roadmap
 
-At this point, there isn't much of a roadmap for Myst other than what is laid out in the [Syntax document](SYNTAX.md). Once a working language with basic features (simple functions, control flow, all value types) is ready, a more defined roadmap of the remaining features will be made.
+The following is a roadmap for a `v0.1.0` of Myst. It is _not necessarily_ comprehensive of the original [Syntax document](SYNTAX.md), but should provide the basis of a usable scripting language. As time goes on, this roadmap may be further refined and modified.
+
+- [X] Values
+  - [X] booleans
+  - [X] floats
+  - [X] functors
+  - [X] integers
+  - [X] lists
+  - [X] maps
+  - [X] nativefunctors
+  - [X] nils
+  - [X] strings
+  - [X] symbols
+- [ ] Flow control and dependency loading
+  - [X] `if`/`unless`/`elif`/`else`
+  - [X] `while`/`until`
+  - [ ] `break`
+  - [X] `yield`
+  - [ ] `return`
+  - [ ] `next`
+  - [X] `require`
+- [ ] Functions/blocks
+  - [X] positional parameters
+  - [X] pattern matches
+  - [X] multiple definitions/clause-based lookup
+  - [ ] type restrictions
+  - [ ] positional splat collectors
+  - [ ] explicit block parameters
+- [ ] Modules
+  - [X] reopening
+  - [X] nested definitions
+  - [ ] `include` other modules
+- [ ] Decomposition/pattern matching
+  - [X] variable bindings
+  - [X] value interpolations
+  - [X] variable re-use (via interpolation)
+  - [ ] splat collectors
+  - [X] list patterns
+  - [ ] map patterns
+- [ ] Standard Library
+  - [ ] IO
+  - [ ] File
+  - [ ] Dir
+  - [ ] Math
+  - [ ] Enumerable
+
+The standard library will likely expand before a `0.1.0` is released. Another goal for `0.1.0` is 60+% test coverage, primarily at a feature test level.
 
 
 # Get Involved
