@@ -13,9 +13,6 @@ module SampleIO
   end
 
   def puts(data)
-    # `write` is a native functor for writing to file descriptors. In most
-    # cases it should be avoided, as the standard library provides `IO.puts`
-    # and other interfaces around it.
     IO.puts(data)
   end
 

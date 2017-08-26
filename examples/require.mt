@@ -16,9 +16,9 @@
 # attempt to load `examples/modules.mt`.
 require "./modules.mt"
 
-# The `modules` file loaded above defines an `IO` module, which is now
+# The `modules` file loaded above defines a `SampleIO` module, which is now
 # available in the current scope.
-IO.puts("calling required module method")
+SampleIO.puts("calling required module method")
 
 
 # Requiring a file inside of a module will import the contents into that scope.
@@ -28,7 +28,7 @@ module Scoped
   require "./functions.mt"
 end
 
-Scoped.func(1, 2)
+Scoped.add(1, 2)
 
 
 # The path for a require can also be determined by any expression that
