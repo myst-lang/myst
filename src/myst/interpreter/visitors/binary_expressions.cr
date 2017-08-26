@@ -27,4 +27,16 @@ class Myst::Interpreter
 
     stack.push(Calculator.do(node.operator.type, a, b))
   end
+
+  def visit(node : AST::UnaryExpression)
+    recurse(node.operand)
+    operand = stack.pop
+
+    case node.operator.type
+    when Token::Type::NOT
+      stack.push(TBoolean.new(!operand.truthy?))
+    else
+      raise "`#{node.operator}` is not yet supported as a unary expression."
+    end
+  end
 end

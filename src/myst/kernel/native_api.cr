@@ -10,6 +10,10 @@ module Myst
       end
     end
 
+    macro native_func(name, arity, method)
+      METHODS["{{name.id}}"] = TNativeFunctor.new("{{name.id}}", {{arity}}, &->{{method}}(Array(Value), TFunctor?, Interpreter))
+    end
+
     macro expect_block_arg(block="block")
       next TNil.new unless block
     end
