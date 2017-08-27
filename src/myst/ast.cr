@@ -75,7 +75,9 @@ module Myst
     #
     #     pattern =: name : type | guard
     #
-    # Currently, only `pattern` and `name` are supported.
+    # Currently, only `pattern` and `name` are supported. `name` may also be
+    # prefixed with an asterisk to indicate the splat collector. In this case
+    # the value of the parameter will always be a list of zero or more values.
     class FunctionParameter
       @pattern : Node?
       def pattern; @pattern.not_nil!; end
@@ -87,7 +89,10 @@ module Myst
       def name?; @name; end
       def name=(val : Node?); @name = val; end
 
-      def initialize(@pattern = nil, @name = nil); end
+      # True if this parameter should be used as the splat collector.
+      property? splat : Bool
+
+      def initialize(@pattern = nil, @name = nil, @splat = false); end
     end
 
     ast_node SimpleAssignment,

@@ -146,9 +146,14 @@ module Myst
       # allowed (as it would be redundant; e.g. `name1 =: name2`).
       case current_token.type
       when Token::Type::IDENT
-        token = current_token
+        name = current_token
         advance
-        return AST::FunctionParameter.new(name: AST::VariableReference.new(token.value))
+        return AST::FunctionParameter.new(name: AST::VariableReference.new(name.value))
+      when Token::Type::STAR
+        advance
+        name = current_token
+        advance
+        return AST::FunctionParameter.new(name: AST::VariableReference.new(name.value), splat: true)
       else
         # Parameters not starting with an identifier are assumed to start with
         # a pattern. If a pattern is given, it may optionally be followed by a

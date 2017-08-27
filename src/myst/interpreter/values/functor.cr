@@ -2,21 +2,60 @@ require "../../ast"
 
 module Myst
   class TFunctor < Value
-    struct Clause
-      property parameters : Array(AST::FunctionParameter)
-      property arity      : Int32
-      property body       : AST::Block
-      property parent     : Scope
+    struct ParameterSet
+      alias ParamT = AST::FunctionParameter
+      property  left  : Array(ParamT)
+      property  splat : ParamT?
+      property  right : Array(ParamT)
 
-      def initialize(@parameters, @body, @parent)
-        @arity = @parameters.size
+      def initialize(@left = [] of ParamT, @splat = nil, @right = [] of ParamT); end
+    end
+
+    struct Clause
+      property  parameters  : ParameterSet
+      property  arity       : Int32
+      property  body        : AST::Block
+      property  parent      : Scope
+
+      def initialize(params, @body, @parent)
+        @parameters = chunk_parameters(params)
+        @arity = params.size
+      end
+
+      # Return a 3-tuple representing the positional parameters for this
+      # clause, split by the splat parameter. If there is no splat, all
+      # parameters will end up in `left`.
+      private def chunk_parameters(params)
+        left  = [] of AST::FunctionParameter
+        splat = nil
+        right = [] of AST::FunctionParameter
+
+        past_splat = false
+        params.each do |param|
+          if param.splat?
+            if past_splat
+              raise "Multiple splat collectors in function definition"
+            else
+              splat = param
+              past_splat = true
+            end
+          elsif past_splat
+            right.unshift(param)
+          else
+            left.push(param)
+          end
+        end
+
+        return ParameterSet.new(left: left, splat: splat, right: right)
       end
 
       # This method allows functors to act as if they are `AST::Node`s.
       def accept(visitor)
         @body.accept(visitor)
       end
+
     end
+
 
     property name       : String
     property clauses    : Array(Clause)

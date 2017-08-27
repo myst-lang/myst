@@ -3,7 +3,9 @@ module Myst
     def self.type_name; "List"; end
     def type_name; self.class.type_name; end
 
-    def initialize(@value : Array(Value)); end
+    def initialize(value : Array(Value))
+      @value = value.dup
+    end
 
     def initialize(other_list : TList)
       @value = other_list.value

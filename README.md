@@ -37,7 +37,7 @@ The following is a roadmap for a `v0.1.0` of Myst. It is _not necessarily_ compr
   - [X] pattern matches
   - [X] multiple definitions/clause-based lookup
   - [ ] type restrictions
-  - [ ] positional splat collectors
+  - [X] positional splat collectors
   - [ ] explicit block parameters
 - [ ] Modules
   - [X] reopening
