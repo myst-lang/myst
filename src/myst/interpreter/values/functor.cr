@@ -7,8 +7,9 @@ module Myst
       property  left  : Array(ParamT)
       property  splat : ParamT?
       property  right : Array(ParamT)
+      property  block : ParamT?
 
-      def initialize(@left = [] of ParamT, @splat = nil, @right = [] of ParamT); end
+      def initialize(@left = [] of ParamT, @splat = nil, @right = [] of ParamT, @block = nil); end
     end
 
     struct Clause
@@ -29,9 +30,15 @@ module Myst
         left  = [] of AST::FunctionParameter
         splat = nil
         right = [] of AST::FunctionParameter
+        block = nil
 
         past_splat = false
         params.each do |param|
+          if param.block?
+            block = param
+            next
+          end
+
           if param.splat?
             if past_splat
               raise "Multiple splat collectors in function definition"
@@ -46,7 +53,7 @@ module Myst
           end
         end
 
-        return ParameterSet.new(left: left, splat: splat, right: right)
+        return ParameterSet.new(left: left, splat: splat, right: right, block: block)
       end
 
       # This method allows functors to act as if they are `AST::Node`s.

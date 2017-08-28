@@ -91,8 +91,10 @@ module Myst
 
       # True if this parameter should be used as the splat collector.
       property? splat : Bool
+      # True if this parameter should be used as the block parameter.
+      property? block : Bool
 
-      def initialize(@pattern = nil, @name = nil, @splat = false); end
+      def initialize(@pattern = nil, @name = nil, @splat = false, @block = false); end
     end
 
     ast_node SimpleAssignment,

@@ -18,7 +18,7 @@ end
 
 # Blocks can also take multiple arguments. A simple example is when iterating
 # a Map, where the provided block takes two arguments, the key and the value.
-{a: 1, b: "hello", c: 4}.each() do |key, value|
+{a: 1, b: "hello", c: 5}.each() do |key, value|
   IO.puts(key)
   IO.puts(value)
 end
@@ -34,15 +34,14 @@ end
 IO.puts(x) #=> 4
 
 
-# Defining a method that takes a block is currently only supported implicitly.
-# That is, the block argument cannot be specified in the function head and can
-# only be called using `yield`.
-def pairs(element1, element2, element3)
-  # `yield` acts exactly like any other function call, and all parameter syntax
-  # rules can be used.
-  yield(element1, element2)
-  yield(element1, element3)
-  yield(element2, element3)
+# Defining a function that accepts a block is done by adding an extra parameter
+# at the end of the function head with an ampersand as a prefix. The block
+# parameter can be named with any valid identifier, and will be available in
+# the function scope for calling like any normal function.
+def pairs(element1, element2, element3, &block)
+  block(element1, element2)
+  block(element1, element3)
+  block(element2, element3)
 end
 
 pairs(1, 2, 3) do |elem1, elem2|

@@ -154,6 +154,11 @@ module Myst
         name = current_token
         advance
         return AST::FunctionParameter.new(name: AST::VariableReference.new(name.value), splat: true)
+      when Token::Type::AMPERSAND
+        advance
+        name = current_token
+        advance
+        return AST::FunctionParameter.new(name: AST::VariableReference.new(name.value), block: true)
       else
         # Parameters not starting with an identifier are assumed to start with
         # a pattern. If a pattern is given, it may optionally be followed by a

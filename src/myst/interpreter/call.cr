@@ -102,10 +102,14 @@ class Myst::Interpreter
           # The remaining arguments get collected into the splat.
           if clause.parameters.splat
             fill_splat(clause.parameters.splat, positionals)
-            positionals.clear
+          else
+            raise "Parameter count not matched" unless positionals.empty?
           end
 
-          raise "Parameter count not matched" unless positionals.empty?
+          if block = clause.parameters.block
+            raise "Clause expects block" unless args.block?
+            @matcher.bind_variable(block.name, args.block)
+          end
 
           # Assign the implicit block argument. When block arguments are made
           # explicit in the future, this will be done conditionally.
@@ -129,7 +133,7 @@ class Myst::Interpreter
 
     private def fill_splat(param : AST::FunctionParameter, args : Array(Value))
       # If the splat is unnamed, it's value does not need to be set.
-      @matcher.match(param.name, TList.new(args)) if param.name?
+      @matcher.bind_variable(param.name, TList.new(args)) if param.name?
     end
     # If no splat is given, nothing should happen
     private def fill_splat(param : Nil, args : Array(Value)); end
