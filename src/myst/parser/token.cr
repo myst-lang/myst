@@ -21,8 +21,6 @@ module Myst
       UNTIL         # until
       END           # end
 
-      YIELD         # yield
-
       TRUE          # true
       FALSE         # false
       IDENT         # [a-zA-Z][_a-zA-Z0-9]*
@@ -68,14 +66,13 @@ module Myst
 
 
       def self.keywords
-        [REQUIRE, YIELD, MODULE, DEF, DO, IF, UNLESS, ELIF, ELSE, END, WHILE, UNTIL, TRUE, FALSE]
+        [REQUIRE, MODULE, DEF, DO, IF, UNLESS, ELIF, ELSE, END, WHILE, UNTIL, TRUE, FALSE]
       end
 
 
       def self.keyword_map
         {
           "require" => REQUIRE,
-          "yield" => YIELD,
           "module" => MODULE,
           "def" => DEF,
           "do" => DO,

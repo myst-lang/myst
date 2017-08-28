@@ -111,9 +111,6 @@ class Myst::Interpreter
             @matcher.bind_variable(block.name, args.block)
           end
 
-          # Assign the implicit block argument. When block arguments are made
-          # explicit in the future, this will be done conditionally.
-          scope["$block_argument"] = args.block if args.block?
           # Getting here means the match was fully successful, so return the
           # clause, keeping the temporary scope on the table for later use.
           return clause

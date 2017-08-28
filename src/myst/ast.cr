@@ -182,13 +182,6 @@ module Myst
 
 
 
-    # Keyword Expressions
-
-    ast_node YieldExpression,
-      arguments : ExpressionList
-
-
-
     # Literals
 
     ast_node VariableReference,

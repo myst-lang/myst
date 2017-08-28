@@ -27,7 +27,6 @@ The following is a roadmap for a `v0.1.0` of Myst. It is _not necessarily_ compr
   - [X] `if`/`unless`/`elif`/`else`
   - [X] `while`/`until`
   - [ ] `break`
-  - [X] `yield`
   - [ ] `return`
   - [ ] `next`
   - [X] `require`
@@ -38,7 +37,7 @@ The following is a roadmap for a `v0.1.0` of Myst. It is _not necessarily_ compr
   - [X] multiple definitions/clause-based lookup
   - [ ] type restrictions
   - [X] positional splat collectors
-  - [ ] explicit block parameters
+  - [X] explicit block parameters
 - [ ] Modules
   - [X] reopening
   - [X] nested definitions

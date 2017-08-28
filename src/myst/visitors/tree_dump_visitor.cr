@@ -113,12 +113,6 @@ module Myst
     end
 
 
-    visit AST::YieldExpression do
-      io << "#{node.type_name}\n".colorize(:magenta)
-      recurse [node.arguments]
-    end
-
-
 
     visit AST::VariableReference do
       io << "#{node.type_name}".colorize(:dark_gray)

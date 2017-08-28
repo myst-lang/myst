@@ -48,7 +48,6 @@ unless
 until
 while
 with
-yield
 ```
 
 
@@ -304,9 +303,6 @@ return a, b
 # break from the current scope with an optional value
 break
 break a, b
-# yield to a block argument given to the current scope with an optional value
-yield
-yield a, b
 # skip the rest of the current scope, where the scope may execute again
 next
 next a, b
@@ -419,27 +415,16 @@ Note that this is nearly equivalent to defining a function with the standard `de
 
 ### Blocks as arguments
 
-While a `Proc` can be assigned to a variable via simple assignment, a block is only allowed as a function argument. A function that accepts a block argument may either explicitly declare a block parameter as the last argument using an ampersand (`&`), or accept the argument implicitly by calling `yield` anywhere in the function body.
+While a `Proc` can be assigned to a variable via simple assignment, a block is only allowed as a function argument. A function that accepts a block argument must explicitly declare the block parameter as the last argument using an ampersand (`&`).
 
 ```ruby
 def func(a, b, &block)
   # The given block is captured as a Proc.
   block(a)
-  # Yielding with an explicit block is not allowed
-  yield a #=> fails to compile
 end
 ```
 
-Taking a block implicitly requires no change to the function head:
-
-```ruby
-def func(a, b)
-  yield a
-  yield b
-end
-```
-
-The above function yields to the given block twice. The first time, it is given an argument of `a`, and the second time, it is given an argument of `b`. Implicit blocks do not allow the function to capture the given block. If the block needs to be stored, it should be taken as an explicit argument.
+Unlike Ruby or Crystal, implicitly capturing blocks is not allowed. This is a purposeful decision, outlined somewhat in [this issue](https://github.com/myst-lang/myst/issues/10). The primary rationale is that implicit blocks mixed with multiple functor clauses can easily lead to unexpected or unintuitive behavior, as having a clause that explicitly captures a block below one that doesn't would _not_ be matched, as the one defined earlier would be matched with the block being captured implicitly.
 
 
 ### Call syntax
@@ -488,7 +473,7 @@ func(with, arguments, &proc1)
 
 Unlike most other languages with blocks, the two syntaxes for blocks are semantically identically. In languages like Ruby and Crystal, blocks specified with `{}` are implicitly _right_ associative, while blocks specified with `do...end` are _left_ associative, which can lead to confusion when parenthesis are omitted, so Myst always enforces _left associativity_ to simplify mental overhead.
 
-Providing too many or too few arguments to a function will raise a `FunctionMatchFailure`. This also applies to block arguments. A function that _explicitly_ accepts a block argument will not match if a block is not provided. Functions that _implicitly_ accept blocks _will_ match without a block provided, but will fail if the function tries to `yield`.
+Providing too many or too few arguments to a function will raise a `FunctionMatchFailure`. This also applies to block arguments. A function that _explicitly_ accepts a block argument will not match if a block is not provided.
 
 ### Overloading
 

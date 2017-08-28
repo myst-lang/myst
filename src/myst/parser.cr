@@ -381,7 +381,7 @@ module Myst
       # Postfix expressions must _start_ on the same line as their receiver.
       # After the expression has started, newlines are allowed.
       @allow_newlines = false
-      receiver ||= parse_yield_expression
+      receiver ||= parse_primary_expression
       # After the receiver has been parsed, `current_token` must be a postfix
       # operator to create a postfix expression. After the operator, newlines
       # are allowed, so they can be enabled here in advance.
@@ -417,28 +417,6 @@ module Myst
         # expression.
         accept(Token::Type::NEWLINE)
         return receiver
-      end
-    end
-
-    def parse_yield_expression
-      case current_token.type
-      when Token::Type::YIELD
-        @allow_newlines = false
-        advance
-        @allow_newlines = true
-        args = AST::ExpressionList.new([] of AST::Node)
-        if accept(Token::Type::LPAREN)
-          unless accept(Token::Type::RPAREN)
-            args = parse_expression_list
-            expect(Token::Type::RPAREN)
-          end
-        else
-          accept(Token::Type::NEWLINE)
-        end
-
-        return AST::YieldExpression.new(args)
-      else
-        parse_primary_expression
       end
     end
 

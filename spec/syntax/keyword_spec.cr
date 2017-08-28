@@ -19,7 +19,6 @@ describe "Tokenizer" do
     "while"   => Token::Type::WHILE,
     "until"   => Token::Type::UNTIL,
     "end"     => Token::Type::END,
-    "yield"   => Token::Type::YIELD,
     "true"    => Token::Type::TRUE,
     "false"   => Token::Type::FALSE
   }
