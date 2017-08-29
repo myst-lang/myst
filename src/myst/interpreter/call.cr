@@ -5,7 +5,7 @@ class Myst::Interpreter
     def block; @block.not_nil!; end
     def block?; @block; end
 
-    def initialize;
+    def initialize
       @positional = [] of Value
     end
     def initialize(@positional); end

@@ -54,6 +54,8 @@ module Myst
         match_value_interpolation(pattern, value)
       when AST::ListLiteral
         match_list(pattern, value)
+      when AST::MapLiteral
+        match_map(pattern, value)
       else
         raise MatchError.new(pattern, value)
       end
@@ -61,7 +63,7 @@ module Myst
 
 
     def bind_variable(pattern : AST::VariableReference, value : Value)
-      interpreter.symbol_table[pattern.name] = value
+      @interpreter.symbol_table[pattern.name] = value
       return value
     end
 
@@ -71,8 +73,8 @@ module Myst
     end
 
     def match_value_interpolation(pattern : AST::ValueInterpolation, value : Value)
-      interpreter.recurse(pattern)
-      left = interpreter.stack.pop()
+      @interpreter.recurse(pattern)
+      left = @interpreter.stack.pop()
       return_if_equal(left, value)
       raise MatchError.new(pattern, value)
     end
@@ -80,6 +82,25 @@ module Myst
     def match_list(pattern : AST::ListLiteral, value : Value)
       if value.is_a?(TList)
         pattern.elements.children.each_with_index{ |el, idx| match(el, value.value[idx]) }
+        return value
+      else
+        raise MatchError.new(pattern, value)
+      end
+    end
+
+    def match_map(pattern : AST::MapLiteral, value : Value)
+      if value.is_a?(TMap)
+        pattern.elements.children.each do |e|
+          entry = e.as(AST::MapEntryDefinition)
+          @interpreter.recurse(entry.key)
+          pattern_key = @interpreter.stack.pop
+
+          if value.has_key?(pattern_key)
+            match(entry.value, value.reference(pattern_key))
+          else
+            raise MatchError.new(pattern, value)
+          end
+        end
         return value
       else
         raise MatchError.new(pattern, value)

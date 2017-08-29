@@ -41,3 +41,15 @@ IO.puts(map) #=> {a: 1, b: 2}
 # matchinde extremely powerful when enforcing structures.
 [a, <(a*3)>] =: ["hi", "hihihi"]
 IO.puts(a) #=> "hi"
+
+# Unlike Lists, pattern matching for Maps is _not_ exhaustive. That is, as long
+# as the value contains _at least_ the content defined in the pattern, the
+# match will succeed. Any extra entries will simply be ignored by the match.
+map = {a: 1, b: 2, c: 3}
+{a: a, b: b} =: map
+IO.puts(a) #=> 1
+IO.puts(b) #=> 2
+
+# Like Lists, the entries of a Map pattern may be any other valid pattern.
+{a: a, b: <(a*2)>, c: <(a*3)>} =: map
+IO.puts(a) #=> 1

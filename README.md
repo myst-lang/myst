@@ -48,7 +48,7 @@ The following is a roadmap for a `v0.1.0` of Myst. It is _not necessarily_ compr
   - [X] variable re-use (via interpolation)
   - [ ] splat collectors
   - [X] list patterns
-  - [ ] map patterns
+  - [X] map patterns
 - [ ] Standard Library
   - [ ] IO
   - [ ] File

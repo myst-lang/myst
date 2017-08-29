@@ -43,6 +43,10 @@ module Myst
       @value[key]? || TNil.new
     end
 
+    def has_key?(key : Value)
+      @value[key]? || false
+    end
+
     def set(key : Value, new_value : Value)
       @value[key] = new_value
     end
