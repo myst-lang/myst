@@ -54,3 +54,20 @@ IO.puts(fib(2)) #=> 2
 IO.puts(fib(5)) #=> 8
 IO.puts(fib())  #=> 0
 
+
+# Pattern matching in functions is exactly the same as pattern-matching
+# assignment. That means all of the pattern matching assignment syntax
+# will work as expected, even value interpolation!
+value = 10
+def match(<(value*2)> =: val)
+  IO.puts("matched " + val.to_s())
+end
+def match(failed_match)
+  IO.puts("failed to match " + failed_match.to_s())
+end
+
+match(20)   #=> matched 20
+match(4)    #=> failed to match 4
+value = 2
+match(20)   #=> failed to match 20
+match(4)    #=> matched 4
