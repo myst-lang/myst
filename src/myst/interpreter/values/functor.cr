@@ -59,7 +59,6 @@ module Myst
       def accept(visitor)
         @body.accept(visitor)
       end
-
     end
 
 

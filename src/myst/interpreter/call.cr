@@ -1,9 +1,7 @@
 class Myst::Interpreter
   struct Args
     property  positional : Array(Value)
-    @block : TFunctor?
-    def block; @block.not_nil!; end
-    def block?; @block; end
+    property! block : TFunctor?
 
     def initialize
       @positional = [] of Value
@@ -66,6 +64,7 @@ class Myst::Interpreter
       args.positional.unshift(@intr.stack.pop) if func.arity > args.positional.size
       @intr.stack.push(func.call(args.positional, args.block?, @intr))
     end
+
 
     # Search through the clauses defined for the functor, using the given
     # arguments to find and return a matching clause. Each match attempt pushes

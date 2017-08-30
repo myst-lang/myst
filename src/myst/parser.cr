@@ -130,12 +130,12 @@ module Myst
     # can only be regular expressions. As such, the two must be parsed
     # independently.
     def parse_parameter_list
-      args = [] of AST::Pattern
-      args << parse_parameter
+      params = [] of AST::Pattern
+      params << parse_parameter
       while accept(Token::Type::COMMA)
-        args << parse_parameter
+        params << parse_parameter
       end
-      return args
+      return params
     end
 
     def parse_parameter
