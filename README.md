@@ -1,6 +1,6 @@
 # Myst
 
-Myst is a practical dynamic language designed for real-world use cases. The primary goals of the language are:
+**A practical, dynamic language.** The primary goals of the language are:
 
 - **Be easy to understand:** Avoid special characters wherever possible. Expressions should flow in syntax as they do in thought. Don't surprise the user. Developers with a background in Ruby, Elixir, Crystal, or other similar languages should feel right at home, though feature parity with any of these is not a goal.
 - **Be reasonably fast:** Myst is a straight-forward, interpreted language, so it should be expected to perform competitively with similar established languages like Python and Ruby, and comparably with others like Elixir. It's okay to trade flexibility for performance.
