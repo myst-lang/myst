@@ -3,13 +3,12 @@ require "../../ast"
 module Myst
   class TFunctor < Value
     struct ParameterSet
-      alias ParamT = AST::FunctionParameter
-      property  left  : Array(ParamT)
-      property  splat : ParamT?
-      property  right : Array(ParamT)
-      property  block : ParamT?
+      property  left  : Array(AST::Pattern)
+      property  splat : AST::Pattern?
+      property  right : Array(AST::Pattern)
+      property  block : AST::Pattern?
 
-      def initialize(@left = [] of ParamT, @splat = nil, @right = [] of ParamT, @block = nil); end
+      def initialize(@left = [] of AST::Pattern, @splat = nil, @right = [] of AST::Pattern, @block = nil); end
     end
 
     struct Clause
@@ -27,9 +26,9 @@ module Myst
       # clause, split by the splat parameter. If there is no splat, all
       # parameters will end up in `left`.
       private def chunk_parameters(params)
-        left  = [] of AST::FunctionParameter
+        left  = [] of AST::Pattern
         splat = nil
-        right = [] of AST::FunctionParameter
+        right = [] of AST::Pattern
         block = nil
 
         past_splat = false

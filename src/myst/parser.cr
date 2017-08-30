@@ -107,7 +107,7 @@ module Myst
       name = expect(Token::Type::IDENT).value
       @allow_newlines = true
 
-      parameters = [] of AST::FunctionParameter
+      parameters = [] of AST::Pattern
       if accept(Token::Type::LPAREN)
         # If the next token is a closing parenthesis, don't expect arguments.
         unless accept(Token::Type::RPAREN)
@@ -130,7 +130,7 @@ module Myst
     # can only be regular expressions. As such, the two must be parsed
     # independently.
     def parse_parameter_list
-      args = [] of AST::FunctionParameter
+      args = [] of AST::Pattern
       args << parse_parameter
       while accept(Token::Type::COMMA)
         args << parse_parameter
@@ -148,27 +148,27 @@ module Myst
       when Token::Type::IDENT
         name = current_token
         advance
-        return AST::FunctionParameter.new(name: AST::VariableReference.new(name.value))
+        return AST::Pattern.new(name: AST::Ident.new(name.value))
       when Token::Type::STAR
         advance
         name = current_token
         advance
-        return AST::FunctionParameter.new(name: AST::VariableReference.new(name.value), splat: true)
+        return AST::Pattern.new(name: AST::Ident.new(name.value), splat: true)
       when Token::Type::AMPERSAND
         advance
         name = current_token
         advance
-        return AST::FunctionParameter.new(name: AST::VariableReference.new(name.value), block: true)
+        return AST::Pattern.new(name: AST::Ident.new(name.value), block: true)
       else
         # Parameters not starting with an identifier are assumed to start with
         # a pattern. If a pattern is given, it may optionally be followed by a
         # name after a match operator.
         begin
-          param = AST::FunctionParameter.new
+          param = AST::Pattern.new
           param.pattern = parse_primary_expression
           if accept(Token::Type::MATCH)
             name = expect(Token::Type::IDENT).value
-            param.name = AST::VariableReference.new(name)
+            param.name = AST::Ident.new(name)
           end
           return param
         rescue ParseError
@@ -435,7 +435,7 @@ module Myst
       when accept(Token::Type::FALSE)
         return AST::BooleanLiteral.new(false)
       when token = accept(Token::Type::IDENT)
-        return AST::VariableReference.new(token.value)
+        return AST::Ident.new(token.value)
       when accept(Token::Type::LESS)
         @allow_newlines = true
         accept(Token::Type::NEWLINE)
@@ -475,7 +475,7 @@ module Myst
 
 
     def parse_optional_block
-      params = [] of AST::FunctionParameter
+      params = [] of AST::Pattern
 
       @allow_newlines = false
       if block_start = accept(Token::Type::DO)

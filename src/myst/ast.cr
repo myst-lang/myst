@@ -54,7 +54,7 @@ module Myst
 
     ast_node FunctionDefinition,
       name        : String,
-      parameters  : Array(FunctionParameter),
+      parameters  : Array(Pattern),
       body        : Block
 
     ast_node ModuleDefinition,
@@ -69,29 +69,24 @@ module Myst
 
     # Expressions
 
-    # Function Parameters are complex, so currently they are defined outside
-    # the macro for flexibility and brevity. Properties of this class
-    # correspond to their syntax like so:
+    # Patterns are complex, so currently they are defined outside the macro for
+    # flexibility and brevity. Properties of this class correspond to their
+    # syntax like so:
     #
     #     pattern =: name : type | guard
     #
     # Currently, only `pattern` and `name` are supported. `name` may also be
-    # prefixed with an asterisk to indicate the splat collector. In this case
-    # the value of the parameter will always be a list of zero or more values.
-    class FunctionParameter
-      @pattern : Node?
-      def pattern; @pattern.not_nil!; end
-      def pattern?; @pattern; end
-      def pattern=(val : Node?); @pattern = val; end
-
-      @name : VariableReference?
-      def name; @name.not_nil!; end
-      def name?; @name; end
-      def name=(val : Node?); @name = val; end
-
-      # True if this parameter should be used as the splat collector.
+    # prefixed with an asterisk to indicate the splat collector, or an
+    # ampersand to indicate a block parameter. Block parameters are only valid
+    # in function parameter definitions.
+    class Pattern
+      property! pattern : Node?
+      property! name : Ident?
+      # True if this parameter should be used as the splat collector. Denoted
+      # in the syntax by a preceding asterisk, e.g. `*args`.
       property? splat : Bool
-      # True if this parameter should be used as the block parameter.
+      # True if this parameter should be used as the block parameter. Denoted
+      # in the syntax by a preceding ampersand, e.g., `&block`.
       property? block : Bool
 
       def initialize(@pattern = nil, @name = nil, @splat = false, @block = false); end
@@ -184,7 +179,7 @@ module Myst
 
     # Literals
 
-    ast_node VariableReference,
+    ast_node Ident,
       name      : String
 
 

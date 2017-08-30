@@ -1,5 +1,5 @@
 class Myst::Interpreter
-  def visit(node : AST::VariableReference)
+  def visit(node : AST::Ident)
     if value = @symbol_table[node.name]?
       stack.push(value)
     else

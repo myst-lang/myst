@@ -123,12 +123,12 @@ class Myst::Interpreter
       return nil
     end
 
-    private def match_positional_arg(param : AST::FunctionParameter, arg : Value)
+    private def match_positional_arg(param : AST::Pattern, arg : Value)
       @matcher.match(param.pattern, arg) if param.pattern?
       @matcher.match(param.name, arg) if param.name?
     end
 
-    private def fill_splat(param : AST::FunctionParameter, args : Array(Value))
+    private def fill_splat(param : AST::Pattern, args : Array(Value))
       # If the splat is unnamed, it's value does not need to be set.
       @matcher.bind_variable(param.name, TList.new(args)) if param.name?
     end

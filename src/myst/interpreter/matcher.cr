@@ -48,7 +48,7 @@ module Myst
         match_value(pattern, value)
       when AST::StringLiteral, AST::SymbolLiteral
         match_value(pattern, value)
-      when AST::VariableReference
+      when AST::Ident
         bind_variable(pattern, value)
       when AST::ValueInterpolation
         match_value_interpolation(pattern, value)
@@ -62,7 +62,7 @@ module Myst
     end
 
 
-    def bind_variable(pattern : AST::VariableReference, value : Value)
+    def bind_variable(pattern : AST::Ident, value : Value)
       @interpreter.symbol_table[pattern.name] = value
       return value
     end
