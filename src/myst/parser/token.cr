@@ -98,7 +98,7 @@ module Myst
 
 
       def self.unary_operators
-        [PLUS, MINUS, NOT]
+        [PLUS, MINUS, NOT, STAR, AMPERSAND]
       end
 
       def self.binary_operators

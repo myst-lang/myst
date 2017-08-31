@@ -2,8 +2,11 @@ require "./calculator.cr"
 
 module Myst
   class MatchError < Exception
-    def initialize(pattern, value)
-      @message = "Failed to match `#{pattern} =: #{value}`"
+    def initialize(pattern, value, msg=nil)
+      @message = <<-MESSAGE
+        Failed to match `#{pattern} =: #{value}`.
+        Reason: #{msg}
+      MESSAGE
     end
   end
 
@@ -62,9 +65,13 @@ module Myst
     end
 
 
-    def bind_variable(pattern : AST::Ident, value : Value)
-      @interpreter.symbol_table[pattern.name] = value
-      return value
+    def bind_variable(pattern : AST::Node, value : Value)
+      if pattern.is_a?(AST::Ident)
+        @interpreter.symbol_table[pattern.name] = value
+        return value
+      else
+        raise "Attempted to bind `#{value}` to a `#{pattern.class}`. Binding must be an Identifier."
+      end
     end
 
     def match_value(pattern : AST::IntegerLiteral | AST::FloatLiteral | AST::StringLiteral | AST::SymbolLiteral | AST::BooleanLiteral, value : Value)
@@ -74,18 +81,9 @@ module Myst
 
     def match_value_interpolation(pattern : AST::ValueInterpolation, value : Value)
       @interpreter.recurse(pattern)
-      left = @interpreter.stack.pop()
+      left = @interpreter.stack.pop
       return_if_equal(left, value)
       raise MatchError.new(pattern, value)
-    end
-
-    def match_list(pattern : AST::ListLiteral, value : Value)
-      if value.is_a?(TList)
-        pattern.elements.children.each_with_index{ |el, idx| match(el, value.value[idx]) }
-        return value
-      else
-        raise MatchError.new(pattern, value)
-      end
     end
 
     def match_map(pattern : AST::MapLiteral, value : Value)
@@ -105,6 +103,60 @@ module Myst
       else
         raise MatchError.new(pattern, value)
       end
+    end
+
+    def match_list(pattern : AST::ListLiteral, value : Value)
+      if value.is_a?(TList)
+        left, splat, right = chunk_list_pattern(pattern)
+
+        value_elements = value.value.dup
+        left.each { |element_pattern| match(element_pattern, value_elements.shift)  }
+        right.each{ |element_pattern| match(element_pattern, value_elements.pop)    }
+        if splat.is_a?(AST::UnaryExpression)
+          bind_variable(splat.operand, TList.new(value_elements))
+        else
+          unless value_elements.empty?
+            raise MatchError.new(pattern, value, "Not all elements matched")
+          end
+        end
+
+        return value
+      else
+        raise MatchError.new(pattern, value)
+      end
+    end
+
+
+    # Return a 3-tuple representing the segments of a List pattern in the
+    # format `{pre-splat, splat-collector, post-splat}`. The splat collector
+    # will be the single splat collector in the List literal. If more than
+    # one splat exists in the literal, an error will be raised.
+    private def chunk_list_pattern(pattern : AST::ListLiteral)
+      left  = [] of AST::Node
+      splat = nil
+      right = [] of AST::Node
+
+      past_splat = false
+      pattern.elements.children.each do |el|
+        if el.is_a?(AST::UnaryExpression)
+          if el.operator.type == Token::Type::STAR
+            if past_splat
+              raise "More than one splat collector in a List pattern is not allowed."
+            else
+              splat = el
+              past_splat = true
+            end
+          else
+            raise "Unrecognized unary operator `#{el.operator.type}` for List pattern."
+          end
+        elsif past_splat
+          right.unshift(el)
+        else
+          left.push(el)
+        end
+      end
+
+      {left, splat, right}
     end
   end
 end

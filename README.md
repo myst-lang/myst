@@ -42,11 +42,11 @@ The following is a roadmap for a `v0.1.0` of Myst. It is _not necessarily_ compr
   - [X] reopening
   - [X] nested definitions
   - [ ] `include` other modules
-- [ ] Decomposition/pattern matching
+- [X] Decomposition/pattern matching
   - [X] variable bindings
   - [X] value interpolations
   - [X] variable re-use (via interpolation)
-  - [ ] splat collectors
+  - [X] splat collectors
   - [X] list patterns
   - [X] map patterns
 - [ ] Standard Library

@@ -31,7 +31,7 @@ x =: list[2]
 IO.puts(b) #=> "hello"
 IO.puts(c) #=> false
 
-# Nested values are also supported in decomposition.
+# Nested values are also supported in pattern matching.
 [1, b, ["nested", c], map] =: [1, 2, ["nested", "lists"], {a: 1, b: 2}]
 IO.puts(c) #=> "lists"
 IO.puts(map) #=> {a: 1, b: 2}
@@ -42,9 +42,26 @@ IO.puts(map) #=> {a: 1, b: 2}
 [a, <(a*3)>] =: ["hi", "hihihi"]
 IO.puts(a) #=> "hi"
 
-# Unlike Lists, pattern matching for Maps is _not_ exhaustive. That is, as long
-# as the value contains _at least_ the content defined in the pattern, the
-# match will succeed. Any extra entries will simply be ignored by the match.
+# Pattern matching for lists also allows for splat collectors, similar to how
+# they are used in function parameters. Only one splat collector is allowed in
+# a List pattern.
+[head, *tail] =: [1, 2, 3]
+IO.puts(tail) #=> [2, 3]
+# A splat collector matches successfully when 0 or more elements remain to be
+# matched. If there are no elements, the collector will become an empty List.
+[a, b, c, *rest] =: [1, 2, 3]
+IO.puts(rest) #=> []
+# Splat collectors may be used anywhere in the List pattern.
+[first, *_, last] =: [1, 2, 3, 4]
+IO.puts(first) #=> 1
+IO.puts(last) #=> 4
+
+
+
+# Unlike Lists, pattern matching for Maps is _not_ exhaustive, nor is it order-
+# dependent. That is, as long as the value contains _at least_ the content
+# defined in the pattern, the match will succeed. Any extra entries will simply
+# be ignored by the match.
 map = {a: 1, b: 2, c: 3}
 {a: a, b: b} =: map
 IO.puts(a) #=> 1

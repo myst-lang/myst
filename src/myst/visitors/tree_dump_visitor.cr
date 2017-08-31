@@ -40,7 +40,7 @@ module Myst
       recurse node.children
     end
 
-    visit AST::FunctionParameter do
+    visit AST::Pattern do
       io << "#{node.type_name}".colorize(:cyan)
       io << "|#{node.name}\n"
     end
@@ -114,7 +114,7 @@ module Myst
 
 
 
-    visit AST::VariableReference do
+    visit AST::Ident do
       io << "#{node.type_name}".colorize(:dark_gray)
       io << "(#{node.name})\n"
     end
