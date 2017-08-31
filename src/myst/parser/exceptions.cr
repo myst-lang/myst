@@ -18,7 +18,7 @@ module Myst
 
     def initialize(@got, @expected=nil)
       @message = if @expected
-        "Expected token `#{@expected}`, got #{@got.type} instead (at #{@got.location})"
+        "Expected one of #{@expected}, got #{@got.type} instead (at #{@got.location})"
       else
         "Unexpected token `#{@got.type}` (at #{@got.location})"
       end

@@ -31,11 +31,11 @@ The following is a roadmap for a `v0.1.0` of Myst. It is _not necessarily_ compr
   - [ ] `next`
   - [X] `require`
   - [ ] `case`/`cond` for sequential conditions
-- [ ] Functions/blocks
+- [X] Functions/blocks
   - [X] positional parameters
   - [X] pattern matches
   - [X] multiple definitions/clause-based lookup
-  - [ ] type restrictions
+  - [X] type restrictions
   - [X] positional splat collectors
   - [X] explicit block parameters
 - [ ] Modules

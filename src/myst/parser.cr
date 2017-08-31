@@ -33,9 +33,9 @@ module Myst
       @current_token
     end
 
-    def accept(type : Token::Type)
+    def accept(*types : Token::Type)
       token = @current_token
-      if token.type == type
+      if types.includes?(token.type)
         advance
         token
       else
@@ -43,9 +43,9 @@ module Myst
       end
     end
 
-    def expect(type : Token::Type)
+    def expect(*types : Token::Type)
       token = @current_token
-      raise ParseError.new(token, type) unless accept(type)
+      raise ParseError.new(token, types.to_a) unless accept(*types)
       token
     end
 
@@ -92,7 +92,7 @@ module Myst
     def parse_module_definition
       @allow_newlines = false
       expect(Token::Type::MODULE)
-      name = expect(Token::Type::IDENT).value
+      name = expect(Token::Type::CONST).value
       @allow_newlines = true
       expect(Token::Type::NEWLINE)
       body = parse_block
@@ -144,37 +144,48 @@ module Myst
       #
       # If an identifier is the first token encountered, a pattern match is not
       # allowed (as it would be redundant; e.g. `name1 =: name2`).
-      case current_token.type
-      when Token::Type::IDENT
-        name = current_token
-        advance
-        return AST::Pattern.new(name: AST::Ident.new(name.value))
-      when Token::Type::STAR
-        advance
-        name = current_token
-        advance
-        return AST::Pattern.new(name: AST::Ident.new(name.value), splat: true)
-      when Token::Type::AMPERSAND
-        advance
-        name = current_token
-        advance
-        return AST::Pattern.new(name: AST::Ident.new(name.value), block: true)
-      else
-        # Parameters not starting with an identifier are assumed to start with
-        # a pattern. If a pattern is given, it may optionally be followed by a
-        # name after a match operator.
-        begin
-          param = AST::Pattern.new
-          param.pattern = parse_primary_expression
-          if accept(Token::Type::MATCH)
-            name = expect(Token::Type::IDENT).value
-            param.name = AST::Ident.new(name)
-          end
-          return param
-        rescue ParseError
-          raise "Type restrictions and guard clauses in function parameters are not yet supported."
-        end
+      param = case current_token.type
+              when Token::Type::IDENT
+                name = current_token
+                advance
+                AST::Pattern.new(name: AST::Ident.new(name.value))
+              when Token::Type::STAR
+                advance
+                name = current_token
+                advance
+                AST::Pattern.new(name: AST::Ident.new(name.value), splat: true)
+              when Token::Type::AMPERSAND
+                advance
+                name = current_token
+                advance
+                AST::Pattern.new(name: AST::Ident.new(name.value), block: true)
+              else
+                # Parameters not starting with an identifier are assumed to start with
+                # a pattern. If a pattern is given, it may optionally be followed by a
+                # name after a match operator.
+                begin
+                  p = AST::Pattern.new
+                  p.pattern = parse_primary_expression
+                  if accept(Token::Type::MATCH)
+                    name = expect(Token::Type::IDENT).value
+                    p.name = AST::Ident.new(name)
+                  end
+
+                  p
+                rescue ParseError
+                  raise "Type restrictions and guard clauses in function parameters are not yet supported."
+                end
+              end
+
+      # All formats of function parameters also contain a type restriction. The
+      # format for a type restriction is `param : Type`, where `param` is any
+      # of the formats described above.
+      if accept(Token::Type::COLON)
+        name = expect(Token::Type::CONST).value
+        param.type_restriction = AST::Const.new(name)
       end
+
+      param
     end
 
     def parse_map_entry_list
@@ -389,7 +400,7 @@ module Myst
 
       expr = case
       when accept(Token::Type::POINT)
-        member = expect(Token::Type::IDENT).value
+        member = expect(Token::Type::IDENT, Token::Type::CONST).value
         return parse_postfix_expression(AST::MemberAccessExpression.new(receiver, member))
       when accept(Token::Type::LPAREN)
         if accept(Token::Type::RPAREN)
@@ -436,6 +447,8 @@ module Myst
         return AST::BooleanLiteral.new(false)
       when token = accept(Token::Type::IDENT)
         return AST::Ident.new(token.value)
+      when token = accept(Token::Type::CONST)
+        return AST::Const.new(token.value)
       when accept(Token::Type::LESS)
         @allow_newlines = true
         accept(Token::Type::NEWLINE)

@@ -82,6 +82,7 @@ module Myst
     class Pattern
       property! pattern : Node?
       property! name : Ident?
+      property! type_restriction : Const?
       # True if this parameter should be used as the splat collector. Denoted
       # in the syntax by a preceding asterisk, e.g. `*args`.
       property? splat : Bool
@@ -89,7 +90,13 @@ module Myst
       # in the syntax by a preceding ampersand, e.g., `&block`.
       property? block : Bool
 
-      def initialize(@pattern = nil, @name = nil, @splat = false, @block = false); end
+      def initialize(
+        @pattern = nil,
+        @name = nil,
+        @type_restriction = nil,
+        @splat = false,
+        @block = false
+      ); end
     end
 
     ast_node SimpleAssignment,
@@ -180,6 +187,9 @@ module Myst
     # Literals
 
     ast_node Ident,
+      name      : String
+
+    ast_node Const,
       name      : String
 
 

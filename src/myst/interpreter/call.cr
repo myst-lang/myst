@@ -123,6 +123,7 @@ class Myst::Interpreter
     end
 
     private def match_positional_arg(param : AST::Pattern, arg : Value)
+      @matcher.match(param.type_restriction, arg) if param.type_restriction?
       @matcher.match(param.pattern, arg) if param.pattern?
       @matcher.match(param.name, arg) if param.name?
     end

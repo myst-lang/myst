@@ -53,6 +53,8 @@ module Myst
         match_value(pattern, value)
       when AST::Ident
         bind_variable(pattern, value)
+      when AST::Const
+        match_type_restriction(pattern, value)
       when AST::ValueInterpolation
         match_value_interpolation(pattern, value)
       when AST::ListLiteral
@@ -71,6 +73,14 @@ module Myst
         return value
       else
         raise "Attempted to bind `#{value}` to a `#{pattern.class}`. Binding must be an Identifier."
+      end
+    end
+
+    def match_type_restriction(pattern : AST::Const, value : Value)
+      if value.type_name == pattern.name
+        value
+      else
+        raise MatchError.new(pattern, value, "Type restriction not satisfied.")
       end
     end
 

@@ -194,6 +194,8 @@ module Myst
         consume_numeric
       when .ascii_whitespace?
         consume_whitespace
+      when .ascii_uppercase?
+        consume_constant
       else
         # Everything else should be tried as either a keyword or an identifier.
         # First, attempt to lex an identifier, then check if the identifier as
@@ -320,10 +322,32 @@ module Myst
       while read_char.ascii_whitespace?; end
     end
 
+    def consume_constant
+      # Constants must start with an uppercase character, and may only contain
+      # letters, numbers or underscores afterwards.
+      if current_char.ascii_uppercase?
+        read_char
+      else
+        raise SyntaxError.new(current_location, "Unexpected character `#{current_char}` for CONST. Current buffer: `#{@reader.buffer_value}`.")
+      end
+
+      @current_token.type = Token::Type::CONST
+
+      loop do
+        if current_char.ascii_alphanumeric? || current_char == '_'
+          read_char
+        else
+          break
+        end
+      end
+
+      @current_token.value = @reader.buffer_value
+    end
+
     def consume_identifier
       # Identifiers must start with a letter or an underscore
       unless current_char.ascii_letter? || current_char == '_'
-        raise SyntaxError.new(current_location, "Unexpected character `#{current_char}`. Current buffer: `#{@reader.buffer_value}`.")
+        raise SyntaxError.new(current_location, "Unexpected character `#{current_char}` for IDENT. Current buffer: `#{@reader.buffer_value}`.")
       end
 
       loop do

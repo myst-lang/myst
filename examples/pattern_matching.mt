@@ -70,3 +70,11 @@ IO.puts(b) #=> 2
 # Like Lists, the entries of a Map pattern may be any other valid pattern.
 {a: a, b: <(a*2)>, c: <(a*3)>} =: map
 IO.puts(a) #=> 1
+
+
+# Patterns may also just be simple types. This can be useful as for quickly
+# ensuring the type of a value
+a = "hello"
+if String =: a #=> match succeeds
+  IO.puts("a was a string")
+end

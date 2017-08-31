@@ -23,7 +23,8 @@ module Myst
 
       TRUE          # true
       FALSE         # false
-      IDENT         # [a-zA-Z][_a-zA-Z0-9]*
+      IDENT         # [a-z][_a-zA-Z0-9]*
+      CONST         # [A-Z][a-zA-Z0-9]*
 
       PLUS          # +
       MINUS         # -
