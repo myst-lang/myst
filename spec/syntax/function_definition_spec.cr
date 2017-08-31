@@ -2,12 +2,19 @@ require "../spec_helper"
 
 describe "Function Definition" do
   it "allows any valid identifier as a name" do
-    ["a", "baf24", "__fa1asf_1s", "AF_AF_ASF"].each do |name|
+    ["a", "baf24", "__fa1asf_1s"].each do |name|
       assert_valid %Q(
         def #{name}
         end
       )
     end
+  end
+
+  it "does not allow constants for names" do
+    assert_invalid %q(
+      def Constant
+      end
+    )
   end
 
   it "is invalid with spaces in the name" do

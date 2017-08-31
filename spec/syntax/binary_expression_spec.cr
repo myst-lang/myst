@@ -3,7 +3,7 @@ require "../spec_helper.cr"
 private BINARY_OPERATORS = ["+", "-", "*", "/", "=", "=:", "<", "<=",
                             "==", "!=", ">=", ">", "&&", "||"]
 
-private NON_UNARY_OPERATORS = [ "*", "/", "=", "=:", "<", "<=",
+private NON_UNARY_OPERATORS = [ "/", "=", "=:", "<", "<=",
                                 "==", "!=", ">=", ">", "&&", "||"]
 
 private CHAINABLE_OPERATORS = ["*", "/", "=", "=:", "==", "!=", "&&", "||"]

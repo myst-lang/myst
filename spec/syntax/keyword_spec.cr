@@ -31,7 +31,7 @@ describe "Tokenizer" do
 
   it "only matches keywords in lowercase" do
     keywords.keys.each do |kw|
-      assert_token_type kw.upcase, Token::Type::IDENT
+      assert_token_type kw.upcase, Token::Type::CONST
     end
   end
 

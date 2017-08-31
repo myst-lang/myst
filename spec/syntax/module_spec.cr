@@ -1,9 +1,16 @@
 require "../spec_helper"
 
 describe "Function Definition" do
-  it "allows any valid identifier as a name" do
-    ["a", "baf24", "__fa1asf_1s", "AF_AF_ASF"].each do |name|
-      assert_valid %Q(
+  it "allows any valid constant as a name" do
+    assert_valid %q(
+      module AF_AF_ASF
+      end
+    )
+  end
+
+  it "is invalid with anything other than a constant for a name" do
+    ["a", "baf24", "__fa1asf_1s"].each do |name|
+      assert_invalid %Q(
         module #{name}
         end
       )
