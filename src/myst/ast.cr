@@ -166,6 +166,11 @@ module Myst
       receiver  : Node,
       member    : String
 
+    ast_node MemberAssignmentExpression,
+      receiver  : Node,
+      member    : String,
+      value     : Node
+
     ast_node AccessExpression,
       target  : Node,
       key     : Node

@@ -56,10 +56,25 @@ class Myst::Interpreter
         stack.push(receiver)
         stack.push(native_method)
       else
-        raise "Unknown method call `#{member_name}` for primitive value `#{receiver.type_name}`."
+        raise "Unknown member `#{member_name}` for primitive value `#{receiver.type_name}`."
       end
     else
       raise "#{receiver} does not allow member access."
+    end
+  end
+
+  def visit(node : AST::MemberAssignmentExpression)
+    recurse(node.receiver)
+    receiver = stack.pop
+    member_name = node.member
+    recurse(node.value)
+    value = stack.pop
+
+    case receiver
+    when TObject, Scope
+      stack.push(receiver[member_name] = value)
+    else
+      raise "#{receiver} does not allow member assignment."
     end
   end
 end

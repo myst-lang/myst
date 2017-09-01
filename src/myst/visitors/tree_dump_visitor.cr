@@ -92,6 +92,11 @@ module Myst
       recurse [node.receiver]
     end
 
+    visit AST::MemberAssignmentExpression do
+      io << "#{node.type_name}|#{node.member}\n".colorize(:white)
+      recurse [node.receiver, node.value]
+    end
+
     visit AST::AccessExpression do
       io << "#{node.type_name}\n".colorize(:white)
       recurse [node.target, node.key]
@@ -114,7 +119,7 @@ module Myst
 
 
 
-    visit AST::Ident do
+    visit AST::Ident, AST::Const do
       io << "#{node.type_name}".colorize(:dark_gray)
       io << "(#{node.name})\n"
     end

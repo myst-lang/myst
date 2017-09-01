@@ -10,7 +10,7 @@ class Myst::Interpreter
       # that the value is treated as a reference, rather than a copy.
       @symbol_table[target.name] = stack.last
     else
-      raise "Cannot assign to `#{node.class}`. Must be either Ident or Const."
+      raise "Cannot assign to `#{node.target.class}`. Must be either Ident or Const."
     end
   end
 end

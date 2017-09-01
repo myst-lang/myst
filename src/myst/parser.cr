@@ -401,7 +401,12 @@ module Myst
       expr = case
       when accept(Token::Type::POINT)
         member = expect(Token::Type::IDENT, Token::Type::CONST).value
-        return parse_postfix_expression(AST::MemberAccessExpression.new(receiver, member))
+        if accept(Token::Type::EQUAL)
+          value = parse_expression
+          return AST::MemberAssignmentExpression.new(receiver, member, value)
+        else
+          return parse_postfix_expression(AST::MemberAccessExpression.new(receiver, member))
+        end
       when accept(Token::Type::LPAREN)
         if accept(Token::Type::RPAREN)
           args = AST::ExpressionList.new([] of AST::Node)
@@ -418,7 +423,7 @@ module Myst
         expect(Token::Type::RBRACE)
         if accept(Token::Type::EQUAL)
           value = parse_expression
-          return parse_postfix_expression(AST::AccessSetExpression.new(receiver, key, value))
+          return AST::AccessSetExpression.new(receiver, key, value)
         else
           return parse_postfix_expression(AST::AccessExpression.new(receiver, key))
         end
