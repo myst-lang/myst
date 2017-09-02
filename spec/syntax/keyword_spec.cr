@@ -22,6 +22,7 @@ describe "Tokenizer" do
     "true"    => Token::Type::TRUE,
     "false"   => Token::Type::FALSE,
     "nil"     => Token::Type::NIL,
+    "return"  => Token::Type::RETURN,
     "break"   => Token::Type::BREAK,
     "next"    => Token::Type::NEXT
   }
