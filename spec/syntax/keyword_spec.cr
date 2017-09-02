@@ -15,7 +15,6 @@ describe "Tokenizer" do
     "do"      => Token::Type::DO,
     "if"      => Token::Type::IF,
     "unless"  => Token::Type::UNLESS,
-    "elif"    => Token::Type::ELIF,
     "else"    => Token::Type::ELSE,
     "while"   => Token::Type::WHILE,
     "until"   => Token::Type::UNTIL,

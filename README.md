@@ -24,7 +24,7 @@ The following is a roadmap for a `v0.1.0` of Myst. It is _not necessarily_ compr
   - [X] strings
   - [X] symbols
 - [ ] Flow control and dependency loading
-  - [X] `if`/`unless`/`elif`/`else`
+  - [X] `if`/`unless`/`else`
   - [X] `while`/`until`
   - [ ] `break`
   - [ ] `return`

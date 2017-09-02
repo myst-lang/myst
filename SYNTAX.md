@@ -35,7 +35,6 @@ begin
 break
 continue
 def
-elif
 else
 end
 ensure
@@ -270,10 +269,8 @@ Myst's flow control structures are almost directly taken from Ruby. However, the
 # conditions as blocks
 if a
   # only if `a` is truthy
-elif b
-  # only if `a` is falsey and `b` is truthy
 else
-  # only if neither of the above runs
+  # only if the above does not run
 end
 unless b
   # only if `b` is falsey

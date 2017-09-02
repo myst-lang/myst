@@ -56,59 +56,7 @@ describe "Else Expression" do
       assert_invalid %q(
         if false
         else
-        elif wrong
-        end
-      )
-    end
-  end
-
-
-  describe "when following an `elif` block" do
-    it "is valid with an empty body" do
-      assert_valid %q(
         if false
-        elif false
-        else
-        end
-      )
-    end
-
-    it "is valid with a single-expression body" do
-      assert_valid %q(
-        if true
-        elif true
-        else
-          1 + 1
-        end
-      )
-    end
-
-    it "is valid with a multi-expression body" do
-      assert_valid %q(
-        if true
-        elif true
-        else
-          a = 1
-          b = 1
-          a + b
-        end
-      )
-    end
-
-    it "allows a single expression immediately following the `else`" do
-      assert_valid %q(
-        if false
-        elif false
-        else wrong end
-      )
-    end
-
-    it "is invalid with a succeeding conditional block" do
-      assert_invalid %q(
-        if false
-        elif wrong
-        else
-        elif wrong
         end
       )
     end
@@ -155,7 +103,7 @@ describe "Else Expression" do
       assert_invalid %q(
         unless false
         else
-        elif wrong
+        if wrong
         end
       )
     end

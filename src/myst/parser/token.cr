@@ -16,7 +16,6 @@ module Myst
       DO            # do
       IF            # if
       UNLESS        # unless
-      ELIF          # elif
       ELSE          # else
       WHILE         # while
       UNTIL         # until
@@ -68,7 +67,7 @@ module Myst
 
 
       def self.keywords
-        [REQUIRE, INCLUDE, MODULE, DEF, DO, IF, UNLESS, ELIF, ELSE, END, WHILE, UNTIL, TRUE, FALSE]
+        [REQUIRE, INCLUDE, MODULE, DEF, DO, IF, UNLESS, ELSE, END, WHILE, UNTIL, TRUE, FALSE]
       end
 
 
@@ -81,7 +80,6 @@ module Myst
           "do" => DO,
           "if" => IF,
           "unless" => UNLESS,
-          "elif" => ELIF,
           "else" => ELSE,
           "end" => END,
           "while" => WHILE,

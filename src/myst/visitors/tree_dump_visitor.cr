@@ -54,7 +54,7 @@ module Myst
       recurse [node.pattern, node.value]
     end
 
-    visit AST::IfExpression, AST::UnlessExpression, AST::ElifExpression do
+    visit AST::IfExpression, AST::UnlessExpression do
       io << "#{node.type_name}\n".colorize(:blue)
       recurse [node.condition, node.body, node.alternative].compact
     end

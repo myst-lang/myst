@@ -271,14 +271,14 @@ module Myst
       when Token::Type::IF
         advance
         condition = parse_expression
-        body = parse_block([Token::Type::ELSE, Token::Type::ELIF])
+        body = parse_block([Token::Type::ELSE])
         alternative = parse_conditional_alternative
         expect(Token::Type::END)
         return AST::IfExpression.new(condition, body, alternative)
       when Token::Type::UNLESS
         advance
         condition = parse_expression
-        body = parse_block([Token::Type::ELSE, Token::Type::ELIF])
+        body = parse_block([Token::Type::ELSE])
         alternative = parse_conditional_alternative
         expect(Token::Type::END)
         return AST::UnlessExpression.new(condition, body, alternative)
@@ -289,12 +289,6 @@ module Myst
 
     def parse_conditional_alternative
       case current_token.type
-      when Token::Type::ELIF
-        advance
-        condition = parse_expression
-        body = parse_block([Token::Type::ELSE, Token::Type::ELIF])
-        alternative = parse_conditional_alternative
-        return AST::ElifExpression.new(condition, body, alternative)
       when Token::Type::ELSE
         advance
         body = parse_block
@@ -302,7 +296,7 @@ module Myst
       when Token::Type::END
         return nil
       else
-        raise ParseError.new(current_token, [Token::Type::ELSE, Token::Type::ELIF, Token::Type::END])
+        raise ParseError.new(current_token, [Token::Type::ELSE, Token::Type::END])
       end
     end
 

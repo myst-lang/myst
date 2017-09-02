@@ -120,11 +120,6 @@ module Myst
       body        : Block,
       alternative : Node?
 
-    ast_node ElifExpression,
-      condition   : Node,
-      body        : Block,
-      alternative : Node?
-
     ast_node ElseExpression,
       body        : Block
 

@@ -15,20 +15,20 @@ def fib(n)
   end
 end
 
-puts(fib(10))
+IO.puts(fib(10))
 
 unless 1 == 2
-  puts("1 is not 2")
+  IO.puts("1 is not 2")
 end
 
 x = 5
 
 until x == 0
-  puts(x)
+  IO.puts(x)
   x = x - 1
 end
 
 while fib(x) < 10
-  puts(fib(x))
+  IO.puts(fib(x))
   x = x + 1
 end

@@ -1,5 +1,5 @@
 class Myst::Interpreter
-  def visit(node : AST::IfExpression | AST::ElifExpression)
+  def visit(node : AST::IfExpression)
     recurse(node.condition.not_nil!)
     if stack.pop().truthy?
       recurse(node.body)
