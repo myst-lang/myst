@@ -23,12 +23,12 @@ The following is a roadmap for a `v0.1.0` of Myst. It is _not necessarily_ compr
   - [X] nils
   - [X] strings
   - [X] symbols
-- [ ] Flow control and dependency loading
+- [X] Flow control and dependency loading
   - [X] `when`/`unless`/`else`
   - [X] `while`/`until`
-  - [ ] `break`
-  - [ ] `return`
-  - [ ] `next`
+  - [X] `break`
+  - [X] `return`
+  - [X] `next`
   - [X] `require`
 - [X] Functions/blocks
   - [X] positional parameters
