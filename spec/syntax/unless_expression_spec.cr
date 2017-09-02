@@ -56,4 +56,24 @@ describe "Unless Expression" do
       end
     )
   end
+
+  it "is valid when chained after another `unless`" do
+    assert_valid %q(
+      unless a
+        1
+      unless b
+        2
+      end
+    )
+  end
+
+  it "is valid when chained after a `when` block" do
+    assert_valid %q(
+      when a
+        1
+      unless b
+        2
+      end
+    )
+  end
 end

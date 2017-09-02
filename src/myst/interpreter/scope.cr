@@ -4,6 +4,10 @@ module Myst
   class Scope < Value
     property data   : Hash(String, Value)
     property parent : Scope?
+    # When `restrict_assignments` is true, assignments to variables in this
+    # scope will always create new entries in the current scope. This may be
+    # toggled at any point to change the behavior of the scope.
+    property restrict_assignments : Bool = false
 
     def type_name; "Scope"; end
 
@@ -18,7 +22,7 @@ module Myst
     end
 
     def []=(name : String, value : Value)
-      if self[name]?
+      if !@restrict_assignments && self[name]?
         assign_existing(name, value)
       else
         data[name] = value
@@ -45,6 +49,11 @@ module Myst
     def insert_parent(scope : Scope)
       scope.parent = self.parent
       self.parent = scope
+    end
+
+    # Remove all entries from this scope. Does not affect ancestors.
+    def clear
+      data.clear
     end
 
 

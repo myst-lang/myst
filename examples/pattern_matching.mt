@@ -75,6 +75,6 @@ IO.puts(a) #=> 1
 # Patterns may also just be simple types. This can be useful as for quickly
 # ensuring the type of a value
 a = "hello"
-if String =: a #=> match succeeds
+when String =: a #=> match succeeds
   IO.puts("a was a string")
 end

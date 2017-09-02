@@ -110,7 +110,7 @@ module Myst
       pattern   : Node,
       value     : Node
 
-    ast_node IfExpression,
+    ast_node WhenExpression,
       condition   : Node,
       body        : Block,
       alternative : Node?

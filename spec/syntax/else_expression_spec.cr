@@ -16,10 +16,10 @@ describe "Else Expression" do
     )
   end
 
-  describe "when following an `if` block" do
+  describe "when following a `when` chain" do
     it "is valid with an empty body" do
       assert_valid %q(
-        if false
+        when false
         else
         end
       )
@@ -27,7 +27,7 @@ describe "Else Expression" do
 
     it "is valid with a single-expression body" do
       assert_valid %q(
-        if true
+        when true
         else
           1 + 1
         end
@@ -36,7 +36,7 @@ describe "Else Expression" do
 
     it "is valid with a multi-expression body" do
       assert_valid %q(
-        if true
+        when true
         else
           a = 1
           b = 1
@@ -47,16 +47,16 @@ describe "Else Expression" do
 
     it "allows a single expression immediately following the `else`" do
       assert_valid %q(
-        if false
+        when false
         else wrong end
       )
     end
 
     it "is invalid with a succeeding conditional block" do
       assert_invalid %q(
-        if false
+        when false
         else
-        if false
+        when false
         end
       )
     end
@@ -103,7 +103,7 @@ describe "Else Expression" do
       assert_invalid %q(
         unless false
         else
-        if wrong
+        when wrong
         end
       )
     end

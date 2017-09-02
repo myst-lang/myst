@@ -72,8 +72,8 @@ module Myst
         parse_include_statement
       when Token::Type::DEF
         parse_function_definition
-      when Token::Type::IF, Token::Type::UNLESS
-        parse_conditional_expression
+      when Token::Type::WHEN, Token::Type::UNLESS
+        parse_when_statement
       when Token::Type::WHILE, Token::Type::UNTIL
         parse_conditional_loop
       else
@@ -266,37 +266,50 @@ module Myst
       end
     end
 
-    def parse_conditional_expression
+    WHEN_BLOCK_DELIMITERS = [Token::Type::WHEN, Token::Type::UNLESS, Token::Type::ELSE, Token::Type::END]
+    def parse_when_statement
       case current_token.type
-      when Token::Type::IF
+      when Token::Type::WHEN
         advance
         condition = parse_expression
-        body = parse_block([Token::Type::ELSE])
-        alternative = parse_conditional_alternative
-        expect(Token::Type::END)
-        return AST::IfExpression.new(condition, body, alternative)
+        body = parse_block(WHEN_BLOCK_DELIMITERS)
+        alternative = parse_when_alternative
+        return AST::WhenExpression.new(condition, body, alternative)
       when Token::Type::UNLESS
         advance
         condition = parse_expression
-        body = parse_block([Token::Type::ELSE])
-        alternative = parse_conditional_alternative
-        expect(Token::Type::END)
+        body = parse_block(WHEN_BLOCK_DELIMITERS)
+        alternative = parse_when_alternative
         return AST::UnlessExpression.new(condition, body, alternative)
       else
         return parse_logical_or_expression
       end
     end
 
-    def parse_conditional_alternative
+    def parse_when_alternative
       case current_token.type
+      when Token::Type::WHEN
+        advance
+        condition = parse_expression
+        body = parse_block(WHEN_BLOCK_DELIMITERS)
+        alternative = parse_when_alternative
+        return AST::WhenExpression.new(condition, body, alternative)
+      when Token::Type::UNLESS
+        advance
+        condition = parse_expression
+        body = parse_block(WHEN_BLOCK_DELIMITERS)
+        alternative = parse_when_alternative
+        return AST::UnlessExpression.new(condition, body, alternative)
       when Token::Type::ELSE
         advance
         body = parse_block
+        expect(Token::Type::END)
         return AST::ElseExpression.new(body)
       when Token::Type::END
+        advance
         return nil
       else
-        raise ParseError.new(current_token, [Token::Type::ELSE, Token::Type::END])
+        raise ParseError.new(current_token, WHEN_BLOCK_DELIMITERS)
       end
     end
 

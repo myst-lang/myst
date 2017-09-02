@@ -13,11 +13,11 @@ describe "Tokenizer" do
     "module"  => Token::Type::MODULE,
     "def"     => Token::Type::DEF,
     "do"      => Token::Type::DO,
-    "if"      => Token::Type::IF,
     "unless"  => Token::Type::UNLESS,
     "else"    => Token::Type::ELSE,
     "while"   => Token::Type::WHILE,
     "until"   => Token::Type::UNTIL,
+    "when"    => Token::Type::WHEN,
     "end"     => Token::Type::END,
     "true"    => Token::Type::TRUE,
     "false"   => Token::Type::FALSE
