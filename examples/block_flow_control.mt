@@ -22,3 +22,9 @@ IO.puts(result) #=> :err
 
   IO.puts(elem)
 end
+
+
+# `return` is not allowed within a block, primarily because the semantics start
+# to become more confusing, as `return` would cause an immediate exit from the
+# block itself, the function that called it, _and_ the function that _provided_
+# the block. Instead, the third exit is to be performed separately by users.
