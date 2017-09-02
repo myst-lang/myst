@@ -9,6 +9,7 @@ end
 describe "Tokenizer" do
   keywords = {
     "require" => Token::Type::REQUIRE,
+    "include" => Token::Type::INCLUDE,
     "module"  => Token::Type::MODULE,
     "def"     => Token::Type::DEF,
     "do"      => Token::Type::DO,

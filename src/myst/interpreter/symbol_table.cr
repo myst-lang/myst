@@ -14,15 +14,11 @@ module Myst
 
 
     def []?(identifier : String)
-      scope = current_scope
-      while scope
-        return scope[identifier] if scope[identifier]?
-        scope = scope.parent
-      end
+      current_scope[identifier]?
     end
 
     def [](identifier : String)
-      self[identifier]? || raise IndexError.new
+      current_scope[identifier]
     end
 
 
@@ -32,17 +28,7 @@ module Myst
 
 
     def assign(identifier : String, value : Value, make_new=false)
-      if make_new
-        return current_scope[identifier] = value
-      else
-        scope = current_scope
-        while scope
-          return scope[identifier] = value if scope[identifier]?
-          scope = scope.parent
-        end
-
-        return current_scope[identifier] = value
-      end
+      current_scope.assign(identifier, value, make_new)
     end
 
 

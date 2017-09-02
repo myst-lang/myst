@@ -68,6 +68,8 @@ module Myst
         parse_require_statement
       when Token::Type::MODULE
         parse_module_definition
+      when Token::Type::INCLUDE
+        parse_include_statement
       when Token::Type::DEF
         parse_function_definition
       when Token::Type::IF, Token::Type::UNLESS
@@ -87,6 +89,24 @@ module Myst
       expect(Token::Type::REQUIRE)
       path = parse_expression
       return AST::RequireStatement.new(path, @working_dir)
+    end
+
+    def parse_include_statement
+      expect(Token::Type::INCLUDE)
+      mod = parse_module_reference
+      return AST::IncludeStatement.new(mod)
+    end
+
+    # This is essentially a special-case of `parse_postfix_expression` to only
+    # allow member accesses with Constants, e.g. `HTTP.WebSocket.Response`
+    def parse_module_reference
+      root = expect(Token::Type::CONST).value
+      module_reference = AST::Const.new(root)
+      while accept(Token::Type::POINT)
+        member = expect(Token::Type::CONST).value
+        module_reference = AST::MemberAccessExpression.new(module_reference, member)
+      end
+      module_reference
     end
 
     def parse_module_definition

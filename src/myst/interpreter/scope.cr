@@ -9,16 +9,28 @@ module Myst
 
     def initialize(@parent=nil, @data=Hash(String, Value).new); end
 
-    def [](name : String)
-      @data[name]
+    def []?(name : String)
+      data[name]? || (p = parent) && p[name]?
     end
 
-    def []?(name : String)
-      @data[name]?
+    def [](name : String)
+      self[name]? || raise IndexError.new
     end
 
     def []=(name : String, value : Value)
-      @data[name] = value
+      if self[name]?
+        assign_existing(name, value)
+      else
+        data[name] = value
+      end
+    end
+
+    def assign(name : String, value : Value, make_new=false)
+      if make_new
+        data[name] = value
+      else
+        self[name] = value
+      end
     end
 
     def full_clone
@@ -28,6 +40,13 @@ module Myst
       end
       new_scope
     end
+
+    # Insert `scope` at the front of the "ancestor chain" for this scope.
+    def insert_parent(scope : Scope)
+      scope.parent = self.parent
+      self.parent = scope
+    end
+
 
     def hash
       data.keys.sum(&.hash)
@@ -40,6 +59,17 @@ module Myst
         str << data.map{ |key, value| "#{key}: #{value.type_name}"}.join(", ")
         str << "}"
       end
+    end
+
+
+    protected def assign_existing(name : String, value : Value)
+      if data[name]?
+        data[name] = value
+      elsif p = parent
+        p.assign_existing(name, value)
+      end
+
+      value
     end
   end
 end

@@ -65,6 +65,9 @@ module Myst
       path        : Node,
       working_dir : String
 
+    ast_node IncludeStatement,
+      path        : Node
+
 
 
     # Expressions

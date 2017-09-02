@@ -41,7 +41,7 @@ The following is a roadmap for a `v0.1.0` of Myst. It is _not necessarily_ compr
 - [ ] Modules
   - [X] reopening
   - [X] nested definitions
-  - [ ] `include` other modules
+  - [X] `include` other modules
 - [X] Decomposition/pattern matching
   - [X] variable bindings
   - [X] value interpolations

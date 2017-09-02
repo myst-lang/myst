@@ -10,6 +10,7 @@ module Myst
       SYMBOL        # :symbol
 
       REQUIRE       # require
+      INCLUDE       # include
       MODULE        # module
       DEF           # def
       DO            # do
@@ -67,13 +68,14 @@ module Myst
 
 
       def self.keywords
-        [REQUIRE, MODULE, DEF, DO, IF, UNLESS, ELIF, ELSE, END, WHILE, UNTIL, TRUE, FALSE]
+        [REQUIRE, INCLUDE, MODULE, DEF, DO, IF, UNLESS, ELIF, ELSE, END, WHILE, UNTIL, TRUE, FALSE]
       end
 
 
       def self.keyword_map
         {
           "require" => REQUIRE,
+          "include" => INCLUDE,
           "module" => MODULE,
           "def" => DEF,
           "do" => DO,

@@ -28,10 +28,9 @@ module Myst
       recurse node.children
     end
 
-    visit AST::RequireStatement do
-      io << "#{node.type_name}".colorize(:red)
-      io << "/#{node.children.size}\n"
-      recurse node.children
+    visit AST::RequireStatement, AST::IncludeStatement do
+      io << "#{node.type_name}\n".colorize(:red)
+      recurse [node.path]
     end
 
     visit AST::ModuleDefinition, AST::FunctionDefinition do
