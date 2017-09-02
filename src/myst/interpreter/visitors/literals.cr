@@ -3,6 +3,10 @@ class Myst::Interpreter
     stack.push(Value.from_literal(node))
   end
 
+  def visit(node : AST::NilLiteral)
+    stack.push(TNil.new)
+  end
+
 
   def visit(node : AST::ListLiteral)
     recurse(node.elements)

@@ -477,6 +477,8 @@ module Myst
         return AST::BooleanLiteral.new(true)
       when accept(Token::Type::FALSE)
         return AST::BooleanLiteral.new(false)
+      when accept(Token::Type::NIL)
+        return AST::NilLiteral.new
       when token = accept(Token::Type::IDENT)
         return AST::Ident.new(token.value)
       when token = accept(Token::Type::CONST)

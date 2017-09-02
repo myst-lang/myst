@@ -23,6 +23,7 @@ module Myst
 
       TRUE          # true
       FALSE         # false
+      NIL           # nil
       IDENT         # [a-z][_a-zA-Z0-9]*
       CONST         # [A-Z][a-zA-Z0-9]*
 
@@ -67,7 +68,7 @@ module Myst
 
 
       def self.keywords
-        [REQUIRE, INCLUDE, MODULE, DEF, DO, UNLESS, ELSE, END, WHILE, UNTIL, WHEN, TRUE, FALSE]
+        [REQUIRE, INCLUDE, MODULE, DEF, DO, UNLESS, ELSE, END, WHILE, UNTIL, WHEN, TRUE, FALSE, NIL]
       end
 
 
@@ -85,7 +86,8 @@ module Myst
           "until" => UNTIL,
           "when" => WHEN,
           "true" => TRUE,
-          "false" => FALSE
+          "false" => FALSE,
+          "nil" => NIL
         }
       end
 

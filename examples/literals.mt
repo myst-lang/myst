@@ -5,3 +5,4 @@
 "hello"
 "multiple
 lines"
+nil

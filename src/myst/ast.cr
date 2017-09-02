@@ -211,6 +211,8 @@ module Myst
     ast_node BooleanLiteral,
       value     : Bool
 
+    ast_node NilLiteral
+
 
     ast_node ListLiteral,
       elements  : ExpressionList

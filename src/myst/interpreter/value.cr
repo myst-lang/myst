@@ -25,6 +25,8 @@ module Myst
         TSymbol.new(literal.value)
       when AST::BooleanLiteral
         TBoolean.new(literal.value)
+      when AST::NilLiteral
+        TNil.new
       else
         raise "#{literal.class} cannot be converted to a Value."
       end

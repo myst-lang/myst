@@ -20,7 +20,8 @@ describe "Tokenizer" do
     "when"    => Token::Type::WHEN,
     "end"     => Token::Type::END,
     "true"    => Token::Type::TRUE,
-    "false"   => Token::Type::FALSE
+    "false"   => Token::Type::FALSE,
+    "nil"     => Token::Type::NIL
   }
 
   it "lexes all keywords appropriately" do

@@ -128,6 +128,11 @@ module Myst
       io << "(#{node.value})\n"
     end
 
+    visit AST::NilLiteral do
+      io << "#{node.type_name}".colorize(:yellow)
+      io << "(nil)\n"
+    end
+
     visit AST::ListLiteral, AST::MapLiteral do
       io << "#{node.type_name}\n".colorize(:yellow)
       recurse [node.elements]
