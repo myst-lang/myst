@@ -13,15 +13,17 @@ describe "Tokenizer" do
     "module"  => Token::Type::MODULE,
     "def"     => Token::Type::DEF,
     "do"      => Token::Type::DO,
+    "end"     => Token::Type::END,
+    "when"    => Token::Type::WHEN,
     "unless"  => Token::Type::UNLESS,
     "else"    => Token::Type::ELSE,
     "while"   => Token::Type::WHILE,
     "until"   => Token::Type::UNTIL,
-    "when"    => Token::Type::WHEN,
-    "end"     => Token::Type::END,
     "true"    => Token::Type::TRUE,
     "false"   => Token::Type::FALSE,
-    "nil"     => Token::Type::NIL
+    "nil"     => Token::Type::NIL,
+    "break"   => Token::Type::BREAK,
+    "next"    => Token::Type::NEXT
   }
 
   it "lexes all keywords appropriately" do
