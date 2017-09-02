@@ -15,6 +15,10 @@ module Nested
   end
 end
 
+# Including a module is as simple as writing `include`, followed by a
+# potentially-namespaced module reference, such as `Nested.Baz` in the example
+# below. Namespaced module references may be arbitrarily deep (they are not
+# limited to the one degree of indirection shown here).
 module Foo
   include Bar
   include Nested.Baz
