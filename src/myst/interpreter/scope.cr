@@ -14,7 +14,7 @@ module Myst
     def initialize(@parent=nil, @data=Hash(String, Value).new); end
 
     def []?(name : String)
-      data[name]? || (p = parent) && p[name]?
+      data[name]? || ((p = parent) && p[name]?)
     end
 
     def [](name : String)

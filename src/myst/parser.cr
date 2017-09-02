@@ -76,6 +76,8 @@ module Myst
         parse_when_statement
       when Token::Type::WHILE, Token::Type::UNTIL
         parse_conditional_loop
+      when Token::Type::RETURN, Token::Type::BREAK, Token::Type::NEXT
+        parse_flow_control_statement
       else
         parse_expression
       end
@@ -95,6 +97,34 @@ module Myst
       expect(Token::Type::INCLUDE)
       mod = parse_module_reference
       return AST::IncludeStatement.new(mod)
+    end
+
+    def parse_flow_control_statement
+      @allow_newlines = false
+      node =  case current_token.type
+              when Token::Type::RETURN
+                advance
+                @allow_newlines = true
+                return AST::ReturnStatement.new(parse_optional_inline_value)
+              when Token::Type::BREAK
+                advance
+                @allow_newlines = true
+                return AST::BreakStatement.new(parse_optional_inline_value)
+              when Token::Type::NEXT
+                advance
+                @allow_newlines = true
+                return AST::NextStatement.new(parse_optional_inline_value)
+              else
+                raise ParseError.new(current_token, [Token::Type::RETURN, Token::Type::BREAK, Token::Type::NEXT])
+              end
+
+      return node
+    end
+
+    def parse_optional_inline_value
+      # Attempt to parse a value starting on the current line. If one does not
+      # exist, return nil instead.
+      parse_expression unless accept(Token::Type::NEWLINE)
     end
 
     # This is essentially a special-case of `parse_postfix_expression` to only

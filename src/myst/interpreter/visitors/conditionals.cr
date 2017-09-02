@@ -7,10 +7,10 @@ class Myst::Interpreter
     block_scope = Scope.new
     block_scope.restrict_assignments = true
     self.push_scope(block_scope)
+    recurse(node.condition)
+    block_scope.restrict_assignments = false
 
-    recurse(node.condition.not_nil!)
     if stack.pop.truthy?
-      block_scope.restrict_assignments = false
       recurse(node.body)
       self.pop_scope
     else
@@ -27,10 +27,10 @@ class Myst::Interpreter
     block_scope = Scope.new
     block_scope.restrict_assignments = true
     self.push_scope(block_scope)
+    recurse(node.condition)
+    block_scope.restrict_assignments = false
 
-    recurse(node.condition.not_nil!)
     unless stack.pop().truthy?
-      block_scope.restrict_assignments = false
       recurse(node.body)
     else
       block_scope.clear

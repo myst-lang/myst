@@ -68,6 +68,15 @@ module Myst
     ast_node IncludeStatement,
       path        : Node
 
+    ast_node BreakStatement,
+      value       : Node?
+
+    ast_node ReturnStatement,
+      value       : Node?
+
+    ast_node NextStatement,
+      value       : Node?
+
 
 
     # Expressions

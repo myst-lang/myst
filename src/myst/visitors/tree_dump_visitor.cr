@@ -33,6 +33,14 @@ module Myst
       recurse [node.path]
     end
 
+    visit AST::ReturnStatement, AST::BreakStatement, AST::NextStatement do
+      io << "#{node.type_name}".colorize(:green).mode(:bold)
+      if node.value
+        io << "\n"
+        recurse [node.value.not_nil!]
+      end
+    end
+
     visit AST::ModuleDefinition, AST::FunctionDefinition do
       io << "#{node.type_name}".colorize(:blue).mode(:bold)
       io << "|#{node.name}\n"

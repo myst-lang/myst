@@ -44,7 +44,22 @@ class Myst::Interpreter
       else
         raise "`#{@callable.class}` is not a callable type"
       end
+    rescue ReturnException | NextException
+      # `return`s are caught by the first calling function. This is
+      # consistent no matter what context the `return` is given in.
+      # `next` operates in the same manner, but is used inside of blocks
+      # instead of `return` to avoid ambiguity at a glance.
+    rescue b : BreakException
+      # `break`s cause the function that called the breaking function to
+      # return. To know when this happens, the exception gets marked as
+      # "caught" by the call that encountered the `break`, then re-raised
+      # to be caught by the next containing call.
+      if b.uncaught?
+        b.uncaught = false
+        raise b
+      end
     end
+
 
 
     private def call_functor(args : Args)
