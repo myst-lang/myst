@@ -38,7 +38,7 @@ The following is a roadmap for a `v0.1.0` of Myst. It is _not necessarily_ compr
   - [X] type restrictions
   - [X] positional splat collectors
   - [X] explicit block parameters
-- [ ] Modules
+- [X] Modules
   - [X] reopening
   - [X] nested definitions
   - [X] `include` other modules
