@@ -14,7 +14,7 @@ module IO
   # Read characters from STDIN until a newline character is found.
   def gets
     result = ""
-    until (char = read(STDIN, 1)) == "\n"
+    until (char = read(STDIN, 1)) == "\n" || char == nil
       result = result + char
     end
     result

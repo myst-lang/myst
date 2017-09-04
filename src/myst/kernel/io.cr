@@ -67,8 +67,11 @@ module Myst::Kernel
         raise "read: length to read must be an Integer"
       end
 
-      string = fd.read_string(length)
-      TString.new(string).as(Value)
+      if string = fd.gets(length)
+        TString.new(string)
+      else
+        TNil.new
+      end
     end
 
     native_func :read, 2, IO.read
