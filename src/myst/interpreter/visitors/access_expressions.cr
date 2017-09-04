@@ -55,7 +55,7 @@ class Myst::Interpreter
     when Primitive
       if  (primitive_module = Kernel::SCOPE[receiver.type_name]?) &&
           primitive_module.is_a?(Scope) &&
-          (native_method = primitive_module[member_name])
+          (native_method = primitive_module[member_name]?)
         stack.push(receiver)
         stack.push(native_method)
       else

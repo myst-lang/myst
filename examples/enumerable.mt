@@ -14,7 +14,7 @@ end
 
 
 l = [1, 2, 3]
-r = l.split().map() do |e|
+r = l.map() do |e|
   e * 2
 end
 
