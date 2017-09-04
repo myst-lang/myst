@@ -11,7 +11,7 @@ class Myst::Interpreter
       args = Args.new(get_inline_args(node), get_block_arg(node))
       Call.new(func, args, self).run
     else
-      raise "#{func} is not a functor value."
+      raise "#{func} is not a callable value."
     end
   end
 

@@ -16,7 +16,7 @@ class Myst::Interpreter
 
   class FunctionMatchError < Exception
     def initialize(functor, args)
-      @message = "Could not find matching clause for `#{functor.name}` with given arguments `#{args.inspect}`"
+      @message = "Could not find matching clause for `#{functor}` with given arguments `#{args.inspect}`"
     end
   end
 
@@ -26,9 +26,9 @@ class Myst::Interpreter
     alias CallableT = TFunctor | TNativeFunctor
 
     property callable : CallableT
-    property args : Args
-    property intr : Interpreter
-    property matcher : Matcher
+    property args     : Args
+    property intr     : Interpreter
+    property matcher  : Matcher
 
     def initialize(@callable : CallableT, @args, @intr)
       @matcher = Matcher.new(@intr)
@@ -38,9 +38,9 @@ class Myst::Interpreter
     def run
       case @callable
       when TFunctor
-        call_functor(args)
+        call_functor
       when TNativeFunctor
-        call_native_functor(args)
+        call_native_functor
       else
         raise "`#{@callable.class}` is not a callable type"
       end
@@ -62,22 +62,21 @@ class Myst::Interpreter
 
 
 
-    private def call_functor(args : Args)
-      func = @callable.as(TFunctor)
-      if clause = lookup_clause(func, args)
+    private def call_functor
+      if clause = lookup_clause
         @intr.recurse(clause.body)
         @intr.pop_scope
       else
-        raise FunctionMatchError.new(func, args)
+        raise FunctionMatchError.new(@callable, @args)
       end
     end
 
-    private def call_native_functor(args : Args)
+    private def call_native_functor
       func = @callable.as(TNativeFunctor)
       # TODO: Remove this once the receiver becomes an explicitly passed
       # argument for all function calls.
-      args.positional.unshift(@intr.stack.pop) if func.arity > args.positional.size
-      @intr.stack.push(func.call(args.positional, args.block?, @intr))
+      @args.positional.unshift(@intr.stack.pop) if func.arity > @args.positional.size
+      @intr.stack.push(func.call(@args.positional, args.block?, @intr))
     end
 
 
@@ -86,15 +85,16 @@ class Myst::Interpreter
     # a temporary scope on the interpreter's symbol table. If the match
     # succeeds, the scope will be left on the stack for use during the
     # execution of the clause. If the match fails, the scope will be popped.
-    private def lookup_clause(func : TFunctor, args : Args) : TFunctor::Clause?
+    private def lookup_clause : TFunctor::Clause?
+      func = @callable.as(TFunctor)
       func.clauses.find do |clause|
         # If the clause contains a splat argument, the number of positional
         # arguments in the call must be at least the number of normal
         # positional arguments.
         if clause.parameters.splat
-          args.positional.size >= clause.arity - 1
+          @args.positional.size >= clause.arity - 1
         else
-          args.positional.size == clause.arity
+          @args.positional.size == clause.arity
         end
 
         begin
@@ -108,7 +108,7 @@ class Myst::Interpreter
           # iterating from the right until the splat is seen again. At that
           # point, collect the remaining positional arguments into the splat
           # collector.
-          positionals = args.positional.dup
+          positionals = @args.positional.dup
           # .shift will pull arguments off the left side of the list.
           clause.parameters.left.each { |param| match_positional_arg(param, positionals.shift) }
           # .pop will pull arguments off the right side.
@@ -121,8 +121,8 @@ class Myst::Interpreter
           end
 
           if block = clause.parameters.block
-            raise "Clause expects block" unless args.block?
-            @matcher.bind_variable(block.name, args.block)
+            raise "Clause expects block" unless @args.block?
+            @matcher.bind_variable(block.name, @args.block)
           end
 
           # Getting here means the match was fully successful, so return the
