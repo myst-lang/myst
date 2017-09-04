@@ -3,8 +3,6 @@ module Myst::Kernel
 
   SCOPE = Scope.new
 
-  PRIMITIVE_APIS = {} of ::String => Scope
-
   macro add_kernel_method(name, arity)
     SCOPE["{{name.id}}"] = TNativeFunctor.new("{{name.id}}", {{arity}}) do |args|
       {{ yield }}
@@ -12,7 +10,7 @@ module Myst::Kernel
   end
 
   macro register_primitive_api(module_def)
-    PRIMITIVE_APIS["{{module_def.id}}"] = {{module_def}}::METHODS
+    SCOPE["{{module_def.id}}"] = {{module_def}}::METHODS
   end
 
   macro register_native_api(module_def)

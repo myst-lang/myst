@@ -46,13 +46,16 @@ class Myst::Interpreter
   def visit(node : AST::MemberAccessExpression)
     recurse(node.receiver)
     receiver = stack.pop
+
     member_name = node.member
 
     case receiver
     when TObject, Scope
       stack.push(receiver[member_name])
     when Primitive
-      if native_method = Kernel::PRIMITIVE_APIS[receiver.type_name][member_name]?
+      if  (primitive_module = Kernel::SCOPE[receiver.type_name]?) &&
+          primitive_module.is_a?(Scope) &&
+          (native_method = primitive_module[member_name])
         stack.push(receiver)
         stack.push(native_method)
       else
