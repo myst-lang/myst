@@ -1,232 +1,533 @@
 module Myst
   module AST
-    class Node
-      property type_name : String?
+    abstract class Node
+      property location : Location?
+      property end_location : Location?
+
+      def at(@location : Location)
+        self
+      end
+
+      def at_end(@end_location : Location)
+        self
+      end
+
+      def at(node : Node)
+        @location = node.location
+        @end_location = node.end_location
+        self
+      end
+
+      def at_end(node : Node)
+        @end_location = node.end_location
+        self
+      end
 
       def accept(visitor)
         visitor.visit(self)
       end
 
-      @[AlwaysInline]
-      def children
-        vars = {{ @type.instance_vars }}
-        node_vars = [] of AST::Node
-        vars.each do |node|
-          if node.is_a? AST::Node
-            node_vars << node
-          end
-        end
-        node_vars
-      end
-
-      def type_name : String
-        @type_name ||= {{@type.name}}.name.split("::").last
+      def class_desc : String
+        {{@type.name.split("::").last.id.stringify}}
       end
     end
 
 
-    macro ast_node(name, *properties)
-      class {{name.id}} < Node
-        {% for prop in properties %}
-          property {{prop.var}} : {{prop.type}}
-        {% end %}
-
-        def initialize({{ *properties.map{ |p| "@#{p.var}".id } }})
-        end
-      end
-    end
-
-
-    ast_node Empty
-
-
-    # Lists
-
-    ast_node Block,
-      children  : Array(Node)
-
-    ast_node ExpressionList,
-      children  : Array(Node)
-
-
-
-    # Statements
-
-    ast_node FunctionDefinition,
-      name        : String,
-      parameters  : Array(Pattern),
-      body        : Block
-
-    ast_node ModuleDefinition,
-      name        : String,
-      body        : Block
-
-    ast_node RequireStatement,
-      path        : Node,
-      working_dir : String
-
-    ast_node IncludeStatement,
-      path        : Node
-
-    ast_node BreakStatement,
-      value       : Node?
-
-    ast_node ReturnStatement,
-      value       : Node?
-
-    ast_node NextStatement,
-      value       : Node?
-
-
-
-    # Expressions
-
-    # Patterns are complex, so currently they are defined outside the macro for
-    # flexibility and brevity. Properties of this class correspond to their
-    # syntax like so:
+    # A No-op. Used as a placeholder for empty bodies, such as an empty method
+    # definition or empty class body.
     #
-    #     pattern =: name : type | guard
     #
-    # Currently, only `pattern` and `name` are supported. `name` may also be
-    # prefixed with an asterisk to indicate the splat collector, or an
-    # ampersand to indicate a block parameter. Block parameters are only valid
-    # in function parameter definitions.
-    class Pattern
-      property! pattern : Node?
-      property! name : Ident?
-      property! type_restriction : Const?
-      # True if this parameter should be used as the splat collector. Denoted
-      # in the syntax by a preceding asterisk, e.g. `*args`.
-      property? splat : Bool
-      # True if this parameter should be used as the block parameter. Denoted
-      # in the syntax by a preceding ampersand, e.g., `&block`.
-      property? block : Bool
-
-      def initialize(
-        @pattern = nil,
-        @name = nil,
-        @type_restriction = nil,
-        @splat = false,
-        @block = false
-      ); end
+    class Nop < Node
     end
 
-    ast_node SimpleAssignment,
-      target    : Node,
-      value     : Node
 
-    ast_node PatternMatchingAssignment,
-      pattern   : Node,
-      value     : Node
+    # A container for one or more expressions. The main block of a program will
+    # be an Expressions node. Other examples include function bodies, module
+    # bodies, etc.
+    class Expressions < Node
+      property children  : Array(Node)
 
-    ast_node WhenExpression,
-      condition   : Node,
-      body        : Block,
-      alternative : Node?
-
-    ast_node UnlessExpression,
-      condition   : Node,
-      body        : Block,
-      alternative : Node?
-
-    ast_node ElseExpression,
-      body        : Block
-
-    ast_node WhileExpression,
-      condition   : Node,
-      body        : Block
-
-    ast_node UntilExpression,
-      condition   : Node,
-      body        : Block
-
-    ast_node LogicalExpression,
-      operator  : Token,
-      left      : Node,
-      right     : Node
-
-    ast_node EqualityExpression,
-      operator  : Token,
-      left      : Node,
-      right     : Node
-
-    ast_node RelationalExpression,
-      operator  : Token,
-      left      : Node,
-      right     : Node
-
-    ast_node BinaryExpression,
-      operator  : Token,
-      left      : Node,
-      right     : Node
-
-    ast_node UnaryExpression,
-      operator  : Token,
-      operand   : Node
-
-    ast_node FunctionCall,
-      receiver  : Node,
-      arguments : ExpressionList,
-      block     : FunctionDefinition?
-
-    ast_node MemberAccessExpression,
-      receiver  : Node,
-      member    : String
-
-    ast_node MemberAssignmentExpression,
-      receiver  : Node,
-      member    : String,
-      value     : Node
-
-    ast_node AccessExpression,
-      target  : Node,
-      key     : Node
-
-    ast_node AccessSetExpression,
-      target  : Node,
-      key     : Node,
-      value   : Node
-
-    ast_node MapEntryDefinition,
-      key     : Node,
-      value   : Node
-
-    ast_node ValueInterpolation,
-      value   : Node
+      def initialize(@children = [] of Node); end
+    end
 
 
+    # The `nil` literal.
+    #
+    #   'nil'
+    class NilLiteral < Node
+    end
 
-    # Literals
+    # A boolean literal.
+    #
+    #   'true' | 'false'
+    class BooleanLiteral < Node
+      property value : Bool
 
-    ast_node Ident,
-      name      : String
+      def initialize(@value); end
+    end
 
-    ast_node Const,
-      name      : String
+    # Any integer literal. Underscores from the literal are removed from the
+    # value stored by this node.
+    #
+    #   [0-9][_0-9]*
+    class IntegerLiteral < Node
+      property value : String
 
+      def initialize(@value); end
+    end
 
-    ast_node IntegerLiteral,
-      value     : String
+    # A float literal. Same as above, but for values including decimals. Float
+    # literals _must_ have a decimal value both before _and_ after the radix.
+    #
+    #   [0-9][_0-9]*\.[_0-9]+
+    class FloatLiteral < Node
+      property value : String
 
-    ast_node FloatLiteral,
-      value     : String
+      def initialize(@value); end
+    end
 
-    ast_node StringLiteral,
-      value     : String
+    # A string literal. Any value wrapped in double quotes. Characters
+    # immediately following a backslash are escaped.
+    #
+    #   '"' \w* '"'
+    class StringLiteral < Node
+      property value : String
 
-    ast_node SymbolLiteral,
-      value     : String
+      def initialize(@value); end
+    end
 
-    ast_node BooleanLiteral,
-      value     : Bool
+    # A symbol literal. The value stored by this node does not include the
+    # designating colon.
+    #
+    #   ':' name
+    # |
+    #   name ':'
+    #
+    # The second form only applies in some contexts (map entries, etc.).
+    class SymbolLiteral < Node
+      property value : String
 
-    ast_node NilLiteral
+      def initialize(@value); end
+    end
 
+    # A List literal. Lists are always delimited by square braces, and may
+    # contain any number of elements, delimited from each other by commas.
+    #
+    #   '[' [ expression [ ',' expression ]* ] ']'
+    class ListLiteral < Node
+      property elements : Array(Node)
 
-    ast_node ListLiteral,
-      elements  : ExpressionList
+      def initialize(@elements = [] of Node)
+      end
+    end
 
-    ast_node MapLiteral,
-      elements  : ExpressionList
+    # A Map literal. Maps are always delimited by curly braces, and may contain
+    # any number of entries, delimited from each other by commas.
+    #
+    #   '{' [ entry [ ',' entry ]* ] '}'
+    #
+    # Entries are dual values separated by a colon. The first value (the key)
+    # may be either a name or a value interpolation (defined later).
+    #
+    #   name ':' expression
+    # |
+    #   interpolation : expression
+    class MapLiteral < Node
+      property elements : Array(Entry)
+
+      record Entry,
+        key : Node,
+        value : Node
+
+      def initialize(@elements = [] of Entry)
+      end
+    end
+
+    # A local variable. Distinct from Calls based on assignments that have been
+    # made in the current scope.
+    #
+    #   [a-z][a-zA-Z0-9_]*
+    class Var < Node
+      property name : String
+
+      def initialize(@name : String)
+      end
+    end
+
+    # A constant. Distinct from other identifiers by a capital letter as the
+    # first character. Constants do not allow re-assignment to their values.
+    #
+    #   [A-Z][a-zA-Z0-9]*
+    class Const < Node
+      property name : String
+
+      def initialize(@name : String)
+      end
+    end
+
+    # An underscore-prefixed identifier. Underscores are specifically intended
+    # to be used as ignored values (values where an assignment is needed to be
+    # semantically correct, but where the value is not used).
+    #
+    #   _[a-zA-Z0-9]*
+    class Underscore < Node
+      property name : String
+
+      def initialize(@name : String)
+      end
+    end
+
+    # A concatenated series of constants. Each entry in the path sets the scope
+    # for lookup of the next entry.
+    #
+    #   const [ '.' const ]*
+    class Path < Node
+      property names : Array(String)
+
+      def initialize(@names = [] of String)
+      end
+
+      def initialize(*names)
+        @names = names.to_a
+      end
+    end
+
+    # A value interpolation. Interpolations are used to dynamically insert
+    # values in places that normally expect a static value, such as keys in
+    # Map literals, or expected values in patterns.
+    #
+    #   '<' postfix_expression '>'
+    #
+    # For anything less precedent than a postfix expression (e.g., `a + b`),
+    # parentheses can be used around the expression (e.g., `<(a + b)>`).
+    class ValueInterpolation < Node
+      property value : Node
+
+      def initialize(@value); end
+    end
+
+    # An assignment. As mentioned for Var, assignments distinguish local
+    # variables from Calls. Those local variables are created by these
+    # assignments.
+    #
+    #   target '=' expression
+    class SimpleAssign < Node
+      property target   : Node
+      property value    : Node
+    end
+
+    # A match assignment. Similar to SimpleAssign, but essentiallly inverted.
+    # Match assignments create expectations that the right-hand-side value
+    # structurally matches the left-hand-side pattern. The "assignment" portion
+    # comes from the ability to name variables on the left-hand-side to capture
+    # specific sub-values from the right-hand-side.
+    #
+    #   pattern '=:' expression
+    class MatchAssign < Node
+      property pattern  : Node
+      property value    : Node
+    end
+
+    # An operational assignment. These function as a shorthand for an operation
+    # followed by an assignment to the same receiver.
+    #
+    #   target op'=' expression
+    #
+    # For example, the operator `||` may be used to conditional assign to the
+    # target if it is currently falsey. The syntax `target ||= expression` is
+    # equivalent to `target = target || expression`. The same applies to other
+    # operations: `target += expression` is equivalent to
+    # `target = target + value`.
+    class OpAssign < Node
+      property target   : Node
+      property op       : String
+      property value    : Node
+
+      def initialize(@target, @op, @value)
+      end
+    end
+
+    # A when expression. These expressions are the fundamental building block
+    # for conditional logic (they replace the ubiquitous `if` expressions in
+    # most C-based languages). They can also be chained with other `when` or
+    # `unless` expressions to create a flat cascade of conditional logic, or an
+    # `else` expression to define an alternative if the condition is not met.
+    #
+    #   'when' condition
+    #     body
+    #   'end'
+    # |
+    #   'when' condition
+    #     body
+    #   'else'
+    #     [ alternative ]
+    #   'end'
+    # |
+    #   'when' condition
+    #     body
+    #   ( when_expression | unless_expression )
+    class When < Node
+      property condition    : Node
+      property body         : Node
+      property alternative  : Node
+
+      def initialize(@condition, @body=Nop.new, @alternative=Nop.new)
+      end
+    end
+
+    # An unless expression. This is functionally the same as the `when`
+    # expression, but evalutes its body when the condition is falsey.
+    #
+    #   'unless' condition
+    #     body
+    #   'end'
+    # |
+    #   'unless' condition
+    #     body
+    #   'else'
+    #     [ alternative ]
+    #   'end'
+    # |
+    #   'unless' condition
+    #     body
+    #   ( when_expression | unless_expression )
+    class Unless < Node
+      property condition    : Node
+      property body         : Node
+      property alternative  : Node
+
+      def initialize(@condition, @body=Nop.new, @alternative=Nop.new)
+      end
+    end
+
+    # A while expression. These expressions are the only native looping
+    # construct in the language. The body of the expression is executed until
+    # the condition evaluates to a falsey value.
+    #
+    #   'while' condition
+    #     body
+    #   'end'
+    class While < Node
+      property condition  : Node
+      property body       : Node
+
+      def initialize(@condition, @body=Nop.new)
+      end
+    end
+
+    # An until expression. This is functionally the same as the `while`
+    # expression, but executes its body until the condition evaluates to a
+    # truthy value.
+    class Until < Node
+      property condition  : Node
+      property body       : Node
+
+      def initialize(@condition, @body=Nop.new)
+      end
+    end
+
+    # A binary operation. This only represents logical operations where the
+    # operation is independent of its operands. Non-logical, infix operations
+    # such as `a + b` are parsed as Calls.
+    abstract class BinaryOp < Node
+      property left   : Node
+      property right  : Node
+
+      def initialize(@left, @right); end
+    end
+
+    # A logical-or expression. Evaluates to a truthy value if either operand
+    # is truthy.
+    #
+    #   expression '||' expression
+    class Or < BinaryOp
+    end
+
+    # A logical-and expression. Evaluates to a truthy value only if both the
+    # operands are truthy.
+    #
+    #   expression '&&' expression
+    class And < BinaryOp
+    end
+
+    # A unary operation. Similar to binary operations, this only represents
+    # operations that are independent of the operand. Dependent operations such
+    # as the unary `+` are parsed as Calls.
+    abstract class UnaryOp < Node
+      property value  : Node
+
+      def initialize(@value); end
+    end
+
+    # A logical-not expression. Evaluates the truthiness of the value and
+    # returns the opposite.
+    #
+    #   '!' postfix_expression
+    #
+    # For anything less precedent than a postfix expression (e.g., `a + b`),
+    # parentheses can be used around the expression (e.g., `!(a + b)`).
+    class Not < UnaryOp
+    end
+
+    # A method call. Calls are the building block of functionality. Any
+    # operation not expressed by a distinct node is considered a call. For
+    # example, `a + b` is a call to the method `+` on `a` with `b` as an
+    # argument, `obj.member` is a call to the method `member` on `obj`, etc.
+    # Additionally, any identifier that is not known to be a local variable
+    # (created by a SimpleAssign or MatchAssign) is considered a Call.
+    #
+    #   [ receiver '.' ] name [ block ]
+    # |
+    #   [ receiver '.' ] name '(' [ arg [ ',' arg ]* ] ')' [ block ]
+    # |
+    #   arg operator arg
+    #
+    # The last form is for infix operations, such as `a + b` shown above, where
+    # `operator` would be the `+`.
+    class Call < Node
+      property! receiver  : Node?
+      property  name      : String
+      property  args      : Array(Node)
+      property  block     : Block?
+
+      def initialize(@receiver, @name, @args = [] of Node, @block=nil)
+      end
+    end
+
+    # A parameter for a method definition. Parameters can take many forms. The
+    # simplest parameter is just a name or a pattern. If the parameter is a
+    # name, it may be prefixed by a '*' to indicate a splat argument, or a '&'
+    # to indicate a block argument.
+    #
+    # Additionally, if the parameter is a name, it may be prefixed with a
+    # pattern and a match operator, or suffixed with a type restriction and/or
+    # guard clause, as shown in the final form.
+    #
+    #   pattern
+    # |
+    #   '*' name
+    # |
+    #   '&' name
+    # |
+    #   [ pattern '=:' ] name [ ':' const ] [ '|' guard ]
+    class Param < Node
+      property! pattern     : Node?
+      property! name        : String?
+      property! restriction : Const?
+      property! guard       : Node?
+
+      def initialize(@pattern=nil, @name=nil, @restriction=nil, @guard=nil)
+      end
+    end
+
+    # A method definition. Parameters for methods must be wrapped in
+    # parentheses. If the method does not accept parameters, the parentheses
+    # may be omitted.
+    #
+    #   'def' name '(' [ param [ ',' param ]* ] ')'
+    #     body
+    #   'end'
+    # |
+    #   'def' name
+    #     body
+    #   'end'
+    class Def < Node
+      property name         : String
+      property params       : Array(Param)
+      property block_param  : Param?
+      property body         : Node
+      property splat_index  : Int32?
+
+      def initialize(@name, @params = [] of Param, @body=Nop.new, @block_param=nil, @splat_index=nil)
+      end
+    end
+
+    # A block definition. Functionally, a block is equivalent to a method
+    # definition. The only difference being that a block is always unnamed.
+    # Syntax-wise, blocks appear as the last expression in a Call, and can be
+    # created either by a `do...end` construct or curly braces (`{ ... }`).
+    #
+    #   'do' [ '|' param [ ',' param ]* '|' ]
+    #     body
+    #   'end'
+    # |
+    #   '{' [ '|' param [ ',' param ]* '|' ] body '}'
+    #
+    # Convention recommends that the brace form only be used for single-line
+    # blocks, and the `do...end` form only be used for multi-line blocks.
+    class Block < Def
+    end
+
+    # A module definition. The name of the module must be a Constant (i.e., it
+    # must start with a capital letter). Not only is this good practice in
+    # general, but it also makes parsing Paths simpler and more efficient.
+    #
+    #   'module' const
+    #     body
+    #   'end'
+    class ModuleDef < Node
+      property name : String
+      property body : Node
+
+      def initialize(@name, @body=Nop.new)
+      end
+    end
+
+    # A require expression. Requires are the primary mechanism for loading code
+    # from other source files. Files will only be loaded once. If another
+    # require appears that references the same file, it will not be loaded
+    # again. The result of a require statement will be a boolean indicating
+    # whether the code was loaded.
+    #
+    #   'require' string
+    class Require < Node
+      property path : String
+
+      def initialize(@path : String); end
+    end
+
+    # An include expression. Includes are the primary mechanism for composing
+    # modules. When an Include is encountered, the module referenced by the
+    # path must already exist. The path can be any valid Path expression, such
+    # as `TopLevelModule` or `Some.Nested.Module`.
+    #
+    #   'include' path
+    class Include < Node
+      property path : Path
+
+      def initialize(@path : Path); end
+    end
+
+    # Any flow control expression. These represent expressions that usurp the
+    # normal flow of execution. A flow control expression may optionally carry
+    # a value to be returned at the destination.
+    class ControlExpr < Node
+      property! value : Node?
+
+      def initialize(@value=nil); end
+    end
+
+    # A return expression. Return expressions are used to prematurely exit a
+    # method
+    #
+    #   'return' [ value ]
+    class Return < ControlExpr
+    end
+
+    # A next expression. Next expressions are semantically equivalent to Return
+    # expressions, and are meant to be used as an alternative inside of Blocks
+    # to avoid confusion around what is returning and to where.
+    #
+    #   'next' [ value ]
+    class Next < ControlExpr
+    end
+
+    # A break expression. Break expressions are similar to Return expressions,
+    # except they cause they also cause the _caller_ to return. The primary use
+    # for a break expression is to end iteration of a collection early.
+    #
+    #   'break' [ value ]
+    class Break < ControlExpr
+    end
   end
 end
