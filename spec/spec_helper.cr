@@ -5,9 +5,9 @@ include Myst
 
 # Run the Myst parser on the given source code, returning the AST that the
 # parser generates for it.
-def parse_program(source : String) : AST::Node
+def parse_program(source : String) : AST::Expressions
   parser = Parser.new(IO::Memory.new(source), __DIR__)
-  program = parser.parse_block
+  program = parser.parse
 end
 
 # Run the given source through the Myst interpreter. The result of

@@ -27,6 +27,9 @@ module Myst
         visitor.visit(self)
       end
 
+      def accept_children(visitor)
+      end
+
       def class_desc : String
         {{@type.name.split("::").last.id.stringify}}
       end
@@ -48,6 +51,10 @@ module Myst
       property children  : Array(Node)
 
       def initialize(@children = [] of Node); end
+
+      def accept_children(visitor)
+        children.each(&.accept(visitor))
+      end
     end
 
 
@@ -141,6 +148,13 @@ module Myst
 
       def initialize(@elements = [] of Entry)
       end
+
+      def accept_children(visitor)
+        elements.each do |key, value|
+          key.accept(visitor)
+          value.accept(visitor)
+        end
+      end
     end
 
     # A local variable. Distinct from Calls based on assignments that have been
@@ -204,6 +218,10 @@ module Myst
       property value : Node
 
       def initialize(@value); end
+
+      def accept_children(visitor)
+        value.accept(visitor)
+      end
     end
 
     # An assignment. As mentioned for Var, assignments distinguish local
@@ -214,6 +232,13 @@ module Myst
     class SimpleAssign < Node
       property target   : Node
       property value    : Node
+
+      def initialize(@target, @value); end
+
+      def accept_children(visitor)
+        target.accept(visitor)
+        value.accept(visitor)
+      end
     end
 
     # A match assignment. Similar to SimpleAssign, but essentiallly inverted.
@@ -226,6 +251,13 @@ module Myst
     class MatchAssign < Node
       property pattern  : Node
       property value    : Node
+
+      def initialize(@pattern, @value); end
+
+      def accept_children(visitor)
+        pattern.accept(visitor)
+        value.accept(visitor)
+      end
     end
 
     # An operational assignment. These function as a shorthand for an operation
@@ -244,6 +276,11 @@ module Myst
       property value    : Node
 
       def initialize(@target, @op, @value)
+      end
+
+      def accept_children(visitor)
+        target.accept(visitor)
+        value.accept(visitor)
       end
     end
 
@@ -273,6 +310,12 @@ module Myst
 
       def initialize(@condition, @body=Nop.new, @alternative=Nop.new)
       end
+
+      def accept_children(visitor)
+        condition.accept(visitor)
+        body.accept(visitor)
+        alternative.accept(visitor)
+      end
     end
 
     # An unless expression. This is functionally the same as the `when`
@@ -298,6 +341,12 @@ module Myst
 
       def initialize(@condition, @body=Nop.new, @alternative=Nop.new)
       end
+
+      def accept_children(visitor)
+        condition.accept(visitor)
+        body.accept(visitor)
+        alternative.accept(visitor)
+      end
     end
 
     # A while expression. These expressions are the only native looping
@@ -313,6 +362,11 @@ module Myst
 
       def initialize(@condition, @body=Nop.new)
       end
+
+      def accept_children(visitor)
+        condition.accept(visitor)
+        body.accept(visitor)
+      end
     end
 
     # An until expression. This is functionally the same as the `while`
@@ -324,6 +378,11 @@ module Myst
 
       def initialize(@condition, @body=Nop.new)
       end
+
+      def accept_children(visitor)
+        condition.accept(visitor)
+        body.accept(visitor)
+      end
     end
 
     # A binary operation. This only represents logical operations where the
@@ -334,6 +393,11 @@ module Myst
       property right  : Node
 
       def initialize(@left, @right); end
+
+      def accept_children(visitor)
+        left.accept(visitor)
+        right.accept(visitor)
+      end
     end
 
     # A logical-or expression. Evaluates to a truthy value if either operand
@@ -357,6 +421,10 @@ module Myst
       property value  : Node
 
       def initialize(@value); end
+
+      def accept_children(visitor)
+        value.accept(visitor)
+      end
     end
 
     # A logical-not expression. Evaluates the truthiness of the value and
@@ -367,6 +435,14 @@ module Myst
     # For anything less precedent than a postfix expression (e.g., `a + b`),
     # parentheses can be used around the expression (e.g., `!(a + b)`).
     class Not < UnaryOp
+    end
+
+    # A splat expression. Splats deconstruct collections to be treated as
+    # multiple individual values. Splats can also indicate the opposite: that a
+    # single collection should be created from multiple values.
+    #
+    #   '*' name
+    class Splat < UnaryOp
     end
 
     # A method call. Calls are the building block of functionality. Any
@@ -391,6 +467,12 @@ module Myst
       property  block     : Block?
 
       def initialize(@receiver, @name, @args = [] of Node, @block=nil)
+      end
+
+      def accept_children(visitor)
+        receiver.try(&.accept(visitor))
+        args.each(&.accept(visitor))
+        block.try(&.accept(visitor))
       end
     end
 
@@ -418,6 +500,12 @@ module Myst
 
       def initialize(@pattern=nil, @name=nil, @restriction=nil, @guard=nil)
       end
+
+      def accept_children(visitor)
+        pattern.try(&.accept(visitor))
+        restriction.try(&.accept(visitor))
+        guard.try(&.accept(visitor))
+      end
     end
 
     # A method definition. Parameters for methods must be wrapped in
@@ -439,6 +527,12 @@ module Myst
       property splat_index  : Int32?
 
       def initialize(@name, @params = [] of Param, @body=Nop.new, @block_param=nil, @splat_index=nil)
+      end
+
+      def accept_children(visitor)
+        params.each(&.accept(visitor))
+        block_param.try(&.accept(visitor))
+        body.accept(visitor)
       end
     end
 
@@ -471,6 +565,10 @@ module Myst
 
       def initialize(@name, @body=Nop.new)
       end
+
+      def accept_children(visitor)
+        body.accept(visitor)
+      end
     end
 
     # A require expression. Requires are the primary mechanism for loading code
@@ -496,6 +594,10 @@ module Myst
       property path : Path
 
       def initialize(@path : Path); end
+
+      def accept_children(visitor)
+        path.accept(visitor)
+      end
     end
 
     # Any flow control expression. These represent expressions that usurp the
@@ -505,6 +607,10 @@ module Myst
       property! value : Node?
 
       def initialize(@value=nil); end
+
+      def accept_children(visitor)
+        value.try(&.accept(visitor))
+      end
     end
 
     # A return expression. Return expressions are used to prematurely exit a

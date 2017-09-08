@@ -24,7 +24,4 @@ module Myst
       end
     end
   end
-
-  class RuntimeError < BaseException
-  end
 end

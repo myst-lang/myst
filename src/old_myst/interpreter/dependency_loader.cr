@@ -34,14 +34,14 @@ module Myst
       path = resolve_path(path_value, working_dir)
       unless already_loaded[path]?
         already_loaded[path] = true
-        Parser.for_file(path).parse_block
+        Parser.for_file(path).parse
       end
     end
 
     def load(path_value, working_dir)
       path = resolve_path(path_value, working_dir)
       already_loaded[path] = true
-      Parser.for_file(path).parse_block
+      Parser.for_file(path).parse
     end
 
 

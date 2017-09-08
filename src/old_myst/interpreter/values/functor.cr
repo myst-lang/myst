@@ -1,20 +1,18 @@
-require "../../ast"
-
 module Myst
   class TFunctor < Value
     struct ParameterSet
-      property  left  : Array(AST::Pattern)
-      property  splat : AST::Pattern?
-      property  right : Array(AST::Pattern)
-      property  block : AST::Pattern?
+      property  left  : Array(AST::Param)
+      property  splat : AST::Param?
+      property  right : Array(AST::Param)
+      property  block : AST::Param?
 
-      def initialize(@left = [] of AST::Pattern, @splat = nil, @right = [] of AST::Pattern, @block = nil); end
+      def initialize(@left = [] of AST::Param, @splat = nil, @right = [] of AST::Param, @block = nil); end
     end
 
     struct Clause
       property  parameters  : ParameterSet
       property  arity       : Int32
-      property  body        : AST::Block
+      property  body        : AST::Expressions
       property  parent      : Scope
 
       def initialize(params, @body, @parent)
@@ -26,9 +24,9 @@ module Myst
       # clause, split by the splat parameter. If there is no splat, all
       # parameters will end up in `left`.
       private def chunk_parameters(params)
-        left  = [] of AST::Pattern
+        left  = [] of AST::Param
         splat = nil
-        right = [] of AST::Pattern
+        right = [] of AST::Param
         block = nil
 
         past_splat = false
@@ -69,13 +67,13 @@ module Myst
     def self.type_name; "Functor"; end
     def type_name; self.class.type_name; end
 
-    def initialize(definition : AST::FunctionDefinition, @parent : Scope)
+    def initialize(definition : AST::Def, @parent : Scope)
       @name       = definition.name
       @clauses    = [] of Clause
       add_clause(definition)
     end
 
-    def add_clause(definition : AST::FunctionDefinition)
+    def add_clause(definition : AST::Def)
       clauses << Clause.new(definition.parameters, definition.body, @parent)
     end
 

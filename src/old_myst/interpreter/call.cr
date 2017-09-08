@@ -54,8 +54,8 @@ class Myst::Interpreter
       # return. To know when this happens, the exception gets marked as
       # "caught" by the call that encountered the `break`, then re-raised
       # to be caught by the next containing call.
-      if b.uncaught?
-        b.uncaught = false
+      unless b.caught?
+        b.caught = true
         raise b
       end
     end
@@ -137,13 +137,13 @@ class Myst::Interpreter
       return nil
     end
 
-    private def match_positional_arg(param : AST::Pattern, arg : Value)
-      @matcher.match(param.type_restriction, arg) if param.type_restriction?
+    private def match_positional_arg(param : AST::Param, arg : Value)
+      @matcher.match(param.restriction, arg) if param.restriction?
       @matcher.match(param.pattern, arg) if param.pattern?
-      @matcher.match(param.name, arg) if param.name?
+      @matcher.bind_variable(param.name, arg) if param.name?
     end
 
-    private def fill_splat(param : AST::Pattern, args : Array(Value))
+    private def fill_splat(param : AST::Param, args : Array(Value))
       # If the splat is unnamed, it's value does not need to be set.
       @matcher.bind_variable(param.name, TList.new(args)) if param.name?
     end

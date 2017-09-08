@@ -51,29 +51,25 @@ module Myst
         match_value(pattern, value)
       when AST::StringLiteral, AST::SymbolLiteral
         match_value(pattern, value)
-      when AST::Ident
-        bind_variable(pattern, value)
-      when AST::Const
-        match_type_restriction(pattern, value)
-      when AST::ValueInterpolation
-        match_value_interpolation(pattern, value)
       when AST::ListLiteral
         match_list(pattern, value)
       when AST::MapLiteral
         match_map(pattern, value)
+      when AST::Var
+        bind_variable(pattern.name, value)
+      when AST::Const
+        match_type_restriction(pattern, value)
+      when AST::ValueInterpolation
+        match_value_interpolation(pattern, value)
       else
         raise MatchError.new(pattern, value)
       end
     end
 
 
-    def bind_variable(pattern : AST::Node, value : Value)
-      if pattern.is_a?(AST::Ident)
-        @interpreter.symbol_table[pattern.name] = value
-        return value
-      else
-        raise "Attempted to bind `#{value}` to a `#{pattern.class}`. Binding must be an Identifier."
-      end
+    def bind_variable(name : String, value : Value)
+      @interpreter.symbol_table[name] = value
+      return value
     end
 
     def match_type_restriction(pattern : AST::Const, value : Value)
@@ -98,8 +94,7 @@ module Myst
 
     def match_map(pattern : AST::MapLiteral, value : Value)
       if value.is_a?(TMap)
-        pattern.elements.children.each do |e|
-          entry = e.as(AST::MapEntryDefinition)
+        pattern.elements.each do |entry|
           @interpreter.recurse(entry.key)
           pattern_key = @interpreter.stack.pop
 
@@ -122,8 +117,8 @@ module Myst
         value_elements = value.value.dup
         left.each { |element_pattern| match(element_pattern, value_elements.shift)  }
         right.each{ |element_pattern| match(element_pattern, value_elements.pop)    }
-        if splat.is_a?(AST::UnaryExpression)
-          bind_variable(splat.operand, TList.new(value_elements))
+        if splat.is_a?(AST::Splat) && (val = splat.value).is_a?(AST::Var)
+          bind_variable(val.name, TList.new(value_elements))
         else
           unless value_elements.empty?
             raise MatchError.new(pattern, value, "Not all elements matched")
@@ -147,17 +142,13 @@ module Myst
       right = [] of AST::Node
 
       past_splat = false
-      pattern.elements.children.each do |el|
-        if el.is_a?(AST::UnaryExpression)
-          if el.operator.type == Token::Type::STAR
-            if past_splat
-              raise "More than one splat collector in a List pattern is not allowed."
-            else
-              splat = el
-              past_splat = true
-            end
+      pattern.elements.each do |el|
+        if el.is_a?(AST::Splat)
+          if past_splat
+            raise "More than one splat collector in a List pattern is not allowed."
           else
-            raise "Unrecognized unary operator `#{el.operator.type}` for List pattern."
+            splat = el
+            past_splat = true
           end
         elsif past_splat
           right.unshift(el)
