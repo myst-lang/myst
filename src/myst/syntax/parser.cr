@@ -80,9 +80,7 @@ module Myst
           raise ParseError.new(current_token, "Expected a literal value")
         end
 
-      literal.at(current_token.location)
-      read_token
-      return literal
+      return literal.at(current_token.location)
     end
   end
 end

@@ -232,6 +232,16 @@ module Myst
       end
     end
 
+    # An explicit reference to self. The primary usecase of `self` is to
+    # disambiguate method calls on an object from local variables.
+    # Specifically, assignment such as `prop = 2`, where `prop=` is a method
+    # on `self` will be parsed as a local variable assignment, whereas
+    # `self.prop = 2` will parse as a call to the `prop=` method.
+    #
+    #   'self'
+    class Self < Node
+    end
+
     # An assignment. As mentioned for Var, assignments distinguish local
     # variables from Calls. Those local variables are created by these
     # assignments.
