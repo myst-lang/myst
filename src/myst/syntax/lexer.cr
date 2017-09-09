@@ -319,7 +319,7 @@ module Myst
     def consume_whitespace
       @current_token.type = Token::Type::WHITESPACE
 
-      while read_char.ascii_whitespace?; end
+      while (c = read_char).ascii_whitespace? && c != '\n'; end
     end
 
     def consume_constant

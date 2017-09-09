@@ -77,7 +77,7 @@ module Myst
         when Token::Type::SYMBOL
           SymbolLiteral.new(current_token.value)
         else
-          raise ParseError.new(current_token, "Expected a literal value")
+          raise ParseError.new("Expected a literal value. Got #{current_token} instead")
         end
 
       return literal.at(current_token.location)

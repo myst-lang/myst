@@ -60,4 +60,12 @@ describe "Tokenizer" do
     tokens.size.should eq(2) # One whitespace token, followed by the EOF.
     tokens.first.type.should eq(Token::Type::WHITESPACE)
   end
+
+  it "lexes newlines characters separately from whitespace" do
+    tokens = tokenize(" \t\n ")
+    tokens.size.should eq(4) # whitespace, newline, whitespace, eof
+    tokens[0].type.should eq(Token::Type::WHITESPACE)
+    tokens[1].type.should eq(Token::Type::NEWLINE)
+    tokens[2].type.should eq(Token::Type::WHITESPACE)
+  end
 end

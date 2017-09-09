@@ -50,11 +50,19 @@ module Myst
     class Expressions < Node
       property children  : Array(Node)
 
-      def initialize(@children = [] of Node); end
+      def initialize; @children = [] of Node; end
+      def initialize(*children)
+        @children = children.map{ |c| c.as(Node) }.to_a
+      end
+
+      def initialize(other : self)
+        @children = other.children
+      end
 
       def accept_children(visitor)
         children.each(&.accept(visitor))
       end
+
 
       def location
         @location || @children.first?.try &.location
