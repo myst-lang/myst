@@ -8,7 +8,7 @@ end
 # This spec only tests simple token types. Types whose value is not static
 # (strings, identifiers, numerics, symbols, etc.) each have their own, more
 # comprehensive specs.
-describe "Tokenizer" do
+describe "Lexer" do
   it "lexes all operators properly" do
     assert_token_type "+",  Token::Type::PLUS
     assert_token_type "-",  Token::Type::MINUS
