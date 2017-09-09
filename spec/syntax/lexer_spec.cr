@@ -63,9 +63,15 @@ describe "Lexer" do
 
   it "lexes newlines characters separately from whitespace" do
     tokens = tokenize(" \t\n ")
-    tokens.size.should eq(4) # whitespace, newline, whitespace, eof
+    tokens.size.should eq(4) # whitespace, newline, whitespace, EOF.
     tokens[0].type.should eq(Token::Type::WHITESPACE)
     tokens[1].type.should eq(Token::Type::NEWLINE)
     tokens[2].type.should eq(Token::Type::WHITESPACE)
+  end
+
+  it "stops lexing after reaching EOF" do
+    tokens = tokenize("thing\0 more things")
+    tokens.size.should eq(2)
+    tokens.last.type.should eq(Token::Type::EOF)
   end
 end

@@ -23,6 +23,9 @@ module Myst
         self
       end
 
+      def at(node : Nil);     self; end
+      def at_end(node : Nil); self; end
+
       def accept(visitor)
         visitor.visit(self)
       end
@@ -155,6 +158,10 @@ module Myst
       property elements : Array(Node)
 
       def initialize(@elements = [] of Node)
+      end
+
+      def accept_children(visitor)
+        elements.each(&.accept(visitor))
       end
 
       def_equals_and_hash elements

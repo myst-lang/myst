@@ -1,5 +1,15 @@
 require "../spec_helper"
 
+private def make_literal_node(value : Nil   ); NilLiteral.new;                  end
+private def make_literal_node(value : Bool  ); BooleanLiteral.new(value);       end
+private def make_literal_node(value : Int   ); IntegerLiteral.new(value.to_s);  end
+private def make_literal_node(value : Float ); FloatLiteral.new(value.to_s);    end
+private def make_literal_node(value : String); StringLiteral.new(value);        end
+private def make_literal_node(value : Symbol); SymbolLiteral.new(value.to_s);   end
+private def make_literal_node(value : Array(T)) forall T
+  ListLiteral.new(value.map{ |v| (v.is_a?(Node) ? v : make_literal_node(v)).as(Node) })
+end
+
 # Check that parsing the given source succeeds. If given, additionally check
 # that the result of parsing the source matches the given nodes.
 private macro it_parses(source, *expected)
@@ -10,6 +20,8 @@ private macro it_parses(source, *expected)
     {% end %}
   end
 end
+
+
 
 include Myst::AST
 
@@ -43,4 +55,15 @@ describe "Parser" do
   it_parses %q(_named),         Underscore.new("_named")
   it_parses %q(_named_longer),  Underscore.new("_named_longer")
   it_parses %q(_1234),          Underscore.new("_1234")
+
+  it_parses %q([]),             ListLiteral.new
+  it_parses %q([call]),         make_literal_node([Call.new(nil, "call")])
+  it_parses %q([1, 2, 3]),      make_literal_node([1, 2, 3])
+  it_parses %q(
+    [
+      100,
+      2.42,
+      "hello"
+    ]
+  ),                            make_literal_node([100, 2.42, "hello"])
 end

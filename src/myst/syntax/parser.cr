@@ -11,10 +11,9 @@ module Myst
 
     def initialize(source : IO, source_file : String? = nil, working_dir : String? = nil)
       super(source, source_file, working_dir)
-
       # A stack to track of variables defined locally in the current scope.
       @local_vars = [Set(String).new]
-      advance
+      read_token
     end
 
 
@@ -25,33 +24,34 @@ module Myst
     # Methods for moving through the source.
     ###
 
-    def advance(allowed_tokens=Token::Type.ignorable, newlines=true)
-      while allowed_tokens.includes?(read_token.type); end
+    # Skip through whitespace tokens, but only if the current token is already
+    # a whitespace token.
+    def skip_space
+      skip_tokens(Token::Type.whitespace)
+    end
+
+    def skip_space_and_newlines
+      skip_tokens(Token::Type.whitespace+[Token::Type::NEWLINE])
+    end
+
+    private def skip_tokens(allowed)
+      while allowed.includes?(@current_token.type)
+        read_token
+      end
       @current_token
     end
 
-    def advance_with_newlines
-      advance
-    end
 
-    def advance_without_newlines
-      advance(newlines: false)
-    end
-
-    def accept(*types : Token::Type, newlines=true)
-      token = @current_token
-      if types.includes?(token.type)
-        advance(newlines: newlines)
-        token
-      else
-        nil
+    def accept(*types : Token::Type)
+      if types.includes?(@current_token.type)
+        token = @current_token
+        read_token
+        return token
       end
     end
 
-    def expect(*types : Token::Type, newlines=true)
-      token = @current_token
-      raise ParseError.new("Expected one of #{types}, got #{token}") unless accept(*types, newlines: newlines)
-      token
+    def expect(*types : Token::Type)
+      accept(*types) || raise ParseError.new("Expected one of #{types.join(',')}, got #{@current_token.type}")
     end
 
 
@@ -59,7 +59,8 @@ module Myst
     ###
     # Parsers
     #
-    # Methods for parsing source material into nodes.
+    # Methods for parsing source material into nodes. Each method will consume
+    # exactly the number of tokens required to build its node.
     ###
 
     # Parse the entirety of the given source. Currently, this assumes valid
@@ -67,61 +68,99 @@ module Myst
     def parse
       program = Expressions.new
       until accept(Token::Type::EOF)
+        skip_space_and_newlines
         program.children << parse_expression
+        skip_space_and_newlines
       end
 
       program
     end
 
     def parse_expression
-      expr = case current_token.type
-      when Token::Type::IDENT
-        parse_var_or_call
-      else
-        parse_literal
-      end
+      expr =
+          case current_token.type
+          when Token::Type::IDENT
+            parse_var_or_call
+          else
+            parse_literal
+          end
 
-      advance_with_newlines
-
+      skip_space_and_newlines
       return expr
     end
 
     def parse_var_or_call
-      name = expect(Token::Type::IDENT).value
+      token = expect(Token::Type::IDENT)
+      name  = token.value
 
       if name.starts_with?('_')
-        return Underscore.new(name)
+        return Underscore.new(name).at(token.location)
       end
 
       if is_local_var?(name)
-        return Var.new(name)
+        return Var.new(name).at(token.location)
       end
 
-      return Call.new(nil, name)
+      return Call.new(nil, name).at(token.location)
     end
 
     def parse_literal
       literal =
-        case current_token.type
-        when Token::Type::NIL
-          NilLiteral.new
-        when Token::Type::TRUE
-          BooleanLiteral.new(true)
-        when Token::Type::FALSE
-          BooleanLiteral.new(false)
-        when Token::Type::INTEGER
-          IntegerLiteral.new(current_token.value)
-        when Token::Type::FLOAT
-          FloatLiteral.new(current_token.value)
-        when Token::Type::STRING
-          StringLiteral.new(current_token.value)
-        when Token::Type::SYMBOL
-          SymbolLiteral.new(current_token.value)
-        else
-          raise ParseError.new("Expected a literal value. Got #{current_token} instead")
-        end
+          case (token = current_token).type
+          when Token::Type::NIL
+            read_token
+            NilLiteral.new
+          when Token::Type::TRUE
+            read_token
+            BooleanLiteral.new(true)
+          when Token::Type::FALSE
+            read_token
+            BooleanLiteral.new(false)
+          when Token::Type::INTEGER
+            read_token
+            IntegerLiteral.new(token.value)
+          when Token::Type::FLOAT
+            read_token
+            FloatLiteral.new(token.value)
+          when Token::Type::STRING
+            read_token
+            StringLiteral.new(token.value)
+          when Token::Type::SYMBOL
+            read_token
+            SymbolLiteral.new(token.value)
+          when Token::Type::LBRACE
+            parse_list_literal
+          else
+            raise ParseError.new("Expected a literal value. Got #{current_token.inspect} instead")
+          end
 
       return literal.at(current_token.location)
+    end
+
+
+    def parse_list_literal
+      start = expect(Token::Type::LBRACE)
+      list = ListLiteral.new.at(start.location)
+
+      skip_space_and_newlines
+      # If the next token is a closing brace, create an empty list
+      if finish = accept(Token::Type::RBRACE)
+        return list.at_end(finish.location)
+      end
+
+      # Otherwise, there must be at least one expression to be parsed.
+      loop do
+        list.elements << parse_expression
+        skip_space_and_newlines
+        if accept(Token::Type::COMMA)
+          skip_space_and_newlines
+          next
+        end
+        if finish = accept(Token::Type::RBRACE)
+          skip_space
+          return list.at_end(finish.location)
+        end
+      end
     end
 
 

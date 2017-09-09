@@ -43,7 +43,7 @@ module Myst
     end
 
     def lex_all
-      until finished?
+      until @current_token.type == Token::Type::EOF
         read_token
       end
     end
@@ -318,7 +318,6 @@ module Myst
 
     def consume_whitespace
       @current_token.type = Token::Type::WHITESPACE
-
       while (c = read_char).ascii_whitespace? && c != '\n'; end
     end
 

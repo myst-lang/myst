@@ -37,6 +37,11 @@ module Myst
       io << "#{node.class_desc}|#{node.value}\n"
     end
 
+    def visit(node : ListLiteral)
+      io << "#{node.class_desc}|#{node.elements.size}\n"
+      node.accept_children(self)
+    end
+
 
 
     COLORS = [

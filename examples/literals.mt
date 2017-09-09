@@ -6,3 +6,5 @@
 "multiple
 lines"
 nil
+
+[1, 2, 3]

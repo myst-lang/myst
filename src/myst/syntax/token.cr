@@ -70,12 +70,12 @@ module Myst
       UNKNOWN       # Unresolved type
 
 
-      def self.ignorable
-        [ COMMENT, NEWLINE, WHITESPACE, UNKNOWN ]
+      def self.whitespace
+        [ COMMENT, WHITESPACE, UNKNOWN ]
       end
 
-      def ignorable?
-        self.ignorable.includes?(self)
+      def whitespace?
+        self.whitespace.includes?(self)
       end
 
       def self.keywords
