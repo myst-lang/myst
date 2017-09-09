@@ -543,7 +543,7 @@ module Myst
       property! receiver  : Node?
       property  name      : String
       property  args      : Array(Node)
-      property  block     : Block?
+      property! block     : Block?
 
       def initialize(@receiver, @name, @args = [] of Node, @block=nil)
       end
@@ -554,7 +554,7 @@ module Myst
         block.try(&.accept(visitor))
       end
 
-      def_equals_and_hash receiver, name, args, block
+      def_equals_and_hash receiver?, name, args, block?
     end
 
     # A parameter for a method definition. Parameters can take many forms. The
@@ -588,7 +588,7 @@ module Myst
         guard.try(&.accept(visitor))
       end
 
-      def_equals_and_hash pattern, name, restriction, guard
+      def_equals_and_hash pattern?, name?, restriction?, guard?
     end
 
     # A method definition. Parameters for methods must be wrapped in
@@ -603,11 +603,11 @@ module Myst
     #     body
     #   'end'
     class Def < Node
-      property name         : String
-      property params       : Array(Param)
-      property block_param  : Param?
-      property body         : Node
-      property splat_index  : Int32?
+      property  name         : String
+      property  params       : Array(Param)
+      property! block_param  : Param?
+      property  body         : Node
+      property! splat_index  : Int32?
 
       def initialize(@name, @params = [] of Param, @body=Nop.new, @block_param=nil, @splat_index=nil)
       end
@@ -618,7 +618,7 @@ module Myst
         body.accept(visitor)
       end
 
-      def_equals_and_hash name, params, block_param, body, splat_index
+      def_equals_and_hash name, params, block_param?, body, splat_index?
     end
 
     # A block definition. Functionally, a block is equivalent to a method
@@ -704,7 +704,7 @@ module Myst
         value.try(&.accept(visitor))
       end
 
-      def_equals_and_hash value
+      def_equals_and_hash value?
     end
 
     # A return expression. Return expressions are used to prematurely exit a

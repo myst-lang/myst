@@ -33,4 +33,14 @@ describe "Parser" do
 
   it_parses %q(:name),          SymbolLiteral.new("name")
   it_parses %q(:"hello world"), SymbolLiteral.new("hello world")
+
+  # Identifiers not previously defined as locals are considered Calls.
+  it_parses %q(what),             Call.new(nil, "what")
+  it_parses %q(long_identifier),  Call.new(nil, "long_identifier")
+  it_parses %q(ident_with_1234),  Call.new(nil, "ident_with_1234")
+
+  it_parses %q(_),              Underscore.new("_")
+  it_parses %q(_named),         Underscore.new("_named")
+  it_parses %q(_named_longer),  Underscore.new("_named_longer")
+  it_parses %q(_1234),          Underscore.new("_1234")
 end
