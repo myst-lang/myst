@@ -5,7 +5,7 @@ require "../spec_helper"
 private macro it_parses(source, *expected)
   it %q(parses `{{source.id}}`) do
     result = parse_program({{source}})
-    {% if expected.empty? %}
+    {% unless expected.empty? %}
       result.should eq(Expressions.new(*{{expected}}))
     {% end %}
   end
@@ -31,5 +31,6 @@ describe "Parser" do
   it_parses %q(""),             StringLiteral.new("")
   it_parses %q("  \t  "),       StringLiteral.new("  \t  ")
 
-  it_parses %q(:name),          SymbolLiteral.new(":name")
+  it_parses %q(:name),          SymbolLiteral.new("name")
+  it_parses %q(:"hello world"), SymbolLiteral.new("hello world")
 end

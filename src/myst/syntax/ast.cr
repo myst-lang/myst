@@ -41,6 +41,7 @@ module Myst
     #
     #
     class Nop < Node
+      def_equals_and_hash
     end
 
 
@@ -71,6 +72,8 @@ module Myst
       def end_location
         @end_location || @children.last?.try &.end_location
       end
+
+      def_equals_and_hash children
     end
 
 
@@ -78,6 +81,7 @@ module Myst
     #
     #   'nil'
     class NilLiteral < Node
+      def_equals_and_hash
     end
 
     # A boolean literal.
@@ -87,6 +91,8 @@ module Myst
       property value : Bool
 
       def initialize(@value); end
+
+      def_equals_and_hash value
     end
 
     # Any integer literal. Underscores from the literal are removed from the
@@ -97,6 +103,8 @@ module Myst
       property value : String
 
       def initialize(@value); end
+
+      def_equals_and_hash value
     end
 
     # A float literal. Same as above, but for values including decimals. Float
@@ -107,6 +115,8 @@ module Myst
       property value : String
 
       def initialize(@value); end
+
+      def_equals_and_hash value
     end
 
     # A string literal. Any value wrapped in double quotes. Characters
@@ -117,6 +127,8 @@ module Myst
       property value : String
 
       def initialize(@value); end
+
+      def_equals_and_hash value
     end
 
     # A symbol literal. The value stored by this node does not include the
@@ -131,6 +143,8 @@ module Myst
       property value : String
 
       def initialize(@value); end
+
+      def_equals_and_hash value
     end
 
     # A List literal. Lists are always delimited by square braces, and may
@@ -142,6 +156,8 @@ module Myst
 
       def initialize(@elements = [] of Node)
       end
+
+      def_equals_and_hash elements
     end
 
     # A Map literal. Maps are always delimited by curly braces, and may contain
@@ -171,6 +187,8 @@ module Myst
           entry.value.accept(visitor)
         end
       end
+
+      def_equals_and_hash elements
     end
 
     # A local variable. Distinct from Calls based on assignments that have been
@@ -182,6 +200,8 @@ module Myst
 
       def initialize(@name : String)
       end
+
+      def_equals_and_hash name
     end
 
     # A constant. Distinct from other identifiers by a capital letter as the
@@ -193,6 +213,8 @@ module Myst
 
       def initialize(@name : String)
       end
+
+      def_equals_and_hash name
     end
 
     # An underscore-prefixed identifier. Underscores are specifically intended
@@ -205,6 +227,10 @@ module Myst
 
       def initialize(@name : String)
       end
+
+      # The name of an underscore is inconsequential. So long as two objects
+      # are Underscore nodes, they should be considered equal.
+      def_equals_and_hash
     end
 
     # A concatenated series of constants. Each entry in the path sets the scope
@@ -220,6 +246,8 @@ module Myst
       def initialize(*names)
         @names = names.to_a
       end
+
+      def_equals_and_hash names
     end
 
     # A value interpolation. Interpolations are used to dynamically insert
@@ -238,6 +266,8 @@ module Myst
       def accept_children(visitor)
         value.accept(visitor)
       end
+
+      def_equals_and_hash value
     end
 
     # An explicit reference to self. The primary usecase of `self` is to
@@ -248,6 +278,7 @@ module Myst
     #
     #   'self'
     class Self < Node
+      def_equals_and_hash
     end
 
     # An assignment. As mentioned for Var, assignments distinguish local
@@ -265,6 +296,8 @@ module Myst
         target.accept(visitor)
         value.accept(visitor)
       end
+
+      def_equals_and_hash target, value
     end
 
     # A match assignment. Similar to SimpleAssign, but essentiallly inverted.
@@ -284,6 +317,8 @@ module Myst
         pattern.accept(visitor)
         value.accept(visitor)
       end
+
+      def_equals_and_hash pattern, value
     end
 
     # An operational assignment. These function as a shorthand for an operation
@@ -308,6 +343,8 @@ module Myst
         target.accept(visitor)
         value.accept(visitor)
       end
+
+      def_equals_and_hash target, op, value
     end
 
     # A when expression. These expressions are the fundamental building block
@@ -342,6 +379,8 @@ module Myst
         body.accept(visitor)
         alternative.accept(visitor)
       end
+
+      def_equals_and_hash condition, body, alternative
     end
 
     # An unless expression. This is functionally the same as the `when`
@@ -373,6 +412,8 @@ module Myst
         body.accept(visitor)
         alternative.accept(visitor)
       end
+
+      def_equals_and_hash condition, body, alternative
     end
 
     # A while expression. These expressions are the only native looping
@@ -393,6 +434,8 @@ module Myst
         condition.accept(visitor)
         body.accept(visitor)
       end
+
+      def_equals_and_hash condition, body
     end
 
     # An until expression. This is functionally the same as the `while`
@@ -409,6 +452,8 @@ module Myst
         condition.accept(visitor)
         body.accept(visitor)
       end
+
+      def_equals_and_hash condition, body
     end
 
     # A binary operation. This only represents logical operations where the
@@ -424,6 +469,8 @@ module Myst
         left.accept(visitor)
         right.accept(visitor)
       end
+
+      def_equals_and_hash left, right
     end
 
     # A logical-or expression. Evaluates to a truthy value if either operand
@@ -431,6 +478,7 @@ module Myst
     #
     #   expression '||' expression
     class Or < BinaryOp
+      def_equals_and_hash
     end
 
     # A logical-and expression. Evaluates to a truthy value only if both the
@@ -438,6 +486,7 @@ module Myst
     #
     #   expression '&&' expression
     class And < BinaryOp
+      def_equals_and_hash
     end
 
     # A unary operation. Similar to binary operations, this only represents
@@ -451,6 +500,8 @@ module Myst
       def accept_children(visitor)
         value.accept(visitor)
       end
+
+      def_equals_and_hash value
     end
 
     # A logical-not expression. Evaluates the truthiness of the value and
@@ -461,6 +512,7 @@ module Myst
     # For anything less precedent than a postfix expression (e.g., `a + b`),
     # parentheses can be used around the expression (e.g., `!(a + b)`).
     class Not < UnaryOp
+      def_equals_and_hash
     end
 
     # A splat expression. Splats deconstruct collections to be treated as
@@ -469,6 +521,7 @@ module Myst
     #
     #   '*' name
     class Splat < UnaryOp
+      def_equals_and_hash
     end
 
     # A method call. Calls are the building block of functionality. Any
@@ -500,6 +553,8 @@ module Myst
         args.each(&.accept(visitor))
         block.try(&.accept(visitor))
       end
+
+      def_equals_and_hash receiver, name, args, block
     end
 
     # A parameter for a method definition. Parameters can take many forms. The
@@ -532,6 +587,8 @@ module Myst
         restriction.try(&.accept(visitor))
         guard.try(&.accept(visitor))
       end
+
+      def_equals_and_hash pattern, name, restriction, guard
     end
 
     # A method definition. Parameters for methods must be wrapped in
@@ -560,6 +617,8 @@ module Myst
         block_param.try(&.accept(visitor))
         body.accept(visitor)
       end
+
+      def_equals_and_hash name, params, block_param, body, splat_index
     end
 
     # A block definition. Functionally, a block is equivalent to a method
@@ -576,6 +635,7 @@ module Myst
     # Convention recommends that the brace form only be used for single-line
     # blocks, and the `do...end` form only be used for multi-line blocks.
     class Block < Def
+      def_equals_and_hash
     end
 
     # A module definition. The name of the module must be a Constant (i.e., it
@@ -595,6 +655,8 @@ module Myst
       def accept_children(visitor)
         body.accept(visitor)
       end
+
+      def_equals_and_hash name, body
     end
 
     # A require expression. Requires are the primary mechanism for loading code
@@ -608,6 +670,8 @@ module Myst
       property path : String
 
       def initialize(@path : String); end
+
+      def_equals_and_hash path
     end
 
     # An include expression. Includes are the primary mechanism for composing
@@ -624,6 +688,8 @@ module Myst
       def accept_children(visitor)
         path.accept(visitor)
       end
+
+      def_equals_and_hash path
     end
 
     # Any flow control expression. These represent expressions that usurp the
@@ -637,6 +703,8 @@ module Myst
       def accept_children(visitor)
         value.try(&.accept(visitor))
       end
+
+      def_equals_and_hash value
     end
 
     # A return expression. Return expressions are used to prematurely exit a
@@ -644,6 +712,7 @@ module Myst
     #
     #   'return' [ value ]
     class Return < ControlExpr
+      def_equals_and_hash
     end
 
     # A next expression. Next expressions are semantically equivalent to Return
@@ -652,6 +721,7 @@ module Myst
     #
     #   'next' [ value ]
     class Next < ControlExpr
+      def_equals_and_hash
     end
 
     # A break expression. Break expressions are similar to Return expressions,
@@ -660,6 +730,7 @@ module Myst
     #
     #   'break' [ value ]
     class Break < ControlExpr
+      def_equals_and_hash
     end
   end
 end
