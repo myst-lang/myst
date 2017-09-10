@@ -80,17 +80,23 @@ module Myst
     end
 
 
+    # Any literal node. This intermediate class allows the parser to easily
+    # assert that a node is a literal, without worry about type expansion to
+    # `Node+`, which would allow any Node type.
+    class Literal < Node
+    end
+
     # The `nil` literal.
     #
     #   'nil'
-    class NilLiteral < Node
+    class NilLiteral < Literal
       def_equals_and_hash
     end
 
     # A boolean literal.
     #
     #   'true' | 'false'
-    class BooleanLiteral < Node
+    class BooleanLiteral < Literal
       property value : Bool
 
       def initialize(@value); end
@@ -102,7 +108,7 @@ module Myst
     # value stored by this node.
     #
     #   [0-9][_0-9]*
-    class IntegerLiteral < Node
+    class IntegerLiteral < Literal
       property value : String
 
       def initialize(@value); end
@@ -114,7 +120,7 @@ module Myst
     # literals _must_ have a decimal value both before _and_ after the radix.
     #
     #   [0-9][_0-9]*\.[_0-9]+
-    class FloatLiteral < Node
+    class FloatLiteral < Literal
       property value : String
 
       def initialize(@value); end
@@ -126,7 +132,7 @@ module Myst
     # immediately following a backslash are escaped.
     #
     #   '"' \w* '"'
-    class StringLiteral < Node
+    class StringLiteral < Literal
       property value : String
 
       def initialize(@value); end
@@ -142,7 +148,7 @@ module Myst
     #   name ':'
     #
     # The second form only applies in some contexts (map entries, etc.).
-    class SymbolLiteral < Node
+    class SymbolLiteral < Literal
       property value : String
 
       def initialize(@value); end
@@ -154,7 +160,7 @@ module Myst
     # contain any number of elements, delimited from each other by commas.
     #
     #   '[' [ expression [ ',' expression ]* ] ']'
-    class ListLiteral < Node
+    class ListLiteral < Literal
       property elements : Array(Node)
 
       def initialize(@elements = [] of Node)
@@ -178,7 +184,7 @@ module Myst
     #   name ':' expression
     # |
     #   interpolation : expression
-    class MapLiteral < Node
+    class MapLiteral < Literal
       property elements : Array(Entry)
 
       record Entry,

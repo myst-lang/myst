@@ -29,6 +29,20 @@ private macro it_parses(source, *expected)
   end
 end
 
+# Expect the given source to raise an error when parsed. If `message` is given,
+# the raised error will be expected to contain at least that content.
+private macro it_does_not_parse(source, message=nil)
+  it %q(does not parse `{{source.id}}`) do
+    exception = expect_raises(ParseError) do
+      result = parse_program({{source}})
+    end
+
+    {% if message %}
+      (exception.message || "").downcase.should match({{message}})
+    {% end %}
+  end
+end
+
 
 
 include Myst::AST
@@ -158,4 +172,15 @@ describe "Parser" do
     a = 2
     a
   ),              Call.new(nil, "a"), SimpleAssign.new(Var.new("a"), literal(2)), Var.new("a")
+
+  # Underscores can be the target of an assignment, and they should be declared in the current scope.
+  it_parses %q(_ = 2),  SimpleAssign.new(Underscore.new("_"), literal(2))
+
+  # Assignments can not be made to literal values.
+  it_does_not_parse %q(2 = 4),          /cannot assign to literal value/i
+  it_does_not_parse %q(2.56 = 4),       /cannot assign to literal value/i
+  it_does_not_parse %q("hi" = 4),       /cannot assign to literal value/i
+  it_does_not_parse %q(nil = 4),        /cannot assign to literal value/i
+  it_does_not_parse %q(false = true),   /cannot assign to literal value/i
+  it_does_not_parse %q([1, 2, 3] = 4),  /cannot assign to literal value/i
 end

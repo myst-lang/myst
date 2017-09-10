@@ -312,6 +312,9 @@ module Myst
       when Var
         push_local_var(node.name)
         return node
+      when Underscore
+        push_local_var(node.name)
+        return node
       when Call
         # If no explicit receiver was set on the Call, consider it a Var.
         if node.receiver? || node.block? || !node.args.empty?
@@ -320,8 +323,10 @@ module Myst
           push_local_var(node.name)
           return Var.new(node.name).at(node)
         end
+      when Literal
+        raise ParseError.new("Cannot assign to literal value.")
       else
-        raise "Invalid value for LHS of Assign: #{node}"
+        raise ParseError.new("Invalid value for LHS of Assign: #{node}")
       end
     end
 
