@@ -161,6 +161,9 @@ module Myst
       when '/'
         @current_token.type = Token::Type::SLASH
         read_char
+      when '%'
+        @current_token.type = Token::Type::MODULO
+        read_char
       when '\n'
         @current_token.type = Token::Type::NEWLINE
         read_char

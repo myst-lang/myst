@@ -77,16 +77,105 @@ module Myst
     end
 
     def parse_expression
-      expr =
-          case current_token.type
-          when Token::Type::IDENT
-            parse_var_or_call
-          else
-            parse_literal
-          end
+      expr = parse_logical_or
 
       skip_space_and_newlines
       return expr
+    end
+
+    def parse_logical_or
+      left = parse_logical_and
+      skip_space_and_newlines
+
+      if accept(Token::Type::OROR)
+        skip_space_and_newlines
+        right = parse_logical_or
+        return Or.new(left, right).at(left).at_end(right)
+      end
+
+      return left
+    end
+
+    def parse_logical_and
+      left = parse_equality
+      skip_space_and_newlines
+
+      if accept(Token::Type::ANDAND)
+        skip_space_and_newlines
+        right = parse_logical_and
+        return And.new(left, right).at(left).at_end(right)
+      end
+
+      return left
+    end
+
+    def parse_equality
+      left = parse_comparative
+      skip_space_and_newlines
+
+      if op = accept(Token::Type::EQUALEQUAL, Token::Type::NOTEQUAL)
+        skip_space_and_newlines
+        right = parse_equality
+        return Call.new(left, op.value, [right] of Node).at(left).at_end(right)
+      end
+
+      return left
+    end
+
+    def parse_comparative
+      left = parse_additive
+      skip_space_and_newlines
+
+      if op = accept(Token::Type::LESS, Token::Type::LESSEQUAL, Token::Type::GREATEREQUAL, Token::Type::GREATER)
+        skip_space_and_newlines
+        right = parse_comparative
+        return Call.new(left, op.value, [right] of Node).at(left).at_end(right)
+      end
+
+      return left
+    end
+
+    def parse_additive(left=nil)
+      left ||= parse_multiplicative
+      skip_space_and_newlines
+
+      if op = accept(Token::Type::PLUS, Token::Type::MINUS)
+        skip_space_and_newlines
+        right = parse_additive
+        return Call.new(left, op.value, [right] of Node).at(left).at_end(right)
+      end
+
+      return left
+    end
+
+    def parse_multiplicative(left=nil)
+      left ||= parse_primary
+      skip_space_and_newlines
+
+      if op = accept(Token::Type::STAR, Token::Type::SLASH, Token::Type::MODULO)
+        skip_space_and_newlines
+        right = parse_multiplicative
+        return Call.new(left, op.value, [right] of Node).at(left).at_end(right)
+      end
+
+      return left
+    end
+
+    def parse_primary
+      case current_token.type
+      when Token::Type::LPAREN
+        accept(Token::Type::LPAREN)
+        skip_space_and_newlines
+        expr = parse_expression
+        skip_space_and_newlines
+        expect(Token::Type::RPAREN)
+        skip_space_and_newlines
+        return expr
+      when Token::Type::IDENT
+        parse_var_or_call
+      else
+        parse_literal
+      end
     end
 
     def parse_var_or_call

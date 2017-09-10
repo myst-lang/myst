@@ -34,6 +34,7 @@ module Myst
       MINUS         # -
       STAR          # *
       SLASH         # /
+      MODULO        # %
 
       EQUAL         # =
       MATCH         # =:
