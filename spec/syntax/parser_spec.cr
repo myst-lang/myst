@@ -129,4 +129,33 @@ describe "Parser" do
 
   # Ensure Calls can be used as operands to infix expressions
   it_parses %q(call + other * last), Call.new(Call.new(nil, "call"), "+", [Call.new(Call.new(nil, "other"), "*", [Call.new(nil, "last").as(Node)]).as(Node)])
+
+
+
+  # Assignments
+
+  it_parses %q(a = b),      SimpleAssign.new(Var.new("a"), Call.new(nil, "b"))
+  it_parses %q(a = b = c),  SimpleAssign.new(Var.new("a"), SimpleAssign.new(Var.new("b"), Call.new(nil, "c")))
+
+  # Precedence with logical operations is odd.
+  # An assignment with a logical operation as an argument considers the logical as higher priority.
+  it_parses %q(a = 1 && 2),  SimpleAssign.new(Var.new("a"), And.new(literal(1), literal(2)))
+  it_parses %q(a = 1 || 2),  SimpleAssign.new(Var.new("a"), Or.new(literal(1), literal(2)))
+  # A logical operation with an assignment as an argument considers the assignment as higher priority.
+  it_parses %q(1 && b = 2),  And.new(literal(1), SimpleAssign.new(Var.new("b"), literal(2)))
+  it_parses %q(1 || b = 2),  Or.new(literal(1), SimpleAssign.new(Var.new("b"), literal(2)))
+
+  # Assignments take over the remainder of the expression when appearing in a logical operation.
+  it_parses %q(1 || b = 2 && 3), Or.new(literal(1), SimpleAssign.new(Var.new("b"), And.new(literal(2), literal(3))))
+  it_parses %q(1 || b = 2 + c = 3 || 4), Or.new(literal(1), SimpleAssign.new(Var.new("b"), Call.new(literal(2), "+", [SimpleAssign.new(Var.new("c"), Or.new(literal(3), literal(4))).as(Node)])))
+
+  # Assignments within parentheses are contained by them.
+  it_parses %q(1 || (b = 2) && 3), Or.new(literal(1), And.new(SimpleAssign.new(Var.new("b"), literal(2)), literal(3)))
+
+  # Once a variable has been assigned, future references to it should be a Var, not a Call.
+  it_parses %q(
+    a
+    a = 2
+    a
+  ),              Call.new(nil, "a"), SimpleAssign.new(Var.new("a"), literal(2)), Var.new("a")
 end

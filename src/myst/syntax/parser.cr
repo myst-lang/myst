@@ -78,7 +78,6 @@ module Myst
 
     def parse_expression
       expr = parse_logical_or
-
       skip_space_and_newlines
       return expr
     end
@@ -135,8 +134,8 @@ module Myst
       return left
     end
 
-    def parse_additive(left=nil)
-      left ||= parse_multiplicative
+    def parse_additive
+      left = parse_multiplicative
       skip_space_and_newlines
 
       if op = accept(Token::Type::PLUS, Token::Type::MINUS)
@@ -148,8 +147,8 @@ module Myst
       return left
     end
 
-    def parse_multiplicative(left=nil)
-      left ||= parse_primary
+    def parse_multiplicative
+      left = parse_assign
       skip_space_and_newlines
 
       if op = accept(Token::Type::STAR, Token::Type::SLASH, Token::Type::MODULO)
@@ -159,6 +158,18 @@ module Myst
       end
 
       return left
+    end
+
+    def parse_assign
+      target = parse_primary
+      skip_space_and_newlines
+      if accept(Token::Type::EQUAL)
+        skip_space_and_newlines
+        value = parse_expression
+        return SimpleAssign.new(to_lhs(target), value).at(target).at_end(value)
+      end
+
+      return target
     end
 
     def parse_primary
@@ -284,6 +295,34 @@ module Myst
       # between the two.
       expect(Token::Type::COLON)
       return SymbolLiteral.new(name.value).at(name.location).at_end(name.location)
+    end
+
+
+
+    ###
+    # Conversions
+    #
+    # Methods to convert node types based on some context.
+    ###
+
+    # Convert the given node to one that is suitable for the left-hand-side of
+    # an *Assign node.
+    private def to_lhs(node)
+      case node
+      when Var
+        push_local_var(node.name)
+        return node
+      when Call
+        # If no explicit receiver was set on the Call, consider it a Var.
+        if node.receiver? || node.block? || !node.args.empty?
+          return node
+        else
+          push_local_var(node.name)
+          return Var.new(node.name).at(node)
+        end
+      else
+        raise "Invalid value for LHS of Assign: #{node}"
+      end
     end
 
 
