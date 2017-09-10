@@ -130,6 +130,8 @@ module Myst
             SymbolLiteral.new(token.value)
           when Token::Type::LBRACE
             parse_list_literal
+          when Token::Type::LCURLY
+            parse_map_literal
           else
             raise ParseError.new("Expected a literal value. Got #{current_token.inspect} instead")
           end
@@ -157,10 +159,42 @@ module Myst
           next
         end
         if finish = accept(Token::Type::RBRACE)
-          skip_space
           return list.at_end(finish.location)
         end
       end
+    end
+
+    def parse_map_literal
+      start = expect(Token::Type::LCURLY)
+      map = MapLiteral.new.at(start.location)
+
+      skip_space_and_newlines
+      if finish = accept(Token::Type::RCURLY)
+        return map.at_end(finish.location)
+      end
+
+      loop do
+        key = parse_map_key
+        skip_space_and_newlines
+        value = parse_expression
+        map.elements << MapLiteral::Entry.new(key: key, value: value)
+        skip_space_and_newlines
+        if accept(Token::Type::COMMA)
+          skip_space_and_newlines
+          next
+        end
+        if finish = accept(Token::Type::RCURLY)
+          return map.at_end(finish.location)
+        end
+      end
+    end
+
+    def parse_map_key
+      name = expect(Token::Type::IDENT)
+      # Symbol keys must be _immediately_ followed by a colon, with no spaces
+      # between the two.
+      expect(Token::Type::COLON)
+      return SymbolLiteral.new(name.value).at(name.location).at_end(name.location)
     end
 
 

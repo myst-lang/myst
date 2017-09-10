@@ -1,13 +1,21 @@
 require "../spec_helper"
 
-private def make_literal_node(value : Nil   ); NilLiteral.new;                  end
-private def make_literal_node(value : Bool  ); BooleanLiteral.new(value);       end
-private def make_literal_node(value : Int   ); IntegerLiteral.new(value.to_s);  end
-private def make_literal_node(value : Float ); FloatLiteral.new(value.to_s);    end
-private def make_literal_node(value : String); StringLiteral.new(value);        end
-private def make_literal_node(value : Symbol); SymbolLiteral.new(value.to_s);   end
+private def make_literal_node(value : Node  );  value; end
+private def make_literal_node(value : Nil   );  NilLiteral.new;                 end
+private def make_literal_node(value : Bool  );  BooleanLiteral.new(value);      end
+private def make_literal_node(value : Int   );  IntegerLiteral.new(value.to_s); end
+private def make_literal_node(value : Float );  FloatLiteral.new(value.to_s);   end
+private def make_literal_node(value : String);  StringLiteral.new(value);       end
+private def make_literal_node(value : Symbol);  SymbolLiteral.new(value.to_s);  end
 private def make_literal_node(value : Array(T)) forall T
   ListLiteral.new(value.map{ |v| (v.is_a?(Node) ? v : make_literal_node(v)).as(Node) })
+end
+private def make_literal_node(value : Hash(K, V)) forall K, V
+  entries = value.map do |k, v|
+    MapLiteral::Entry.new(key: make_literal_node(k), value: make_literal_node(v))
+  end
+
+  MapLiteral.new(entries)
 end
 
 # Check that parsing the given source succeeds. If given, additionally check
@@ -59,6 +67,7 @@ describe "Parser" do
   it_parses %q([]),             ListLiteral.new
   it_parses %q([call]),         make_literal_node([Call.new(nil, "call")])
   it_parses %q([1, 2, 3]),      make_literal_node([1, 2, 3])
+  it_parses %q([  1, 3    ]),   make_literal_node([1, 3])
   it_parses %q(
     [
       100,
@@ -66,4 +75,14 @@ describe "Parser" do
       "hello"
     ]
   ),                            make_literal_node([100, 2.42, "hello"])
+
+  it_parses %q({}),             MapLiteral.new
+  it_parses %q({a: 1, b: 2}),   make_literal_node({ :a => 1, :b => 2 })
+  it_parses %q({  a: call   }), make_literal_node({ :a => Call.new(nil, "call") })
+  it_parses %q(
+    {
+      something: "hello",
+      other: 5.4
+    }
+  ),                            make_literal_node({ :something => "hello", :other => 5.4 })
 end
