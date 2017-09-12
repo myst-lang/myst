@@ -189,4 +189,24 @@ describe "Parser" do
 
   # Without the semicolon, a syntax error should occur
   it_does_not_parse %q(a = 1 b = 2)
+
+  # Expression with operators must include the operator on the first line, but
+  # the rest of the expression may flow to multiple lines.
+  it_parses %q(
+    a =
+      [
+        1,
+        2
+      ]
+  ),              SimpleAssign.new(v("a"), l([1, 2]))
+
+  it_parses %q(
+    var1 +
+    var2
+  ),              Call.new(Call.new(nil, "var1"), "+", [Call.new(nil, "var2").as(Node)])
+
+  it_does_not_parse %q(
+    var1
+    + var2
+  )
 end
