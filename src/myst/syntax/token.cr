@@ -63,6 +63,7 @@ module Myst
       COMMA         # ,
       POINT         # .
       COLON         # :
+      SEMI          # ;
 
       COMMENT       # # comment
       NEWLINE       # \n

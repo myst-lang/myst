@@ -175,6 +175,9 @@ module Myst
         consume_string
       when ':'
         consume_symbol_or_colon
+      when ';'
+        @current_token.type = Token::Type::SEMI
+        read_char
       when '('
         @current_token.type = Token::Type::LPAREN
         read_char

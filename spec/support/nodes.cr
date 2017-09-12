@@ -1,0 +1,49 @@
+require "../spec_helper.cr"
+
+include Myst::AST
+
+# Utilities for generating AST Nodes with fewer characters.
+
+# l(value)
+#
+# Generate a Literal node corresponding to the type of the provided value.
+# Calls with Arrays and Hashes act recursively.
+def l(value : Node  );  value; end
+def l(value : Nil   );  NilLiteral.new;                           end
+def l(value : Bool  );  BooleanLiteral.new(value).as(Node);       end
+def l(value : Int   );  IntegerLiteral.new(value.to_s).as(Node);  end
+def l(value : Float );  FloatLiteral.new(value.to_s).as(Node);    end
+def l(value : String);  StringLiteral.new(value).as(Node);        end
+def l(value : Symbol);  SymbolLiteral.new(value.to_s).as(Node);   end
+def l(value : Array(T)) forall T
+  ListLiteral.new(value.map{ |v| (v.is_a?(Node) ? v : l(v)).as(Node) }).as(Node)
+end
+def l(value : Hash(K, V)) forall K, V
+  entries = value.map do |k, v|
+    MapLiteral::Entry.new(key: l(k), value: l(v))
+  end
+
+  MapLiteral.new(entries).as(Node)
+end
+
+
+# v(name)
+#
+# Generate a Var node with the given name.
+def v(name) : Var
+  Var.new(name)
+end
+
+# c(name)
+#
+# Generate a Const node with the given name.
+def c(name) : Const
+  Const.new(name)
+end
+
+# u(name)
+#
+# Generate an Underscore node with the given name.
+def u(name) : Underscore
+  Underscore.new(name)
+end

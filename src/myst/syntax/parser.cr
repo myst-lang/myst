@@ -51,7 +51,15 @@ module Myst
     end
 
     def expect(*types : Token::Type)
-      accept(*types) || raise ParseError.new("Expected one of #{types.join(',')}, got #{@current_token.type}")
+      accept(*types) || raise ParseError.new("Expected one of #{types.join(',')} but got #{@current_token.type}")
+    end
+
+    def expect_delimiter
+      expect(Token::Type::SEMI, Token::Type::NEWLINE)
+    end
+
+    def expect_delimiter_or_eof
+      expect(Token::Type::SEMI, Token::Type::NEWLINE, Token::Type::EOF)
     end
 
 
@@ -70,6 +78,7 @@ module Myst
       until accept(Token::Type::EOF)
         skip_space_and_newlines
         program.children << parse_expression
+        expect_delimiter_or_eof
         skip_space_and_newlines
       end
 
@@ -77,14 +86,12 @@ module Myst
     end
 
     def parse_expression
-      expr = parse_logical_or
-      skip_space_and_newlines
-      return expr
+      parse_logical_or
     end
 
     def parse_logical_or
       left = parse_logical_and
-      skip_space_and_newlines
+      skip_space
 
       if accept(Token::Type::OROR)
         skip_space_and_newlines
@@ -97,7 +104,7 @@ module Myst
 
     def parse_logical_and
       left = parse_equality
-      skip_space_and_newlines
+      skip_space
 
       if accept(Token::Type::ANDAND)
         skip_space_and_newlines
@@ -110,7 +117,7 @@ module Myst
 
     def parse_equality
       left = parse_comparative
-      skip_space_and_newlines
+      skip_space
 
       if op = accept(Token::Type::EQUALEQUAL, Token::Type::NOTEQUAL)
         skip_space_and_newlines
@@ -123,7 +130,7 @@ module Myst
 
     def parse_comparative
       left = parse_additive
-      skip_space_and_newlines
+      skip_space
 
       if op = accept(Token::Type::LESS, Token::Type::LESSEQUAL, Token::Type::GREATEREQUAL, Token::Type::GREATER)
         skip_space_and_newlines
@@ -136,7 +143,7 @@ module Myst
 
     def parse_additive
       left = parse_multiplicative
-      skip_space_and_newlines
+      skip_space
 
       if op = accept(Token::Type::PLUS, Token::Type::MINUS)
         skip_space_and_newlines
@@ -149,7 +156,7 @@ module Myst
 
     def parse_multiplicative
       left = parse_assign
-      skip_space_and_newlines
+      skip_space
 
       if op = accept(Token::Type::STAR, Token::Type::SLASH, Token::Type::MODULO)
         skip_space_and_newlines
@@ -162,7 +169,7 @@ module Myst
 
     def parse_assign
       target = parse_primary
-      skip_space_and_newlines
+      skip_space
       if accept(Token::Type::EQUAL)
         skip_space_and_newlines
         value = parse_expression
@@ -205,38 +212,35 @@ module Myst
     end
 
     def parse_literal
-      literal =
-          case (token = current_token).type
-          when Token::Type::NIL
-            read_token
-            NilLiteral.new
-          when Token::Type::TRUE
-            read_token
-            BooleanLiteral.new(true)
-          when Token::Type::FALSE
-            read_token
-            BooleanLiteral.new(false)
-          when Token::Type::INTEGER
-            read_token
-            IntegerLiteral.new(token.value)
-          when Token::Type::FLOAT
-            read_token
-            FloatLiteral.new(token.value)
-          when Token::Type::STRING
-            read_token
-            StringLiteral.new(token.value)
-          when Token::Type::SYMBOL
-            read_token
-            SymbolLiteral.new(token.value)
-          when Token::Type::LBRACE
-            parse_list_literal
-          when Token::Type::LCURLY
-            parse_map_literal
-          else
-            raise ParseError.new("Expected a literal value. Got #{current_token.inspect} instead")
-          end
-
-      return literal.at(current_token.location)
+      case (token = current_token).type
+      when Token::Type::NIL
+        read_token
+        NilLiteral.new.at(token.location)
+      when Token::Type::TRUE
+        read_token
+        BooleanLiteral.new(true).at(token.location)
+      when Token::Type::FALSE
+        read_token
+        BooleanLiteral.new(false).at(token.location)
+      when Token::Type::INTEGER
+        read_token
+        IntegerLiteral.new(token.value).at(token.location)
+      when Token::Type::FLOAT
+        read_token
+        FloatLiteral.new(token.value).at(token.location)
+      when Token::Type::STRING
+        read_token
+        StringLiteral.new(token.value).at(token.location)
+      when Token::Type::SYMBOL
+        read_token
+        SymbolLiteral.new(token.value).at(token.location)
+      when Token::Type::LBRACE
+        parse_list_literal
+      when Token::Type::LCURLY
+        parse_map_literal
+      else
+        raise ParseError.new("Expected a literal value. Got #{current_token.inspect} instead")
+      end
     end
 
 

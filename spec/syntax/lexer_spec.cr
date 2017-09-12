@@ -31,6 +31,7 @@ describe "Lexer" do
     assert_token_type ",",  Token::Type::COMMA
     assert_token_type ".",  Token::Type::POINT
     assert_token_type ": ", Token::Type::COLON
+    assert_token_type "; ", Token::Type::SEMI
     assert_token_type "&",  Token::Type::AMPERSAND
     assert_token_type "|",  Token::Type::PIPE
   end
