@@ -75,8 +75,8 @@ module Myst
     # input and will only end when an EOF is encountered.
     def parse
       program = Expressions.new
+      skip_space_and_newlines
       until accept(Token::Type::EOF)
-        skip_space_and_newlines
         program.children << parse_expression
         expect_delimiter_or_eof
         skip_space_and_newlines
@@ -85,8 +85,70 @@ module Myst
       program
     end
 
+    # A code block is a set of expressions contained by some other expression.
+    # For example, the body of a method definition.
+    def parse_code_block(*terminators)
+      block = Expressions.new
+      skip_space_and_newlines
+      until terminators.includes?(current_token.type)
+        block.children << parse_expression
+        expect_delimiter_or_eof
+        skip_space_and_newlines
+      end
+
+      block
+    end
+
     def parse_expression
-      parse_logical_or
+      case current_token.type
+      when Token::Type::DEF
+        parse_def
+      else
+        parse_logical_or
+      end
+    end
+
+    def parse_def
+      start = expect(Token::Type::DEF)
+      skip_space
+      name = expect(Token::Type::IDENT).value
+      skip_space
+      method_def = Def.new(name).at(start.location)
+      # If the Def has parameters, they must be parenthesized. If the token
+      # after the opening parenthesis is a closing one, then there are no
+      # parameters.
+      if accept(Token::Type::LPAREN) && !accept(Token::Type::RPAREN)
+        # Parentheses are still allowed for Defs with no arguments
+        loop do
+          skip_space_and_newlines
+          method_def.params << parse_param
+          skip_space_and_newlines
+          # If there is no comma, this is the last parameter, and a closing
+          # parenthesis should be expected.
+          unless accept(Token::Type::COMMA)
+            expect(Token::Type::RPAREN)
+            break
+          end
+        end
+      end
+
+      skip_space
+      expect_delimiter_or_eof
+      skip_space_and_newlines
+
+      if finish = accept(Token::Type::END)
+        method_def.body = Nop.new
+        return method_def.at_end(finish.location)
+      else
+        method_def.body = parse_code_block(Token::Type::END)
+        finish = expect(Token::Type::END)
+        return method_def.at_end(finish.location)
+      end
+    end
+
+    def parse_param
+      name = expect(Token::Type::IDENT)
+      return Param.new(name: name.value).at(name.location)
     end
 
     def parse_logical_or

@@ -209,4 +209,37 @@ describe "Parser" do
     var1
     + var2
   )
+
+
+
+  # Method definitions
+
+  it_parses %q(
+    def foo
+    end
+  ),                          Def.new("foo") # `@body` will be a Nop
+  # Semicolons can be used as delimiters to compact the definition.
+  it_parses %q(def foo; end), Def.new("foo")
+
+  it_parses %q(
+    def foo(a, b)
+    end
+  )
+
+  it_parses %q(def foo(); end),     Def.new("foo")
+  it_parses %q(def foo(a); end),    Def.new("foo", [Param.new(name: "a")])
+  it_parses %q(def foo(a, b); end), Def.new("foo", [Param.new(name: "a"), Param.new(name: "b")])
+
+  it_parses %q(
+    def foo
+      1 + 2
+    end
+  ),            Def.new("foo", body: Expressions.new(Call.new(l(1), "+", [l(2)])))
+
+  it_parses %q(
+    def foo
+      a = 1
+      a * 4
+    end
+  ),            Def.new("foo", body: Expressions.new(SimpleAssign.new(v("a"), l(1)), Call.new(v("a"), "*", [l(4)])))
 end
