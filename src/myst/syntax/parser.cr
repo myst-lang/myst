@@ -118,11 +118,31 @@ module Myst
       # after the opening parenthesis is a closing one, then there are no
       # parameters.
       if accept(Token::Type::LPAREN) && !accept(Token::Type::RPAREN)
-        # Parentheses are still allowed for Defs with no arguments
+        allow_splat = true
+        param_index = 0
         loop do
           skip_space_and_newlines
-          method_def.params << parse_param
+          next_param = parse_param(allow_splat)
           skip_space_and_newlines
+          # Only one splat collector is allowed in a parameter list.
+          if next_param.splat?
+            allow_splat = false
+            method_def.splat_index = param_index
+          end
+
+          # The block parameter must be the last parameter.
+          if next_param.block?
+            method_def.block_param = next_param
+            if accept(Token::Type::RPAREN)
+              break
+            else
+              raise ParseError.new("Block parameter must be the last parameter in a Def.")
+            end
+          end
+
+          method_def.params << next_param
+          param_index += 1
+
           # If there is no comma, this is the last parameter, and a closing
           # parenthesis should be expected.
           unless accept(Token::Type::COMMA)
@@ -146,9 +166,23 @@ module Myst
       end
     end
 
-    def parse_param
+    def parse_param(allow_splat=true)
+      param = Param.new
+
+      case
+      when accept(Token::Type::STAR)
+        if allow_splat
+          param.splat = true
+        else
+          raise ParseError.new("Multiple splat parameters are not allowed in a definition.")
+        end
+      when accept(Token::Type::AMPERSAND)
+        param.block = true
+      end
+
       name = expect(Token::Type::IDENT)
-      return Param.new(name: name.value).at(name.location)
+      param.name = name.value
+      return param.at(name.location)
     end
 
     def parse_logical_or

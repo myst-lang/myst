@@ -591,8 +591,10 @@ module Myst
       property! name        : String?
       property! restriction : Const?
       property! guard       : Node?
+      property? splat       : Bool
+      property? block       : Bool
 
-      def initialize(@pattern=nil, @name=nil, @restriction=nil, @guard=nil)
+      def initialize(@pattern=nil, @name=nil, @restriction=nil, @guard=nil, @splat=false, @block=false)
       end
 
       def accept_children(visitor)
@@ -601,7 +603,7 @@ module Myst
         guard.try(&.accept(visitor))
       end
 
-      def_equals_and_hash pattern?, name?, restriction?, guard?
+      def_equals_and_hash pattern?, name?, restriction?, guard?, splat?, block?
     end
 
     # A method definition. Parameters for methods must be wrapped in

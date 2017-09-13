@@ -132,7 +132,6 @@ describe "Parser" do
 
   it_parses %q(a = b),      SimpleAssign.new(v("a"), Call.new(nil, "b"))
   it_parses %q(a = b = c),  SimpleAssign.new(v("a"), SimpleAssign.new(v("b"), Call.new(nil, "c")))
-
   # Precedence with logical operations is odd.
   # An assignment with a logical operation as an argument considers the logical as higher priority.
   it_parses %q(a = 1 && 2),  SimpleAssign.new(v("a"), And.new(l(1), l(2)))
@@ -140,21 +139,17 @@ describe "Parser" do
   # A logical operation with an assignment as an argument considers the assignment as higher priority.
   it_parses %q(1 && b = 2),  And.new(l(1), SimpleAssign.new(v("b"), l(2)))
   it_parses %q(1 || b = 2),  Or.new(l(1), SimpleAssign.new(v("b"), l(2)))
-
   # Assignments take over the remainder of the expression when appearing in a logical operation.
   it_parses %q(1 || b = 2 && 3), Or.new(l(1), SimpleAssign.new(v("b"), And.new(l(2), l(3))))
   it_parses %q(1 || b = 2 + c = 3 || 4), Or.new(l(1), SimpleAssign.new(v("b"), Call.new(l(2), "+", [SimpleAssign.new(v("c"), Or.new(l(3), l(4))).as(Node)])))
-
   # Assignments within parentheses are contained by them.
   it_parses %q(1 || (b = 2) && 3), Or.new(l(1), And.new(SimpleAssign.new(v("b"), l(2)), l(3)))
-
   # Once a variable has been assigned, future references to it should be a Var, not a Call.
   it_parses %q(
     a
     a = 2
     a
   ),              Call.new(nil, "a"), SimpleAssign.new(v("a"), l(2)), v("a")
-
   # Underscores can be the target of an assignment, and they should be declared in the current scope.
   it_parses %q(_ = 2),  SimpleAssign.new(u("_"), l(2))
 
@@ -175,21 +170,17 @@ describe "Parser" do
     a = 1
     a + 2
   ),              SimpleAssign.new(v("a"), l(1)), Call.new(v("a"), "+", [l(2)])
-
   it_parses %q(
     nil
     [4, 5]
   ),              l(nil), l([4, 5])
-
   # Semicolons can also be used to place multiple expressions on a single line
   it_parses %q(
     a = 1; a + 2;
     b = 2;
   ),              SimpleAssign.new(v("a"), l(1)), Call.new(v("a"), "+", [l(2)]), SimpleAssign.new(v("b"), l(2))
-
   # Without the semicolon, a syntax error should occur
   it_does_not_parse %q(a = 1 b = 2)
-
   # Expression with operators must include the operator on the first line, but
   # the rest of the expression may flow to multiple lines.
   it_parses %q(
@@ -199,12 +190,10 @@ describe "Parser" do
         2
       ]
   ),              SimpleAssign.new(v("a"), l([1, 2]))
-
   it_parses %q(
     var1 +
     var2
   ),              Call.new(Call.new(nil, "var1"), "+", [Call.new(nil, "var2").as(Node)])
-
   it_does_not_parse %q(
     var1
     + var2
@@ -226,9 +215,10 @@ describe "Parser" do
     end
   )
 
-  it_parses %q(def foo(); end),     Def.new("foo")
-  it_parses %q(def foo(a); end),    Def.new("foo", [Param.new(name: "a")])
-  it_parses %q(def foo(a, b); end), Def.new("foo", [Param.new(name: "a"), Param.new(name: "b")])
+  it_parses %q(def foo(); end),           Def.new("foo")
+  it_parses %q(def foo(a); end),          Def.new("foo", [Param.new(name: "a")])
+  it_parses %q(def foo(a, b); end),       Def.new("foo", [Param.new(name: "a"), Param.new(name: "b")])
+  it_parses %q(def foo(_, _second); end), Def.new("foo", [Param.new(name: "_"), Param.new(name: "_second")])
 
   it_parses %q(
     def foo
@@ -242,4 +232,25 @@ describe "Parser" do
       a * 4
     end
   ),            Def.new("foo", body: Expressions.new(SimpleAssign.new(v("a"), l(1)), Call.new(v("a"), "*", [l(4)])))
+
+  # A Splat collector can appear anywhere in the param list
+  it_parses %q(def foo(*a); end),       Def.new("foo", [Param.new(name: "a", splat: true)], splat_index: 0)
+  it_parses %q(def foo(*a, b); end),    Def.new("foo", [Param.new(name: "a", splat: true), Param.new(name: "b")], splat_index: 0)
+  it_parses %q(def foo(a, *b); end),    Def.new("foo", [Param.new(name: "a"), Param.new(name: "b", splat: true)], splat_index: 1)
+  it_parses %q(def foo(a, *b, c); end), Def.new("foo", [Param.new(name: "a"), Param.new(name: "b", splat: true), Param.new(name: "c")], splat_index: 1)
+
+  # Multiple splat collectors are not allowed in the param list
+  it_does_not_parse %q(def foo(*a, *b); end), /multiple splat parameters/
+
+  # A Block parameter must be the last parameter in the param list
+  it_parses %q(def foo(&block); end), Def.new("foo", block_param: Param.new(name: "block", block: true))
+  it_parses %q(def foo(a, &block); end), Def.new("foo", [Param.new(name: "a")], block_param: Param.new(name: "block", block: true))
+  it_parses %q(def foo(a, *b, &block); end), Def.new("foo", [Param.new(name: "a"), Param.new(name: "b", splat: true)], block_param: Param.new(name: "block", block: true), splat_index: 1)
+
+  it_does_not_parse %q(def foo(&block, a); end), /block parameter/
+
+  it_parses %q(
+    def foo; end
+    def foo; end
+  ),                Def.new("foo"), Def.new("foo")
 end
