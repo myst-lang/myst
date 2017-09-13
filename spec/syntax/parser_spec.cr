@@ -267,4 +267,32 @@ describe "Parser" do
 
   # The Vars defined within the Def should be removed after the Def finishes.
   it_parses %q(def foo(a); end; a), Def.new("foo", [p("a")]), Call.new(nil, "a")
+
+
+
+  # Module definitions
+
+  it_parses %q(
+    module Foo
+    end
+  ),                              ModuleDef.new("Foo")
+  it_parses %q(module Foo; end),  ModuleDef.new("Foo")
+  it_parses %q(
+    module Foo
+      def foo; end
+    end
+  ),                ModuleDef.new("Foo", Expressions.new(Def.new("foo")))
+  # Modules allow immediate code evaluation on their scope.
+  it_parses %q(
+    module Foo
+      1 + 2;
+    end
+  ),                ModuleDef.new("Foo", Expressions.new(Call.new(l(1), "+", [l(2)])))
+  # Modules can also be nested
+  it_parses %q(
+    module Foo
+      module Bar
+      end
+    end
+  ),                ModuleDef.new("Foo", Expressions.new(ModuleDef.new("Bar")))
 end

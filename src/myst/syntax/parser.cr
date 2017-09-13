@@ -103,6 +103,8 @@ module Myst
       case current_token.type
       when Token::Type::DEF
         parse_def
+      when Token::Type::MODULE
+        parse_module_def
       else
         parse_logical_or
       end
@@ -155,7 +157,7 @@ module Myst
       end
 
       skip_space
-      expect_delimiter_or_eof
+      expect_delimiter
       skip_space_and_newlines
 
       if finish = accept(Token::Type::END)
@@ -195,6 +197,26 @@ module Myst
       end
 
       return param.at(name.location)
+    end
+
+    def parse_module_def
+      start = expect(Token::Type::MODULE)
+      skip_space
+      name = expect(Token::Type::CONST).value
+      skip_space
+      expect_delimiter
+      skip_space_and_newlines
+
+      if finish = accept(Token::Type::END)
+        return ModuleDef.new(name, Nop.new).at(start.location).at_end(finish.location)
+      else
+        push_var_scope
+        body = parse_code_block(Token::Type::END)
+        finish = expect(Token::Type::END)
+        pop_var_scope
+        return ModuleDef.new(name, body).at(start.location).at_end(finish.location)
+      end
+
     end
 
     def parse_logical_or
