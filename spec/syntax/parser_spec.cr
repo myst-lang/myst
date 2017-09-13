@@ -62,6 +62,11 @@ describe "Parser" do
   it_parses %q(_named_longer),  u("_named_longer")
   it_parses %q(_1234),          u("_1234")
 
+  it_parses %q(Thing),          c("Thing")
+  it_parses %q(A),              c("A")
+  it_parses %q(ANOTHER),        c("ANOTHER")
+  it_parses %q(UNDER_SCORES),   c("UNDER_SCORES")
+
   it_parses %q([]),             ListLiteral.new
   it_parses %q([call]),         l([Call.new(nil, "call")])
   it_parses %q([1, 2, 3]),      l([1, 2, 3])

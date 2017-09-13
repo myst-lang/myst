@@ -297,6 +297,10 @@ module Myst
         expect(Token::Type::RPAREN)
         skip_space_and_newlines
         return expr
+      when Token::Type::CONST
+        token = current_token
+        read_token
+        return Const.new(token.value)
       when Token::Type::IDENT
         parse_var_or_call
       else
