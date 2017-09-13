@@ -342,7 +342,30 @@ module Myst
         return Var.new(name).at(token.location)
       end
 
-      return Call.new(nil, name).at(token.location)
+      call = Call.new(nil, name).at(token.location)
+      skip_space
+      if accept(Token::Type::LPAREN)
+        skip_space_and_newlines
+
+        if finish = accept(Token::Type::RPAREN)
+          return call.at_end(finish.location)
+        end
+
+        loop do
+          skip_space_and_newlines
+          call.args << parse_expression
+          skip_space_and_newlines
+
+          # If there is no comma, this is the last argument, and a closing
+          # parenthesis should be expected.
+          unless accept(Token::Type::COMMA)
+            finish = expect(Token::Type::RPAREN)
+            return call.at_end(finish.location)
+          end
+        end
+      end
+
+      return call
     end
 
     def parse_literal

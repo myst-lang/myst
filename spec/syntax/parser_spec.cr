@@ -295,4 +295,26 @@ describe "Parser" do
       end
     end
   ),                ModuleDef.new("Foo", Expressions.new(ModuleDef.new("Bar")))
+
+
+
+  # Calls
+
+  # Bare identifiers are considered calls, as long as they have not already
+  # been defined as Vars.
+  it_parses %q(call),           Call.new(nil, "call")
+  it_parses %q(call()),         Call.new(nil, "call")
+  it_parses %q(call(1)),        Call.new(nil, "call", [l(1)])
+  it_parses %q(call(1, 2 + 3)), Call.new(nil, "call", [l(1), Call.new(l(2), "+", [l(3)])])
+  it_parses %q(call (1)),       Call.new(nil, "call", [l(1)])
+  it_parses %q(
+    call(
+      1,
+      2
+    )
+  ),                            Call.new(nil, "call", [l(1), l(2)])
+  it_parses %q(
+    call(
+    )
+  ),                            Call.new(nil, "call")
 end
