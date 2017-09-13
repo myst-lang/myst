@@ -216,9 +216,9 @@ describe "Parser" do
   )
 
   it_parses %q(def foo(); end),           Def.new("foo")
-  it_parses %q(def foo(a); end),          Def.new("foo", [Param.new(name: "a")])
-  it_parses %q(def foo(a, b); end),       Def.new("foo", [Param.new(name: "a"), Param.new(name: "b")])
-  it_parses %q(def foo(_, _second); end), Def.new("foo", [Param.new(name: "_"), Param.new(name: "_second")])
+  it_parses %q(def foo(a); end),          Def.new("foo", [p("a")])
+  it_parses %q(def foo(a, b); end),       Def.new("foo", [p("a"), p("b")])
+  it_parses %q(def foo(_, _second); end), Def.new("foo", [p("_"), p("_second")])
 
   it_parses %q(
     def foo
@@ -234,18 +234,18 @@ describe "Parser" do
   ),            Def.new("foo", body: Expressions.new(SimpleAssign.new(v("a"), l(1)), Call.new(v("a"), "*", [l(4)])))
 
   # A Splat collector can appear anywhere in the param list
-  it_parses %q(def foo(*a); end),       Def.new("foo", [Param.new(name: "a", splat: true)], splat_index: 0)
-  it_parses %q(def foo(*a, b); end),    Def.new("foo", [Param.new(name: "a", splat: true), Param.new(name: "b")], splat_index: 0)
-  it_parses %q(def foo(a, *b); end),    Def.new("foo", [Param.new(name: "a"), Param.new(name: "b", splat: true)], splat_index: 1)
-  it_parses %q(def foo(a, *b, c); end), Def.new("foo", [Param.new(name: "a"), Param.new(name: "b", splat: true), Param.new(name: "c")], splat_index: 1)
+  it_parses %q(def foo(*a); end),       Def.new("foo", [p("a", splat: true)], splat_index: 0)
+  it_parses %q(def foo(*a, b); end),    Def.new("foo", [p("a", splat: true), p("b")], splat_index: 0)
+  it_parses %q(def foo(a, *b); end),    Def.new("foo", [p("a"), p("b", splat: true)], splat_index: 1)
+  it_parses %q(def foo(a, *b, c); end), Def.new("foo", [p("a"), p("b", splat: true), p("c")], splat_index: 1)
 
   # Multiple splat collectors are not allowed in the param list
   it_does_not_parse %q(def foo(*a, *b); end), /multiple splat parameters/
 
   # A Block parameter must be the last parameter in the param list
-  it_parses %q(def foo(&block); end), Def.new("foo", block_param: Param.new(name: "block", block: true))
-  it_parses %q(def foo(a, &block); end), Def.new("foo", [Param.new(name: "a")], block_param: Param.new(name: "block", block: true))
-  it_parses %q(def foo(a, *b, &block); end), Def.new("foo", [Param.new(name: "a"), Param.new(name: "b", splat: true)], block_param: Param.new(name: "block", block: true), splat_index: 1)
+  it_parses %q(def foo(&block); end), Def.new("foo", block_param: p("block", block: true))
+  it_parses %q(def foo(a, &block); end), Def.new("foo", [p("a")], block_param: p("block", block: true))
+  it_parses %q(def foo(a, *b, &block); end), Def.new("foo", [p("a"), p("b", splat: true)], block_param: p("block", block: true), splat_index: 1)
 
   it_does_not_parse %q(def foo(&block, a); end), /block parameter/
 
@@ -253,4 +253,13 @@ describe "Parser" do
     def foo; end
     def foo; end
   ),                Def.new("foo"), Def.new("foo")
+
+  # References to variables defined as parameters should be considered Vars,
+  # not Calls. To maintain consistency in the call syntax, this does not apply
+  # to the block parameter
+  it_parses %q(def foo(a); a; end),           Def.new("foo", [p("a")], Expressions.new(v("a")))
+  it_parses %q(def foo(&block); block; end),  Def.new("foo", block_param: p("block", block: true), body: Expressions.new(Call.new(nil, "block")))
+
+  # The Vars defined within the Def should be removed after the Def finishes.
+  it_parses %q(def foo(a); end; a), Def.new("foo", [p("a")]), Call.new(nil, "a")
 end

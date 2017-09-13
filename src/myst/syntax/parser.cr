@@ -114,6 +114,8 @@ module Myst
       name = expect(Token::Type::IDENT).value
       skip_space
       method_def = Def.new(name).at(start.location)
+
+      push_var_scope
       # If the Def has parameters, they must be parenthesized. If the token
       # after the opening parenthesis is a closing one, then there are no
       # parameters.
@@ -158,10 +160,12 @@ module Myst
 
       if finish = accept(Token::Type::END)
         method_def.body = Nop.new
+        pop_var_scope
         return method_def.at_end(finish.location)
       else
         method_def.body = parse_code_block(Token::Type::END)
         finish = expect(Token::Type::END)
+        pop_var_scope
         return method_def.at_end(finish.location)
       end
     end
@@ -182,6 +186,14 @@ module Myst
 
       name = expect(Token::Type::IDENT)
       param.name = name.value
+
+      # Named parameters should be treated as Vars (not Calls) within the Def
+      # body. However, for a call syntax that is consistent with normal calls,
+      # the block parameter is excluded from this.
+      unless param.block?
+        push_local_var(param.name)
+      end
+
       return param.at(name.location)
     end
 
