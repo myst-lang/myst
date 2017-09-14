@@ -290,9 +290,10 @@ describe "Parser" do
   # Modules allow immediate code evaluation on their scope.
   it_parses %q(
     module Foo
-      1 + 2;
+      1 + 2
+      a = 3
     end
-  ),                ModuleDef.new("Foo", Expressions.new(Call.new(l(1), "+", [l(2)])))
+  ),                ModuleDef.new("Foo", Expressions.new(Call.new(l(1), "+", [l(2)]), SimpleAssign.new(v("a"), l(3))))
   # Modules can also be nested
   it_parses %q(
     module Foo
@@ -425,15 +426,15 @@ describe "Parser" do
   ),                                Call.new(nil, "call", [Call.new(nil, "inner", [l(1)], block: Block.new).as(Node)])
 
   # Blocks are exactly like normal defs, they can contain any valid Expressions node as a body.
-  it_parses %q(call{ a = 1; a }), Call.new(nil, "call", block: Block.new(body: Expressions.new(SimpleAssign.new(Var.new("a"), l(1)), Var.new("a"))))
+  it_parses %q(call{ a = 1; a }), Call.new(nil, "call", block: Block.new(body: Expressions.new(SimpleAssign.new(v("a"), l(1)), v("a"))))
   it_parses %q(call{
       a = 1
       a
     }
-  ), Call.new(nil, "call", block: Block.new(body: Expressions.new(SimpleAssign.new(Var.new("a"), l(1)), Var.new("a"))))
+  ), Call.new(nil, "call", block: Block.new(body: Expressions.new(SimpleAssign.new(v("a"), l(1)), v("a"))))
   it_parses %q(call do
       a = 1
       a
     end
-  ), Call.new(nil, "call", block: Block.new(body: Expressions.new(SimpleAssign.new(Var.new("a"), l(1)), Var.new("a"))))
+  ), Call.new(nil, "call", block: Block.new(body: Expressions.new(SimpleAssign.new(v("a"), l(1)), v("a"))))
 end
