@@ -27,6 +27,14 @@ def l(value : Hash(K, V)) forall K, V
 end
 
 
+# i(value)
+#
+# Generate a ValueInterpolation node from the given value. If the value is not
+# a Node already, it is assumed to be a Literal.
+def i(value : Node);  ValueInterpolation.new(value);    end
+def i(value);         ValueInterpolation.new(l(value)); end
+
+
 # v(name)
 #
 # Generate a Var node with the given name.

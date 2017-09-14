@@ -332,11 +332,22 @@ module Myst
         token = current_token
         read_token
         return Const.new(token.value)
+      when Token::Type::LESS
+        parse_value_interpolation
       when Token::Type::IDENT
         parse_var_or_call
       else
         parse_literal
       end
+    end
+
+    def parse_value_interpolation
+      start = expect(Token::Type::LESS)
+      skip_space_and_newlines
+      value = parse_primary
+      skip_space_and_newlines
+      finish = expect(Token::Type::GREATER)
+      return ValueInterpolation.new(value).at(start.location).at_end(finish.location)
     end
 
     def parse_var_or_call
@@ -532,11 +543,21 @@ module Myst
     end
 
     def parse_map_key
-      name = expect(Token::Type::IDENT)
-      # Symbol keys must be _immediately_ followed by a colon, with no spaces
-      # between the two.
+      key =
+        case current_token.type
+        when Token::Type::IDENT
+          name = expect(Token::Type::IDENT)
+          SymbolLiteral.new(name.value).at(name.location)
+        when Token::Type::LESS
+          parse_value_interpolation
+        else
+          raise ParseError.new("#{current_token} is not a valid map key")
+        end
+      # Keys must be _immediately_ followed by a colon, with no spaces between
+      # the end of the key and the colon. This applies to both symbols and
+      # value interpolations.
       expect(Token::Type::COLON)
-      return SymbolLiteral.new(name.value).at(name.location).at_end(name.location)
+      return key
     end
 
 

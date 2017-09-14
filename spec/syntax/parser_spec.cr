@@ -91,6 +91,50 @@ describe "Parser" do
 
 
 
+  # Value interpolations
+
+  # Any literal value is valid in an interpolation.
+  it_parses %q(<nil>),          i(nil)
+  it_parses %q(<true>),         i(true)
+  it_parses %q(<false>),        i(false)
+  it_parses %q(<1>),            i(1)
+  it_parses %q(<1.5>),          i(1.5)
+  it_parses %q(<"hi">),         i("hi")
+  it_parses %q(<:hello>),       i(:hello)
+  it_parses %q(<:"hi there">),  i(:"hi there")
+  it_parses %q(<[1, 2]>),       i([1, 2])
+  it_parses %q(<{a: 1}>),       i({:a => 1})
+  # Calls, Vars, Consts, Underscores are also valid.
+  it_parses %q(<a>),            i(Call.new(nil, "a"))
+  it_parses %q(<Thing>),        i(c("Thing"))
+  it_parses %q(<_>),            i(u("_"))
+  # Complex expressions must be wrapped in parentheses.
+  it_parses %q(<(a)>),          i(Call.new(nil, "a"))
+  it_parses %q(<(1 + 2)>),      i(Call.new(l(1), "+", [l(2)]))
+  it_does_not_parse %q(<1 + 2>)
+  it_does_not_parse %q(<a + b>)
+  it_does_not_parse %q(< a + b >)
+  # Interpolations can span multiple lines if necessary.
+  it_parses %q(<
+    a
+  >),                           i(Call.new(nil, "a"))
+  it_parses %q(<
+    (1 + 2)
+  >),                           i(Call.new(l(1), "+", [l(2)]))
+
+  # Interpolations can also be used as Map keys.
+  it_parses %q(
+    {
+      <1>: "int",
+      <nil>: :nil
+    }
+  ),                            l({ i(1) => "int", i(nil) => :nil })
+  # Interpolations can be used as a replacement for any primary expression.
+  it_parses %q(
+    [1, <2>, 3]
+  ),                            l([1, i(2), 3])
+
+
   # Infix expressions
 
   it_parses %q(1 || 2),         Or.new(l(1), l(2))
