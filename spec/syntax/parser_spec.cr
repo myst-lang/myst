@@ -251,8 +251,13 @@ describe "Parser" do
   it_parses %q(def foo(&block); end), Def.new("foo", block_param: p("block", block: true))
   it_parses %q(def foo(a, &block); end), Def.new("foo", [p("a")], block_param: p("block", block: true))
   it_parses %q(def foo(a, *b, &block); end), Def.new("foo", [p("a"), p("b", splat: true)], block_param: p("block", block: true), splat_index: 1)
+  # The block parameter may also be given any name
+  it_parses %q(def foo(a, &b); end), Def.new("foo", [p("a")], block_param: p("b", block: true))
+  it_parses %q(def foo(a, &_); end), Def.new("foo", [p("a")], block_param: p("_", block: true))
 
-  it_does_not_parse %q(def foo(&block, a); end), /block parameter/
+  it_does_not_parse %q(def foo(&block, a); end),        /block parameter/
+  it_does_not_parse %q(def foo(&block1, &block2); end), /block parameter/
+  it_does_not_parse %q(def foo(a, &block, c); end),     /block parameter/
 
   it_parses %q(
     def foo; end
@@ -300,8 +305,7 @@ describe "Parser" do
 
   # Calls
 
-  # Bare identifiers are considered calls, as long as they have not already
-  # been defined as Vars.
+  # Bare identifiers are considered calls, as long as they have not already been defined as Vars.
   it_parses %q(call),           Call.new(nil, "call")
   it_parses %q(call()),         Call.new(nil, "call")
   it_parses %q(call(1)),        Call.new(nil, "call", [l(1)])
@@ -317,4 +321,106 @@ describe "Parser" do
     call(
     )
   ),                            Call.new(nil, "call")
+
+  # Calls with parameters _must_ wrap them in parentheses.
+  it_does_not_parse %q(call a, b)
+
+
+
+  # Blocks
+
+  # Blocks can be given to a Call as either brace blocks (`{}`) or `do...end` constructs.
+  it_parses %q(call{ }),        Call.new(nil, "call", block: Block.new)
+  it_parses %q(
+    call do
+    end
+  ),                            Call.new(nil, "call", block: Block.new)
+
+  # The `do...end` syntax can also have a delimiter after the `do` and parameters.
+  it_parses %q(call do; end),   Call.new(nil, "call", block: Block.new)
+
+  # Brace blocks accept arguments after the opening brace.
+  it_parses %q(call{ |a,b| }),      Call.new(nil, "call", block: Block.new([p("a"), p("b")]))
+  # Block parameters are exactly like normal Def parameters, with the same syntax support.
+  it_parses %q(call{ | | }),        Call.new(nil, "call", block: Block.new())
+  it_parses %q(call{ |a,*b| }),     Call.new(nil, "call", block: Block.new([p("a"), p("b", splat: true)]))
+  it_parses %q(call{ |*a,b| }),     Call.new(nil, "call", block: Block.new([p("a", splat: true), p("b")]))
+  it_parses %q(call{ |a,*b,c| }),   Call.new(nil, "call", block: Block.new([p("a"), p("b", splat: true), p("c")]))
+  it_parses %q(call{ |a,&block| }), Call.new(nil, "call", block: Block.new([p("a")], block_param: p("block", block: true)))
+  it_parses %q(call{ |a,&b| }),     Call.new(nil, "call", block: Block.new([p("a")], block_param: p("b", block: true)))
+  it_parses %q(call{ |a,
+                        &b| }),     Call.new(nil, "call", block: Block.new([p("a")], block_param: p("b", block: true)))
+  it_does_not_parse %q(call{ |&b,a| }),     /block parameter/
+  it_does_not_parse %q(call{ |*a,*b| }),    /multiple splat/
+
+  # `do...end` blocks accept arguments accept arguments
+  it_parses %q(
+    call do | |
+    end
+  ),                Call.new(nil, "call", block: Block.new())
+  it_parses %q(
+    call do |a,*b|
+    end
+  ),                Call.new(nil, "call", block: Block.new([p("a"), p("b", splat: true)]))
+  it_parses %q(
+    call do |*a,b|
+    end
+  ),                Call.new(nil, "call", block: Block.new([p("a", splat: true), p("b")]))
+  it_parses %q(
+    call do |a,*b,c|
+    end
+  ),                Call.new(nil, "call", block: Block.new([p("a"), p("b", splat: true), p("c")]))
+  it_parses %q(
+    call do |a,&block|
+    end
+  ),                Call.new(nil, "call", block: Block.new([p("a")], block_param: p("block", block: true)))
+  it_parses %q(
+    call do |a,&b|
+    end
+  ),                Call.new(nil, "call", block: Block.new([p("a")], block_param: p("b", block: true)))
+  it_parses %q(
+    call do |a,
+              &b|
+    end
+  ),                Call.new(nil, "call", block: Block.new([p("a")], block_param: p("b", block: true)))
+
+  it_does_not_parse %q(
+    call do |&b,a|
+    end
+  ),                      /block parameter/
+  it_does_not_parse %q(
+    call do |*a,*b|
+    end
+  ),                      /multiple splat/
+
+  it_does_not_parse %q(
+    call{
+      |arg|
+    }
+  )
+  it_does_not_parse %q(
+    call do
+      |arg|
+    end
+  )
+
+  # Calls with arguments _and_ blocks provide the block after the closing parenthesis.
+  it_parses %q(call(1, 2){ }),  Call.new(nil, "call", [l(1), l(2)], block: Block.new)
+  it_parses %q(
+    call(1, 2) do
+    end
+  ),                            Call.new(nil, "call", [l(1), l(2)], block: Block.new)
+
+  # Blocks are exactly like normal defs, they can contain any valid Expressions node as a body.
+  it_parses %q(call{ a = 1; a }), Call.new(nil, "call", block: Block.new(body: Expressions.new(SimpleAssign.new(Var.new("a"), l(1)), Var.new("a"))))
+  it_parses %q(call{
+      a = 1
+      a
+    }
+  ), Call.new(nil, "call", block: Block.new(body: Expressions.new(SimpleAssign.new(Var.new("a"), l(1)), Var.new("a"))))
+  it_parses %q(call do
+      a = 1
+      a
+    end
+  ), Call.new(nil, "call", block: Block.new(body: Expressions.new(SimpleAssign.new(Var.new("a"), l(1)), Var.new("a"))))
 end

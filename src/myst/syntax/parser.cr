@@ -92,6 +92,12 @@ module Myst
       skip_space_and_newlines
       until terminators.includes?(current_token.type)
         block.children << parse_expression
+        # In a code block, the last expression does not require a delimiter.
+        # For example, `call{ a = 1; a + 2 } is valid, even though `a + 2` is
+        # not followed by a delimiter. So, if the next significant token is a
+        # terminator, stop expecting expressions/delimiters.
+        skip_space
+        break if terminators.includes?(current_token.type)
         expect_delimiter_or_eof
         skip_space_and_newlines
       end
@@ -114,44 +120,47 @@ module Myst
       start = expect(Token::Type::DEF)
       skip_space
       name = expect(Token::Type::IDENT).value
-      skip_space
       method_def = Def.new(name).at(start.location)
-
       push_var_scope
+
       # If the Def has parameters, they must be parenthesized. If the token
       # after the opening parenthesis is a closing one, then there are no
       # parameters.
-      if accept(Token::Type::LPAREN) && !accept(Token::Type::RPAREN)
-        allow_splat = true
-        param_index = 0
-        loop do
-          skip_space_and_newlines
-          next_param = parse_param(allow_splat)
-          skip_space_and_newlines
-          # Only one splat collector is allowed in a parameter list.
-          if next_param.splat?
-            allow_splat = false
-            method_def.splat_index = param_index
-          end
-
-          # The block parameter must be the last parameter.
-          if next_param.block?
-            method_def.block_param = next_param
-            if accept(Token::Type::RPAREN)
-              break
-            else
-              raise ParseError.new("Block parameter must be the last parameter in a Def.")
+      skip_space
+      if accept(Token::Type::LPAREN)
+        skip_space_and_newlines
+        unless accept(Token::Type::RPAREN)
+          allow_splat = true
+          param_index = 0
+          loop do
+            skip_space_and_newlines
+            next_param = parse_param(allow_splat)
+            skip_space_and_newlines
+            # Only one splat collector is allowed in a parameter list.
+            if next_param.splat?
+              allow_splat = false
+              method_def.splat_index = param_index
             end
-          end
 
-          method_def.params << next_param
-          param_index += 1
+            # The block parameter must be the last parameter.
+            if next_param.block?
+              method_def.block_param = next_param
+              if accept(Token::Type::RPAREN)
+                break
+              else
+                raise ParseError.new("Block parameter must be the last parameter in a Def.")
+              end
+            end
 
-          # If there is no comma, this is the last parameter, and a closing
-          # parenthesis should be expected.
-          unless accept(Token::Type::COMMA)
-            expect(Token::Type::RPAREN)
-            break
+            method_def.params << next_param
+            param_index += 1
+
+            # If there is no comma, this is the last parameter, and a closing
+            # parenthesis should be expected.
+            unless accept(Token::Type::COMMA)
+              expect(Token::Type::RPAREN)
+              break
+            end
           end
         end
       end
@@ -331,41 +340,113 @@ module Myst
     end
 
     def parse_var_or_call
-      token = expect(Token::Type::IDENT)
-      name  = token.value
+      start = expect(Token::Type::IDENT)
+      name  = start.value
 
       if name.starts_with?('_')
-        return Underscore.new(name).at(token.location)
+        return Underscore.new(name).at(start.location)
       end
 
       if is_local_var?(name)
-        return Var.new(name).at(token.location)
+        return Var.new(name).at(start.location)
       end
 
-      call = Call.new(nil, name).at(token.location)
+      call = Call.new(nil, name).at(start.location)
       skip_space
       if accept(Token::Type::LPAREN)
         skip_space_and_newlines
 
         if finish = accept(Token::Type::RPAREN)
-          return call.at_end(finish.location)
-        end
+          call.at_end(finish.location)
+        else
+          loop do
+            skip_space_and_newlines
+            call.args << parse_expression
+            skip_space_and_newlines
 
-        loop do
-          skip_space_and_newlines
-          call.args << parse_expression
-          skip_space_and_newlines
-
-          # If there is no comma, this is the last argument, and a closing
-          # parenthesis should be expected.
-          unless accept(Token::Type::COMMA)
-            finish = expect(Token::Type::RPAREN)
-            return call.at_end(finish.location)
+            # If there is no comma, this is the last argument, and a closing
+            # parenthesis should be expected.
+            unless accept(Token::Type::COMMA)
+              finish = expect(Token::Type::RPAREN)
+              call.at_end(finish.location)
+              break
+            end
           end
         end
       end
 
+      skip_space
+      if call.block = parse_optional_block
+        return call.at_end(call.block)
+      end
+
       return call
+    end
+
+    def parse_optional_block
+      block = Block.new
+      end_token =
+        case
+        when start = accept(Token::Type::LCURLY)
+          block.at(start.location)
+          Token::Type::RCURLY
+        when start = accept(Token::Type::DO)
+          block.at(start.location)
+          Token::Type::END
+        else
+          # If a block token is not present, there is no block present, so the
+          # attempt to parse one can stop.
+          return
+        end
+
+      skip_space
+      if accept(Token::Type::PIPE)
+        skip_space_and_newlines
+        unless accept(Token::Type::PIPE)
+          allow_splat = true
+          param_index = 0
+          loop do
+            skip_space_and_newlines
+            next_param = parse_param(allow_splat)
+            skip_space_and_newlines
+            # Only one splat collector is allowed in a parameter list.
+            if next_param.splat?
+              allow_splat = false
+              block.splat_index = param_index
+            end
+
+            # The block parameter must be the last parameter.
+            if next_param.block?
+              block.block_param = next_param
+              if accept(Token::Type::PIPE)
+                break
+              else
+                raise ParseError.new("Block parameter must be the last parameter in a Def.")
+              end
+            end
+
+            block.params << next_param
+            param_index += 1
+
+            # If there is no comma, this is the last parameter, and a closing
+            # parenthesis should be expected.
+            unless accept(Token::Type::COMMA)
+              expect(Token::Type::PIPE)
+              break
+            end
+          end
+        end
+      end
+
+      expect_delimiter if end_token == Token::Type::END
+      skip_space_and_newlines
+      if finish = accept(end_token)
+        return block.at_end(finish.location)
+      else
+        block.body = parse_code_block(end_token)
+        finish = expect(end_token)
+        return block.at_end(finish.location)
+      end
     end
 
     def parse_literal

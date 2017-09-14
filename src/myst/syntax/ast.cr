@@ -650,6 +650,10 @@ module Myst
     # Convention recommends that the brace form only be used for single-line
     # blocks, and the `do...end` form only be used for multi-line blocks.
     class Block < Def
+      def initialize(@params = [] of Param, @body=Nop.new, @block_param=nil, @splat_index=nil)
+        @name = ""
+      end
+
       def_equals_and_hash
     end
 

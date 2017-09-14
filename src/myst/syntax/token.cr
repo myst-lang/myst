@@ -142,7 +142,6 @@ module Myst
       def operator?
         unary_operator? || binary_operator?
       end
-
     end
 
 
