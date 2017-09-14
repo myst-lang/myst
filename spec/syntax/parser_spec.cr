@@ -424,6 +424,11 @@ describe "Parser" do
     call(inner(1) do
     end)
   ),                                Call.new(nil, "call", [Call.new(nil, "inner", [l(1)], block: Block.new).as(Node)])
+  it_parses %q(call(1, inner(1){ }, 2)),  Call.new(nil, "call", [l(1), Call.new(nil, "inner", [l(1)], block: Block.new), l(2)])
+  it_parses %q(
+    call(1, inner(1) do
+    end, 2)
+  ),                                      Call.new(nil, "call", [l(1), Call.new(nil, "inner", [l(1)], block: Block.new), l(2)])
 
   # Blocks are exactly like normal defs, they can contain any valid Expressions node as a body.
   it_parses %q(call{ a = 1; a }), Call.new(nil, "call", block: Block.new(body: Expressions.new(SimpleAssign.new(v("a"), l(1)), v("a"))))
@@ -437,4 +442,8 @@ describe "Parser" do
       a
     end
   ), Call.new(nil, "call", block: Block.new(body: Expressions.new(SimpleAssign.new(v("a"), l(1)), v("a"))))
+
+
+
+  #
 end
