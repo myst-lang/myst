@@ -331,13 +331,19 @@ describe "Parser" do
 
   # Blocks can be given to a Call as either brace blocks (`{}`) or `do...end` constructs.
   it_parses %q(call{ }),        Call.new(nil, "call", block: Block.new)
+  it_parses %q(call   { }),     Call.new(nil, "call", block: Block.new)
   it_parses %q(
     call do
     end
   ),                            Call.new(nil, "call", block: Block.new)
+  it_parses %q(
+    call    do
+            end
+  ),                            Call.new(nil, "call", block: Block.new)
 
   # The `do...end` syntax can also have a delimiter after the `do` and parameters.
   it_parses %q(call do; end),   Call.new(nil, "call", block: Block.new)
+  it_parses %q(call   do; end), Call.new(nil, "call", block: Block.new)
 
   # Brace blocks accept arguments after the opening brace.
   it_parses %q(call{ |a,b| }),      Call.new(nil, "call", block: Block.new([p("a"), p("b")]))
