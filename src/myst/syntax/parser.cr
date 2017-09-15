@@ -185,27 +185,44 @@ module Myst
       param = Param.new
 
       case
-      when accept(Token::Type::STAR)
+      when start = accept(Token::Type::STAR)
         if allow_splat
           param.splat = true
+          name = expect(Token::Type::IDENT)
+          push_local_var(name.value)
+          param.name = name.value
+          return param.at(start.location).at_end(name.location)
         else
           raise ParseError.new("Multiple splat parameters are not allowed in a definition.")
         end
-      when accept(Token::Type::AMPERSAND)
+      when start = accept(Token::Type::AMPERSAND)
         param.block = true
+        name = expect(Token::Type::IDENT)
+        param.name = name.value
+        # Named parameters should be treated as Vars (not Calls) within the Def
+        # body. However, for a call syntax that is consistent with normal calls,
+        # the block parameter is excluded from this.
+        return param.at(start.location).at_end(name.location)
+      when name = accept(Token::Type::IDENT)
+        param.name = name.value
+        push_local_var(name.value)
+        return param.at(name.location)
+      else
+        # If no other parameter syntax has matched, attempt to parse the
+        # parameter as a pattern.
+        param.pattern = to_pattern(parse_primary)
+        param.at(param.pattern)
+        skip_space
+        if accept(Token::Type::MATCH)
+          skip_space
+          name = expect(Token::Type::IDENT)
+          push_local_var(name.value)
+          param.name = name.value
+          return param.at_end(name.location)
+        end
       end
 
-      name = expect(Token::Type::IDENT)
-      param.name = name.value
-
-      # Named parameters should be treated as Vars (not Calls) within the Def
-      # body. However, for a call syntax that is consistent with normal calls,
-      # the block parameter is excluded from this.
-      unless param.block?
-        push_local_var(param.name)
-      end
-
-      return param.at(name.location)
+      return param
     end
 
     def parse_module_def
@@ -604,6 +621,14 @@ module Myst
     # suitable for use as a Pattern.
     private def to_pattern(node)
       case node
+      when Var
+        push_local_var(node.name)
+        return node
+      when Underscore
+        push_local_var(node.name)
+        return node
+      when Const
+        return node
       when Call
         # Only bare calls can be used as bindings in a pattern.
         if node.receiver? || node.block? || !node.args.empty?

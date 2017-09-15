@@ -360,6 +360,15 @@ describe "Parser" do
   # The Vars defined within the Def should be removed after the Def finishes.
   it_parses %q(def foo(a); end; a), Def.new("foo", [p("a")]), Call.new(nil, "a")
 
+  # Defs allow patterns as parameters
+  it_parses %q(def foo(nil); end),          Def.new("foo", [p(nil, l(nil))])
+  it_parses %q(def foo(1, 2); end),         Def.new("foo", [p(nil, l(1)), p(nil, l(2))])
+  it_parses %q(def foo([1, a]); end),       Def.new("foo", [p(nil, l([1, v("a")]))])
+  it_parses %q(def foo({a: 1, b: b}); end), Def.new("foo", [p(nil, l({ :a => 1, :b => v("b") }))])
+  # Patterns can also be followed by a name to capture the entire argument.
+  it_parses %q(def foo([1, a] =: b); end),  Def.new("foo", [p("b", l([1, v("a")]))])
+  it_parses %q(def foo([1, _] =: _); end),  Def.new("foo", [p("_", l([1, u("_")]))])
+
 
 
   # Module definitions
