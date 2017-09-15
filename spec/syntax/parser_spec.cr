@@ -571,4 +571,24 @@ describe "Parser" do
   test_calls_with_receiver("self.",   Self.new)
   # `self` can not be used as the name of a Call
   it_does_not_parse %q(object.self)
+
+
+
+  # Include
+
+  # Includes accept any node as an argument, and are valid in any context.
+  it_parses %q(include Thing),        Include.new(c("Thing"))
+  it_parses %q(include Thing.Other),  Include.new(Call.new(c("Thing"), "Other"))
+  it_parses %q(include dynamic),      Include.new(Call.new(nil, "dynamic"))
+  it_parses %q(include self),         Include.new(Self.new)
+  it_parses %q(
+    module Thing
+      include Other
+    end
+  ),                                  ModuleDef.new("Thing", e(Include.new(c("Other"))))
+  it_parses %q(
+    def foo
+      include Thing
+    end
+  ),                                  Def.new("foo", body: e(Include.new(c("Thing"))))
 end

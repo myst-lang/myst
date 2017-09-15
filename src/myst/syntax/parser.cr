@@ -111,6 +111,8 @@ module Myst
         parse_def
       when Token::Type::MODULE
         parse_module_def
+      when Token::Type::INCLUDE
+        parse_include
       else
         parse_logical_or
       end
@@ -242,7 +244,13 @@ module Myst
         pop_var_scope
         return ModuleDef.new(name, body).at(start.location).at_end(finish.location)
       end
+    end
 
+    def parse_include
+      start = expect(Token::Type::INCLUDE)
+      skip_space
+      path = parse_expression
+      return Include.new(path).at(start.location).at_end(path)
     end
 
     def parse_logical_or
