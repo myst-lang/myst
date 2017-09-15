@@ -64,3 +64,10 @@ end
 def p(name=nil, pattern=nil, splat=false, block=false)
   Param.new(pattern: pattern, name: name, splat: splat, block: block)
 end
+
+# e(*nodes)
+#
+# Generate an Expressions node from the given nodes.
+def e(*nodes : Node)
+  Expressions.new(*nodes)
+end

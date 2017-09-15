@@ -183,7 +183,7 @@ module Myst
     #
     #   name ':' expression
     # |
-    #   interpolation : expression
+    #   interpolation ':' expression
     class MapLiteral < Literal
       property elements : Array(Entry)
 

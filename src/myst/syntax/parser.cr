@@ -309,10 +309,15 @@ module Myst
     def parse_assign
       target = parse_primary
       skip_space
-      if accept(Token::Type::EQUAL)
+      case
+      when accept(Token::Type::EQUAL)
         skip_space_and_newlines
         value = parse_expression
         return SimpleAssign.new(to_lhs(target), value).at(target).at_end(value)
+      when accept(Token::Type::MATCH)
+        skip_space_and_newlines
+        value = parse_expression
+        return MatchAssign.new(to_pattern(target), value).at(target).at_end(value)
       end
 
       return target
@@ -578,6 +583,8 @@ module Myst
       when Underscore
         push_local_var(node.name)
         return node
+      when Const
+        return node
       when Call
         # If no explicit receiver was set on the Call, consider it a Var.
         if node.receiver? || node.block? || !node.args.empty?
@@ -591,6 +598,27 @@ module Myst
       else
         raise ParseError.new("Invalid value for LHS of Assign: #{node}")
       end
+    end
+
+    # Recursively scan the given node, transforming it's elements to be
+    # suitable for use as a Pattern.
+    private def to_pattern(node)
+      case node
+      when Call
+        # Only bare calls can be used as bindings in a pattern.
+        if node.receiver? || node.block? || !node.args.empty?
+          raise "Calls are not allowed in patterns."
+        else
+          push_local_var(node.name)
+          return Var.new(node.name).at(node)
+        end
+      when ListLiteral
+        node.elements = node.elements.map{ |e| to_pattern(e).as(Node) }
+      when MapLiteral
+        node.elements = node.elements.map{ |e| MapLiteral::Entry.new(e.key, to_pattern(e.value).as(Node)) }
+      end
+
+      return node
     end
 
 

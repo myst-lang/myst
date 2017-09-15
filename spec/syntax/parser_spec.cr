@@ -121,7 +121,6 @@ describe "Parser" do
   it_parses %q(<
     (1 + 2)
   >),                           i(Call.new(l(1), "+", [l(2)]))
-
   # Interpolations can also be used as Map keys.
   it_parses %q(
     {
@@ -130,9 +129,8 @@ describe "Parser" do
     }
   ),                            l({ i(1) => "int", i(nil) => :nil })
   # Interpolations can be used as a replacement for any primary expression.
-  it_parses %q(
-    [1, <2>, 3]
-  ),                            l([1, i(2), 3])
+  it_parses %q([1, <2>, 3]),    l([1, i(2), 3])
+  it_parses %q(<3> + 4),        Call.new(i(3), "+", [l(4)])
 
 
   # Infix expressions
@@ -177,7 +175,7 @@ describe "Parser" do
 
 
 
-  # Assignments
+  # Simple Assignments
 
   it_parses %q(a = b),      SimpleAssign.new(v("a"), Call.new(nil, "b"))
   it_parses %q(a = b = c),  SimpleAssign.new(v("a"), SimpleAssign.new(v("b"), Call.new(nil, "c")))
@@ -199,16 +197,50 @@ describe "Parser" do
     a = 2
     a
   ),              Call.new(nil, "a"), SimpleAssign.new(v("a"), l(2)), v("a")
-  # Underscores can be the target of an assignment, and they should be declared in the current scope.
-  it_parses %q(_ = 2),  SimpleAssign.new(u("_"), l(2))
+  # Consts and Underscores can also be the target of an assignment, and they
+  # should be declared in the current scope.
+  it_parses %q(THING = 4),  SimpleAssign.new(c("THING"), l(4))
+  it_parses %q(_ = 2),      SimpleAssign.new(u("_"), l(2))
 
-  # Assignments can not be made to l values.
+  # Assignments can not be made to literal values.
   it_does_not_parse %q(2 = 4),          /cannot assign to literal value/i
   it_does_not_parse %q(2.56 = 4),       /cannot assign to literal value/i
   it_does_not_parse %q("hi" = 4),       /cannot assign to literal value/i
   it_does_not_parse %q(nil = 4),        /cannot assign to literal value/i
   it_does_not_parse %q(false = true),   /cannot assign to literal value/i
   it_does_not_parse %q([1, 2, 3] = 4),  /cannot assign to literal value/i
+
+
+
+  # Match Assignments
+
+  # Match assignments allow literal values on either side
+  it_parses %q(1 =: 1),           MatchAssign.new(l(1), l(1))
+  it_parses %q(:hi =: "hi"),      MatchAssign.new(l(:hi), l("hi"))
+  it_parses %q(true =: false),    MatchAssign.new(l(true), l(false))
+  it_parses %q([1, 2] =: [1, 2]), MatchAssign.new(l([1, 2]), l([1, 2]))
+  it_parses %q({a: 2} =: {a: 2}), MatchAssign.new(l({:a => 2}),l({:a => 2}))
+  # Vars, Consts, and Underscores can also be used on either side.
+  it_parses %q(a =: 5),           MatchAssign.new(v("a"), l(5))
+  it_parses %q(Thing =: 10),      MatchAssign.new(c("Thing"), l(10))
+  it_parses %q(_ =: 15),          MatchAssign.new(u("_"), l(15))
+  # Value Interpolations are also allowed on either side for complex patterns/values.
+  it_parses %q(<a> =: <b>),       MatchAssign.new(i(Call.new(nil, "a")), i(Call.new(nil, "b")))
+  # Bare multiple assignment is not allowed. Use a List pattern instead.
+  it_does_not_parse %q(a, b =: 1, 2)
+  # The value of a match assignment may appear on a new line.
+  it_parses %q(
+    a =:
+      4
+  ),            MatchAssign.new(v("a"), l(4))
+  # Patterns can be arbitrarily nested.
+  it_parses %q(
+    [1, {
+      a: a,
+      b: b
+    }, 4] =:
+      thing
+  ),            MatchAssign.new(l([1, { :a => v("a"), :b => v("b") }, 4]), Call.new(nil, "thing"))
 
 
 
@@ -273,14 +305,14 @@ describe "Parser" do
     def foo
       1 + 2
     end
-  ),            Def.new("foo", body: Expressions.new(Call.new(l(1), "+", [l(2)])))
+  ),            Def.new("foo", body: e(Call.new(l(1), "+", [l(2)])))
 
   it_parses %q(
     def foo
       a = 1
       a * 4
     end
-  ),            Def.new("foo", body: Expressions.new(SimpleAssign.new(v("a"), l(1)), Call.new(v("a"), "*", [l(4)])))
+  ),            Def.new("foo", body: e(SimpleAssign.new(v("a"), l(1)), Call.new(v("a"), "*", [l(4)])))
 
   # A Splat collector can appear anywhere in the param list
   it_parses %q(def foo(*a); end),       Def.new("foo", [p("a", splat: true)], splat_index: 0)
@@ -311,8 +343,8 @@ describe "Parser" do
   # References to variables defined as parameters should be considered Vars,
   # not Calls. To maintain consistency in the call syntax, this does not apply
   # to the block parameter
-  it_parses %q(def foo(a); a; end),           Def.new("foo", [p("a")], Expressions.new(v("a")))
-  it_parses %q(def foo(&block); block; end),  Def.new("foo", block_param: p("block", block: true), body: Expressions.new(Call.new(nil, "block")))
+  it_parses %q(def foo(a); a; end),           Def.new("foo", [p("a")], e(v("a")))
+  it_parses %q(def foo(&block); block; end),  Def.new("foo", block_param: p("block", block: true), body: e(Call.new(nil, "block")))
 
   # The Vars defined within the Def should be removed after the Def finishes.
   it_parses %q(def foo(a); end; a), Def.new("foo", [p("a")]), Call.new(nil, "a")
@@ -330,21 +362,21 @@ describe "Parser" do
     module Foo
       def foo; end
     end
-  ),                ModuleDef.new("Foo", Expressions.new(Def.new("foo")))
+  ),                ModuleDef.new("Foo", e(Def.new("foo")))
   # Modules allow immediate code evaluation on their scope.
   it_parses %q(
     module Foo
       1 + 2
       a = 3
     end
-  ),                ModuleDef.new("Foo", Expressions.new(Call.new(l(1), "+", [l(2)]), SimpleAssign.new(v("a"), l(3))))
+  ),                ModuleDef.new("Foo", e(Call.new(l(1), "+", [l(2)]), SimpleAssign.new(v("a"), l(3))))
   # Modules can also be nested
   it_parses %q(
     module Foo
       module Bar
       end
     end
-  ),                ModuleDef.new("Foo", Expressions.new(ModuleDef.new("Bar")))
+  ),                ModuleDef.new("Foo", e(ModuleDef.new("Bar")))
 
 
 
@@ -475,19 +507,15 @@ describe "Parser" do
   ),                                      Call.new(nil, "call", [l(1), Call.new(nil, "inner", [l(1)], block: Block.new), l(2)])
 
   # Blocks are exactly like normal defs, they can contain any valid Expressions node as a body.
-  it_parses %q(call{ a = 1; a }), Call.new(nil, "call", block: Block.new(body: Expressions.new(SimpleAssign.new(v("a"), l(1)), v("a"))))
+  it_parses %q(call{ a = 1; a }), Call.new(nil, "call", block: Block.new(body: e(SimpleAssign.new(v("a"), l(1)), v("a"))))
   it_parses %q(call{
       a = 1
       a
     }
-  ), Call.new(nil, "call", block: Block.new(body: Expressions.new(SimpleAssign.new(v("a"), l(1)), v("a"))))
+  ), Call.new(nil, "call", block: Block.new(body: e(SimpleAssign.new(v("a"), l(1)), v("a"))))
   it_parses %q(call do
       a = 1
       a
     end
-  ), Call.new(nil, "call", block: Block.new(body: Expressions.new(SimpleAssign.new(v("a"), l(1)), v("a"))))
-
-
-
-  #
+  ), Call.new(nil, "call", block: Block.new(body: e(SimpleAssign.new(v("a"), l(1)), v("a"))))
 end
