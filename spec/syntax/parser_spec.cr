@@ -245,6 +245,11 @@ describe "Parser" do
   it_parses %q(<{a: 1}>),       i({:a => 1})
   # Calls, Vars, Consts, Underscores are also valid.
   it_parses %q(<a>),            i(Call.new(nil, "a"))
+  it_parses %q(<a(1, 2)>),      i(Call.new(nil, "a", [l(1), l(2)]))
+  it_parses %q(<a.b(1)>),       i(Call.new(Call.new(nil, "a"), "b", [l(1)]))
+  it_parses %q(<a.b.c>),        i(Call.new(Call.new(Call.new(nil, "a"), "b"), "c"))
+  it_parses %q(<a{ }>),         i(Call.new(nil, "a", block: Block.new))
+  it_parses %q(<a do; end>),    i(Call.new(nil, "a", block: Block.new))
   it_parses %q(<Thing>),        i(c("Thing"))
   it_parses %q(<_>),            i(u("_"))
   # Complex expressions must be wrapped in parentheses.
