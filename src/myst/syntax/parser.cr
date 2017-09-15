@@ -210,7 +210,7 @@ module Myst
       else
         # If no other parameter syntax has matched, attempt to parse the
         # parameter as a pattern.
-        param.pattern = to_pattern(parse_primary)
+        param.pattern = to_pattern(parse_postfix)
         param.at(param.pattern)
         skip_space
         if accept(Token::Type::MATCH)
@@ -324,7 +324,7 @@ module Myst
     end
 
     def parse_assign
-      target = parse_primary
+      target = parse_postfix
       skip_space
       case
       when accept(Token::Type::EQUAL)
@@ -338,6 +338,19 @@ module Myst
       end
 
       return target
+    end
+
+    def parse_postfix(receiver=nil)
+      receiver ||= parse_primary
+      skip_space
+
+      case
+      when accept(Token::Type::POINT)
+        skip_space_and_newlines
+        return parse_postfix(parse_var_or_call(receiver))
+      else
+        return receiver
+      end
     end
 
     def parse_primary
@@ -366,25 +379,27 @@ module Myst
     def parse_value_interpolation
       start = expect(Token::Type::LESS)
       skip_space_and_newlines
-      value = parse_primary
+      value = parse_postfix
       skip_space_and_newlines
       finish = expect(Token::Type::GREATER)
       return ValueInterpolation.new(value).at(start.location).at_end(finish.location)
     end
 
-    def parse_var_or_call
+    def parse_var_or_call(receiver=nil)
       start = expect(Token::Type::IDENT)
       name  = start.value
 
-      if name.starts_with?('_')
-        return Underscore.new(name).at(start.location)
+      if receiver.nil?
+        if name.starts_with?('_')
+          return Underscore.new(name).at(start.location)
+        end
+
+        if is_local_var?(name)
+          return Var.new(name).at(start.location)
+        end
       end
 
-      if is_local_var?(name)
-        return Var.new(name).at(start.location)
-      end
-
-      call = Call.new(nil, name).at(start.location)
+      call = Call.new(receiver, name).at(start.location)
       skip_space
       if accept(Token::Type::LPAREN)
         skip_space_and_newlines
