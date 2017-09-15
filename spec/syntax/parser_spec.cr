@@ -368,6 +368,7 @@ describe "Parser" do
   # Patterns can also be followed by a name to capture the entire argument.
   it_parses %q(def foo([1, a] =: b); end),  Def.new("foo", [p("b", l([1, v("a")]))])
   it_parses %q(def foo([1, _] =: _); end),  Def.new("foo", [p("_", l([1, u("_")]))])
+  it_parses %q(def foo(<other> =: _); end), Def.new("foo", [p("_", i(Call.new(nil, "other")))])
 
 
 
@@ -448,6 +449,7 @@ describe "Parser" do
   it_parses %q(call{ | | }),              Call.new(nil, "call", block: Block.new())
   it_parses %q(call{ |a,*b| }),           Call.new(nil, "call", block: Block.new([p("a"), p("b", splat: true)]))
   it_parses %q(call{ |1,nil=:thing| }),   Call.new(nil, "call", block: Block.new([p(nil, l(1)), p("thing", l(nil))]))
+  it_parses %q(call{ |<other>| }),        Call.new(nil, "call", block: Block.new([p(nil, i(Call.new(nil, "other")))]))
   it_parses %q(call{ |*a,b| }),           Call.new(nil, "call", block: Block.new([p("a", splat: true), p("b")]))
   it_parses %q(call{ |a,*b,c| }),         Call.new(nil, "call", block: Block.new([p("a"), p("b", splat: true), p("c")]))
   it_parses %q(call{ |a,&block| }),       Call.new(nil, "call", block: Block.new([p("a")], block_param: p("block", block: true)))
