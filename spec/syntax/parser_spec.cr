@@ -443,16 +443,18 @@ describe "Parser" do
   it_parses %q(call   do; end), Call.new(nil, "call", block: Block.new)
 
   # Brace blocks accept arguments after the opening brace.
-  it_parses %q(call{ |a,b| }),      Call.new(nil, "call", block: Block.new([p("a"), p("b")]))
+  it_parses %q(call{ |a,b| }),            Call.new(nil, "call", block: Block.new([p("a"), p("b")]))
   # Block parameters are exactly like normal Def parameters, with the same syntax support.
-  it_parses %q(call{ | | }),        Call.new(nil, "call", block: Block.new())
-  it_parses %q(call{ |a,*b| }),     Call.new(nil, "call", block: Block.new([p("a"), p("b", splat: true)]))
-  it_parses %q(call{ |*a,b| }),     Call.new(nil, "call", block: Block.new([p("a", splat: true), p("b")]))
-  it_parses %q(call{ |a,*b,c| }),   Call.new(nil, "call", block: Block.new([p("a"), p("b", splat: true), p("c")]))
-  it_parses %q(call{ |a,&block| }), Call.new(nil, "call", block: Block.new([p("a")], block_param: p("block", block: true)))
-  it_parses %q(call{ |a,&b| }),     Call.new(nil, "call", block: Block.new([p("a")], block_param: p("b", block: true)))
+  it_parses %q(call{ | | }),              Call.new(nil, "call", block: Block.new())
+  it_parses %q(call{ |a,*b| }),           Call.new(nil, "call", block: Block.new([p("a"), p("b", splat: true)]))
+  it_parses %q(call{ |1,nil=:thing| }),   Call.new(nil, "call", block: Block.new([p(nil, l(1)), p("thing", l(nil))]))
+  it_parses %q(call{ |*a,b| }),           Call.new(nil, "call", block: Block.new([p("a", splat: true), p("b")]))
+  it_parses %q(call{ |a,*b,c| }),         Call.new(nil, "call", block: Block.new([p("a"), p("b", splat: true), p("c")]))
+  it_parses %q(call{ |a,&block| }),       Call.new(nil, "call", block: Block.new([p("a")], block_param: p("block", block: true)))
+  it_parses %q(call{ |a,&b| }),           Call.new(nil, "call", block: Block.new([p("a")], block_param: p("b", block: true)))
   it_parses %q(call{ |a,
-                        &b| }),     Call.new(nil, "call", block: Block.new([p("a")], block_param: p("b", block: true)))
+                        &b| }),           Call.new(nil, "call", block: Block.new([p("a")], block_param: p("b", block: true)))
+
   it_does_not_parse %q(call{ |&b,a| }),     /block parameter/
   it_does_not_parse %q(call{ |*a,*b| }),    /multiple splat/
 
