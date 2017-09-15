@@ -251,6 +251,8 @@ describe "Parser" do
   it_parses %q(<a{ }>),         i(Call.new(nil, "a", block: Block.new))
   it_parses %q(<a do; end>),    i(Call.new(nil, "a", block: Block.new))
   it_parses %q(<Thing>),        i(c("Thing"))
+  it_parses %q(<Thing.Other>),  i(Call.new(c("Thing"), "Other"))
+  it_parses %q(<A.B.C>),        i(Call.new(Call.new(c("A"), "B"), "C"))
   it_parses %q(<_>),            i(u("_"))
   # Complex expressions must be wrapped in parentheses.
   it_parses %q(<(a)>),          i(Call.new(nil, "a"))
@@ -550,6 +552,8 @@ describe "Parser" do
   test_calls_with_receiver("",                  nil)
   test_calls_with_receiver("object.",           Call.new(nil, "object"))
   test_calls_with_receiver("nested.object.",    Call.new(Call.new(nil, "nested"), "object"))
+  test_calls_with_receiver("Thing.member.",     Call.new(c("Thing"), "member"))
+  test_calls_with_receiver("Thing.Other.",      Call.new(c("Thing"), "Other"))
   test_calls_with_receiver("1.",                l(1))
   test_calls_with_receiver("[1, 2, 3].",        l([1, 2, 3]))
   test_calls_with_receiver(%q("some string".),  l("some string"))

@@ -386,7 +386,7 @@ module Myst
     end
 
     def parse_var_or_call(receiver=nil)
-      start = expect(Token::Type::IDENT)
+      start = expect(Token::Type::IDENT, Token::Type::CONST)
       name  = start.value
 
       if receiver.nil?

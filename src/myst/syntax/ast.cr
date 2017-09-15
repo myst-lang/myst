@@ -246,23 +246,6 @@ module Myst
       def_equals_and_hash
     end
 
-    # A concatenated series of constants. Each entry in the path sets the scope
-    # for lookup of the next entry.
-    #
-    #   const [ '.' const ]*
-    class Path < Node
-      property names : Array(String)
-
-      def initialize(@names = [] of String)
-      end
-
-      def initialize(*names)
-        @names = names.to_a
-      end
-
-      def_equals_and_hash names
-    end
-
     # A value interpolation. Interpolations are used to dynamically insert
     # values in places that normally expect a static value, such as keys in
     # Map literals, or expected values in patterns.
@@ -658,8 +641,7 @@ module Myst
     end
 
     # A module definition. The name of the module must be a Constant (i.e., it
-    # must start with a capital letter). Not only is this good practice in
-    # general, but it also makes parsing Paths simpler and more efficient.
+    # must start with a capital letter).
     #
     #   'module' const
     #     body
@@ -695,14 +677,13 @@ module Myst
 
     # An include expression. Includes are the primary mechanism for composing
     # modules. When an Include is encountered, the module referenced by the
-    # path must already exist. The path can be any valid Path expression, such
-    # as `TopLevelModule` or `Some.Nested.Module`.
+    # path must already exist.
     #
     #   'include' path
     class Include < Node
-      property path : Path
+      property path : Node
 
-      def initialize(@path : Path); end
+      def initialize(@path : Node); end
 
       def accept_children(visitor)
         path.accept(visitor)
