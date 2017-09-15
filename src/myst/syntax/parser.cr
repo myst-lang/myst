@@ -363,6 +363,10 @@ module Myst
         expect(Token::Type::RPAREN)
         skip_space_and_newlines
         return expr
+      when Token::Type::SELF
+        token = current_token
+        read_token
+        return Self.new.at(token.location)
       when Token::Type::CONST
         token = current_token
         read_token

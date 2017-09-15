@@ -557,6 +557,18 @@ describe "Parser" do
   test_calls_with_receiver("1.",                l(1))
   test_calls_with_receiver("[1, 2, 3].",        l([1, 2, 3]))
   test_calls_with_receiver(%q("some string".),  l("some string"))
-  test_calls_with_receiver(%q(method{ }.),      Call.new(nil, "method", block: Block.new))
-  test_calls_with_receiver(%q(method do; end.), Call.new(nil, "method", block: Block.new))
+  test_calls_with_receiver("method{ }.",        Call.new(nil, "method", block: Block.new))
+  test_calls_with_receiver("method do; end.",   Call.new(nil, "method", block: Block.new))
+
+
+
+  # Self
+
+  # `self` can be used anywhere a primary expression is allowed
+  it_parses %q(self),                 Self.new
+  it_parses %q(<self>),               i(Self.new)
+  it_parses %q(self + self),          Call.new(Self.new, "+", [Self.new.as(Node)])
+  test_calls_with_receiver("self.",   Self.new)
+  # `self` can not be used as the name of a Call
+  it_does_not_parse %q(object.self)
 end

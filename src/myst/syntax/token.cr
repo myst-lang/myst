@@ -23,6 +23,7 @@ module Myst
       RETURN        # return
       BREAK         # break
       NEXT          # next
+      SELF          # self
 
       TRUE          # true
       FALSE         # false
@@ -86,7 +87,8 @@ module Myst
           WHEN, UNLESS, ELSE,
           WHILE, UNTIL,
           TRUE, FALSE, NIL,
-          RETURN, BREAK, NEXT
+          RETURN, BREAK, NEXT,
+          SELF
         ]
       end
 
@@ -109,7 +111,8 @@ module Myst
           "nil" => NIL,
           "return" => RETURN,
           "break" => BREAK,
-          "next" => NEXT
+          "next" => NEXT,
+          "self" => SELF
         }
       end
 
