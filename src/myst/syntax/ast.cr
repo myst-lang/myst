@@ -668,9 +668,9 @@ module Myst
     #
     #   'require' string
     class Require < Node
-      property path : String
+      property path : Node
 
-      def initialize(@path : String); end
+      def initialize(@path : Node); end
 
       def_equals_and_hash path
     end

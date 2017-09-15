@@ -580,6 +580,7 @@ describe "Parser" do
   it_parses %q(include Thing),        Include.new(c("Thing"))
   it_parses %q(include Thing.Other),  Include.new(Call.new(c("Thing"), "Other"))
   it_parses %q(include dynamic),      Include.new(Call.new(nil, "dynamic"))
+  it_parses %q(include 1 + 2),        Include.new(Call.new(l(1), "+", [l(2)]))
   it_parses %q(include self),         Include.new(Self.new)
   it_parses %q(
     module Thing
@@ -591,4 +592,34 @@ describe "Parser" do
       include Thing
     end
   ),                                  Def.new("foo", body: e(Include.new(c("Thing"))))
+
+  # The argument for an include must be on the same line as the keyword
+  it_does_not_parse %q(
+    include
+    Thing
+  ),                      /expected value for include/
+
+
+
+  # Require
+
+  # Requires are syntactically similar to includes, but the expected value is a String.
+  it_parses %q(require "some_file"),  Require.new(l("some_file"))
+  it_parses %q(require base + path),  Require.new(Call.new(Call.new(nil, "base"), "+", [Call.new(nil, "path").as(Node)]))
+  it_parses %q(require Thing.dep),    Require.new(Call.new(c("Thing"), "dep"))
+  it_parses %q(
+    module Thing
+      require "other_thing"
+    end
+  ),                                  ModuleDef.new("Thing", e(Require.new(l("other_thing"))))
+  it_parses %q(
+    def foo
+      require "other_thing"
+    end
+  ),                                  Def.new("foo", body: e(Require.new(l("other_thing"))))
+
+  it_does_not_parse %q(
+    require
+    "some_file"
+  ),                      /expected value for require/
 end

@@ -113,6 +113,8 @@ module Myst
         parse_module_def
       when Token::Type::INCLUDE
         parse_include
+      when Token::Type::REQUIRE
+        parse_require
       else
         parse_logical_or
       end
@@ -249,8 +251,21 @@ module Myst
     def parse_include
       start = expect(Token::Type::INCLUDE)
       skip_space
+      if current_token.type == Token::Type::NEWLINE
+        raise ParseError.new("expected value for include")
+      end
       path = parse_expression
       return Include.new(path).at(start.location).at_end(path)
+    end
+
+    def parse_require
+      start = expect(Token::Type::REQUIRE)
+      skip_space
+      if current_token.type == Token::Type::NEWLINE
+        raise ParseError.new("expected value for require")
+      end
+      path = parse_expression
+      return Require.new(path).at(start.location).at_end(path)
     end
 
     def parse_logical_or
