@@ -242,6 +242,17 @@ describe "Parser" do
       thing
   ),            MatchAssign.new(l([1, { :a => v("a"), :b => v("b") }, 4]), Call.new(nil, "thing"))
 
+  # Matches can be chained with other matches, as well as simple assignments.
+  it_parses %q(
+    a = 3 =: b
+  ),            SimpleAssign.new(v("a"), MatchAssign.new(l(3), Call.new(nil, "b")))
+  it_parses %q(
+    3 =: a = b
+  ),            MatchAssign.new(l(3), SimpleAssign.new(v("a"), Call.new(nil, "b")))
+  it_parses %q(
+    3 =: a =: 3
+  ),            MatchAssign.new(l(3), MatchAssign.new(v("a"), l(3)))
+
 
 
   # Expression delimiters
