@@ -276,7 +276,7 @@ module Myst
 
     def parse_conditional
       case
-      when accept(Token::Type::WHEN)
+      when start = accept(Token::Type::WHEN)
         skip_space
         condition = parse_expression
         skip_space
@@ -284,8 +284,8 @@ module Myst
         skip_space_and_newlines
         body = parse_code_block(Token::Type::WHEN, Token::Type::UNLESS, Token::Type::ELSE, Token::Type::END)
         alternative = parse_conditional
-        return When.new(condition, body, alternative)
-      when accept(Token::Type::UNLESS)
+        return When.new(condition, body, alternative).at(start.location).at_end(alternative)
+      when start = accept(Token::Type::UNLESS)
         skip_space
         condition = parse_expression
         skip_space
@@ -293,8 +293,8 @@ module Myst
         skip_space_and_newlines
         body = parse_code_block(Token::Type::WHEN, Token::Type::UNLESS, Token::Type::ELSE, Token::Type::END)
         alternative = parse_conditional
-        return Unless.new(condition, body, alternative)
-      when accept(Token::Type::ELSE)
+        return Unless.new(condition, body, alternative).at(start.location).at_end(alternative)
+      when start = accept(Token::Type::ELSE)
         skip_space
         expect_delimiter
         skip_space_and_newlines
@@ -303,8 +303,8 @@ module Myst
         body = parse_code_block(Token::Type::END)
         expect(Token::Type::END)
         return body
-      when accept(Token::Type::END)
-        return Nop.new
+      when finish = accept(Token::Type::END)
+        return Nop.new.at_end(finish.location)
       else
         # This may be reached if a conditional is not properly closed.
         raise ParseError.new("Expected one of `when`, `unless`, or `else`, got #{current_token.inspect}")
@@ -313,7 +313,7 @@ module Myst
 
     def parse_loop
       case
-      when accept(Token::Type::WHILE)
+      when start = accept(Token::Type::WHILE)
         skip_space
         condition = parse_expression
         skip_space
@@ -322,8 +322,8 @@ module Myst
 
         body = parse_code_block(Token::Type::END)
         expect(Token::Type::END)
-        return While.new(condition, body)
-      when accept(Token::Type::UNTIL)
+        return While.new(condition, body).at(start.location).at_end(body)
+      when start = accept(Token::Type::UNTIL)
         skip_space
         condition = parse_expression
         skip_space
@@ -332,7 +332,7 @@ module Myst
 
         body = parse_code_block(Token::Type::END)
         expect(Token::Type::END)
-        return Until.new(condition, body)
+        return Until.new(condition, body).at(start.location).at_end(body)
       else
         # This should never be reached.
         raise ParseError.new("Expected one of `while` or `until`, got #{current_token.inspect}")
