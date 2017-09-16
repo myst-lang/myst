@@ -88,9 +88,10 @@ module Myst
     # A code block is a set of expressions contained by some other expression.
     # For example, the body of a method definition.
     def parse_code_block(*terminators)
-      block = Expressions.new
+      block = nil
       skip_space_and_newlines
       until terminators.includes?(current_token.type)
+        block ||= Expressions.new
         block.children << parse_expression
         # In a code block, the last expression does not require a delimiter.
         # For example, `call{ a = 1; a + 2 } is valid, even though `a + 2` is
@@ -102,7 +103,8 @@ module Myst
         skip_space_and_newlines
       end
 
-      block
+      # If there were no expressions in the block, return a Nop instead.w
+      block || Nop.new
     end
 
     def parse_expression
@@ -115,6 +117,8 @@ module Myst
         parse_include
       when Token::Type::REQUIRE
         parse_require
+      when Token::Type::WHEN, Token::Type::UNLESS
+        parse_conditional
       else
         parse_logical_or
       end
@@ -266,6 +270,42 @@ module Myst
       end
       path = parse_expression
       return Require.new(path).at(start.location).at_end(path)
+    end
+
+    def parse_conditional
+      case
+      when accept(Token::Type::WHEN)
+        skip_space
+        condition = parse_expression
+        skip_space
+        expect_delimiter
+        skip_space_and_newlines
+        body = parse_code_block(Token::Type::WHEN, Token::Type::UNLESS, Token::Type::ELSE, Token::Type::END)
+        alternative = parse_conditional
+        return When.new(condition, body, alternative)
+      when accept(Token::Type::UNLESS)
+        skip_space
+        condition = parse_expression
+        skip_space
+        expect_delimiter
+        skip_space_and_newlines
+        body = parse_code_block(Token::Type::WHEN, Token::Type::UNLESS, Token::Type::ELSE, Token::Type::END)
+        alternative = parse_conditional
+        return Unless.new(condition, body, alternative)
+      when accept(Token::Type::ELSE)
+        skip_space
+        expect_delimiter
+        skip_space_and_newlines
+        # An `else` does not have a condition, nor can it have an alternative,
+        # so when encountered, simply parse and return the body.
+        body = parse_code_block(Token::Type::END)
+        expect(Token::Type::END)
+        return body
+      when accept(Token::Type::END)
+        return Nop.new
+      else
+        raise ParseError.new("Expected one of `when`, `unless`, or `else`, got #{current_token.inspect}")
+      end
     end
 
     def parse_logical_or

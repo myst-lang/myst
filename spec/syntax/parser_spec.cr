@@ -631,4 +631,160 @@ describe "Parser" do
     require base +
             path
   ),                                  Require.new(Call.new(Call.new(nil, "base"), "+", [Call.new(nil, "path").as(Node)]))
+
+
+
+  # Conditionals
+
+  # The primary conditional expression is `when`. It functionally replaces `if`
+  # from most other languages.
+  it_parses %q(
+    when true
+    end
+  ),                                When.new(l(true))
+  it_parses %q(when true; end),     When.new(l(true))
+  it_parses %q(when a == 1; end),   When.new(Call.new(Call.new(nil, "a"), "==", [l(1)]))
+  # Any expression can be used as a condition
+  it_parses %q(
+    when a = 1
+    end
+  ),                                When.new(SimpleAssign.new(v("a"), l(1)))
+  it_parses %q(
+    when 1 + 2
+    end
+  ),                                When.new(Call.new(l(1), "+", [l(2)]))
+  # The body of a When is a normal code block.
+  it_parses %q(
+    when true
+      1 + 1
+      do_something
+    end
+  ),                                When.new(l(true), e(Call.new(l(1), "+", [l(1)]), Call.new(nil, "do_something")))
+  # Whens can be chained together for more complex logic. This is most similar
+  # to `else if` in other languages.
+  it_parses %q(
+    when true
+      # Do a thing
+    when false
+      # Do another thing
+    end
+  ),                                When.new(l(true), alternative: When.new(l(false)))
+  # An `else` can be used at the end of a When chain as a catch-all.
+  it_parses %q(
+    when true
+    else
+      a = 1
+    end
+  ),                                When.new(l(true), alternative: e(SimpleAssign.new(v("a"), l(1))))
+  it_parses %q(
+    when true
+    when false
+    else
+    end
+  ),                                When.new(l(true), alternative: When.new(l(false)))
+
+  # Unless is the logical inverse of When.
+  it_parses %q(
+    unless true
+    end
+  ),                                Unless.new(l(true))
+  it_parses %q(unless true; end),   Unless.new(l(true))
+  it_parses %q(unless a == 1; end), Unless.new(Call.new(Call.new(nil, "a"), "==", [l(1)]))
+  it_parses %q(
+    unless a = 1
+    end
+  ),                                Unless.new(SimpleAssign.new(v("a"), l(1)))
+  it_parses %q(
+    unless 1 + 2
+    end
+  ),                                Unless.new(Call.new(l(1), "+", [l(2)]))
+  it_parses %q(
+    unless true
+      1 + 1
+      do_something
+    end
+  ),                                Unless.new(l(true), e(Call.new(l(1), "+", [l(1)]), Call.new(nil, "do_something")))
+  it_parses %q(
+    unless true
+      # Do a thing
+    unless false
+      # Do another thing
+    end
+  ),                                Unless.new(l(true), alternative: Unless.new(l(false)))
+  it_parses %q(
+    unless true
+    else
+    end
+  ),                                Unless.new(l(true))
+  it_parses %q(
+    unless true
+    else
+      a = 1
+    end
+  ),                                Unless.new(l(true), alternative: e(SimpleAssign.new(v("a"), l(1))))
+  it_parses %q(
+    unless true
+    unless false
+    else
+    end
+  ),                                Unless.new(l(true), alternative: Unless.new(l(false)))
+
+  # When and Unless can be used in any combination
+  it_parses %q(
+    when true
+    unless false
+    end
+  ),                                When.new(l(true), alternative: Unless.new(l(false)))
+  it_parses %q(
+    unless false
+    when true
+    end
+  ),                                Unless.new(l(false), alternative: When.new(l(true)))
+  it_parses %q(
+    when true
+    unless false
+    when true
+    end
+  ),                                When.new(l(true), alternative: Unless.new(l(false), alternative: When.new(l(true))))
+  it_parses %q(
+    unless false
+    when true
+    unless false
+    end
+  ),                                Unless.new(l(false), alternative: When.new(l(true), alternative: Unless.new(l(false))))
+
+
+  # `else` _must_ be the last block of a When chain
+  it_does_not_parse %q(
+    when true
+    else
+    when false
+    end
+  )
+  it_does_not_parse %q(
+    unless true
+    else
+    unless false
+    end
+  )
+  # `else` is not valid on it's own
+  it_does_not_parse %q(else; end)
+  it_does_not_parse %q(
+    else
+    end
+  )
+
+  # `when`s cannot be directly nested
+  it_does_not_parse %q(
+    when true
+      when false
+      end
+    end
+  )
+  it_does_not_parse %q(
+    unless true
+      unless false
+      end
+    end
+  )
 end
