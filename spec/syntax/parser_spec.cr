@@ -774,7 +774,7 @@ describe "Parser" do
     end
   )
 
-  # `when`s cannot be directly nested
+  # Whens cannot be directly nested
   it_does_not_parse %q(
     when true
       when false
@@ -785,6 +785,18 @@ describe "Parser" do
     unless true
       unless false
       end
+    end
+  )
+
+  # Whens that are nested within other constructs maintain their scoping
+  it_parses %q(
+    when true
+      call do
+        when true
+        else
+        end
+      end
+    when false
     end
   )
 end
