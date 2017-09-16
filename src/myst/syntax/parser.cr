@@ -119,6 +119,8 @@ module Myst
         parse_require
       when Token::Type::WHEN, Token::Type::UNLESS
         parse_conditional
+      when Token::Type::WHILE, Token::Type::UNTIL
+        parse_loop
       else
         parse_logical_or
       end
@@ -304,7 +306,36 @@ module Myst
       when accept(Token::Type::END)
         return Nop.new
       else
+        # This may be reached if a conditional is not properly closed.
         raise ParseError.new("Expected one of `when`, `unless`, or `else`, got #{current_token.inspect}")
+      end
+    end
+
+    def parse_loop
+      case
+      when accept(Token::Type::WHILE)
+        skip_space
+        condition = parse_expression
+        skip_space
+        expect_delimiter
+        skip_space_and_newlines
+
+        body = parse_code_block(Token::Type::END)
+        expect(Token::Type::END)
+        return While.new(condition, body)
+      when accept(Token::Type::UNTIL)
+        skip_space
+        condition = parse_expression
+        skip_space
+        expect_delimiter
+        skip_space_and_newlines
+
+        body = parse_code_block(Token::Type::END)
+        expect(Token::Type::END)
+        return Until.new(condition, body)
+      else
+        # This should never be reached.
+        raise ParseError.new("Expected one of `while` or `until`, got #{current_token.inspect}")
       end
     end
 

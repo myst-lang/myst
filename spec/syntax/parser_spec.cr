@@ -799,4 +799,74 @@ describe "Parser" do
     when false
     end
   )
+
+
+
+  # Loops
+
+  # Loops are syntactically similar to Whens, but do not allow for chaining.
+  # While and Until are the main looping constructs.
+  it_parses %q(
+    while true
+    end
+  ),                                While.new(l(true))
+  it_parses %q(while true; end),    While.new(l(true))
+  it_parses %q(while a == 1; end),  While.new(Call.new(Call.new(nil, "a"), "==", [l(1)]))
+  it_parses %q(
+    while a = 1
+    end
+  ),                                While.new(SimpleAssign.new(v("a"), l(1)))
+  it_parses %q(
+    while 1 + 2
+    end
+  ),                                While.new(Call.new(l(1), "+", [l(2)]))
+  it_parses %q(
+    while true
+      1 + 1
+      do_something
+    end
+  ),                                While.new(l(true), e(Call.new(l(1), "+", [l(1)]), Call.new(nil, "do_something")))
+
+  it_parses %q(
+    until true
+    end
+  ),                                Until.new(l(true))
+  it_parses %q(until true; end),    Until.new(l(true))
+  it_parses %q(until a == 1; end),  Until.new(Call.new(Call.new(nil, "a"), "==", [l(1)]))
+  it_parses %q(
+    until a = 1
+    end
+  ),                                Until.new(SimpleAssign.new(v("a"), l(1)))
+  it_parses %q(
+    until 1 + 2
+    end
+  ),                                Until.new(Call.new(l(1), "+", [l(2)]))
+  it_parses %q(
+    until true
+      1 + 1
+      do_something
+    end
+  ),                                Until.new(l(true), e(Call.new(l(1), "+", [l(1)]), Call.new(nil, "do_something")))
+
+  # Loops can be nested directly
+  it_parses %q(
+    while true
+      until false
+      end
+    end
+  ),                                While.new(l(true), e(Until.new(l(false))))
+  it_parses %q(
+    until false
+      while true
+      end
+    end
+  ),                                Until.new(l(false), e(While.new(l(true))))
+
+  # Loops and conditionals can be intertwined with no issues.
+  it_parses %q(
+    while true
+      when a == b
+      end
+    end
+  ),                                While.new(l(true), e(When.new(Call.new(Call.new(nil, "a"), "==", [Call.new(nil, "b").as(Node)]))))
 end
