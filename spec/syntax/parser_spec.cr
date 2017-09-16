@@ -321,6 +321,56 @@ describe "Parser" do
 
 
 
+  # Unary expressions.
+
+  # Note: these examples represent valid _syntax_. They may appear semantically
+  # invalid, but should be accepted by the parser none-the-less.
+
+  {% for op in [[:!, Not], [:-, Negation], [:*, Splat]] %}
+    # Unary expressions are an operator followed by any valid postfix expression.
+    it_parses %q({{op[0].id}}  nil),      {{op[1]}}.new(l(nil))
+    it_parses %q({{op[0].id}}false),      {{op[1]}}.new(l(false))
+    it_parses %q({{op[0].id}}"hello"),    {{op[1]}}.new(l("hello"))
+    it_parses %q({{op[0].id}}[1, 2]),     {{op[1]}}.new(l([1, 2]))
+    it_parses %q({{op[0].id}}{a: 2}),     {{op[1]}}.new(l({ :a => 2 }))
+    it_parses %q({{op[0].id}}:hi),        {{op[1]}}.new(l(:hi))
+    it_parses %q({{op[0].id}}<1.5>),      {{op[1]}}.new(i(1.5))
+    it_parses %q({{op[0].id}}a),          {{op[1]}}.new(Call.new(nil, "a"))
+    it_parses %q({{op[0].id}}(1 + 2)),    {{op[1]}}.new(Call.new(l(1), "+", [l(2)]))
+    it_parses %q({{op[0].id}}a.b),        {{op[1]}}.new(Call.new(Call.new(nil, "a"), "b"))
+    it_parses %q({{op[0].id}}Thing.b),    {{op[1]}}.new(Call.new(c("Thing"), "b"))
+    it_parses %q(
+      {{op[0].id}}(
+        1 + 2
+      )
+    ),      {{op[1]}}.new(Call.new(l(1), "+", [l(2)]))
+
+    # Unary operators can be chained any number of times.
+    it_parses %q({{op[0].id}}{{op[0].id}}a),              {{op[1]}}.new({{op[1]}}.new(Call.new(nil, "a")))
+    it_parses %q({{op[0].id}}{{op[0].id}}{{op[0].id}}a),  {{op[1]}}.new({{op[1]}}.new({{op[1]}}.new(Call.new(nil, "a"))))
+
+    # Unary operators are not valid without an argument.
+    it_does_not_parse %q({{op[0].id}})
+    # The operand must start on the same line as the operator.
+    it_does_not_parse %q(
+      {{op[0].id}}
+      a
+    )
+  {% end %}
+
+  # Unary operators can also be mixed when chaining.
+  it_parses %q(!*-a),     Not.new(Splat.new(Negation.new(Call.new(nil, "a"))))
+  it_parses %q(-*!100),   Negation.new(Splat.new(Not.new(l(100))))
+  it_parses %q(-!*[1,2]), Negation.new(Not.new(Splat.new(l([1, 2]))))
+
+  # Unary operators have a higher precedence than any binary operation.
+  it_parses %q(-1 +  -2),   Call.new(Negation.new(l(1)), "+", [Negation.new(l(2)).as(Node)])
+  it_parses %q(!1 || !2),   Or.new(Not.new(l(1)), Not.new(l(2)).as(Node))
+  it_parses %q(-1 == -2),   Call.new(Negation.new(l(1)), "==", [Negation.new(l(2)).as(Node)])
+  it_parses %q( a =  -1),   SimpleAssign.new(v("a"), Negation.new(l(1)))
+
+
+
   # Simple Assignments
 
   it_parses %q(a = b),      SimpleAssign.new(v("a"), Call.new(nil, "b"))

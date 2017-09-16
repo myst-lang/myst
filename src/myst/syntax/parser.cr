@@ -418,7 +418,7 @@ module Myst
     end
 
     def parse_assign
-      target = parse_postfix
+      target = parse_unary
       skip_space
       case
       when accept(Token::Type::EQUAL)
@@ -432,6 +432,25 @@ module Myst
       end
 
       return target
+    end
+
+    def parse_unary
+      case
+      when start = accept(Token::Type::NOT)
+        skip_space
+        value = parse_unary
+        return Not.new(value).at(start.location).at_end(value)
+      when start = accept(Token::Type::MINUS)
+        skip_space
+        value = parse_unary
+        return Negation.new(value).at(start.location).at_end(value)
+      when start = accept(Token::Type::STAR)
+        skip_space
+        value = parse_unary
+        return Splat.new(value).at(start.location).at_end(value)
+      else
+        return parse_postfix
+      end
     end
 
     def parse_postfix(receiver=nil)
@@ -477,7 +496,7 @@ module Myst
     def parse_value_interpolation
       start = expect(Token::Type::LESS)
       skip_space_and_newlines
-      value = parse_postfix
+      value = parse_unary
       skip_space_and_newlines
       finish = expect(Token::Type::GREATER)
       return ValueInterpolation.new(value).at(start.location).at_end(finish.location)

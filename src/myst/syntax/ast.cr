@@ -511,6 +511,15 @@ module Myst
       def_equals_and_hash
     end
 
+    # A negation expression. Mainly applicable for Integers, this node
+    # generally indicates an _arithmetic_ negation, as oppposed to a _logical_
+    # negation as indicated by a `!`.
+    #
+    #   '-' postfix_expression
+    class Negation < UnaryOp
+      def_equals_and_hash
+    end
+
     # A splat expression. Splats deconstruct collections to be treated as
     # multiple individual values. Splats can also indicate the opposite: that a
     # single collection should be created from multiple values.
