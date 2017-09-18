@@ -919,4 +919,34 @@ describe "Parser" do
       end
     end
   ),                                While.new(l(true), e(When.new(Call.new(Call.new(nil, "a"), "==", [Call.new(nil, "b").as(Node)]))))
+
+
+
+  # Flow Control
+
+  # Returns, Breaks, and Nexts all accept an optional value, like other keyword
+  # expressions, the value must start on the same line as the keyword.
+
+  {% for keyword, node in { "return".id => Return, "break".id => Break, "next".id => Next } %}
+    it_parses %q({{keyword}}),              {{node}}.new
+    it_parses %q({{keyword}} nil),          {{node}}.new(l(nil))
+    it_parses %q({{keyword}} 1),            {{node}}.new(l(1))
+    it_parses %q({{keyword}} "hello"),      {{node}}.new(l("hello"))
+    it_parses %q({{keyword}} {a: 1, b: 2}), {{node}}.new(l({ :a => 1, :b => 2 }))
+    it_parses %q({{keyword}} [1, 2, 3]),    {{node}}.new(l([1, 2, 3]))
+    it_parses %q({{keyword}} 1 + 2),        {{node}}.new(Call.new(l(1), "+", [l(2)]))
+    it_parses %q(
+      {{keyword}} 1 +
+                  2
+    ),                                      {{node}}.new(Call.new(l(1), "+", [l(2)]))
+    it_parses %q(
+      {{keyword}} (
+        1 + 2
+      )
+    ),                                      {{node}}.new(Call.new(l(1), "+", [l(2)]))
+    it_parses %q(
+      {{keyword}}
+      1 + 2
+    ),                                      {{node}}.new, Call.new(l(1), "+", [l(2)])
+  {% end %}
 end

@@ -124,6 +124,14 @@ module Myst
         self == END
       end
 
+      def self.delimiters
+        [NEWLINE, SEMI, EOF]
+      end
+
+      def delimiter?
+        self.class.delimiters.includes?(self)
+      end
+
 
       def self.unary_operators
         [PLUS, MINUS, NOT, STAR, AMPERSAND]

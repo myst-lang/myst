@@ -117,6 +117,8 @@ module Myst
         parse_include
       when Token::Type::REQUIRE
         parse_require
+      when Token::Type::RETURN, Token::Type::BREAK, Token::Type::NEXT
+        parse_flow_control
       when Token::Type::WHEN, Token::Type::UNLESS
         parse_conditional
       when Token::Type::WHILE, Token::Type::UNTIL
@@ -272,6 +274,28 @@ module Myst
       end
       path = parse_expression
       return Require.new(path).at(start.location).at_end(path)
+    end
+
+    def parse_flow_control
+      node =
+        case
+        when accept(Token::Type::RETURN)
+          Return.new
+        when accept(Token::Type::BREAK)
+          Break.new
+        when accept(Token::Type::NEXT)
+          Next.new
+        else
+          raise ParseError.new("Expected one of return, break, or next, got #{current_token.inspect}")
+        end
+
+      skip_space
+
+      unless current_token.type.delimiter?
+        node.value = parse_expression
+      end
+
+      return node
     end
 
     def parse_conditional
