@@ -329,16 +329,24 @@ module Myst
     def consume_symbol_or_colon
       # Read the starting colon
       read_char
+
+      force_symbol = false
       case current_char
       when '"'
-        # Quoted values allow for arbitrary symbol names
+        # Quoted values allow for arbitrary symbol names. An empty string (:"")
+        # will still be considered a symbol
         consume_string
+        force_symbol = true
       when .ascii_whitespace?
+      when '\0'
+        # A colon followed immediately by whitespace should not be a symbol.
+        # The empty string notation shown above should be used for symbols with
+        # no value.
       else
         consume_identifier
       end
 
-      if @current_token.value.size > 1
+      if force_symbol || @current_token.value.size > 1
         @current_token.type = Token::Type::SYMBOL
         @current_token.value = @current_token.value[1..-1]
       else
@@ -347,7 +355,7 @@ module Myst
     end
 
     def consume_comment
-      until read_char == '\n'; end
+      until ['\n', '\0'].includes?(read_char); end
     end
 
     def consume_whitespace

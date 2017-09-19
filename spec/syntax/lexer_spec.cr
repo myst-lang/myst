@@ -5,65 +5,79 @@ private def assert_token_type(source, token_type)
   token.type.should eq(token_type)
 end
 
+STATIC_TOKENS = {
+  Token::Type::PLUS         =>  "+",
+  Token::Type::MINUS        =>  "-",
+  Token::Type::STAR         =>  "*",
+  Token::Type::SLASH        =>  "/",
+  Token::Type::EQUAL        =>  "=",
+  Token::Type::NOT          =>  "!",
+  Token::Type::MATCH        =>  "=:",
+  Token::Type::LESS         =>  "<",
+  Token::Type::LESSEQUAL    =>  "<=",
+  Token::Type::EQUALEQUAL   =>  "==",
+  Token::Type::NOTEQUAL     =>  "!=",
+  Token::Type::GREATEREQUAL =>  ">=",
+  Token::Type::GREATER      =>  ">",
+  Token::Type::ANDAND       =>  "&&",
+  Token::Type::OROR         =>  "||",
+  Token::Type::ANDOP        =>  "&&=",
+  Token::Type::OROP         =>  "||=",
+  Token::Type::PLUSOP       =>  "+=",
+  Token::Type::MINUSOP      =>  "-=",
+  Token::Type::STAROP       =>  "*=",
+  Token::Type::SLASHOP      =>  "/=",
+  Token::Type::MODOP        =>  "%=",
+  Token::Type::COMMA        =>  ",",
+  Token::Type::POINT        =>  ".",
+  Token::Type::COLON        =>  ":",
+  Token::Type::SEMI         =>  "; ",
+  Token::Type::AMPERSAND    =>  "&",
+  Token::Type::PIPE         =>  "|",
+  Token::Type::LPAREN       =>  "(",
+  Token::Type::RPAREN       =>  ")",
+  Token::Type::LBRACE       =>  "[",
+  Token::Type::RBRACE       =>  "]",
+  Token::Type::LCURLY       =>  "{",
+  Token::Type::RCURLY       =>  "}",
+  Token::Type::EOF          =>  "\0",
+  Token::Type::NEWLINE      =>  "\n",
+  Token::Type::WHITESPACE   =>  " ",
+  Token::Type::REQUIRE      =>  "require",
+  Token::Type::INCLUDE      =>  "include",
+  Token::Type::MODULE       =>  "module",
+  Token::Type::DEF          =>  "def",
+  Token::Type::DO           =>  "do",
+  Token::Type::UNLESS       =>  "unless",
+  Token::Type::ELSE         =>  "else",
+  Token::Type::WHILE        =>  "while",
+  Token::Type::UNTIL        =>  "until",
+  Token::Type::WHEN         =>  "when",
+  Token::Type::END          =>  "end",
+  Token::Type::RETURN       =>  "return",
+  Token::Type::BREAK        =>  "break",
+  Token::Type::NEXT         =>  "next",
+  Token::Type::SELF         =>  "self",
+  Token::Type::TRUE         =>  "true",
+  Token::Type::FALSE        =>  "false",
+  Token::Type::NIL          =>  "nil"
+}
+
 # This spec only tests simple token types. Types whose value is not static
 # (strings, identifiers, numerics, symbols, etc.) each have their own, more
 # comprehensive specs.
 describe "Lexer" do
-  it "lexes all operators properly" do
-    assert_token_type "+",  Token::Type::PLUS
-    assert_token_type "-",  Token::Type::MINUS
-    assert_token_type "*",  Token::Type::STAR
-    assert_token_type "/",  Token::Type::SLASH
-    assert_token_type "=",  Token::Type::EQUAL
-    assert_token_type "!",  Token::Type::NOT
-    assert_token_type "=:", Token::Type::MATCH
-    assert_token_type "<",  Token::Type::LESS
-    assert_token_type "<=", Token::Type::LESSEQUAL
-    assert_token_type "==", Token::Type::EQUALEQUAL
-    assert_token_type "!=", Token::Type::NOTEQUAL
-    assert_token_type ">=", Token::Type::GREATEREQUAL
-    assert_token_type ">",  Token::Type::GREATER
-    assert_token_type "&&", Token::Type::ANDAND
-    assert_token_type "||", Token::Type::OROR
-  end
 
-  it "lexes all opassign tokens properly" do
-    assert_token_type "&&=", Token::Type::ANDOP
-    assert_token_type "||=", Token::Type::OROP
-    assert_token_type  "+=", Token::Type::PLUSOP
-    assert_token_type  "-=", Token::Type::MINUSOP
-    assert_token_type  "*=", Token::Type::STAROP
-    assert_token_type  "/=", Token::Type::SLASHOP
-    assert_token_type  "%=", Token::Type::MODOP
-  end
+  {% for type, token in STATIC_TOKENS %}
+    it "lexes `" + {{token}} + "`" do
+      assert_token_type {{token}}, {{type}}
+    end
+  {% end %}
 
-  it "lexes all punctuation characters properly" do
-    assert_token_type ",",  Token::Type::COMMA
-    assert_token_type ".",  Token::Type::POINT
-    assert_token_type ": ", Token::Type::COLON
-    assert_token_type "; ", Token::Type::SEMI
-    assert_token_type "&",  Token::Type::AMPERSAND
-    assert_token_type "|",  Token::Type::PIPE
-  end
 
-  it "lexes all bracing characters properly" do
-    assert_token_type "(",  Token::Type::LPAREN
-    assert_token_type ")",  Token::Type::RPAREN
-    assert_token_type "[",  Token::Type::LBRACE
-    assert_token_type "]",  Token::Type::RBRACE
-    assert_token_type "{",  Token::Type::LCURLY
-    assert_token_type "}",  Token::Type::RCURLY
-  end
 
   it "lexes comments properly" do
     assert_token_type "# some comment\n", Token::Type::COMMENT
-  end
-
-  it "lexes delimiters properly" do
-    assert_token_type "\0", Token::Type::EOF
-    assert_token_type "\n", Token::Type::NEWLINE
-    assert_token_type " ",  Token::Type::WHITESPACE
-    assert_token_type "\t", Token::Type::WHITESPACE
   end
 
   it "lexes multiple whitespace delimiters together" do
@@ -84,5 +98,55 @@ describe "Lexer" do
     tokens = tokenize("thing\0 more things")
     tokens.size.should eq(2)
     tokens.last.type.should eq(Token::Type::EOF)
+  end
+
+  it "lexes integers" do
+    assert_token_type "1",          Token::Type::INTEGER
+    assert_token_type "100",        Token::Type::INTEGER
+    assert_token_type "123456789",  Token::Type::INTEGER
+    assert_token_type "123_456",    Token::Type::INTEGER
+    assert_token_type "23_000",     Token::Type::INTEGER
+    assert_token_type "45_00",      Token::Type::INTEGER
+  end
+
+  it "lexes floats" do
+    assert_token_type "1.0",          Token::Type::FLOAT
+    assert_token_type "100.0",        Token::Type::FLOAT
+    assert_token_type "12345.6789",   Token::Type::FLOAT
+    assert_token_type "123_456.789",  Token::Type::FLOAT
+    assert_token_type "23.123_456",   Token::Type::FLOAT
+    assert_token_type "1000.000_0",   Token::Type::FLOAT
+  end
+
+  it "lexes strings" do
+    assert_token_type %q(""),             Token::Type::STRING
+    assert_token_type %q("   "),          Token::Type::STRING
+    assert_token_type %q("hello, world"), Token::Type::STRING
+    assert_token_type %q("hello,
+    world"),                              Token::Type::STRING
+  end
+
+  it "allows escape characters in strings" do
+    assert_token_type %q("\""),   Token::Type::STRING
+    assert_token_type %q("\0"),   Token::Type::STRING
+    assert_token_type %q("\t"),   Token::Type::STRING
+    assert_token_type %q("\n"),   Token::Type::STRING
+    assert_token_type %q("\\"),   Token::Type::STRING
+  end
+
+  it "lexes symbols" do
+    assert_token_type %q(:hello), Token::Type::SYMBOL
+    assert_token_type %q(:a),     Token::Type::SYMBOL
+  end
+
+  it "allows constants as symbol values" do
+    assert_token_type %q(:CONST), Token::Type::SYMBOL
+    assert_token_type %q(:Thing), Token::Type::SYMBOL
+  end
+
+  it "lexes symbols with spaces" do
+    assert_token_type %q(:""),             Token::Type::SYMBOL
+    assert_token_type %q(:"   "),          Token::Type::SYMBOL
+    assert_token_type %q(:"hello, world"), Token::Type::SYMBOL
   end
 end
