@@ -694,6 +694,10 @@ describe "Parser" do
     include 1 +
             2
   ),                                  Include.new(Call.new(l(1), "+", [l(2)]))
+  # Only one value is expected. Providing multiple values is invalid.
+  it_does_not_parse %q(
+    include Thing1, Thing2
+  )
 
 
 
@@ -722,6 +726,10 @@ describe "Parser" do
     require base +
             path
   ),                                  Require.new(Call.new(Call.new(nil, "base"), "+", [Call.new(nil, "path").as(Node)]))
+  # Only one value is expected. Providing multiple values is invalid.
+  it_does_not_parse %q(
+    require "file1", "file2"
+  )
 
 
 
