@@ -67,18 +67,20 @@ private macro test_calls_with_receiver(receiver_source, receiver_node)
   it_parses %q({{receiver_source.id}}call do |a|; end), Call.new({{receiver_node}}, "call", block: Block.new([p("a")]))
 
   # Brace blocks accept arguments after the opening brace.
-  it_parses %q({{receiver_source.id}}call{ |a,b| }),             Call.new({{receiver_node}}, "call", block: Block.new([p("a"), p("b")]))
+  it_parses %q({{receiver_source.id}}call{ |a,b| }),                  Call.new({{receiver_node}}, "call", block: Block.new([p("a"), p("b")]))
   # Block parameters are exactly like normal Def parameters, with the same syntax support.
-  it_parses %q({{receiver_source.id}}call{ | | }),               Call.new({{receiver_node}}, "call", block: Block.new())
-  it_parses %q({{receiver_source.id}}call{ |a,*b| }),            Call.new({{receiver_node}}, "call", block: Block.new([p("a"), p("b", splat: true)]))
-  it_parses %q({{receiver_source.id}}call{ |1,nil=:thing| }),    Call.new({{receiver_node}}, "call", block: Block.new([p(nil, l(1)), p("thing", l(nil))]))
-  it_parses %q({{receiver_source.id}}call{ |<other>| }),         Call.new({{receiver_node}}, "call", block: Block.new([p(nil, i(Call.new(nil, "other")))]))
-  it_parses %q({{receiver_source.id}}call{ |*a,b| }),            Call.new({{receiver_node}}, "call", block: Block.new([p("a", splat: true), p("b")]))
-  it_parses %q({{receiver_source.id}}call{ |a,*b,c| }),          Call.new({{receiver_node}}, "call", block: Block.new([p("a"), p("b", splat: true), p("c")]))
-  it_parses %q({{receiver_source.id}}call{ |a,&block| }),        Call.new({{receiver_node}}, "call", block: Block.new([p("a")], block_param: p("block", block: true)))
-  it_parses %q({{receiver_source.id}}call{ |a,&b| }),            Call.new({{receiver_node}}, "call", block: Block.new([p("a")], block_param: p("b", block: true)))
+  it_parses %q({{receiver_source.id}}call{ | | }),                    Call.new({{receiver_node}}, "call", block: Block.new())
+  it_parses %q({{receiver_source.id}}call{ |a,*b| }),                 Call.new({{receiver_node}}, "call", block: Block.new([p("a"), p("b", splat: true)]))
+  it_parses %q({{receiver_source.id}}call{ |1,nil=:thing| }),         Call.new({{receiver_node}}, "call", block: Block.new([p(nil, l(1)), p("thing", l(nil))]))
+  it_parses %q({{receiver_source.id}}call{ |a : Integer, b : Nil| }), Call.new({{receiver_node}}, "call", block: Block.new([p("a", restriction: c("Integer")), p("b", restriction: c("Nil"))]))
+  it_parses %q({{receiver_source.id}}call{ |1 =: a : Integer| }),     Call.new({{receiver_node}}, "call", block: Block.new([p("a", l(1), restriction: c("Integer"))]))
+  it_parses %q({{receiver_source.id}}call{ |<other>| }),              Call.new({{receiver_node}}, "call", block: Block.new([p(nil, i(Call.new(nil, "other")))]))
+  it_parses %q({{receiver_source.id}}call{ |*a,b| }),                 Call.new({{receiver_node}}, "call", block: Block.new([p("a", splat: true), p("b")]))
+  it_parses %q({{receiver_source.id}}call{ |a,*b,c| }),               Call.new({{receiver_node}}, "call", block: Block.new([p("a"), p("b", splat: true), p("c")]))
+  it_parses %q({{receiver_source.id}}call{ |a,&block| }),             Call.new({{receiver_node}}, "call", block: Block.new([p("a")], block_param: p("block", block: true)))
+  it_parses %q({{receiver_source.id}}call{ |a,&b| }),                 Call.new({{receiver_node}}, "call", block: Block.new([p("a")], block_param: p("b", block: true)))
   it_parses %q({{receiver_source.id}}call{ |a,
-                                          &b| }),             Call.new({{receiver_node}}, "call", block: Block.new([p("a")], block_param: p("b", block: true)))
+                                              &b| }),                 Call.new({{receiver_node}}, "call", block: Block.new([p("a")], block_param: p("b", block: true)))
 
   it_does_not_parse %q({{receiver_source.id}}call{ |&b,a| }),     /block parameter/
   it_does_not_parse %q({{receiver_source.id}}call{ |*a,*b| }),    /multiple splat/
@@ -647,7 +649,6 @@ describe "Parser" do
   it_parses %q(def foo([1, 2] =: a : Integer); end),  Def.new("foo", [p("a", l([1, 2]), restriction: c("Integer"))])
   it_parses %q(def foo([1, 2] =: a : Nil); end),      Def.new("foo", [p("a", l([1, 2]), restriction: c("Nil"))])
   it_parses %q(def foo([1, 2] =: a : Thing); end),    Def.new("foo", [p("a", l([1, 2]), restriction: c("Thing"))])
-
   # Only the top level parameters may have retrictions.
   it_does_not_parse %q(def foo([1, a : List]); end)
   it_does_not_parse %q(def foo([1, _ : List]); end)
@@ -655,10 +656,41 @@ describe "Parser" do
   it_does_not_parse %q(def foo([1, a : List] =: c); end)
   it_does_not_parse %q(def foo([1, _ : List] =: c); end)
   it_does_not_parse %q(def foo([1, [a, b] : List] =: c); end)
-
   # Block and Splat parameters may not have restrictions
   it_does_not_parse %q(def foo(*a : List); end)
   it_does_not_parse %q(def foo(&block : Block); end)
+  # All components of a parameter must appear inline with the previous component
+  it_does_not_parse %q(
+    def foo(a :
+                List)
+  )
+  it_does_not_parse %q(
+    def foo(a
+              : List)
+  )
+  it_does_not_parse %q(
+    def foo(<(1+2)> =:
+                        a)
+  )
+  it_does_not_parse %q(
+    def foo(<(1+2)>
+                    =: a)
+  )
+  # Individual components of a parameter _may_ span multiple lines, but should
+  # avoid it where possible.
+  it_parses %q(
+    def foo(<(1 +
+                  2)> =: a : Integer); end
+  ),                                    Def.new("foo", [p("a", i(Call.new(l(1), "+", [l(2)])), restriction: c("Integer"))])
+  # Parameters may each appear on their own line for clarity
+  it_parses %q(
+    def foo(
+        [1, _] =: list : List,
+        nil,
+        b : Integer
+      )
+    end
+  ),                            Def.new("foo", [p("list", l([1, u("_")]), restriction: c("List")), p(nil, l(nil)), p("b", restriction: c("Integer"))])
 
 
 
