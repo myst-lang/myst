@@ -451,6 +451,47 @@ describe "Parser" do
 
 
 
+  # Operational Assignments
+
+  # Most binary operations can be concatenated with an assignment to form an
+  # Operational Assignment. These are a syntactic shorthand for and operation
+  # and assignment on the same variable, i.e., `a op= b` is equivalent to
+  # writing  `a = a op b`.
+  {% for op in ["+=", "-=", "*=", "/=", "%=", "||=", "&&="] %}
+    # When the left-hand-side is an identifier, treat it as a Var.
+    it_parses %q(a {{op.id}} 1),              OpAssign.new(v("a"), {{op}}, l(1))
+    it_parses %q(a {{op.id}} a {{op.id}} 1),  OpAssign.new(v("a"), {{op}}, OpAssign.new(v("a"), {{op}}, l(1)))
+    it_parses %q(a {{op.id}} 1 + 2),          OpAssign.new(v("a"), {{op}}, Call.new(l(1), "+", [l(2)]))
+    it_parses %q(a {{op.id}} Thing.member),   OpAssign.new(v("a"), {{op}}, Call.new(c("Thing"), "member"))
+
+    # The left-hand-side can also be any simple Call
+    it_parses %q(a.b {{op.id}} 1),                OpAssign.new(Call.new(Call.new(nil, "a"), "b"), {{op}}, l(1))
+    it_parses %q(a.b {{op.id}} a.b {{op.id}} 1),  OpAssign.new(Call.new(Call.new(nil, "a"), "b"), {{op}}, OpAssign.new(Call.new(Call.new(nil, "a"), "b"), {{op}}, l(1)))
+    it_parses %q(a.b {{op.id}} 1 + 2),            OpAssign.new(Call.new(Call.new(nil, "a"), "b"), {{op}}, Call.new(l(1), "+", [l(2)]))
+    it_parses %q(a.b {{op.id}} Thing.member),     OpAssign.new(Call.new(Call.new(nil, "a"), "b"), {{op}}, Call.new(c("Thing"), "member"))
+
+    # As an infix expression, the value can appear on a new line
+    it_parses %q(
+      a.b {{op.id}}
+        1 + 2
+    ),              OpAssign.new(Call.new(Call.new(nil, "a"), "b"), {{op}}, Call.new(l(1), "+", [l(2)]))
+    it_parses %q(
+      a.b {{op.id}} (1 +
+        2
+      )
+    ),              OpAssign.new(Call.new(Call.new(nil, "a"), "b"), {{op}}, Call.new(l(1), "+", [l(2)]))
+
+    # The left-hand-side must be an assignable value (i.e., not a literal)
+    it_does_not_parse %q(1 {{op.id}} 2)
+    it_does_not_parse %q(nil {{op.id}} 2)
+    it_does_not_parse %q([1, 2] {{op.id}} 2)
+    # No left-hand-side is also invalid
+    it_does_not_parse %q({{op.id}} 2)
+  {% end %}
+
+
+
+
   # Expression delimiters
 
   # Newlines can be used to delimit complete expressions
@@ -732,6 +773,18 @@ describe "Parser" do
     else
     end
   ),                                When.new(l(true), alternative: When.new(l(false)))
+  # Whens are also valid as the value of an assignment
+  it_parses %q(
+    a = when true
+        when false
+        end
+  ),                                SimpleAssign.new(v("a"), When.new(l(true), alternative: When.new(l(false))))
+  it_parses %q(
+    long_name =
+      when true
+      when false
+      end
+  ),                                SimpleAssign.new(v("long_name"), When.new(l(true), alternative: When.new(l(false))))
 
   # Unless is the logical inverse of When.
   it_parses %q(
@@ -778,6 +831,17 @@ describe "Parser" do
     else
     end
   ),                                Unless.new(l(true), alternative: Unless.new(l(false)))
+  it_parses %q(
+    a = unless true
+        unless false
+        end
+  ),                                SimpleAssign.new(v("a"), Unless.new(l(true), alternative: Unless.new(l(false))))
+  it_parses %q(
+    long_name =
+      unless true
+      unless false
+      end
+  ),                                SimpleAssign.new(v("long_name"), Unless.new(l(true), alternative: Unless.new(l(false))))
 
   # When and Unless can be used in any combination
   it_parses %q(
@@ -802,6 +866,17 @@ describe "Parser" do
     unless false
     end
   ),                                Unless.new(l(false), alternative: When.new(l(true), alternative: Unless.new(l(false))))
+  it_parses %q(
+    a = when true
+        unless false
+        end
+  ),                                SimpleAssign.new(v("a"), When.new(l(true), alternative: Unless.new(l(false))))
+  it_parses %q(
+    long_name =
+      unless true
+      when false
+      end
+  ),                                SimpleAssign.new(v("long_name"), Unless.new(l(true), alternative: When.new(l(false))))
 
 
   # `else` _must_ be the last block of a When chain

@@ -27,6 +27,16 @@ describe "Lexer" do
     assert_token_type "||", Token::Type::OROR
   end
 
+  it "lexes all opassign tokens properly" do
+    assert_token_type "&&=", Token::Type::ANDOP
+    assert_token_type "||=", Token::Type::OROP
+    assert_token_type  "+=", Token::Type::PLUSOP
+    assert_token_type  "-=", Token::Type::MINUSOP
+    assert_token_type  "*=", Token::Type::STAROP
+    assert_token_type  "/=", Token::Type::SLASHOP
+    assert_token_type  "%=", Token::Type::MODOP
+  end
+
   it "lexes all punctuation characters properly" do
     assert_token_type ",",  Token::Type::COMMA
     assert_token_type ".",  Token::Type::POINT

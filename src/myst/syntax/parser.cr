@@ -453,6 +453,11 @@ module Myst
         skip_space_and_newlines
         value = parse_expression
         return MatchAssign.new(to_pattern(target), value).at(target).at_end(value)
+      when (op = current_token).type.op_assign?
+        read_token
+        skip_space_and_newlines
+        value = parse_expression
+        return OpAssign.new(to_lhs(target), op.value, value).at(target).at_end(value)
       end
 
       return target

@@ -51,6 +51,14 @@ module Myst
       ANDAND        # &&
       OROR          # ||
 
+      ANDOP         # &&=
+      OROP          # ||=
+      PLUSOP        #  +=
+      MINUSOP       #  -=
+      STAROP        #  *=
+      SLASHOP       #  /=
+      MODOP         #  %=
+
       AMPERSAND     # &
       PIPE          # |
 
@@ -130,6 +138,14 @@ module Myst
 
       def delimiter?
         self.class.delimiters.includes?(self)
+      end
+
+      def self.op_assigns
+        [ANDOP, OROP, PLUSOP, MINUSOP, STAROP, SLASHOP, MODOP]
+      end
+
+      def op_assign?
+        self.class.op_assigns.includes?(self)
       end
 
 

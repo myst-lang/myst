@@ -109,6 +109,10 @@ module Myst
         if current_char == '&'
           @current_token.type = Token::Type::ANDAND
           read_char
+          if current_char == '='
+            @current_token.type = Token::Type::ANDOP
+            read_char
+          end
         end
       when '|'
         @current_token.type = Token::Type::PIPE
@@ -116,6 +120,10 @@ module Myst
         if current_char == '|'
           @current_token.type = Token::Type::OROR
           read_char
+          if current_char == '='
+            @current_token.type = Token::Type::OROP
+            read_char
+          end
         end
       when '='
         @current_token.type = Token::Type::EQUAL
@@ -152,18 +160,38 @@ module Myst
       when '+'
         @current_token.type = Token::Type::PLUS
         read_char
+        if current_char == '='
+          @current_token.type = Token::Type::PLUSOP
+          read_char
+        end
       when '-'
         @current_token.type = Token::Type::MINUS
         read_char
+        if current_char == '='
+          @current_token.type = Token::Type::MINUSOP
+          read_char
+        end
       when '*'
         @current_token.type = Token::Type::STAR
         read_char
+        if current_char == '='
+          @current_token.type = Token::Type::STAROP
+          read_char
+        end
       when '/'
         @current_token.type = Token::Type::SLASH
         read_char
+        if current_char == '='
+          @current_token.type = Token::Type::SLASHOP
+          read_char
+        end
       when '%'
         @current_token.type = Token::Type::MODULO
         read_char
+        if current_char == '='
+          @current_token.type = Token::Type::MODOP
+          read_char
+        end
       when '\n'
         @current_token.type = Token::Type::NEWLINE
         read_char
