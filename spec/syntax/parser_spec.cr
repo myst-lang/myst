@@ -753,6 +753,10 @@ describe "Parser" do
     end
   ),                                When.new(Call.new(l(1), "+", [l(2)]))
   it_parses %q(
+    when call(1, 2)
+    end
+  ),                                When.new(Call.new(nil, "call", [l(1), l(2)]))
+  it_parses %q(
     when [1,2].map{ |e| }
     end
   ),                                When.new(Call.new(l([1, 2]), "map", block: Block.new([p("e")])))
@@ -797,6 +801,12 @@ describe "Parser" do
       when false
       end
   ),                                SimpleAssign.new(v("long_name"), When.new(l(true), alternative: When.new(l(false))))
+  # Only one expression may be given for the condition of a When
+  it_does_not_parse %q(
+    when a, b
+    end
+  )
+
 
   # Unless is the logical inverse of When.
   it_parses %q(
@@ -813,6 +823,10 @@ describe "Parser" do
     unless 1 + 2
     end
   ),                                Unless.new(Call.new(l(1), "+", [l(2)]))
+  it_parses %q(
+    unless call(1, 2)
+    end
+  ),                                Unless.new(Call.new(nil, "call", [l(1), l(2)]))
   it_parses %q(
     unless [1,2].map{ |e| }
     end
@@ -963,6 +977,10 @@ describe "Parser" do
     end
   ),                                While.new(Call.new(l(1), "+", [l(2)]))
   it_parses %q(
+    while call(1, 2)
+    end
+  ),                                While.new(Call.new(nil, "call", [l(1), l(2)]))
+  it_parses %q(
     while [1,2].map{ |e| }
     end
   ),                                While.new(Call.new(l([1, 2]), "map", block: Block.new([p("e")])))
@@ -987,6 +1005,10 @@ describe "Parser" do
     until 1 + 2
     end
   ),                                Until.new(Call.new(l(1), "+", [l(2)]))
+  it_parses %q(
+    until call(1, 2)
+    end
+  ),                                Until.new(Call.new(nil, "call", [l(1), l(2)]))
   it_parses %q(
     until [1,2].map{ |e| }
     end
@@ -1048,5 +1070,11 @@ describe "Parser" do
       {{keyword}}
       1 + 2
     ),                                      {{node}}.new, Call.new(l(1), "+", [l(2)])
+
+    # Carrying multiple values implicitly is not supported. To simulate this,
+    # use a List instead.
+    it_does_not_parse %q(
+      {{keyword}} 1, 2
+    )
   {% end %}
 end
