@@ -744,6 +744,10 @@ describe "Parser" do
     when 1 + 2
     end
   ),                                When.new(Call.new(l(1), "+", [l(2)]))
+  it_parses %q(
+    when [1,2].map{ |e| }
+    end
+  ),                                When.new(Call.new(l([1, 2]), "map", block: Block.new([p("e")])))
   # The body of a When is a normal code block.
   it_parses %q(
     when true
@@ -801,6 +805,10 @@ describe "Parser" do
     unless 1 + 2
     end
   ),                                Unless.new(Call.new(l(1), "+", [l(2)]))
+  it_parses %q(
+    unless [1,2].map{ |e| }
+    end
+  ),                                Unless.new(Call.new(l([1, 2]), "map", block: Block.new([p("e")])))
   it_parses %q(
     unless true
       1 + 1
@@ -899,7 +907,8 @@ describe "Parser" do
     end
   )
 
-  # Whens cannot be directly nested
+  # Whens cannot be directly nested. These fail because the Whens are
+  # considered as a single chain, so the second end is unexpected.
   it_does_not_parse %q(
     when true
       when false
@@ -946,6 +955,10 @@ describe "Parser" do
     end
   ),                                While.new(Call.new(l(1), "+", [l(2)]))
   it_parses %q(
+    while [1,2].map{ |e| }
+    end
+  ),                                While.new(Call.new(l([1, 2]), "map", block: Block.new([p("e")])))
+  it_parses %q(
     while true
       1 + 1
       do_something
@@ -966,6 +979,10 @@ describe "Parser" do
     until 1 + 2
     end
   ),                                Until.new(Call.new(l(1), "+", [l(2)]))
+  it_parses %q(
+    until [1,2].map{ |e| }
+    end
+  ),                                Until.new(Call.new(l([1, 2]), "map", block: Block.new([p("e")])))
   it_parses %q(
     until true
       1 + 1
