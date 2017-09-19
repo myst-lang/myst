@@ -62,8 +62,9 @@ private macro test_calls_with_receiver(receiver_source, receiver_node)
   ),                              Call.new({{receiver_node}}, "call", block: Block.new)
 
   # The `do...end` syntax can also have a delimiter after the `do` and parameters.
-  it_parses %q({{receiver_source.id}}call do; end),    Call.new({{receiver_node}}, "call", block: Block.new)
-  it_parses %q({{receiver_source.id}}call   do; end),  Call.new({{receiver_node}}, "call", block: Block.new)
+  it_parses %q({{receiver_source.id}}call do; end),     Call.new({{receiver_node}}, "call", block: Block.new)
+  it_parses %q({{receiver_source.id}}call   do; end),   Call.new({{receiver_node}}, "call", block: Block.new)
+  it_parses %q({{receiver_source.id}}call do |a|; end), Call.new({{receiver_node}}, "call", block: Block.new([p("a")]))
 
   # Brace blocks accept arguments after the opening brace.
   it_parses %q({{receiver_source.id}}call{ |a,b| }),             Call.new({{receiver_node}}, "call", block: Block.new([p("a"), p("b")]))
