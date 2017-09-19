@@ -218,7 +218,7 @@ module Myst
       when name = accept(Token::Type::IDENT)
         param.name = name.value
         push_local_var(name.value)
-        return param.at(name.location)
+        param.at(name.location)
       else
         # If no other parameter syntax has matched, attempt to parse the
         # parameter as a pattern.
@@ -230,8 +230,18 @@ module Myst
           name = expect(Token::Type::IDENT)
           push_local_var(name.value)
           param.name = name.value
-          return param.at_end(name.location)
+          param.at_end(name.location)
         end
+      end
+
+      skip_space
+
+      # A type restriction can follow any non-splat/block parameter.
+      if accept(Token::Type::COLON)
+        skip_space
+        restriction = expect(Token::Type::CONST)
+        param.restriction = Const.new(restriction.value).at(restriction.location)
+        param.at_end(restriction.location)
       end
 
       return param

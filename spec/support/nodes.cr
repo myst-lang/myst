@@ -56,13 +56,13 @@ def u(name) : Underscore
   Underscore.new(name)
 end
 
-# p(name=nil, pattern=nil, splat: false, block: false)
+# p(name=nil, pattern=nil, restriction: nil, splat: false, block: false)
 #
 # Generate a Param node. The default usage creates a basic Param with only a
 # name. Pattern can be given as a second argument, and splat, and block can be
 # added with named parameters.
-def p(name=nil, pattern=nil, splat=false, block=false)
-  Param.new(pattern: pattern, name: name, splat: splat, block: block)
+def p(name=nil, pattern=nil, restriction=nil, splat=false, block=false)
+  Param.new(pattern: pattern, name: name, restriction: restriction, splat: splat, block: block)
 end
 
 # e(*nodes)

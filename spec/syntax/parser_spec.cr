@@ -83,7 +83,7 @@ private macro test_calls_with_receiver(receiver_source, receiver_node)
   it_does_not_parse %q({{receiver_source.id}}call{ |&b,a| }),     /block parameter/
   it_does_not_parse %q({{receiver_source.id}}call{ |*a,*b| }),    /multiple splat/
 
-  # `do...end` blocks accept arguments accept arguments
+  # `do...end` blocks accept arguments
   it_parses %q(
     {{receiver_source.id}}call do | |
     end
@@ -607,6 +607,59 @@ describe "Parser" do
   it_parses %q(def foo([1, a] =: b); end),  Def.new("foo", [p("b", l([1, v("a")]))])
   it_parses %q(def foo([1, _] =: _); end),  Def.new("foo", [p("_", l([1, u("_")]))])
   it_parses %q(def foo(<other> =: _); end), Def.new("foo", [p("_", i(Call.new(nil, "other")))])
+
+  # Type restrictions can be appended to any parameter to restrict the parameter
+  # to an exact type. The type must be a constant.
+  # Simple names
+  it_parses %q(def foo(a : Integer); end),          Def.new("foo", [p("a", restriction: c("Integer"))])
+  it_parses %q(def foo(a : Nil); end),              Def.new("foo", [p("a", restriction: c("Nil"))])
+  it_parses %q(def foo(a : Thing); end),            Def.new("foo", [p("a", restriction: c("Thing"))])
+  it_does_not_parse %q(def foo(a : 123); end)
+  it_does_not_parse %q(def foo(a : nil); end)
+  it_does_not_parse %q(def foo(a : [1, 2]); end)
+  it_does_not_parse %q(def foo(a : b); end)
+  it_does_not_parse %q(def foo(a : 1 + 2); end)
+  it_does_not_parse %q(def foo(a : <thing>); end)
+  it_does_not_parse %q(def foo(a : (A + B)); end)
+  # Simple patterns
+  it_parses %q(def foo(1 : Integer); end),        Def.new("foo", [p(nil, l(1), restriction: c("Integer"))])
+  it_parses %q(def foo(1 : Nil); end),            Def.new("foo", [p(nil, l(1), restriction: c("Nil"))])
+  it_parses %q(def foo(1 : Thing); end),          Def.new("foo", [p(nil, l(1), restriction: c("Thing"))])
+  it_parses %q(def foo(nil : Integer); end),      Def.new("foo", [p(nil, l(nil), restriction: c("Integer"))])
+  it_parses %q(def foo(nil : Nil); end),          Def.new("foo", [p(nil, l(nil), restriction: c("Nil"))])
+  it_parses %q(def foo(nil : Thing); end),        Def.new("foo", [p(nil, l(nil), restriction: c("Thing"))])
+  it_parses %q(def foo(<call> : Integer); end),   Def.new("foo", [p(nil, i(Call.new(nil, "call")), restriction: c("Integer"))])
+  it_parses %q(def foo(<call> : Nil); end),       Def.new("foo", [p(nil, i(Call.new(nil, "call")), restriction: c("Nil"))])
+  it_parses %q(def foo(<call> : Thing); end),     Def.new("foo", [p(nil, i(Call.new(nil, "call")), restriction: c("Thing"))])
+  it_parses %q(def foo([1, 2] : Integer); end),   Def.new("foo", [p(nil, l([1, 2]), restriction: c("Integer"))])
+  it_parses %q(def foo([1, 2] : Nil); end),       Def.new("foo", [p(nil, l([1, 2]), restriction: c("Nil"))])
+  it_parses %q(def foo([1, 2] : Thing); end),     Def.new("foo", [p(nil, l([1, 2]), restriction: c("Thing"))])
+  # Patterns and names
+  it_parses %q(def foo(1 =: a : Integer); end),       Def.new("foo", [p("a", l(1), restriction: c("Integer"))])
+  it_parses %q(def foo(1 =: a : Nil); end),           Def.new("foo", [p("a", l(1), restriction: c("Nil"))])
+  it_parses %q(def foo(1 =: a : Thing); end),         Def.new("foo", [p("a", l(1), restriction: c("Thing"))])
+  it_parses %q(def foo(nil =: a : Integer); end),     Def.new("foo", [p("a", l(nil), restriction: c("Integer"))])
+  it_parses %q(def foo(nil =: a : Nil); end),         Def.new("foo", [p("a", l(nil), restriction: c("Nil"))])
+  it_parses %q(def foo(nil =: a : Thing); end),       Def.new("foo", [p("a", l(nil), restriction: c("Thing"))])
+  it_parses %q(def foo(<call> =: a : Integer); end),  Def.new("foo", [p("a", i(Call.new(nil, "call")), restriction: c("Integer"))])
+  it_parses %q(def foo(<call> =: a : Nil); end),      Def.new("foo", [p("a", i(Call.new(nil, "call")), restriction: c("Nil"))])
+  it_parses %q(def foo(<call> =: a : Thing); end),    Def.new("foo", [p("a", i(Call.new(nil, "call")), restriction: c("Thing"))])
+  it_parses %q(def foo([1, 2] =: a : Integer); end),  Def.new("foo", [p("a", l([1, 2]), restriction: c("Integer"))])
+  it_parses %q(def foo([1, 2] =: a : Nil); end),      Def.new("foo", [p("a", l([1, 2]), restriction: c("Nil"))])
+  it_parses %q(def foo([1, 2] =: a : Thing); end),    Def.new("foo", [p("a", l([1, 2]), restriction: c("Thing"))])
+
+  # Only the top level parameters may have retrictions.
+  it_does_not_parse %q(def foo([1, a : List]); end)
+  it_does_not_parse %q(def foo([1, _ : List]); end)
+  it_does_not_parse %q(def foo([1, [a, b] : List]); end)
+  it_does_not_parse %q(def foo([1, a : List] =: c); end)
+  it_does_not_parse %q(def foo([1, _ : List] =: c); end)
+  it_does_not_parse %q(def foo([1, [a, b] : List] =: c); end)
+
+  # Block and Splat parameters may not have restrictions
+  it_does_not_parse %q(def foo(*a : List); end)
+  it_does_not_parse %q(def foo(&block : Block); end)
+
 
 
 
