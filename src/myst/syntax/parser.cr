@@ -500,6 +500,25 @@ module Myst
       when accept(Token::Type::POINT)
         skip_space_and_newlines
         return parse_postfix(parse_var_or_call(receiver))
+      when accept(Token::Type::LBRACE)
+        skip_space_and_newlines
+        call = Call.new(receiver, "[]")
+
+        loop do
+          skip_space_and_newlines
+          call.args << parse_expression
+          skip_space_and_newlines
+
+          # If there is no comma, this is the last argument, and a closing
+          # parenthesis should be expected.
+          unless accept(Token::Type::COMMA)
+            finish = expect(Token::Type::RBRACE)
+            call.at_end(finish.location)
+            break
+          end
+        end
+
+        return parse_postfix(call)
       else
         return receiver
       end

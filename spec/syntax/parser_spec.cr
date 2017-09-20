@@ -75,6 +75,8 @@ private macro test_calls_with_receiver(receiver_source, receiver_node)
   it_parses %q({{receiver_source.id}}call{ |a : Integer, b : Nil| }), Call.new({{receiver_node}}, "call", block: Block.new([p("a", restriction: c("Integer")), p("b", restriction: c("Nil"))]))
   it_parses %q({{receiver_source.id}}call{ |1 =: a : Integer| }),     Call.new({{receiver_node}}, "call", block: Block.new([p("a", l(1), restriction: c("Integer"))]))
   it_parses %q({{receiver_source.id}}call{ |<other>| }),              Call.new({{receiver_node}}, "call", block: Block.new([p(nil, i(Call.new(nil, "other")))]))
+  it_parses %q({{receiver_source.id}}call{ |<a.b>| }),                Call.new({{receiver_node}}, "call", block: Block.new([p(nil, i(Call.new(Call.new(nil, "a"), "b")))]))
+  it_parses %q({{receiver_source.id}}call{ |<a[0]>| }),               Call.new({{receiver_node}}, "call", block: Block.new([p(nil, i(Call.new(Call.new(nil, "a"), "[]", [l(0)])))]))
   it_parses %q({{receiver_source.id}}call{ |*a,b| }),                 Call.new({{receiver_node}}, "call", block: Block.new([p("a", splat: true), p("b")]))
   it_parses %q({{receiver_source.id}}call{ |a,*b,c| }),               Call.new({{receiver_node}}, "call", block: Block.new([p("a"), p("b", splat: true), p("c")]))
   it_parses %q({{receiver_source.id}}call{ |a,&block| }),             Call.new({{receiver_node}}, "call", block: Block.new([p("a")], block_param: p("block", block: true)))
@@ -257,12 +259,20 @@ describe "Parser" do
   it_parses %q(<Thing.Other>),  i(Call.new(c("Thing"), "Other"))
   it_parses %q(<A.B.C>),        i(Call.new(Call.new(c("A"), "B"), "C"))
   it_parses %q(<_>),            i(u("_"))
+  it_parses %q(<a[0]>),         i(Call.new(Call.new(nil, "a"), "[]", [l(0)]))
+  it_parses %q(<a.b[0]>),       i(Call.new(Call.new(Call.new(nil, "a"), "b"), "[]", [l(0)]))
+  it_parses %q(<[1, 2][0]>),    i(Call.new(l([1, 2]), "[]", [l(0)]))
+  it_parses %q(<{a: 1}[:a]>),   i(Call.new(l({ :a => 1 }), "[]", [l(:a)]))
+  it_parses %q(<a(1, 2)[0]>),   i(Call.new(Call.new(nil, "a", [l(1), l(2)]), "[]", [l(0)]))
   # Complex expressions must be wrapped in parentheses.
   it_parses %q(<(a)>),          i(Call.new(nil, "a"))
   it_parses %q(<(1 + 2)>),      i(Call.new(l(1), "+", [l(2)]))
   it_does_not_parse %q(<1 + 2>)
   it_does_not_parse %q(<a + b>)
   it_does_not_parse %q(< a + b >)
+  # Spacing within the braces is not important
+  it_parses %q(< a >),          i(Call.new(nil, "a"))
+  it_parses %q(< a[0]   >),     i(Call.new(Call.new(nil, "a"), "[]", [l(0)]))
   # Interpolations can span multiple lines if necessary.
   it_parses %q(<
     a
@@ -279,7 +289,8 @@ describe "Parser" do
   ),                            l({ i(1) => "int", i(nil) => :nil })
   # Interpolations can be used as a replacement for any primary expression.
   it_parses %q([1, <2>, 3]),    l([1, i(2), 3])
-  it_parses %q(<3> + 4),        Call.new(i(3), "+", [l(4)])
+  it_parses %q([1, <a.b>, 3]),  l([1, i(Call.new(Call.new(nil, "a"), "b")), 3])
+  it_parses %q(<a[0]> + 4),     Call.new(i(Call.new(Call.new(nil, "a"), "[]", [l(0)])), "+", [l(4)])
 
 
   # Infix expressions
@@ -338,6 +349,7 @@ describe "Parser" do
     it_parses %q({{op[0].id}}{a: 2}),     {{op[1]}}.new(l({ :a => 2 }))
     it_parses %q({{op[0].id}}:hi),        {{op[1]}}.new(l(:hi))
     it_parses %q({{op[0].id}}<1.5>),      {{op[1]}}.new(i(1.5))
+    it_parses %q({{op[0].id}}<other>),    {{op[1]}}.new(i(Call.new(nil, "other")))
     it_parses %q({{op[0].id}}a),          {{op[1]}}.new(Call.new(nil, "a"))
     it_parses %q({{op[0].id}}(1 + 2)),    {{op[1]}}.new(Call.new(l(1), "+", [l(2)]))
     it_parses %q({{op[0].id}}a.b),        {{op[1]}}.new(Call.new(Call.new(nil, "a"), "b"))
@@ -400,6 +412,11 @@ describe "Parser" do
   # should be declared in the current scope.
   it_parses %q(THING = 4),  SimpleAssign.new(c("THING"), l(4))
   it_parses %q(_ = 2),      SimpleAssign.new(u("_"), l(2))
+  # The left hand side may also be a Call expression as long as the Call has a receiver.
+  it_parses %q(a.b = 1),          SimpleAssign.new(Call.new(Call.new(nil, "a"), "b"), l(1))
+  it_parses %q(a[0] = 1),         SimpleAssign.new(Call.new(Call.new(nil, "a"), "[]", [l(0)]), l(1))
+  it_parses %q(a.b = c.d = 1),    SimpleAssign.new(Call.new(Call.new(nil, "a"), "b"), SimpleAssign.new(Call.new(Call.new(nil, "c"), "d"), l(1)).as(Node))
+  it_parses %q(a[0] = b[0] = 1),  SimpleAssign.new(Call.new(Call.new(nil, "a"), "[]", [l(0)]), SimpleAssign.new(Call.new(Call.new(nil, "b"), "[]", [l(0)]), l(1)).as(Node))
 
   # Assignments can not be made to literal values.
   it_does_not_parse %q(2 = 4),          /cannot assign to literal value/i
@@ -425,8 +442,10 @@ describe "Parser" do
   it_parses %q(_ =: 15),          MatchAssign.new(u("_"), l(15))
   # Value Interpolations are also allowed on either side for complex patterns/values.
   it_parses %q(<a> =: <b>),       MatchAssign.new(i(Call.new(nil, "a")), i(Call.new(nil, "b")))
+  it_parses %q(<a.b> =: <c.d>),   MatchAssign.new(i(Call.new(Call.new(nil, "a"), "b")), i(Call.new(Call.new(nil, "c"), "d")))
+  it_parses %q(<a[0]> =: <b[0]>), MatchAssign.new(i(Call.new(Call.new(nil, "a"), "[]", [l(0)])), i(Call.new(Call.new(nil, "b"), "[]", [l(0)])))
   # Bare multiple assignment is not allowed. Use a List pattern instead.
-  it_does_not_parse %q(a, b =: 1, 2)
+  it_does_not_parse %q(a, b =: [1, 2])
   # The value of a match assignment may appear on a new line.
   it_parses %q(
     a =:
@@ -472,6 +491,10 @@ describe "Parser" do
     it_parses %q(a.b {{op.id}} a.b {{op.id}} 1),  OpAssign.new(Call.new(Call.new(nil, "a"), "b"), {{op}}, OpAssign.new(Call.new(Call.new(nil, "a"), "b"), {{op}}, l(1)))
     it_parses %q(a.b {{op.id}} 1 + 2),            OpAssign.new(Call.new(Call.new(nil, "a"), "b"), {{op}}, Call.new(l(1), "+", [l(2)]))
     it_parses %q(a.b {{op.id}} Thing.member),     OpAssign.new(Call.new(Call.new(nil, "a"), "b"), {{op}}, Call.new(c("Thing"), "member"))
+    it_parses %q(a[0] {{op.id}} 1),                 OpAssign.new(Call.new(Call.new(nil, "a"), "[]", [l(0)]), {{op}}, l(1))
+    it_parses %q(a[0] {{op.id}} a[0] {{op.id}} 1),  OpAssign.new(Call.new(Call.new(nil, "a"), "[]", [l(0)]), {{op}}, OpAssign.new(Call.new(Call.new(nil, "a"), "[]", [l(0)]), {{op}}, l(1)))
+    it_parses %q(a[0] {{op.id}} 1 + 2),             OpAssign.new(Call.new(Call.new(nil, "a"), "[]", [l(0)]), {{op}}, Call.new(l(1), "+", [l(2)]))
+    it_parses %q(a[0] {{op.id}} Thing.member),      OpAssign.new(Call.new(Call.new(nil, "a"), "[]", [l(0)]), {{op}}, Call.new(c("Thing"), "member"))
 
     # As an infix expression, the value can appear on a new line
     it_parses %q(
@@ -491,6 +514,65 @@ describe "Parser" do
     # No left-hand-side is also invalid
     it_does_not_parse %q({{op.id}} 2)
   {% end %}
+
+
+  # Element access
+
+  # The List notation `[...]` is used on any object to access specific
+  # elements within it.
+  it_parses %q(list[1]),      Call.new(Call.new(nil, "list"), "[]", [l(1)])
+  it_parses %q(list[a]),      Call.new(Call.new(nil, "list"), "[]", [Call.new(nil, "a").as(Node)])
+  it_parses %q(list[Thing]),  Call.new(Call.new(nil, "list"), "[]", [c("Thing").as(Node)])
+  it_parses %q(list[1 + 2]),  Call.new(Call.new(nil, "list"), "[]", [Call.new(l(1), "+", [l(2)]).as(Node)])
+  it_parses %q(list[a = 1]),  Call.new(Call.new(nil, "list"), "[]", [SimpleAssign.new(v("a"), l(1)).as(Node)])
+  it_parses %q(list[a = 1]),  Call.new(Call.new(nil, "list"), "[]", [SimpleAssign.new(v("a"), l(1)).as(Node)])
+  it_parses %q(list["hi"]),   Call.new(Call.new(nil, "list"), "[]", [l("hi")])
+  it_parses %q(list[:hello]), Call.new(Call.new(nil, "list"), "[]", [l(:hello)])
+  # Accesses can accept any number of arguments, of any type.
+  it_parses %q(list[1, 2]),         Call.new(Call.new(nil, "list"), "[]", [l(1), l(2)])
+  it_parses %q(list[nil, false]),   Call.new(Call.new(nil, "list"), "[]", [l(nil), l(false)])
+  # The receiver can be any expression.
+  it_parses %q((1 + 2)[0]),   Call.new(Call.new(l(1), "+", [l(2)]), "[]", [l(0)])
+  it_parses %q((a = 1)[0]),   Call.new(SimpleAssign.new(v("a"), l(1)), "[]", [l(0)])
+  it_parses %q(false[0]),     Call.new(l(false), "[]", [l(0)])
+  it_parses %q("hello"[0]),   Call.new(l("hello"), "[]", [l(0)])
+  it_parses %q([1, 2][0]),    Call.new(l([1, 2]), "[]", [l(0)])
+  it_parses %q({a: 1}[0]),    Call.new(l({ :a => 1 }), "[]", [l(0)])
+  it_parses %q(a.b[0]),       Call.new(Call.new(Call.new(nil, "a"), "b"), "[]", [l(0)])
+  it_parses %q(Thing.a[0]),   Call.new(Call.new(c("Thing"), "a"), "[]", [l(0)])
+  it_parses %q(a(1, 2)[0]),   Call.new(Call.new(nil, "a", [l(1), l(2)]), "[]", [l(0)])
+  it_parses %q(
+    map{ }[0]
+  ),            Call.new(Call.new(nil, "map", block: Block.new), "[]", [l(0)])
+  it_parses %q(
+    map do
+    end[0]
+  ),            Call.new(Call.new(nil, "map", block: Block.new), "[]", [l(0)])
+  # Accesses must start on the same line, but can span multiple after the opening brace.
+  it_parses %q(
+    list[
+      1,
+      2
+    ]
+  ),            Call.new(Call.new(nil, "list"), "[]", [l(1), l(2)])
+  it_parses %q(
+    list[
+      1 + 2
+    ]
+  ),            Call.new(Call.new(nil, "list"), "[]", [Call.new(l(1), "+", [l(2)]).as(Node)])
+  it_parses %q(
+    list
+    [1, 2]
+  ),            Call.new(nil, "list"), l([1, 2])
+  it_parses %q(
+    [1, 2]
+    [0]
+  ),            l([1, 2]), l([0])
+  # Accesses can also be chained together
+  it_parses %q(list[1][2]),  Call.new(Call.new(Call.new(nil, "list"), "[]", [l(1)]), "[]", [l(2)])
+
+  # The List notation must have at least one argument to be valid
+  it_does_not_parse %q(list[])
 
 
 
@@ -609,6 +691,8 @@ describe "Parser" do
   it_parses %q(def foo([1, a] =: b); end),  Def.new("foo", [p("b", l([1, v("a")]))])
   it_parses %q(def foo([1, _] =: _); end),  Def.new("foo", [p("_", l([1, u("_")]))])
   it_parses %q(def foo(<other> =: _); end), Def.new("foo", [p("_", i(Call.new(nil, "other")))])
+  it_parses %q(def foo(<a.b> =: _); end),   Def.new("foo", [p("_", i(Call.new(Call.new(nil, "a"), "b")))])
+  it_parses %q(def foo(<a[0]> =: _); end),  Def.new("foo", [p("_", i(Call.new(Call.new(nil, "a"), "[]", [l(0)])))])
 
   # Type restrictions can be appended to any parameter to restrict the parameter
   # to an exact type. The type must be a constant.
@@ -633,6 +717,12 @@ describe "Parser" do
   it_parses %q(def foo(<call> : Integer); end),   Def.new("foo", [p(nil, i(Call.new(nil, "call")), restriction: c("Integer"))])
   it_parses %q(def foo(<call> : Nil); end),       Def.new("foo", [p(nil, i(Call.new(nil, "call")), restriction: c("Nil"))])
   it_parses %q(def foo(<call> : Thing); end),     Def.new("foo", [p(nil, i(Call.new(nil, "call")), restriction: c("Thing"))])
+  it_parses %q(def foo(<a.b> : Integer); end),    Def.new("foo", [p(nil, i(Call.new(Call.new(nil, "a"), "b")), restriction: c("Integer"))])
+  it_parses %q(def foo(<a.b> : Nil); end),        Def.new("foo", [p(nil, i(Call.new(Call.new(nil, "a"), "b")), restriction: c("Nil"))])
+  it_parses %q(def foo(<a.b> : Thing); end),      Def.new("foo", [p(nil, i(Call.new(Call.new(nil, "a"), "b")), restriction: c("Thing"))])
+  it_parses %q(def foo(<a[0]> : Integer); end),   Def.new("foo", [p(nil, i(Call.new(Call.new(nil, "a"), "[]", [l(0)])), restriction: c("Integer"))])
+  it_parses %q(def foo(<a[0]> : Nil); end),       Def.new("foo", [p(nil, i(Call.new(Call.new(nil, "a"), "[]", [l(0)])), restriction: c("Nil"))])
+  it_parses %q(def foo(<a[0]> : Thing); end),     Def.new("foo", [p(nil, i(Call.new(Call.new(nil, "a"), "[]", [l(0)])), restriction: c("Thing"))])
   it_parses %q(def foo([1, 2] : Integer); end),   Def.new("foo", [p(nil, l([1, 2]), restriction: c("Integer"))])
   it_parses %q(def foo([1, 2] : Nil); end),       Def.new("foo", [p(nil, l([1, 2]), restriction: c("Nil"))])
   it_parses %q(def foo([1, 2] : Thing); end),     Def.new("foo", [p(nil, l([1, 2]), restriction: c("Thing"))])
@@ -646,6 +736,12 @@ describe "Parser" do
   it_parses %q(def foo(<call> =: a : Integer); end),  Def.new("foo", [p("a", i(Call.new(nil, "call")), restriction: c("Integer"))])
   it_parses %q(def foo(<call> =: a : Nil); end),      Def.new("foo", [p("a", i(Call.new(nil, "call")), restriction: c("Nil"))])
   it_parses %q(def foo(<call> =: a : Thing); end),    Def.new("foo", [p("a", i(Call.new(nil, "call")), restriction: c("Thing"))])
+  it_parses %q(def foo(<a.b> : Integer); end),        Def.new("foo", [p(nil, i(Call.new(Call.new(nil, "a"), "b")), restriction: c("Integer"))])
+  it_parses %q(def foo(<a.b> : Nil); end),            Def.new("foo", [p(nil, i(Call.new(Call.new(nil, "a"), "b")), restriction: c("Nil"))])
+  it_parses %q(def foo(<a.b> : Thing); end),          Def.new("foo", [p(nil, i(Call.new(Call.new(nil, "a"), "b")), restriction: c("Thing"))])
+  it_parses %q(def foo(<a[0]> : Integer); end),       Def.new("foo", [p(nil, i(Call.new(Call.new(nil, "a"), "[]", [l(0)])), restriction: c("Integer"))])
+  it_parses %q(def foo(<a[0]> : Nil); end),           Def.new("foo", [p(nil, i(Call.new(Call.new(nil, "a"), "[]", [l(0)])), restriction: c("Nil"))])
+  it_parses %q(def foo(<a[0]> : Thing); end),         Def.new("foo", [p(nil, i(Call.new(Call.new(nil, "a"), "[]", [l(0)])), restriction: c("Thing"))])
   it_parses %q(def foo([1, 2] =: a : Integer); end),  Def.new("foo", [p("a", l([1, 2]), restriction: c("Integer"))])
   it_parses %q(def foo([1, 2] =: a : Nil); end),      Def.new("foo", [p("a", l([1, 2]), restriction: c("Nil"))])
   it_parses %q(def foo([1, 2] =: a : Thing); end),    Def.new("foo", [p("a", l([1, 2]), restriction: c("Thing"))])
@@ -733,6 +829,8 @@ describe "Parser" do
   test_calls_with_receiver("Thing.Other.",      Call.new(c("Thing"), "Other"))
   test_calls_with_receiver("1.",                l(1))
   test_calls_with_receiver("[1, 2, 3].",        l([1, 2, 3]))
+  test_calls_with_receiver("list[1].",          Call.new(Call.new(nil, "list"), "[]", [l(1)]))
+  test_calls_with_receiver("list[1, 2].",       Call.new(Call.new(nil, "list"), "[]", [l(1), l(2)]))
   test_calls_with_receiver(%q("some string".),  l("some string"))
   test_calls_with_receiver("method{ }.",        Call.new(nil, "method", block: Block.new))
   test_calls_with_receiver("method do; end.",   Call.new(nil, "method", block: Block.new))
@@ -743,9 +841,11 @@ describe "Parser" do
 
   # `self` can be used anywhere a primary expression is allowed
   it_parses %q(self),                 Self.new
+  it_parses %q(-self),                Negation.new(Self.new)
   it_parses %q(<self>),               i(Self.new)
   it_parses %q(self + self),          Call.new(Self.new, "+", [Self.new.as(Node)])
   test_calls_with_receiver("self.",   Self.new)
+  it_parses %q(self[0]),              Call.new(Self.new, "[]", [l(0)])
   # `self` can not be used as the name of a Call
   it_does_not_parse %q(object.self)
 
