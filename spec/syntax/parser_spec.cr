@@ -222,6 +222,8 @@ describe "Parser" do
       "hello"
     ]
   ),                            l([100, 2.42, "hello"])
+  it_parses %q([1, *a, 3]),     l([1, Splat.new(Call.new(nil, "a")), 3])
+  it_parses %q([*a, *b]),       l([Splat.new(Call.new(nil, "a")), Splat.new(Call.new(nil, "b"))])
 
   it_parses %q({}),             MapLiteral.new
   it_parses %q({a: 1, b: 2}),   l({ :a => 1, :b => 2 })
@@ -247,6 +249,7 @@ describe "Parser" do
   it_parses %q(<:hello>),       i(:hello)
   it_parses %q(<:"hi there">),  i(:"hi there")
   it_parses %q(<[1, 2]>),       i([1, 2])
+  it_parses %q(<[a, *b]>),      i(l([Call.new(nil, "a"), Splat.new(Call.new(nil, "b"))]))
   it_parses %q(<{a: 1}>),       i({:a => 1})
   # Calls, Vars, Consts, Underscores are also valid.
   it_parses %q(<a>),            i(Call.new(nil, "a"))
@@ -358,7 +361,7 @@ describe "Parser" do
       {{op[0].id}}(
         1 + 2
       )
-    ),      {{op[1]}}.new(Call.new(l(1), "+", [l(2)]))
+    ),                {{op[1]}}.new(Call.new(l(1), "+", [l(2)]))
 
     # Unary operators can be chained any number of times.
     it_parses %q({{op[0].id}}{{op[0].id}}a),              {{op[1]}}.new({{op[1]}}.new(Call.new(nil, "a")))
@@ -371,6 +374,13 @@ describe "Parser" do
       {{op[0].id}}
       a
     )
+
+    # Unary operations are more precedent than binary operations
+    it_parses %q({{op[0].id}}1 + 2),    Call.new({{op[1]}}.new(l(1)), "+", [l(2)])
+    it_parses %q(1 + {{op[0].id}}2),    Call.new(l(1), "+", [{{op[1]}}.new(l(2)).as(Node)])
+
+    # Unary operations can be used anywherea primary expression is expected.
+    it_parses %q([1, {{op[0].id}}a]),   l([1, {{op[1]}}.new(Call.new(nil, "a"))])
   {% end %}
 
   # Unary operators can also be mixed when chaining.
@@ -431,19 +441,21 @@ describe "Parser" do
   # Match Assignments
 
   # Match assignments allow literal values on either side
-  it_parses %q(1 =: 1),           MatchAssign.new(l(1), l(1))
-  it_parses %q(:hi =: "hi"),      MatchAssign.new(l(:hi), l("hi"))
-  it_parses %q(true =: false),    MatchAssign.new(l(true), l(false))
-  it_parses %q([1, 2] =: [1, 2]), MatchAssign.new(l([1, 2]), l([1, 2]))
-  it_parses %q({a: 2} =: {a: 2}), MatchAssign.new(l({:a => 2}),l({:a => 2}))
+  it_parses %q(1 =: 1),             MatchAssign.new(l(1), l(1))
+  it_parses %q(:hi =: "hi"),        MatchAssign.new(l(:hi), l("hi"))
+  it_parses %q(true =: false),      MatchAssign.new(l(true), l(false))
+  it_parses %q([1, 2] =: [1, 2]),   MatchAssign.new(l([1, 2]), l([1, 2]))
+  it_parses %q({a: 2} =: {a: 2}),   MatchAssign.new(l({:a => 2}),l({:a => 2}))
+  # Splats in list literals act as Splat collectors (as in Params).
+  it_parses %q([1, *_, 3] =: list), MatchAssign.new(l([1, Splat.new(u("_")), 3]), Call.new(nil, "list"))
   # Vars, Consts, and Underscores can also be used on either side.
-  it_parses %q(a =: 5),           MatchAssign.new(v("a"), l(5))
-  it_parses %q(Thing =: 10),      MatchAssign.new(c("Thing"), l(10))
-  it_parses %q(_ =: 15),          MatchAssign.new(u("_"), l(15))
+  it_parses %q(a =: 5),             MatchAssign.new(v("a"), l(5))
+  it_parses %q(Thing =: 10),        MatchAssign.new(c("Thing"), l(10))
+  it_parses %q(_ =: 15),            MatchAssign.new(u("_"), l(15))
   # Value Interpolations are also allowed on either side for complex patterns/values.
-  it_parses %q(<a> =: <b>),       MatchAssign.new(i(Call.new(nil, "a")), i(Call.new(nil, "b")))
-  it_parses %q(<a.b> =: <c.d>),   MatchAssign.new(i(Call.new(Call.new(nil, "a"), "b")), i(Call.new(Call.new(nil, "c"), "d")))
-  it_parses %q(<a[0]> =: <b[0]>), MatchAssign.new(i(Call.new(Call.new(nil, "a"), "[]", [l(0)])), i(Call.new(Call.new(nil, "b"), "[]", [l(0)])))
+  it_parses %q(<a> =: <b>),         MatchAssign.new(i(Call.new(nil, "a")), i(Call.new(nil, "b")))
+  it_parses %q(<a.b> =: <c.d>),     MatchAssign.new(i(Call.new(Call.new(nil, "a"), "b")), i(Call.new(Call.new(nil, "c"), "d")))
+  it_parses %q(<a[0]> =: <b[0]>),   MatchAssign.new(i(Call.new(Call.new(nil, "a"), "[]", [l(0)])), i(Call.new(Call.new(nil, "b"), "[]", [l(0)])))
   # Bare multiple assignment is not allowed. Use a List pattern instead.
   it_does_not_parse %q(a, b =: [1, 2])
   # The value of a match assignment may appear on a new line.
@@ -693,6 +705,8 @@ describe "Parser" do
   it_parses %q(def foo(<other> =: _); end), Def.new("foo", [p("_", i(Call.new(nil, "other")))])
   it_parses %q(def foo(<a.b> =: _); end),   Def.new("foo", [p("_", i(Call.new(Call.new(nil, "a"), "b")))])
   it_parses %q(def foo(<a[0]> =: _); end),  Def.new("foo", [p("_", i(Call.new(Call.new(nil, "a"), "[]", [l(0)])))])
+  # Splats within patterns are allowed.
+  it_parses %q(def foo([1, *_, 3]); end),   Def.new("foo", [p(nil, l([1, Splat.new(u("_")), 3]))])
 
   # Type restrictions can be appended to any parameter to restrict the parameter
   # to an exact type. The type must be a constant.
@@ -1243,6 +1257,7 @@ describe "Parser" do
     it_parses %q({{keyword}} {a: 1, b: 2}), {{node}}.new(l({ :a => 1, :b => 2 }))
     it_parses %q({{keyword}} [1, 2, 3]),    {{node}}.new(l([1, 2, 3]))
     it_parses %q({{keyword}} 1 + 2),        {{node}}.new(Call.new(l(1), "+", [l(2)]))
+    it_parses %q({{keyword}} *collection),  {{node}}.new(Splat.new(Call.new(nil, "collection")))
     it_parses %q(
       {{keyword}} 1 +
                   2
