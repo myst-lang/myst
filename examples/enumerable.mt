@@ -13,8 +13,7 @@ module List
 end
 
 
-l = [1, 2, 3]
-r = l.map() do |e|
+r = [1, 2, 3].map() do |e|
   e * 2
 end
 
