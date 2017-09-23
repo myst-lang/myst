@@ -553,9 +553,9 @@ module Myst
     end
 
     def accept_children(visitor)
-      receiver.try(&.accept(visitor))
+      receiver?.try(&.accept(visitor))
       args.each(&.accept(visitor))
-      block.try(&.accept(visitor))
+      block?.try(&.accept(visitor))
     end
 
     def_equals_and_hash receiver?, name, args, block?

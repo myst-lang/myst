@@ -50,3 +50,7 @@ if show_ast
   visitor = ASTViewer.new(STDOUT)
   program.accept(visitor)
 end
+
+# Interpret the program
+interpreter = Interpreter.new
+program.accept(interpreter)
