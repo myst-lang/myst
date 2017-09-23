@@ -242,8 +242,10 @@ hi
 
     it "can dynamically adjust its size" do
       list = TList.new
-      list.value << TInteger.new(0_i64)
-      list.value << TString.new("hello")
+      list.elements << TInteger.new(0_i64)
+      list.elements << TString.new("hello")
+
+      list.elements.size.should eq(2)
     end
   end
 
@@ -271,8 +273,10 @@ hi
 
     it "can dynamically adjust its size" do
       list = TMap.new
-      list.value[TBoolean.new(false)] = TInteger.new(0_i64)
-      list.value[TBoolean.new(true)]  = TString.new("hello")
+      list.entries[TBoolean.new(false)] = TInteger.new(0_i64)
+      list.entries[TBoolean.new(true)]  = TString.new("hello")
+
+      list.entries.size.should eq(2)
     end
   end
 end

@@ -740,7 +740,7 @@ module Myst
         key = parse_map_key
         skip_space_and_newlines
         value = parse_expression
-        map.elements << MapLiteral::Entry.new(key: key, value: value)
+        map.entries << MapLiteral::Entry.new(key: key, value: value)
         skip_space_and_newlines
         if accept(Token::Type::COMMA)
           skip_space_and_newlines
@@ -828,7 +828,7 @@ module Myst
       when ListLiteral
         node.elements = node.elements.map{ |e| to_pattern(e).as(Node) }
       when MapLiteral
-        node.elements = node.elements.map{ |e| MapLiteral::Entry.new(e.key, to_pattern(e.value).as(Node)) }
+        node.entries = node.entries.map{ |e| MapLiteral::Entry.new(e.key, to_pattern(e.value).as(Node)) }
       end
 
       return node

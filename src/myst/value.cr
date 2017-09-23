@@ -93,17 +93,21 @@ module Myst
 
   class TList < Value
     def self.type_name; "List"; end
-    property value : Array(Value)
+    property elements : Array(Value)
 
-    def initialize(@value=[] of Value)
+    def initialize(@elements=[] of Value)
     end
+
+    def_equals_and_hash elements
   end
 
   class TMap < Value
     def self.type_name; "Map"; end
-    property value : Hash(Value, Value)
+    property entries : Hash(Value, Value)
 
-    def initialize(@value={} of Value => Value)
+    def initialize(@entries={} of Value => Value)
     end
+
+    def_equals_and_hash entries
   end
 end

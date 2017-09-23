@@ -184,23 +184,23 @@ module Myst
   # |
   #   interpolation ':' expression
   class MapLiteral < Literal
-    property elements : Array(Entry)
+    property entries : Array(Entry)
 
     record Entry,
       key : Node,
       value : Node
 
-    def initialize(@elements = [] of Entry)
+    def initialize(@entries = [] of Entry)
     end
 
     def accept_children(visitor)
-      elements.each do |entry|
+      entries.each do |entry|
         entry.key.accept(visitor)
         entry.value.accept(visitor)
       end
     end
 
-    def_equals_and_hash elements
+    def_equals_and_hash entries
   end
 
   # A local variable. Distinct from Calls based on assignments that have been
