@@ -2,8 +2,6 @@ require "./ast.cr"
 
 module Myst
   class Parser < Lexer
-    include AST
-
     def self.for_file(source_file)
       new(File.open(source_file), source_file, File.expand_path(File.dirname(source_file)))
     end

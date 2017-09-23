@@ -2,8 +2,6 @@ module Myst
   class ASTViewer
     property io : IO
 
-    include AST
-
 
     def initialize(@io : IO); end
 

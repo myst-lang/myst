@@ -1,7 +1,5 @@
 require "../spec_helper.cr"
 
-include Myst::AST
-
 # Utilities for generating AST Nodes with fewer characters.
 
 # l(value)

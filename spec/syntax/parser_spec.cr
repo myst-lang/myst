@@ -1,8 +1,6 @@
 require "../spec_helper"
 require "../support/nodes.cr"
 
-include Myst::AST
-
 # Check that parsing the given source succeeds. If given, additionally check
 # that the result of parsing the source matches the given nodes.
 private macro it_parses(source, *expected)
