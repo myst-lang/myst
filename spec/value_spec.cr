@@ -62,6 +62,10 @@ describe "Values" do
   end
 
   describe "TBoolean" do
+    it "has a type name of Boolean" do
+      TBoolean.type_name.should eq("Boolean")
+    end
+
     it "always equates FALSE and FALSE" do
       TBoolean.new(false).should eq(TBoolean.new(false))
     end
@@ -92,6 +96,10 @@ describe "Values" do
   end
 
   describe "TInteger" do
+    it "has a type name of Integer" do
+      TInteger.type_name.should eq("Integer")
+    end
+
     it "can contain any 64-bit integer value" do
       TInteger.new( 9_223_372_036_854_775_807)
       TInteger.new(-9_223_372_036_854_775_807)
@@ -120,6 +128,10 @@ describe "Values" do
   end
 
   describe "TFloat" do
+    it "has a type name of Float" do
+      TFloat.type_name.should eq("Float")
+    end
+
     it "can contain any 64-bit float value" do
       TFloat.new( 1.7976931348623157e+308)
       TFloat.new(-1.7976931348623157e+308)
@@ -148,6 +160,10 @@ describe "Values" do
   end
 
   describe "TString" do
+    it "has a type name of String" do
+      TString.type_name.should eq("String")
+    end
+
     it "can contain strings of arbitrary length" do
       TString.new("hello"*1000)
     end
@@ -180,6 +196,10 @@ hi
   end
 
   describe "TSymbol" do
+    it "has a type name of Symbol" do
+      TSymbol.type_name.should eq("Symbol")
+    end
+
     it "can be created from any string value" do
       TSymbol.new("hello"*1000)
       TSymbol.new("hello\n\t\0")
@@ -195,6 +215,64 @@ hi
 
     it "never considers two unique symbols equal" do
       TSymbol.new("hi").should_not eq(TSymbol.new("hello"))
+    end
+  end
+
+
+  describe "TList" do
+    it "has a type name of List" do
+      TList.type_name.should eq("List")
+    end
+
+    it "can be created with no elements" do
+      TList.new
+    end
+
+    it "can be created with initial elements" do
+      TList.new([TNil.new, TNil.new] of Myst::Value)
+    end
+
+    it "can contain any mixture of Values" do
+      TList.new([TInteger.new(1_i64), TBoolean.new(false), TString.new("hello")])
+    end
+
+    it "can contain other lists within itself" do
+      TList.new([TList.new, TList.new] of Myst::Value)
+    end
+
+    it "can dynamically adjust its size" do
+      list = TList.new
+      list.value << TInteger.new(0_i64)
+      list.value << TString.new("hello")
+    end
+  end
+
+
+  describe "TMap" do
+    it "has a type name of Map" do
+      TMap.type_name.should eq("Map")
+    end
+
+    it "can be created with no elements" do
+      TMap.new
+    end
+
+    it "can be created with initial elements" do
+      TMap.new({ TNil.new => TNil.new } of Myst::Value => Myst::Value)
+    end
+
+    it "can contain any mixture of Values" do
+      TMap.new({ TInteger.new(1_i64) => TBoolean.new(false), TString.new("hello") => TSymbol.new("hi")})
+    end
+
+    it "can contain other maps within itself" do
+      TMap.new({ TMap.new => TMap.new } of Myst::Value => Myst::Value)
+    end
+
+    it "can dynamically adjust its size" do
+      list = TMap.new
+      list.value[TBoolean.new(false)] = TInteger.new(0_i64)
+      list.value[TBoolean.new(true)]  = TString.new("hello")
     end
   end
 end
