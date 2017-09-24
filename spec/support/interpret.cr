@@ -28,7 +28,7 @@ end
 # Run `Value.from_literal` on the given node and return the result. If `node`
 # is not already a Node, it will be run through `l` first.
 def val(node : Node)
-  Myst::Value.from_literal(node)
+  Myst::Value.from_literal(node).as(Myst::Value)
 end
 
 def val(node); val(l(node)); end
