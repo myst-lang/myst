@@ -59,6 +59,10 @@ describe "Values" do
     it "always hashes to the same value" do
       TNil.new.hash.should eq(TNil.new.hash)
     end
+
+    it "is not truthy" do
+      TNil.new.truthy?.should eq(false)
+    end
   end
 
   describe "TBoolean" do
@@ -93,6 +97,14 @@ describe "Values" do
     it "has a string representation of FALSE as `false`" do
       TBoolean.new(false).to_s.should eq("false")
     end
+
+    it "is not truthy when FALSE" do
+      TBoolean.new(false).truthy?.should eq(false)
+    end
+
+    it "is truthy when TRUE" do
+      TBoolean.new(true).truthy?.should eq(true)
+    end
   end
 
   describe "TInteger" do
@@ -125,6 +137,12 @@ describe "Values" do
       TInteger.new( 100_i64).to_s.should eq("100")
       TInteger.new(-100_i64).to_s.should eq("-100")
     end
+
+    it "is always truthy" do
+      TInteger.new(0_i64).truthy?.should    eq(true)
+      TInteger.new(-100_i64).truthy?.should eq(true)
+      TInteger.new(1000_i64).truthy?.should eq(true)
+    end
   end
 
   describe "TFloat" do
@@ -156,6 +174,12 @@ describe "Values" do
     it "can represent its value as a String" do
       TFloat.new( 100.0_f64).to_s.should eq("100.0")
       TFloat.new(-100.0_f64).to_s.should eq("-100.0")
+    end
+
+    it "is always truthy" do
+      TFloat.new(0.0_f64).truthy?.should    eq(true)
+      TFloat.new(-100.0_f64).truthy?.should eq(true)
+      TFloat.new(1000.0_f64).truthy?.should eq(true)
     end
   end
 
@@ -193,6 +217,13 @@ describe "Values" do
 hi
 ")
     end
+
+    it "is always truthy" do
+      TString.new("").truthy?.should            eq(true)
+      TString.new("\n").truthy?.should          eq(true)
+      TString.new("\0").truthy?.should          eq(true)
+      TString.new("hello world").truthy?.should eq(true)
+    end
   end
 
   describe "TSymbol" do
@@ -215,6 +246,13 @@ hi
 
     it "never considers two unique symbols equal" do
       TSymbol.new("hi").should_not eq(TSymbol.new("hello"))
+    end
+
+    it "is always truthy" do
+      TSymbol.new("").truthy?.should            eq(true)
+      TSymbol.new("\n").truthy?.should          eq(true)
+      TSymbol.new("\0").truthy?.should          eq(true)
+      TSymbol.new("hello world").truthy?.should eq(true)
     end
   end
 
@@ -247,6 +285,13 @@ hi
 
       list.elements.size.should eq(2)
     end
+
+    it "is always truthy" do
+      TList.new.truthy?.should                                        eq(true)
+      TList.new([TNil.new] of Myst::Value).truthy?.should             eq(true)
+      TList.new([TBoolean.new(false)] of Myst::Value).truthy?.should  eq(true)
+      TList.new([TInteger.new(1_i64), TNil.new]).truthy?.should       eq(true)
+    end
   end
 
 
@@ -277,6 +322,12 @@ hi
       list.entries[TBoolean.new(true)]  = TString.new("hello")
 
       list.entries.size.should eq(2)
+    end
+
+    it "is always truthy" do
+      TMap.new.truthy?.should eq(true)
+      TMap.new({ TNil.new => TNil.new } of Myst::Value => Myst::Value).truthy?.should eq(true)
+      TMap.new({ TSymbol.new("") => TInteger.new(1_i64) } of Myst::Value => Myst::Value).truthy?.should eq(true)
     end
   end
 end

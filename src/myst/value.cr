@@ -20,6 +20,11 @@ module Myst
         raise "#{literal.class} cannot be converted to a Value."
       end
     end
+
+
+    def truthy?
+      true
+    end
   end
 
   # Primitives are immutable objects
@@ -48,6 +53,10 @@ module Myst
       "nil"
     end
 
+    def truthy?
+      false
+    end
+
     def_equals_and_hash
   end
 
@@ -56,6 +65,10 @@ module Myst
 
     def to_s
       @value ? "true" : "false"
+    end
+
+    def truthy?
+      @value
     end
   end
 
