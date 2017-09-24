@@ -2,8 +2,13 @@ require "../spec_helper.cr"
 
 macro it_interprets(node, expected_stack)
   it %q(interprets {{node.id}}) do
+    {% if node.is_a?(StringLiteral) %}
+      %program = parse_program({{node}})
+    {% else %}
+      %program = {{node}}
+    {% end %}
     interpreter = Interpreter.new
-    {{node}}.accept(interpreter)
+    %program.accept(interpreter)
 
     {% unless expected_stack.empty? %}
       %stack = {{expected_stack}}
@@ -17,3 +22,13 @@ macro it_interprets(node, expected_stack)
     {% end %}
   end
 end
+
+# val(node)
+#
+# Run `Value.from_literal` on the given node and return the result. If `node`
+# is not already a Node, it will be run through `l` first.
+def val(node : Node)
+  Myst::Value.from_literal(node)
+end
+
+def val(node); val(l(node)); end
