@@ -13,15 +13,15 @@ module Myst
     # the parent scope if the value does not exist in this scope.
     #
     # The longhand `has_key?` and `assign` only operate on this scope.
-    def []?(key : String)
-      @values[key]? || ((p = @parent) && p[key]?)
+    def []?(key : String) : Value?
+      @values[key]? || @parent.try(&.[key]?)
     end
 
-    def [](key : String)
+    def [](key : String) : Value
       self[key]? || raise IndexError.new
     end
 
-    def []=(key : String, value : Value)
+    def []=(key : String, value : Value) : Value
       scope = self
       while scope
         if scope.has_key?(key)
