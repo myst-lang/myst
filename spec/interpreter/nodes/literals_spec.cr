@@ -1,6 +1,6 @@
-require "../spec_helper.cr"
-require "../support/nodes.cr"
-require "../support/interpret.cr"
+require "../../spec_helper.cr"
+require "../../support/nodes.cr"
+require "../../support/interpret.cr"
 
 describe "Interpreter - Literals" do
   it_interprets l(nil), [val(nil)]
