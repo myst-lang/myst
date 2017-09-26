@@ -10,8 +10,10 @@ describe "Interpreter - SimpleAssign" do
   end
 
   # Assignments should leave the assigned value on the stack
-  it_interprets %q(a = 1),      [val(1)]
-  it_interprets %q(a = b = {}), [TMap.new]
+  it_interprets %q(a = 1),          [val(1)]
+  it_interprets %q(a = b = {}),     [TMap.new]
+  it_interprets %q(THING = nil),    [val(nil)]
+  it_interprets %q(_forget = 1.0),  [val(1.0)]
 
   it "creates an entry in the symbol table for the assigned variable" do
     interpreter = parse_and_interpret %q(a = 1)
