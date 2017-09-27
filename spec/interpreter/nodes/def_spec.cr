@@ -18,15 +18,39 @@ describe "Interpreter - Def" do
     end
   ),                              [TFunctor.new(itr.current_scope, [Def.new("foo", body: e(l(true), l(nil), l(1)))])]
 
+  it_interprets %q(
+    def foo(a)
+      a
+    end
+  ),                              [TFunctor.new(itr.current_scope, [Def.new("foo", [p("a")], body: e(Var.new("a")))])]
+
   # Redefinition of a function is allowed. It will simply create a second clause.
   it_interprets %q(
     def foo; end
     def foo; end
   ),                              [TFunctor.new(itr.current_scope, [Def.new("foo"), Def.new("foo")])]
 
+  it_interprets %q(
+    def foo(a); end
+    def foo(b); end
+  ),                              [TFunctor.new(itr.current_scope, [Def.new("foo", [p("a")]), Def.new("foo", [p("b")])])]
+
   # Functions with different names should not be merged into one functor.
   it_interprets %q(
     def a; end
     def b; end
   ),                              [TFunctor.new(itr.current_scope, [Def.new("b")])]
+
+  it "only checks the current scope for existing functors" do
+    itr = Interpreter.new
+    itr.symbol_table["foo"] = TFunctor.new(itr.current_scope)
+    itr.push_scope
+    # With the new scope, the current scope does not have `foo` defined.
+    itr.current_scope.has_key?("foo").should be_false
+    # `def foo`, then, shouldn't find the existing functor from the parent
+    # scope, and will instead create a new value.
+    parse_and_interpret %q(def foo; end), itr
+    # That value should then be stored in the current scope.
+    itr.current_scope.has_key?("foo").should be_true
+  end
 end

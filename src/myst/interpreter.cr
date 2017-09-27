@@ -15,6 +15,15 @@ module Myst
       @symbol_table
     end
 
+    def push_scope(scope : Scope = Scope.new)
+      scope.parent ||= @symbol_table
+      @symbol_table = scope
+    end
+
+    def pop_scope
+      @symbol_table = scope.parent
+    end
+
     def visit(node : Node)
       node.accept_children(self)
     end
