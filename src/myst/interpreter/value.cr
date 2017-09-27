@@ -123,4 +123,20 @@ module Myst
 
     def_equals_and_hash entries
   end
+
+
+  class TFunctor < Value
+    property clauses  : Array(Def)
+    property parent   : Scope
+
+    def initialize(@parent : Scope, @clauses=[] of Def)
+    end
+
+
+    def add_clause(definition : Def)
+      clauses.push(definition)
+    end
+
+    def_equals_and_hash clauses, parent
+  end
 end

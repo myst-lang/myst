@@ -618,12 +618,6 @@ module Myst
     def initialize(@name, @params = [] of Param, @body=Nop.new, @block_param=nil, @splat_index=nil)
     end
 
-    def accept_children(visitor)
-      params.each(&.accept(visitor))
-      block_param.try(&.accept(visitor))
-      body.accept(visitor)
-    end
-
     def_equals_and_hash name, params, block_param?, body, splat_index?
   end
 

@@ -11,6 +11,10 @@ module Myst
       @symbol_table = Scope.new
     end
 
+    def current_scope
+      @symbol_table
+    end
+
     def visit(node : Node)
       node.accept_children(self)
     end

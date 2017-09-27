@@ -7,16 +7,16 @@ macro it_interprets(node, expected_stack)
     {% else %}
       %program = {{node}}
     {% end %}
-    interpreter = Interpreter.new
-    %program.accept(interpreter)
+    itr = Interpreter.new
+    %program.accept(itr)
 
     {% unless expected_stack.empty? %}
       %stack = {{expected_stack}}
-      if interpreter.stack.size != %stack.size
-        raise "Stack size does not match expected (#{interpreter.stack.size} vs. #{%stack.size})"
+      if itr.stack.size != %stack.size
+        raise "Stack size does not match expected (#{itr.stack.size} vs. #{%stack.size})"
       end
 
-      interpreter.stack.zip({{expected_stack}}).each do |stack, expected|
+      itr.stack.zip({{expected_stack}}).each do |stack, expected|
         stack.should eq(expected)
       end
     {% end %}
