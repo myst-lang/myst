@@ -1,5 +1,6 @@
 require "./interpreter/*"
 require "./interpreter/nodes/*"
+require "./interpreter/native_lib/*"
 
 module Myst
   class Interpreter

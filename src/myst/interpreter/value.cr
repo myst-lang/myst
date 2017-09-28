@@ -2,6 +2,14 @@ module Myst
   abstract class Value
     def type_name; self.class.type_name; end
 
+    macro inherited
+      # When a new Value type is created, add a METHODS constant to it to hold
+      # native method definitions for the Value.
+      METHODS = Scope.new
+
+      def self.methods; METHODS; end
+    end
+
     def self.from_literal(literal : Node)
       case literal
       when IntegerLiteral
@@ -126,6 +134,7 @@ module Myst
 
 
   class TFunctor < Value
+    def self.type_name; "Functor"; end
     property clauses  : Array(Def)
     property parent   : Scope
 
@@ -138,5 +147,16 @@ module Myst
     end
 
     def_equals_and_hash clauses, parent
+  end
+
+  class TNativeFunctor < Value
+    def self.type_name; "NativeFunctor"; end
+    alias FuncT = (Value?, Array(Value), TFunctor?, Interpreter -> Value)
+    property impl : FuncT
+
+    def initialize(&@impl : FuncT)
+    end
+
+    def_equals_and_hash impl
   end
 end
