@@ -48,4 +48,8 @@ def val(node : Node)
   Myst::Value.from_literal(node).as(Myst::Value)
 end
 
+def val(node : Array(T)) forall T
+  list = TList.new(node.map{ |n| val(n) })
+end
+
 def val(node); val(l(node)); end

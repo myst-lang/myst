@@ -1,6 +1,6 @@
 require "./interpreter/*"
 require "./interpreter/nodes/*"
-require "./interpreter/native_lib/*"
+require "./interpreter/native_lib"
 
 module Myst
   class Interpreter
@@ -22,7 +22,9 @@ module Myst
     end
 
     def pop_scope
-      @symbol_table = scope.parent
+      if @symbol_table.parent
+        @symbol_table = @symbol_table.parent.not_nil!
+      end
     end
 
     def visit(node : Node)
