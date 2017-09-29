@@ -423,14 +423,18 @@ module Myst
       return left
     end
 
-    def parse_additive
-      left = parse_multiplicative
+    # Arithmetic is left-associative. `1 - 1 - 1` _must_ be parsed as
+    # `((1 - 1) - 1)` to follow mathematic precedence and give the right result
+    # of `-2`, rather than `(1 - (1 - 1))`, which would yield `0`.
+    def parse_additive(left=nil)
+      left ||= parse_multiplicative
       skip_space
 
       if op = accept(Token::Type::PLUS, Token::Type::MINUS)
         skip_space_and_newlines
-        right = parse_additive
-        return Call.new(left, op.value, [right] of Node).at(left).at_end(right)
+        right = parse_multiplicative
+        call = Call.new(left, op.value, [right] of Node).at(left).at_end(right)
+        return parse_additive(call)
       end
 
       return left

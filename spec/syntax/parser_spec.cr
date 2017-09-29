@@ -329,6 +329,9 @@ describe "Parser" do
   it_parses %q(1  * 2  + 3),    Call.new(Call.new(l(1), "*",  [l(2)]).as(Node), "+",  [l(3)])
   it_parses %q(1  + 2  * 3),    Call.new(l(1), "+",  [Call.new(l(2), "*",  [l(3)]).as(Node)])
 
+  # Left-associativity for arithmetic expressions
+  it_parses %q(1 - 1 - 1),      Call.new(Call.new(l(1), "-", [l(1)]), "-", [l(1)])
+
   it_parses %q(1 * (2 || 3)),   Call.new(l(1), "*", [Or.new(l(2), l(3)).as(Node)])
 
   # Ensure Calls can be used as operands to infix expressions
