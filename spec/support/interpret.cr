@@ -23,6 +23,23 @@ macro it_interprets(node, expected_stack)
   end
 end
 
+macro it_does_not_interpret(node, message=nil)
+  it %q(does not interpret {{node.id}}) do
+    {% if node.is_a?(StringLiteral) %}
+      %program = parse_program({{node}})
+    {% else %}
+      %program = {{node}}
+    {% end %}
+    itr = Interpreter.new
+
+    exception = expect_raises{ %program.accept(itr) }
+
+    {% if message %}
+      (exception.message || "").downcase.should match({{message}})
+    {% end %}
+  end
+end
+
 # val(node)
 #
 # Run `Value.from_literal` on the given node and return the result. If `node`
