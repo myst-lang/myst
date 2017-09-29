@@ -31,9 +31,9 @@ describe "NativeLib - Integer Methods" do
     it_does_not_interpret %q(1 + :hi),  /invalid argument/
   end
 
+
   describe "#-" do
     it_interprets %q(1 - 1),        [val( 0)]
-    # Arithmetic should be left-associative
     it_interprets %q(1 - 1 - 1),    [val(-1)]
     it_interprets %q(2 - 1),        [val( 1)]
 
@@ -48,17 +48,97 @@ describe "NativeLib - Integer Methods" do
     # Subtraction from 0 acts like negation
     it_interprets %q(0 - 100),      [val(-100)]
 
-    # Addition with floats will always return a float.
+    # Subtraction with floats will always return a float.
     it_interprets %q(1 - 1.0),      [val(0.0)]
     it_interprets %q(10000 - 0.50), [val(9999.50)]
 
-    # Addition with any other type is not supported
+    # Subtraction with any other type is not supported
     it_does_not_interpret %q(1 - nil),  /invalid argument/
     it_does_not_interpret %q(1 - true), /invalid argument/
     it_does_not_interpret %q(1 - []),   /invalid argument/
     it_does_not_interpret %q(1 - {}),   /invalid argument/
     it_does_not_interpret %q(1 - "a"),  /invalid argument/
     it_does_not_interpret %q(1 - :hi),  /invalid argument/
+  end
+
+
+  describe "#*" do
+    it_interprets %q(1 * 1),        [val( 1)]
+    it_interprets %q(1 * 2 * 3),    [val( 6)]
+
+    it_interprets %q(10_000 * 100_000), [val(1_000_000_000)]
+    it_interprets %q(1234567 * 987654), [val(1_219_325_035_818)]
+    # Multiplications are top-truncated
+    it_interprets %q(9_223_372_036_854_775_807 * 3),  [val(9_223_372_036_854_775_805)]
+
+    # Multiplication with 0 always yields 0
+    it_interprets %q(100 * 0),      [val(0)]
+    it_interprets %q(0 * 1234),     [val(0)]
+
+    # Multiplication with floats will always return a float.
+    it_interprets %q(1 * 1.0),      [val(1.0)]
+    it_interprets %q(10000 * 0.50), [val(5000.0)]
+
+    # Multiplication with any other type is not supported
+    it_does_not_interpret %q(1 * nil),  /invalid argument/
+    it_does_not_interpret %q(1 * true), /invalid argument/
+    it_does_not_interpret %q(1 * []),   /invalid argument/
+    it_does_not_interpret %q(1 * {}),   /invalid argument/
+    it_does_not_interpret %q(1 * "a"),  /invalid argument/
+    it_does_not_interpret %q(1 * :hi),  /invalid argument/
+  end
+
+
+  describe "#/" do
+    it_interprets %q(1 / 1),        [val( 1)]
+    it_interprets %q(4 / 2 / 2),    [val( 1)]
+
+    it_interprets %q(100_000 / 10_000), [val(10)]
+    it_interprets %q(625 / 25),         [val(25)]
+
+    # Division with an Integer is always truncated to return an Integer.
+    it_interprets %q(1 / 2),      [val(0)]
+    it_interprets %q(10 / 3),     [val(3)]
+    it_interprets %q(10 / 4),     [val(2)]
+
+    # Division with a Float does not truncate and always returns a Float.
+    it_interprets %q(1 / 2.0),      [val(0.5)]
+    it_interprets %q(10 / 3.0),     [val(3.3333333333333335)]
+    it_interprets %q(10 / 4.0),     [val(2.5)]
+
+    # Division by any 0 value is invalid
+    it_does_not_interpret %q(1 / 0),    /division by zero/
+    it_does_not_interpret %q(1 / 0.0),  /division by zero/
+
+    # Division with any other type is not supported
+    it_does_not_interpret %q(1 / nil),  /invalid argument/
+    it_does_not_interpret %q(1 / true), /invalid argument/
+    it_does_not_interpret %q(1 / []),   /invalid argument/
+    it_does_not_interpret %q(1 / {}),   /invalid argument/
+    it_does_not_interpret %q(1 / "a"),  /invalid argument/
+    it_does_not_interpret %q(1 / :hi),  /invalid argument/
+  end
+
+
+  describe "#%" do
+    it_interprets %q(1 % 1),        [val( 0)]
+    it_interprets %q(7 % 4 % 2),    [val( 1)]
+
+    it_interprets %q(100_000 % 10_000), [val(0)]
+    it_interprets %q(625 % 21),         [val(16)]
+
+    # Modulation by 0 is invalid
+    it_does_not_interpret %q(1 % 0),    /division by zero/
+
+    # Division with any other type is not supported
+    it_does_not_interpret %q(1 % 0.0),  /invalid argument/
+    it_does_not_interpret %q(1 % 1.0),  /invalid argument/
+    it_does_not_interpret %q(1 % nil),  /invalid argument/
+    it_does_not_interpret %q(1 % true), /invalid argument/
+    it_does_not_interpret %q(1 % []),   /invalid argument/
+    it_does_not_interpret %q(1 % {}),   /invalid argument/
+    it_does_not_interpret %q(1 % "a"),  /invalid argument/
+    it_does_not_interpret %q(1 % :hi),  /invalid argument/
   end
 
 
