@@ -440,14 +440,15 @@ module Myst
       return left
     end
 
-    def parse_multiplicative
-      left = parse_assign
+    def parse_multiplicative(left=nil)
+      left ||= parse_assign
       skip_space
 
       if op = accept(Token::Type::STAR, Token::Type::SLASH, Token::Type::MODULO)
         skip_space_and_newlines
-        right = parse_multiplicative
-        return Call.new(left, op.value, [right] of Node).at(left).at_end(right)
+        right = parse_assign
+        call = Call.new(left, op.value, [right] of Node).at(left).at_end(right)
+        return parse_multiplicative(call)
       end
 
       return left

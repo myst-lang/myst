@@ -331,6 +331,14 @@ describe "Parser" do
 
   # Left-associativity for arithmetic expressions
   it_parses %q(1 - 1 - 1),      Call.new(Call.new(l(1), "-", [l(1)]), "-", [l(1)])
+  it_parses %q(1 + 1 - 1),      Call.new(Call.new(l(1), "+", [l(1)]), "-", [l(1)])
+  it_parses %q(1 - 1 + 1),      Call.new(Call.new(l(1), "-", [l(1)]), "+", [l(1)])
+  it_parses %q(1 / 1 / 1),      Call.new(Call.new(l(1), "/", [l(1)]), "/", [l(1)])
+  it_parses %q(1 * 1 / 1),      Call.new(Call.new(l(1), "*", [l(1)]), "/", [l(1)])
+  it_parses %q(1 / 1 * 1),      Call.new(Call.new(l(1), "/", [l(1)]), "*", [l(1)])
+  it_parses %q(1 / 1 % 1),      Call.new(Call.new(l(1), "/", [l(1)]), "%", [l(1)])
+  it_parses %q(1 % 1 / 1),      Call.new(Call.new(l(1), "%", [l(1)]), "/", [l(1)])
+  it_parses %q(1 % 1 % 1),      Call.new(Call.new(l(1), "%", [l(1)]), "%", [l(1)])
 
   it_parses %q(1 * (2 || 3)),   Call.new(l(1), "*", [Or.new(l(2), l(3)).as(Node)])
 
