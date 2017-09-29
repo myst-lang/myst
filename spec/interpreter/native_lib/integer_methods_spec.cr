@@ -127,12 +127,14 @@ describe "NativeLib - Integer Methods" do
     it_interprets %q(100_000 % 10_000), [val(0)]
     it_interprets %q(625 % 21),         [val(16)]
 
+   # Modulation by a Float will yield a Float.
+    it_interprets %q(625 % 21.25),        [val(8.75)]
+
     # Modulation by 0 is invalid
     it_does_not_interpret %q(1 % 0),    /division by zero/
+    it_does_not_interpret %q(1 % 0.0),  /division by zero/
 
     # Division with any other type is not supported
-    it_does_not_interpret %q(1 % 0.0),  /invalid argument/
-    it_does_not_interpret %q(1 % 1.0),  /invalid argument/
     it_does_not_interpret %q(1 % nil),  /invalid argument/
     it_does_not_interpret %q(1 % true), /invalid argument/
     it_does_not_interpret %q(1 % []),   /invalid argument/
@@ -144,6 +146,8 @@ describe "NativeLib - Integer Methods" do
 
   describe "#to_s" do
     it_interprets %q(1.to_s),         [val("1")]
+    it_interprets %q(001.to_s),       [val("1")]
+    it_interprets %q(100.to_s),       [val("100")]
     # Underscores in numbers are extracted during lexing. They are not a part
     # of the value itself.
     it_interprets %q(1_234_567.to_s), [val("1234567")]

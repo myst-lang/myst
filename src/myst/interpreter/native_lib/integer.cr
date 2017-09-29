@@ -55,6 +55,9 @@ module Myst
     when TInteger
       raise "Division by zero" if arg.value == 0
       TInteger.new(this.value % arg.value)
+    when TFloat
+      raise "Division by zero" if arg.value == 0
+      TFloat.new(this.value.to_f % arg.value)
     else
       raise "invalid argument for Integer#%: #{arg.type_name}"
     end
