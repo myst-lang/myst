@@ -153,4 +153,54 @@ describe "NativeLib - Integer Methods" do
     it_interprets %q(1_234_567.to_s), [val("1234567")]
     it_interprets %q((1 + 1).to_s),   [val("2")]
   end
+
+
+  describe "#==" do
+    it_interprets %q(1  == 1),      [val(true)]
+    it_interprets %q(0  == 1),      [val(false)]
+    it_interprets %q(1  == 0),      [val(false)]
+    it_interprets %q(0  == 0),      [val(true)]
+
+    # Comparing to floats succeeds if the float value is integral.
+    it_interprets %q(0 == 0.0),        [val(true)]
+    it_interprets %q(1 == 1.0),        [val(true)]
+    it_interprets %q(0 == 0.1),        [val(false)]
+    it_interprets %q(1 == 1.1),        [val(false)]
+    it_interprets %q(1 == 1.000001),   [val(false)]
+
+    it_interprets %q(1  == nil),      [val(false)]
+    it_interprets %q(1  == true),     [val(false)]
+    it_interprets %q(1  == false),    [val(false)]
+    it_interprets %q(1  == "hello"),  [val(false)]
+    it_interprets %q(1  == :hi),      [val(false)]
+    it_interprets %q(1  == []),       [val(false)]
+    it_interprets %q(1  == [1, 2]),   [val(false)]
+    it_interprets %q(1  == {}),       [val(false)]
+    it_interprets %q(1  == {a: 1}),   [val(false)]
+  end
+
+  # Float#!= is the exact inverse of Float#==.
+  describe "#!=" do
+    it_interprets %q(1  != 1),      [val(false)]
+    it_interprets %q(0  != 1),      [val(true)]
+    it_interprets %q(1  != 0),      [val(true)]
+    it_interprets %q(0  != 0),      [val(false)]
+
+    # Comparing to floats succeeds if the float value is integral.
+    it_interprets %q(0  != 0.0),      [val(false)]
+    it_interprets %q(1  != 1.0),      [val(false)]
+    it_interprets %q(0  != 0.1),      [val(true)]
+    it_interprets %q(1  != 1.1),      [val(true)]
+    it_interprets %q(1  != 1.000001), [val(true)]
+
+    it_interprets %q(1  != nil),      [val(true)]
+    it_interprets %q(1  != true),     [val(true)]
+    it_interprets %q(1  != false),    [val(true)]
+    it_interprets %q(1  != "hello"),  [val(true)]
+    it_interprets %q(1  != :hi),      [val(true)]
+    it_interprets %q(1  != []),       [val(true)]
+    it_interprets %q(1  != [1, 2]),   [val(true)]
+    it_interprets %q(1  != {}),       [val(true)]
+    it_interprets %q(1  != {a: 1}),   [val(true)]
+  end
 end

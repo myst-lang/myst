@@ -67,4 +67,25 @@ module Myst
     this = this.as(TInteger)
     TString.new(this.value.to_s)
   end
+
+
+  TInteger::METHODS["=="] = TNativeFunctor.new do |this, (arg), _block, _itr|
+    this = this.as(TInteger)
+    case arg
+    when TInteger, TFloat
+      TBoolean.new(this.value == arg.value)
+    else
+      TBoolean.new(false)
+    end
+  end
+
+  TInteger::METHODS["!="] = TNativeFunctor.new do |this, (arg), _block, _itr|
+    this = this.as(TInteger)
+    case arg
+    when TInteger, TFloat
+      TBoolean.new(this.value != arg.value)
+    else
+      TBoolean.new(true)
+    end
+  end
 end
