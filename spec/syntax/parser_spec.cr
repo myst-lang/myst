@@ -3,170 +3,170 @@ require "../support/nodes.cr"
 
 # Check that parsing the given source succeeds. If given, additionally check
 # that the result of parsing the source matches the given nodes.
-private macro it_parses(source, *expected)
-  it %q(parses `{{source.id}}`) do
-    result = parse_program({{source}})
-    {% unless expected.empty? %}
-      result.should eq(Expressions.new(*{{expected}}))
-    {% end %}
+private def it_parses(source, *expected)
+  it %Q(parses `#{source}`) do
+    result = parse_program(source)
+    unless expected.empty?
+      result.should eq(Expressions.new(*expected))
+    end
   end
 end
 
 # Expect the given source to raise an error when parsed. If `message` is given,
 # the raised error will be expected to contain at least that content.
-private macro it_does_not_parse(source, message=nil)
-  it %q(does not parse `{{source.id}}`) do
+private def it_does_not_parse(source, message=nil)
+  it %Q(does not parse `#{source}`) do
     exception = expect_raises(ParseError) do
-      result = parse_program({{source}})
+      result = parse_program(source)
     end
 
-    {% if message %}
-      (exception.message || "").downcase.should match({{message}})
-    {% end %}
+    if message
+      (exception.message || "").downcase.should match(message)
+    end
   end
 end
 
 
-private macro test_calls_with_receiver(receiver_source, receiver_node)
+private def test_calls_with_receiver(receiver_source, receiver_node)
   # Bare identifiers are considered calls, as long as they have not already been defined as Vars.
-  it_parses %q({{receiver_source.id}}call),            Call.new({{receiver_node}}, "call")
-  it_parses %q({{receiver_source.id}}call()),          Call.new({{receiver_node}}, "call")
-  it_parses %q({{receiver_source.id}}call(1)),         Call.new({{receiver_node}}, "call", [l(1)])
-  it_parses %q({{receiver_source.id}}call(1, 2 + 3)),  Call.new({{receiver_node}}, "call", [l(1), Call.new(l(2), "+", [l(3)])])
-  it_parses %q({{receiver_source.id}}call (1)),        Call.new({{receiver_node}}, "call", [l(1)])
-  it_parses %q(
-    {{receiver_source.id}}call(
+  it_parses %Q(#{receiver_source}call),            Call.new(receiver_node, "call")
+  it_parses %Q(#{receiver_source}call()),          Call.new(receiver_node, "call")
+  it_parses %Q(#{receiver_source}call(1)),         Call.new(receiver_node, "call", [l(1)])
+  it_parses %Q(#{receiver_source}call(1, 2 + 3)),  Call.new(receiver_node, "call", [l(1), Call.new(l(2), "+", [l(3)])])
+  it_parses %Q(#{receiver_source}call (1)),        Call.new(receiver_node, "call", [l(1)])
+  it_parses %Q(
+    #{receiver_source}call(
       1,
       2
     )
-  ),                            Call.new({{receiver_node}}, "call", [l(1), l(2)])
-  it_parses %q(
-    {{receiver_source.id}}call(
+  ),                            Call.new(receiver_node, "call", [l(1), l(2)])
+  it_parses %Q(
+    #{receiver_source}call(
     )
-  ),                            Call.new({{receiver_node}}, "call")
+  ),                            Call.new(receiver_node, "call")
   # Calls with parameters _must_ wrap them in parentheses.
-  it_does_not_parse %q({{receiver_source.id}}call a, b)
+  it_does_not_parse %Q(#{receiver_source}call a, b)
 
   # Blocks can be given to a Call as either brace blocks (`{}`) or `do...end` constructs.
-  it_parses %q({{receiver_source.id}}call{ }),     Call.new({{receiver_node}}, "call", block: Block.new)
-  it_parses %q({{receiver_source.id}}call   { }),  Call.new({{receiver_node}}, "call", block: Block.new)
-  it_parses %q(
-    {{receiver_source.id}}call do
+  it_parses %Q(#{receiver_source}call{ }),     Call.new(receiver_node, "call", block: Block.new)
+  it_parses %Q(#{receiver_source}call   { }),  Call.new(receiver_node, "call", block: Block.new)
+  it_parses %Q(
+    #{receiver_source}call do
     end
-  ),                              Call.new({{receiver_node}}, "call", block: Block.new)
-  it_parses %q(
-    {{receiver_source.id}}call    do
+  ),                              Call.new(receiver_node, "call", block: Block.new)
+  it_parses %Q(
+    #{receiver_source}call    do
     end
-  ),                              Call.new({{receiver_node}}, "call", block: Block.new)
+  ),                              Call.new(receiver_node, "call", block: Block.new)
 
   # The `do...end` syntax can also have a delimiter after the `do` and parameters.
-  it_parses %q({{receiver_source.id}}call do; end),     Call.new({{receiver_node}}, "call", block: Block.new)
-  it_parses %q({{receiver_source.id}}call   do; end),   Call.new({{receiver_node}}, "call", block: Block.new)
-  it_parses %q({{receiver_source.id}}call do |a|; end), Call.new({{receiver_node}}, "call", block: Block.new([p("a")]))
+  it_parses %Q(#{receiver_source}call do; end),     Call.new(receiver_node, "call", block: Block.new)
+  it_parses %Q(#{receiver_source}call   do; end),   Call.new(receiver_node, "call", block: Block.new)
+  it_parses %Q(#{receiver_source}call do |a|; end), Call.new(receiver_node, "call", block: Block.new([p("a")]))
 
   # Brace blocks accept arguments after the opening brace.
-  it_parses %q({{receiver_source.id}}call{ |a,b| }),                  Call.new({{receiver_node}}, "call", block: Block.new([p("a"), p("b")]))
+  it_parses %Q(#{receiver_source}call{ |a,b| }),                  Call.new(receiver_node, "call", block: Block.new([p("a"), p("b")]))
   # Block parameters are exactly like normal Def parameters, with the same syntax support.
-  it_parses %q({{receiver_source.id}}call{ | | }),                    Call.new({{receiver_node}}, "call", block: Block.new())
-  it_parses %q({{receiver_source.id}}call{ |a,*b| }),                 Call.new({{receiver_node}}, "call", block: Block.new([p("a"), p("b", splat: true)]))
-  it_parses %q({{receiver_source.id}}call{ |1,nil=:thing| }),         Call.new({{receiver_node}}, "call", block: Block.new([p(nil, l(1)), p("thing", l(nil))]))
-  it_parses %q({{receiver_source.id}}call{ |a : Integer, b : Nil| }), Call.new({{receiver_node}}, "call", block: Block.new([p("a", restriction: c("Integer")), p("b", restriction: c("Nil"))]))
-  it_parses %q({{receiver_source.id}}call{ |1 =: a : Integer| }),     Call.new({{receiver_node}}, "call", block: Block.new([p("a", l(1), restriction: c("Integer"))]))
-  it_parses %q({{receiver_source.id}}call{ |<other>| }),              Call.new({{receiver_node}}, "call", block: Block.new([p(nil, i(Call.new(nil, "other")))]))
-  it_parses %q({{receiver_source.id}}call{ |<a.b>| }),                Call.new({{receiver_node}}, "call", block: Block.new([p(nil, i(Call.new(Call.new(nil, "a"), "b")))]))
-  it_parses %q({{receiver_source.id}}call{ |<a[0]>| }),               Call.new({{receiver_node}}, "call", block: Block.new([p(nil, i(Call.new(Call.new(nil, "a"), "[]", [l(0)])))]))
-  it_parses %q({{receiver_source.id}}call{ |*a,b| }),                 Call.new({{receiver_node}}, "call", block: Block.new([p("a", splat: true), p("b")]))
-  it_parses %q({{receiver_source.id}}call{ |a,*b,c| }),               Call.new({{receiver_node}}, "call", block: Block.new([p("a"), p("b", splat: true), p("c")]))
-  it_parses %q({{receiver_source.id}}call{ |a,&block| }),             Call.new({{receiver_node}}, "call", block: Block.new([p("a")], block_param: p("block", block: true)))
-  it_parses %q({{receiver_source.id}}call{ |a,&b| }),                 Call.new({{receiver_node}}, "call", block: Block.new([p("a")], block_param: p("b", block: true)))
-  it_parses %q({{receiver_source.id}}call{ |a,
-                                              &b| }),                 Call.new({{receiver_node}}, "call", block: Block.new([p("a")], block_param: p("b", block: true)))
+  it_parses %Q(#{receiver_source}call{ | | }),                    Call.new(receiver_node, "call", block: Block.new())
+  it_parses %Q(#{receiver_source}call{ |a,*b| }),                 Call.new(receiver_node, "call", block: Block.new([p("a"), p("b", splat: true)]))
+  it_parses %Q(#{receiver_source}call{ |1,nil=:thing| }),         Call.new(receiver_node, "call", block: Block.new([p(nil, l(1)), p("thing", l(nil))]))
+  it_parses %Q(#{receiver_source}call{ |a : Integer, b : Nil| }), Call.new(receiver_node, "call", block: Block.new([p("a", restriction: c("Integer")), p("b", restriction: c("Nil"))]))
+  it_parses %Q(#{receiver_source}call{ |1 =: a : Integer| }),     Call.new(receiver_node, "call", block: Block.new([p("a", l(1), restriction: c("Integer"))]))
+  it_parses %Q(#{receiver_source}call{ |<other>| }),              Call.new(receiver_node, "call", block: Block.new([p(nil, i(Call.new(nil, "other")))]))
+  it_parses %Q(#{receiver_source}call{ |<a.b>| }),                Call.new(receiver_node, "call", block: Block.new([p(nil, i(Call.new(Call.new(nil, "a"), "b")))]))
+  it_parses %Q(#{receiver_source}call{ |<a[0]>| }),               Call.new(receiver_node, "call", block: Block.new([p(nil, i(Call.new(Call.new(nil, "a"), "[]", [l(0)])))]))
+  it_parses %Q(#{receiver_source}call{ |*a,b| }),                 Call.new(receiver_node, "call", block: Block.new([p("a", splat: true), p("b")]))
+  it_parses %Q(#{receiver_source}call{ |a,*b,c| }),               Call.new(receiver_node, "call", block: Block.new([p("a"), p("b", splat: true), p("c")]))
+  it_parses %Q(#{receiver_source}call{ |a,&block| }),             Call.new(receiver_node, "call", block: Block.new([p("a")], block_param: p("block", block: true)))
+  it_parses %Q(#{receiver_source}call{ |a,&b| }),                 Call.new(receiver_node, "call", block: Block.new([p("a")], block_param: p("b", block: true)))
+  it_parses %Q(#{receiver_source}call{ |a,
+                                              &b| }),                 Call.new(receiver_node, "call", block: Block.new([p("a")], block_param: p("b", block: true)))
 
-  it_does_not_parse %q({{receiver_source.id}}call{ |&b,a| }),     /block parameter/
-  it_does_not_parse %q({{receiver_source.id}}call{ |*a,*b| }),    /multiple splat/
+  it_does_not_parse %Q(#{receiver_source}call{ |&b,a| }),     /block parameter/
+  it_does_not_parse %Q(#{receiver_source}call{ |*a,*b| }),    /multiple splat/
 
   # `do...end` blocks accept arguments
-  it_parses %q(
-    {{receiver_source.id}}call do | |
+  it_parses %Q(
+    #{receiver_source}call do | |
     end
-  ),                Call.new({{receiver_node}}, "call", block: Block.new())
-  it_parses %q(
-    {{receiver_source.id}}call do |a,*b|
+  ),                Call.new(receiver_node, "call", block: Block.new())
+  it_parses %Q(
+    #{receiver_source}call do |a,*b|
     end
-  ),                Call.new({{receiver_node}}, "call", block: Block.new([p("a"), p("b", splat: true)]))
-  it_parses %q(
-    {{receiver_source.id}}call do |*a,b|
+  ),                Call.new(receiver_node, "call", block: Block.new([p("a"), p("b", splat: true)]))
+  it_parses %Q(
+    #{receiver_source}call do |*a,b|
     end
-  ),                Call.new({{receiver_node}}, "call", block: Block.new([p("a", splat: true), p("b")]))
-  it_parses %q(
-    {{receiver_source.id}}call do |a,*b,c|
+  ),                Call.new(receiver_node, "call", block: Block.new([p("a", splat: true), p("b")]))
+  it_parses %Q(
+    #{receiver_source}call do |a,*b,c|
     end
-  ),                Call.new({{receiver_node}}, "call", block: Block.new([p("a"), p("b", splat: true), p("c")]))
-  it_parses %q(
-    {{receiver_source.id}}call do |a,&block|
+  ),                Call.new(receiver_node, "call", block: Block.new([p("a"), p("b", splat: true), p("c")]))
+  it_parses %Q(
+    #{receiver_source}call do |a,&block|
     end
-  ),                Call.new({{receiver_node}}, "call", block: Block.new([p("a")], block_param: p("block", block: true)))
-  it_parses %q(
-    {{receiver_source.id}}call do |a,&b|
+  ),                Call.new(receiver_node, "call", block: Block.new([p("a")], block_param: p("block", block: true)))
+  it_parses %Q(
+    #{receiver_source}call do |a,&b|
     end
-  ),                Call.new({{receiver_node}}, "call", block: Block.new([p("a")], block_param: p("b", block: true)))
-  it_parses %q(
-    {{receiver_source.id}}call do |a,
+  ),                Call.new(receiver_node, "call", block: Block.new([p("a")], block_param: p("b", block: true)))
+  it_parses %Q(
+    #{receiver_source}call do |a,
               &b|
     end
-  ),                Call.new({{receiver_node}}, "call", block: Block.new([p("a")], block_param: p("b", block: true)))
+  ),                Call.new(receiver_node, "call", block: Block.new([p("a")], block_param: p("b", block: true)))
 
-  it_does_not_parse %q(
-    {{receiver_source.id}}call do |&b,a|
+  it_does_not_parse %Q(
+    #{receiver_source}call do |&b,a|
     end
   ),                      /block parameter/
-  it_does_not_parse %q(
-    {{receiver_source.id}}call do |*a,*b|
+  it_does_not_parse %Q(
+    #{receiver_source}call do |*a,*b|
     end
   ),                      /multiple splat/
 
-  it_does_not_parse %q(
-    {{receiver_source.id}}call{
+  it_does_not_parse %Q(
+    #{receiver_source}call{
       |arg|
     }
   )
-  it_does_not_parse %q(
-    {{receiver_source.id}}call do
+  it_does_not_parse %Q(
+    #{receiver_source}call do
       |arg|
     end
   )
 
   # Calls with arguments _and_ blocks provide the block after the closing parenthesis.
-  it_parses %q({{receiver_source.id}}call(1, 2){ }),  Call.new({{receiver_node}}, "call", [l(1), l(2)], block: Block.new)
-  it_parses %q(
-    {{receiver_source.id}}call(1, 2) do
+  it_parses %Q(#{receiver_source}call(1, 2){ }),  Call.new(receiver_node, "call", [l(1), l(2)], block: Block.new)
+  it_parses %Q(
+    #{receiver_source}call(1, 2) do
     end
-  ),                            Call.new({{receiver_node}}, "call", [l(1), l(2)], block: Block.new)
+  ),                            Call.new(receiver_node, "call", [l(1), l(2)], block: Block.new)
 
   # Calls with blocks that are within other calls can also accept blocks.
-  it_parses %q(call({{receiver_source.id}}inner(1){ })),  Call.new(nil, "call", [Call.new({{receiver_node}}, "inner", [l(1)], block: Block.new).as(Node)])
-  it_parses %q(
-    call({{receiver_source.id}}inner(1) do
+  it_parses %Q(call(#{receiver_source}inner(1){ })),  Call.new(nil, "call", [Call.new(receiver_node, "inner", [l(1)], block: Block.new).as(Node)])
+  it_parses %Q(
+    call(#{receiver_source}inner(1) do
     end)
-  ),                                Call.new(nil, "call", [Call.new({{receiver_node}}, "inner", [l(1)], block: Block.new).as(Node)])
-  it_parses %q(call(1, {{receiver_source.id}}inner(1){ }, 2)),  Call.new(nil, "call", [l(1), Call.new({{receiver_node}}, "inner", [l(1)], block: Block.new), l(2)])
-  it_parses %q(
-    call(1, {{receiver_source.id}}inner(1) do
+  ),                                Call.new(nil, "call", [Call.new(receiver_node, "inner", [l(1)], block: Block.new).as(Node)])
+  it_parses %Q(call(1, #{receiver_source}inner(1){ }, 2)),  Call.new(nil, "call", [l(1), Call.new(receiver_node, "inner", [l(1)], block: Block.new), l(2)])
+  it_parses %Q(
+    call(1, #{receiver_source}inner(1) do
     end, 2)
-  ),                                      Call.new(nil, "call", [l(1), Call.new({{receiver_node}}, "inner", [l(1)], block: Block.new), l(2)])
+  ),                                      Call.new(nil, "call", [l(1), Call.new(receiver_node, "inner", [l(1)], block: Block.new), l(2)])
 
   # Blocks are exactly like normal defs, they can contain any valid Expressions node as a body.
-  it_parses %q({{receiver_source.id}}call{ a = 1; a }), Call.new({{receiver_node}}, "call", block: Block.new(body: e(SimpleAssign.new(v("a"), l(1)), v("a"))))
-  it_parses %q({{receiver_source.id}}call{
+  it_parses %Q(#{receiver_source}call{ a = 1; a }), Call.new(receiver_node, "call", block: Block.new(body: e(SimpleAssign.new(v("a"), l(1)), v("a"))))
+  it_parses %Q(#{receiver_source}call{
       a = 1
       a
     }
-  ), Call.new({{receiver_node}}, "call", block: Block.new(body: e(SimpleAssign.new(v("a"), l(1)), v("a"))))
-  it_parses %q({{receiver_source.id}}call do
+  ), Call.new(receiver_node, "call", block: Block.new(body: e(SimpleAssign.new(v("a"), l(1)), v("a"))))
+  it_parses %Q(#{receiver_source}call do
       a = 1
       a
     end
-  ), Call.new({{receiver_node}}, "call", block: Block.new(body: e(SimpleAssign.new(v("a"), l(1)), v("a"))))
+  ), Call.new(receiver_node, "call", block: Block.new(body: e(SimpleAssign.new(v("a"), l(1)), v("a"))))
 end
 
 
