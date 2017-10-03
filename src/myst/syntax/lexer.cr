@@ -319,6 +319,7 @@ module Myst
         when "\\n"  then '\n'
         when "\\\"" then '"'
         when "\\t"  then '\t'
+        when "\\0"  then '\0'
         end
       end
 

@@ -23,4 +23,24 @@ module Myst
   TString::METHODS["to_s"] = TNativeFunctor.new do |this, _args, _block, _itr|
     this.as(TString)
   end
+
+  TString::METHODS["=="] = TNativeFunctor.new do |this, (arg), _block, _itr|
+    this = this.as(TString)
+    case arg
+    when TString
+      TBoolean.new(this.value == arg.value)
+    else
+      TBoolean.new(false)
+    end
+  end
+
+  TString::METHODS["!="] = TNativeFunctor.new do |this, (arg), _block, _itr|
+    this = this.as(TString)
+    case arg
+    when TString
+      TBoolean.new(this.value != arg.value)
+    else
+      TBoolean.new(true)
+    end
+  end
 end
