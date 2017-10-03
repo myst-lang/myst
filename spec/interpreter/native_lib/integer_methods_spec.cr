@@ -179,7 +179,7 @@ describe "NativeLib - Integer Methods" do
     it_interprets %q(1  == {a: 1}),   [val(false)]
   end
 
-  # Float#!= is the exact inverse of Float#==.
+  # Integer#!= is the exact inverse of Integer#==.
   describe "#!=" do
     it_interprets %q(1  != 1),      [val(false)]
     it_interprets %q(0  != 1),      [val(true)]
