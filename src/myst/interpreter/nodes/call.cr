@@ -36,13 +36,8 @@ module Myst
         end
       end
 
-      result =
-        if clause.body.is_a?(Expressions)
-          visit(clause.body)
-          stack.pop
-        else
-          TNil.new
-        end
+      visit(clause.body)
+      result = stack.pop
 
       pop_scope
       return result
