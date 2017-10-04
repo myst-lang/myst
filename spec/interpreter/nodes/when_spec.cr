@@ -39,39 +39,32 @@ describe "Interpreter - When" do
   ),                  [val(2)]
 
 
+  # For brevity, tests after this point will use a more compact form where
+  # appropriate.
+
+
   # In a chain, stop evaluation after the first truthy condition
   it_interprets %q(
-    when true
-      1
-    when true
-      2
-    else
-      3
+    when true;  1
+    when true;  2
+    else;       3
     end
   ),                  [val(1)]
 
   it_interprets %q(
-    when false
-      1
-    when true
-      2
-    else
-      3
+    when false; 1
+    when true;  2
+    else;       3
     end
   ),                  [val(2)]
 
   it_interprets %q(
-    when false
-      1
-    when false
-      2
-    else
-      3
+    when false; 1
+    when false; 2
+    else;       3
     end
   ),                  [val(3)]
 
-  # For brevity, tests after this point will use a more compact form where
-  # appropriate.
   it_interprets %q(
     when 1 == 1;  1
     else;         2
@@ -89,4 +82,24 @@ describe "Interpreter - When" do
     else;         true
     end
   ),                  [val(false)]
+
+
+
+  it_interprets %q(
+    when true;    1
+    unless false; 2
+    end
+  ),                  [val(1)]
+
+  it_interprets %q(
+    when false;   1
+    unless true;  2
+    end
+  ),                  [val(nil)]
+
+  it_interprets %q(
+    when false;   1
+    unless false; 2
+    end
+  ),                  [val(2)]
 end
