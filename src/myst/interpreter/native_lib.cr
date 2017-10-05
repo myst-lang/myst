@@ -9,9 +9,7 @@ module Myst
     def call_func(itr, func, *args, receiver : Value?=nil)
       case func
       when TFunctor
-        itr.do_call(func, receiver, args.to_a, nil)
-      when TNativeFunctor
-        itr.do_call(func, receiver, args.to_a, nil)
+        itr.do_call(func.clauses.first, receiver, args.to_a, nil)
       else
         raise "func is not callable."
       end

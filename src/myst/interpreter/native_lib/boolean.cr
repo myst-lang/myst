@@ -1,25 +1,31 @@
 module Myst
-  TBoolean::METHODS["to_s"] = TNativeFunctor.new do |this, _args, _block, _itr|
-    TString.new(this.as(TBoolean).value ? "true" : "false")
-  end
-
-  TBoolean::METHODS["=="] = TNativeFunctor.new do |this, (arg), _block, _itr|
-    this = this.as(TBoolean)
-    case arg
-    when TBoolean
-      TBoolean.new(this.value == arg.value)
-    else
-      TBoolean.new(false)
+  TBoolean::METHODS["to_s"] = TFunctor.new([
+    TNativeDef.new do |this, _args, _block, _itr|
+      TString.new(this.as(TBoolean).value ? "true" : "false")
     end
-  end
+  ] of Callable)
 
-  TBoolean::METHODS["!="] = TNativeFunctor.new do |this, (arg), _block, _itr|
-    this = this.as(TBoolean)
-    case arg
-    when TBoolean
-      TBoolean.new(this.value != arg.value)
-    else
-      TBoolean.new(true)
+  TBoolean::METHODS["=="] = TFunctor.new([
+    TNativeDef.new do |this, (arg), _block, _itr|
+      this = this.as(TBoolean)
+      case arg
+      when TBoolean
+        TBoolean.new(this.value == arg.value)
+      else
+        TBoolean.new(false)
+      end
     end
-  end
+  ] of Callable)
+
+  TBoolean::METHODS["!="] = TFunctor.new([
+    TNativeDef.new do |this, (arg), _block, _itr|
+      this = this.as(TBoolean)
+      case arg
+      when TBoolean
+        TBoolean.new(this.value != arg.value)
+      else
+        TBoolean.new(true)
+      end
+    end
+  ] of Callable)
 end

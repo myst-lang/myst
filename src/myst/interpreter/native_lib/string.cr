@@ -1,46 +1,56 @@
 module Myst
-  TString::METHODS["+"] = TNativeFunctor.new do |this, (arg), _block, _itr|
-    this = this.as(TString)
-    case arg
-    when TString
-      TString.new(this.value + arg.value)
-    else
-      raise "invalid argument for String#+: #{arg.type_name}"
+  TString::METHODS["+"] = TFunctor.new([
+    TNativeDef.new do |this, (arg), _block, _itr|
+      this = this.as(TString)
+      case arg
+      when TString
+        TString.new(this.value + arg.value)
+      else
+        raise "invalid argument for String#+: #{arg.type_name}"
+      end
     end
-  end
+  ] of Callable)
 
-  TString::METHODS["*"] = TNativeFunctor.new do |this, (arg), _block, _itr|
-    this = this.as(TString)
-    case arg
-    when TInteger
-      # String multiplication repeats `this` `arg` times.
-      TString.new(this.value * arg.value)
-    else
-      raise "invalid argument for String#*: #{arg.type_name}"
+  TString::METHODS["*"] = TFunctor.new([
+    TNativeDef.new do |this, (arg), _block, _itr|
+      this = this.as(TString)
+      case arg
+      when TInteger
+        # String multiplication repeats `this` `arg` times.
+        TString.new(this.value * arg.value)
+      else
+        raise "invalid argument for String#*: #{arg.type_name}"
+      end
     end
-  end
+  ] of Callable)
 
-  TString::METHODS["to_s"] = TNativeFunctor.new do |this, _args, _block, _itr|
-    this.as(TString)
-  end
-
-  TString::METHODS["=="] = TNativeFunctor.new do |this, (arg), _block, _itr|
-    this = this.as(TString)
-    case arg
-    when TString
-      TBoolean.new(this.value == arg.value)
-    else
-      TBoolean.new(false)
+  TString::METHODS["to_s"] = TFunctor.new([
+    TNativeDef.new do |this, _args, _block, _itr|
+      this.as(TString)
     end
-  end
+  ] of Callable)
 
-  TString::METHODS["!="] = TNativeFunctor.new do |this, (arg), _block, _itr|
-    this = this.as(TString)
-    case arg
-    when TString
-      TBoolean.new(this.value != arg.value)
-    else
-      TBoolean.new(true)
+  TString::METHODS["=="] = TFunctor.new([
+    TNativeDef.new do |this, (arg), _block, _itr|
+      this = this.as(TString)
+      case arg
+      when TString
+        TBoolean.new(this.value == arg.value)
+      else
+        TBoolean.new(false)
+      end
     end
-  end
+  ] of Callable)
+
+  TString::METHODS["!="] = TFunctor.new([
+    TNativeDef.new do |this, (arg), _block, _itr|
+      this = this.as(TString)
+      case arg
+      when TString
+        TBoolean.new(this.value != arg.value)
+      else
+        TBoolean.new(true)
+      end
+    end
+  ] of Callable)
 end

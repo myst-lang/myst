@@ -133,23 +133,41 @@ module Myst
   end
 
 
+  class Callable < Value
+    def self.type_name; type_name; end
+  end
+
+  # A Functor is a container for multiple functor definitions, which can either
+  # be language-level or native.
   class TFunctor < Value
     def self.type_name; "Functor"; end
-    property clauses  : Array(Def)
-    property parent   : Scope
+    property  clauses         : Array(Callable)
+    property  lexical_scope   : Scope
+    property! parent          : TFunctor?
 
-    def initialize(@parent : Scope, @clauses=[] of Def)
+    def initialize(@clauses=[] of Callable, @lexical_scope : Scope=Scope.new)
     end
 
-
-    def add_clause(definition : Def)
+    def add_clause(definition : Callable)
       clauses.push(definition)
     end
 
-    def_equals_and_hash clauses, parent
+    def_equals_and_hash clauses, lexical_scope, parent?
   end
 
-  class TNativeFunctor < Value
+  class TFunctorDef < Callable
+    def self.type_name; "Functor"; end
+    property  definition      : Def
+
+    delegate params, block_param, body, splat_index, to: definition
+
+    def initialize(@definition : Def)
+    end
+
+    def_equals_and_hash definition
+  end
+
+  class TNativeDef < Callable
     def self.type_name; "NativeFunctor"; end
     alias FuncT = (Value?, Array(Value), TFunctor?, Interpreter -> Value)
     property impl : FuncT

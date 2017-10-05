@@ -1,78 +1,94 @@
 module Myst
-  TFloat::METHODS["+"] = TNativeFunctor.new do |this, (arg), _block, _itr|
-    this = this.as(TFloat)
-    case arg
-    when TInteger, TFloat
-      TFloat.new(this.value + arg.value)
-    else
-      raise "invalid argument for Float#+: #{arg.type_name}"
+  TFloat::METHODS["+"] = TFunctor.new([
+    TNativeDef.new do |this, (arg), _block, _itr|
+      this = this.as(TFloat)
+      case arg
+      when TInteger, TFloat
+        TFloat.new(this.value + arg.value)
+      else
+        raise "invalid argument for Float#+: #{arg.type_name}"
+      end
     end
-  end
+  ] of Callable)
 
-  TFloat::METHODS["-"] = TNativeFunctor.new do |this, (arg), _block, _itr|
-    this = this.as(TFloat)
-    case arg
-    when TInteger, TFloat
-      TFloat.new(this.value - arg.value)
-    else
-      raise "invalid argument for Float#-: #{arg.type_name}"
+  TFloat::METHODS["-"] = TFunctor.new([
+    TNativeDef.new do |this, (arg), _block, _itr|
+      this = this.as(TFloat)
+      case arg
+      when TInteger, TFloat
+        TFloat.new(this.value - arg.value)
+      else
+        raise "invalid argument for Float#-: #{arg.type_name}"
+      end
     end
-  end
+  ] of Callable)
 
-  TFloat::METHODS["*"] = TNativeFunctor.new do |this, (arg), _block, _itr|
-    this = this.as(TFloat)
-    case arg
-    when TInteger, TFloat
-      TFloat.new(this.value * arg.value)
-    else
-      raise "invalid argument for Float#*: #{arg.type_name}"
+  TFloat::METHODS["*"] = TFunctor.new([
+    TNativeDef.new do |this, (arg), _block, _itr|
+      this = this.as(TFloat)
+      case arg
+      when TInteger, TFloat
+        TFloat.new(this.value * arg.value)
+      else
+        raise "invalid argument for Float#*: #{arg.type_name}"
+      end
     end
-  end
+  ] of Callable)
 
-  TFloat::METHODS["/"] = TNativeFunctor.new do |this, (arg), _block, _itr|
-    this = this.as(TFloat)
-    case arg
-    when TInteger, TFloat
-      raise "Division by zero" if arg.value == 0
-      TFloat.new(this.value / arg.value)
-    else
-      raise "invalid argument for Float#/: #{arg.type_name}"
+  TFloat::METHODS["/"] = TFunctor.new([
+    TNativeDef.new do |this, (arg), _block, _itr|
+      this = this.as(TFloat)
+      case arg
+      when TInteger, TFloat
+        raise "Division by zero" if arg.value == 0
+        TFloat.new(this.value / arg.value)
+      else
+        raise "invalid argument for Float#/: #{arg.type_name}"
+      end
     end
-  end
+  ] of Callable)
 
-  TFloat::METHODS["%"] = TNativeFunctor.new do |this, (arg), _block, _itr|
-    this = this.as(TFloat)
-    case arg
-    when TInteger, TFloat
-      raise "Division by zero" if arg.value == 0
-      TFloat.new(this.value % arg.value)
-    else
-      raise "invalid argument for Float#%: #{arg.type_name}"
+  TFloat::METHODS["%"] = TFunctor.new([
+    TNativeDef.new do |this, (arg), _block, _itr|
+      this = this.as(TFloat)
+      case arg
+      when TInteger, TFloat
+        raise "Division by zero" if arg.value == 0
+        TFloat.new(this.value % arg.value)
+      else
+        raise "invalid argument for Float#%: #{arg.type_name}"
+      end
     end
-  end
+  ] of Callable)
 
-  TFloat::METHODS["to_s"] = TNativeFunctor.new do |this, _args, _block, _itr|
-    this = this.as(TFloat)
-    TString.new(this.value.to_s)
-  end
-
-  TFloat::METHODS["=="] = TNativeFunctor.new do |this, (arg), _block, _itr|
-    this = this.as(TFloat)
-    case arg
-    when TFloat, TInteger
-      TBoolean.new(this.value == arg.value)
-    else
-      TBoolean.new(false)
+  TFloat::METHODS["to_s"] = TFunctor.new([
+    TNativeDef.new do |this, _args, _block, _itr|
+      this = this.as(TFloat)
+      TString.new(this.value.to_s)
     end
-  end
+  ] of Callable)
 
-  TFloat::METHODS["!="] = TNativeFunctor.new do |this, (arg), _block, _itr|
-    this = this.as(TFloat)
-    case arg
-    when TFloat, TInteger
-      TBoolean.new(this.value != arg.value)
-    else
-      TBoolean.new(true)
+  TFloat::METHODS["=="] = TFunctor.new([
+    TNativeDef.new do |this, (arg), _block, _itr|
+      this = this.as(TFloat)
+      case arg
+      when TFloat, TInteger
+        TBoolean.new(this.value == arg.value)
+      else
+        TBoolean.new(false)
+      end
     end
-  end
+  ] of Callable)
+
+  TFloat::METHODS["!="] = TFunctor.new([
+    TNativeDef.new do |this, (arg), _block, _itr|
+      this = this.as(TFloat)
+      case arg
+      when TFloat, TInteger
+        TBoolean.new(this.value != arg.value)
+      else
+        TBoolean.new(true)
+      end
+    end
+  ] of Callable)
 end
