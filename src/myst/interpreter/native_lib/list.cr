@@ -1,10 +1,14 @@
 module Myst
   TList::METHODS["each"] = TFunctor.new([
-    TNativeDef.new do |this, _args, block, itr|
+    TNativeDef.new(0) do |this, _args, block, itr|
       this = this.as(TList)
-      this.elements.each do |elem|
-        NativeLib.call_func(itr, block, elem)
+
+      if block
+        this.elements.each do |elem|
+          NativeLib.call_func(itr, block, [elem], nil)
+        end
       end
+
       this
     end
   ] of Callable)

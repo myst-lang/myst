@@ -170,9 +170,10 @@ module Myst
   class TNativeDef < Callable
     def self.type_name; "NativeFunctor"; end
     alias FuncT = (Value?, Array(Value), TFunctor?, Interpreter -> Value)
-    property impl : FuncT
+    property arity  : Int32
+    property impl   : FuncT
 
-    def initialize(&@impl : FuncT)
+    def initialize(@arity : Int32, &@impl : FuncT)
     end
 
     def_equals_and_hash impl

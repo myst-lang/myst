@@ -1,6 +1,6 @@
 module Myst
   TFloat::METHODS["+"] = TFunctor.new([
-    TNativeDef.new do |this, (arg), _block, _itr|
+    TNativeDef.new(1) do |this, (arg), _block, _itr|
       this = this.as(TFloat)
       case arg
       when TInteger, TFloat
@@ -12,7 +12,7 @@ module Myst
   ] of Callable)
 
   TFloat::METHODS["-"] = TFunctor.new([
-    TNativeDef.new do |this, (arg), _block, _itr|
+    TNativeDef.new(1) do |this, (arg), _block, _itr|
       this = this.as(TFloat)
       case arg
       when TInteger, TFloat
@@ -24,7 +24,7 @@ module Myst
   ] of Callable)
 
   TFloat::METHODS["*"] = TFunctor.new([
-    TNativeDef.new do |this, (arg), _block, _itr|
+    TNativeDef.new(1) do |this, (arg), _block, _itr|
       this = this.as(TFloat)
       case arg
       when TInteger, TFloat
@@ -36,7 +36,7 @@ module Myst
   ] of Callable)
 
   TFloat::METHODS["/"] = TFunctor.new([
-    TNativeDef.new do |this, (arg), _block, _itr|
+    TNativeDef.new(1) do |this, (arg), _block, _itr|
       this = this.as(TFloat)
       case arg
       when TInteger, TFloat
@@ -49,7 +49,7 @@ module Myst
   ] of Callable)
 
   TFloat::METHODS["%"] = TFunctor.new([
-    TNativeDef.new do |this, (arg), _block, _itr|
+    TNativeDef.new(1) do |this, (arg), _block, _itr|
       this = this.as(TFloat)
       case arg
       when TInteger, TFloat
@@ -62,14 +62,14 @@ module Myst
   ] of Callable)
 
   TFloat::METHODS["to_s"] = TFunctor.new([
-    TNativeDef.new do |this, _args, _block, _itr|
+    TNativeDef.new(0) do |this, _args, _block, _itr|
       this = this.as(TFloat)
       TString.new(this.value.to_s)
     end
   ] of Callable)
 
   TFloat::METHODS["=="] = TFunctor.new([
-    TNativeDef.new do |this, (arg), _block, _itr|
+    TNativeDef.new(1) do |this, (arg), _block, _itr|
       this = this.as(TFloat)
       case arg
       when TFloat, TInteger
@@ -81,7 +81,7 @@ module Myst
   ] of Callable)
 
   TFloat::METHODS["!="] = TFunctor.new([
-    TNativeDef.new do |this, (arg), _block, _itr|
+    TNativeDef.new(1) do |this, (arg), _block, _itr|
       this = this.as(TFloat)
       case arg
       when TFloat, TInteger

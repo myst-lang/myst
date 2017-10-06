@@ -6,13 +6,8 @@ module Myst
     # function. The function can be either a native function or a source-level
     # function. The results do not affect the stack, the result of calling the
     # function will be returned directly.
-    def call_func(itr, func, *args, receiver : Value?=nil)
-      case func
-      when TFunctor
-        itr.do_call(func.clauses.first, receiver, args.to_a, nil)
-      else
-        raise "func is not callable."
-      end
+    def call_func(itr, func : TFunctor, args : Array(Value), receiver : Value?=nil)
+      Invocation.new(itr, func, receiver, args, nil).invoke
     end
   end
 end

@@ -1,6 +1,6 @@
 module Myst
   TSymbol::METHODS["to_s"] = TFunctor.new([
-    TNativeDef.new do |this, _args, _block, _itr|
+    TNativeDef.new(0) do |this, _args, _block, _itr|
       this = this.as(TSymbol)
       TString.new(this.name)
     end
@@ -8,7 +8,7 @@ module Myst
 
 
   TSymbol::METHODS["=="] = TFunctor.new([
-    TNativeDef.new do |this, (arg), _block, _itr|
+    TNativeDef.new(1) do |this, (arg), _block, _itr|
       this = this.as(TSymbol)
       case arg
       when TSymbol
@@ -20,7 +20,7 @@ module Myst
   ] of Callable)
 
   TSymbol::METHODS["!="] = TFunctor.new([
-    TNativeDef.new do |this, (arg), _block, _itr|
+    TNativeDef.new(1) do |this, (arg), _block, _itr|
       this = this.as(TSymbol)
       case arg
       when TSymbol
