@@ -11,6 +11,8 @@ module Myst
       when Literal
         # All other literal types are simple value matches
         match_value(pattern, value)
+      when ValueInterpolation
+        match_value(pattern, value)
       when Var, Underscore
         # Vars are always assigned in the current scope.
         current_scope.assign(pattern.name, value)

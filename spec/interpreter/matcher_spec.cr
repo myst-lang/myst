@@ -49,6 +49,7 @@ describe "Interpreter - #match" do
   it_does_not_match l({:a => 1}),           TMap.new
   it_does_not_match l({:a => 1, :b => 2}),  val({:a => 1})
 
+
   # Vars should always be assigned into the current scope.
   it_matches v("a"),    val(1.0) do
     itr.current_scope.has_key?("a").should be_true
@@ -82,5 +83,29 @@ describe "Interpreter - #match" do
     itr.current_scope["_"].should eq(val(1))
     itr.current_scope.has_key?("_another").should be_true
     itr.current_scope["_another"].should eq(val(2))
+  end
+
+
+  # ValueInterpolations are treated as a single Value to match against.
+  it_matches i([1, 2]),                       val([1, 2])
+  it_matches i(false),                        val(false)
+  it_matches i(Call.new(l(1), "+", [l(2)])),  val(3)
+  it_matches i(Call.new(l(1), "-", [l(2)])),  val(-1)
+
+  it "can interpolate Vars in patterns" do
+    itr = Interpreter.new
+    itr.current_scope.assign("a", val(1))
+    itr.match(i(v("a")), val(1))
+  end
+
+  it "does not re-assign Vars in interpolations in patterns" do
+    itr = Interpreter.new
+    itr.current_scope.assign("a", val(1))
+
+    expect_raises(Interpreter::MatchError) do
+      itr.match(i(v("a")), val(2))
+    end
+    # The value of `a` should not have changed from the match.
+    itr.current_scope["a"].should eq(val(1))
   end
 end
