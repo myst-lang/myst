@@ -1,6 +1,10 @@
 module Myst
   class Interpreter
-    class MatchError < Exception; end
+    class MatchError < Exception
+      def initialize
+        @message = "match failure"
+      end
+    end
 
     def match(pattern : Node, value : Value)
       case pattern

@@ -82,10 +82,18 @@ module Myst
 
   class TInteger < TPrimitive(Int64)
     def self.type_name; "Integer"; end
+
+    def ==(other : TFloat)
+      self.value == other.value
+    end
   end
 
   class TFloat < TPrimitive(Float64)
     def self.type_name; "Float"; end
+
+    def ==(other : TInteger)
+      self.value == other.value
+    end
   end
 
   class TString < TPrimitive(String)

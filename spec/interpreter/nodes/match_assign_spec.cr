@@ -24,7 +24,21 @@ describe "Interpreter - MatchAssign" do
   it_interprets %q({}     =: {})
   it_interprets %q({a: 1} =: {a: 1})
 
-  # The remaining matches should all fail.
-  # it_does_not_interpret %q(nil    =: false), /match/
-  # it_does_not_interpret %q(nil    =: false), /match/
+  # Matches between different classes (other than Integer and Float), can never
+  # match successfully.
+  distinct_types = ["nil", "true", "false", "1", "\"hi\"", ":hi", "[]", "{}"]
+  distinct_types.each_with_index do |a, i|
+    distinct_types.each_with_index do |b, j|
+      next if i == j
+      it_does_not_interpret "#{a} =: #{b}", /match/
+    end
+  end
+
+  # As with `==`, matches with Floats and Integers are successful when the
+  # values are mathematically equal (e.g., the float has no decimal value).
+  it_interprets %q(1    =: 1.0)
+  it_interprets %q(1.0  =: 1)
+
+  it_does_not_interpret %q(1    =: 1.1),  /match/
+  it_does_not_interpret %q(1.1  =: 1),    /match/
 end
