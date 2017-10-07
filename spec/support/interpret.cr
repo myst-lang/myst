@@ -24,6 +24,10 @@ def it_interprets(node : String)
   it_interprets(node, expected_stack, itr)
 end
 
+def it_interprets(node : String)
+  it_interprets(node, [] of Myst::Value, Interpreter.new)
+end
+
 def it_does_not_interpret(node : String, message=nil)
   it %Q(does not interpret #{node}) do
     itr = Interpreter.new
