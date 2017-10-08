@@ -19,49 +19,60 @@ module Myst
     end
 
     def invoke
-      result = @func.clauses.find do |clause|
+      result = @func.clauses.each do |clause|
         @itr.push_scope
-        case clause
-        when TFunctorDef
-          begin
-            args = @args.dup
-            left, splat, right = chunk_params(clause)
-            left.each { |param| match_positional_arg(param, args.shift) }
-            right.each{ |param| match_positional_arg(param, args.pop)   }
-
-            if splat.is_a?(Param)
-              @itr.match(Var.new(splat.name), TList.new(args))
-            else
-              unless args.empty?
-                raise "All parameters not matched for clause"
-              end
-            end
-
-            if self.block? && clause.block_param?
-              @itr.match(Var.new(clause.block_param.name), self.block)
-            elsif (self.block? && !clause.block_param?) || (!self.block? && clause.block_param?)
-              raise "Unmatched block parameter"
-            end
-
-            break do_call(clause, @receiver, @args, @block)
-          rescue
-            next
-          end
-        when TNativeDef
-          if @args.size == clause.arity
-            break do_call(clause, @receiver, @args, @block)
-          end
+        if clause_matches?(clause, @args.dup)
+          res = do_call(clause, @receiver, @args, @block)
         end
         @itr.pop_scope
+        break res if res
       end
 
-      if result
-        @itr.pop_scope
+      result || raise "No clause matches with given parameters"
+    end
+
+
+    private def clause_matches?(clause : TFunctorDef, args)
+      begin
+        left, splat, right = chunk_params(clause)
+        left.each { |param| match_positional_arg(param, args.shift) }
+        right.each{ |param| match_positional_arg(param, args.pop)   }
+
+        if splat.is_a?(Param)
+          @itr.match(Var.new(splat.name), TList.new(args))
+        else
+          unless args.empty?
+            raise "All parameters not matched for clause"
+          end
+        end
+
+        if self.block? && clause.block_param?
+          @itr.match(Var.new(clause.block_param.name), self.block)
+        elsif (self.block? && !clause.block_param?) || (!self.block? && clause.block_param?)
+          raise "Unmatched block parameter"
+        end
+
+        return do_call(clause, @receiver, @args, @block)
+      rescue
+        false
+      end
+    end
+
+    private def clause_matches?(clause : TNativeDef, args)
+      if @args.size == clause.arity
+        return do_call(clause, @receiver, @args, @block)
       else
-        raise "No clause matches with given parameters"
+        false
       end
+    end
 
-      return result
+    private def clause_matches?(_func, _args)
+      false
+    end
+
+    private def match_positional_arg(param, arg)
+      @itr.match(param.pattern, arg)        if param.pattern?
+      @itr.match(Var.new(param.name), arg)  if param.name?
     end
 
 
@@ -101,12 +112,6 @@ module Myst
       end
 
       {left, splat, right}
-    end
-
-
-    def match_positional_arg(param, arg)
-      @itr.match(param.pattern, arg)        if param.pattern?
-      @itr.match(Var.new(param.name), arg)  if param.name?
     end
   end
 end
