@@ -186,4 +186,16 @@ module Myst
 
     def_equals_and_hash impl
   end
+
+
+  class TModule < Value
+    def self.type_name; "Module"; end
+    property  scope   : Scope
+
+    def initialize(parent : Scope)
+      @scope = Scope.new(parent)
+    end
+
+    def_equals_and_hash scope
+  end
 end

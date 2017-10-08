@@ -15,5 +15,13 @@ module Myst
     def to_s(io : IO)
       io << to_s
     end
+
+    def inspect
+      to_s
+    end
+
+    def inspect(io : IO)
+      to_s(io)
+    end
   end
 end
