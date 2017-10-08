@@ -25,7 +25,7 @@ module Myst
   ] of Callable)
 
   TString::METHODS["to_s"] = TFunctor.new([
-    TNativeDef.new(1) do |this, _args, _block, _itr|
+    TNativeDef.new(0) do |this, _args, _block, _itr|
       this.as(TString)
     end
   ] of Callable)

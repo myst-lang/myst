@@ -19,23 +19,55 @@ module Myst
     end
 
     def invoke
-      do_call(@func.clauses.first, @receiver, @args, @block)
+      result = @func.clauses.find do |clause|
+        @itr.push_scope
+        case clause
+        when TFunctorDef
+          begin
+            args = @args.dup
+            left, splat, right = chunk_params(clause)
+            left.each { |param| match_positional_arg(param, args.shift) }
+            right.each{ |param| match_positional_arg(param, args.pop)   }
+
+            if splat.is_a?(Param)
+              @itr.match(Var.new(splat.name), TList.new(args))
+            else
+              unless args.empty?
+                raise "All parameters not matched for clause"
+              end
+            end
+
+            if self.block? && clause.block_param?
+              @itr.match(Var.new(clause.block_param.name), self.block)
+            elsif (self.block? && !clause.block_param?) || (!self.block? && clause.block_param?)
+              raise "Unmatched block parameter"
+            end
+
+            break do_call(clause, @receiver, @args, @block)
+          rescue
+            next
+          end
+        when TNativeDef
+          if @args.size == clause.arity
+            break do_call(clause, @receiver, @args, @block)
+          end
+        end
+        @itr.pop_scope
+      end
+
+      if result
+        @itr.pop_scope
+      else
+        raise "No clause matches with given parameters"
+      end
+
+      return result
     end
 
 
     private def do_call(func : TFunctorDef, receiver : Value?, args : Array(Value), block : TFunctor?)
-      @itr.push_scope
-      func.params.each_with_index do |p, idx|
-        if p.name?
-          @itr.current_scope.assign(p.name, args[idx])
-        end
-      end
-
       @itr.visit(func.body)
-      result = @itr.stack.pop
-
-      @itr.pop_scope
-      return result
+      return @itr.stack.pop
     end
 
     private def do_call(func : TNativeDef, receiver : Value?, args : Array(Value), block : TFunctor?)
@@ -44,6 +76,37 @@ module Myst
 
     private def do_call(_func, _receiver, _args, _block)
       raise "Unsupported callable type #{_func.class}"
+    end
+
+
+    # Return a 3-tuple representing the segments of a List pattern in the
+    # format `{pre-splat, splat-collector, post-splat}`. The splat collector
+    # will be the single splat collector in the parameter list. The parser
+    # ensures that only one splat collector will be present in the list.
+    private def chunk_params(clause)
+      left  = [] of Param
+      splat = nil
+      right = [] of Param
+
+      past_splat = false
+      clause.params.each do |el|
+        if el.splat?
+          splat = el
+          past_splat = true
+        elsif past_splat
+          right.unshift(el)
+        else
+          left.push(el)
+        end
+      end
+
+      {left, splat, right}
+    end
+
+
+    def match_positional_arg(param, arg)
+      @itr.match(param.pattern, arg)        if param.pattern?
+      @itr.match(Var.new(param.name), arg)  if param.name?
     end
   end
 end

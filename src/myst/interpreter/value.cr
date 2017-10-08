@@ -165,9 +165,9 @@ module Myst
 
   class TFunctorDef < Callable
     def self.type_name; "Functor"; end
-    property  definition      : Def
+    property  definition : Def
 
-    delegate params, block_param, body, splat_index, to: definition
+    delegate params, block_param, block_param?, body, splat_index?, splat_index, to: definition
 
     def initialize(@definition : Def)
     end
