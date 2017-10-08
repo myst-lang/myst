@@ -62,14 +62,14 @@ def val(node : Node)
 end
 
 def val(node : Array(T)) forall T
-  list = TList.new(node.map{ |n| val(n) })
+  TList.new(node.map{ |n| val(n) }).as(Myst::Value)
 end
 
 def val(node : Hash(K, V)) forall K, V
   node.reduce(TMap.new) do |map, (k, v)|
     map.entries[val(k)] = val(v)
     map
-  end
+  end.as(Myst::Value)
 end
 
 def val(node); val(l(node)); end

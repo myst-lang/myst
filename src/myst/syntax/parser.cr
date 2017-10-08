@@ -834,6 +834,8 @@ module Myst
         node.elements = node.elements.map{ |e| to_pattern(e).as(Node) }
       when MapLiteral
         node.entries = node.entries.map{ |e| MapLiteral::Entry.new(e.key, to_pattern(e.value).as(Node)) }
+      when Splat
+        node.value = to_pattern(node.value)
       end
 
       return node

@@ -457,6 +457,7 @@ describe "Parser" do
   it_parses %q({a: 2} =: {a: 2}),   MatchAssign.new(l({:a => 2}),l({:a => 2}))
   # Splats in list literals act as Splat collectors (as in Params).
   it_parses %q([1, *_, 3] =: list), MatchAssign.new(l([1, Splat.new(u("_")), 3]), Call.new(nil, "list"))
+  it_parses %q([1, *a, 3] =: list), MatchAssign.new(l([1, Splat.new(v("a")), 3]), Call.new(nil, "list"))
   # Vars, Consts, and Underscores can also be used on either side.
   it_parses %q(a =: 5),             MatchAssign.new(v("a"), l(5))
   it_parses %q(Thing =: 10),        MatchAssign.new(c("Thing"), l(10))

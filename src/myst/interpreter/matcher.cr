@@ -42,12 +42,17 @@ module Myst
     private def match_list(pattern : ListLiteral, value : Value)
       raise MatchError.new unless value.is_a?(TList)
 
-      if pattern.elements.size != value.elements.size
-        raise MatchError.new
-      end
+      left, splat, right = chunk_list_pattern(pattern)
 
-      pattern.elements.zip(value.elements).each do |p, v|
-        match(p, v)
+      value_elements = value.elements.dup
+      left.each { |element_pattern| match(element_pattern, value_elements.shift)  }
+      right.each{ |element_pattern| match(element_pattern, value_elements.pop)    }
+      if splat.is_a?(Splat)
+        match(splat.value, TList.new(value_elements))
+      else
+        unless value_elements.empty?
+          raise MatchError.new
+        end
       end
     end
 
@@ -64,6 +69,35 @@ module Myst
           raise MatchError.new
         end
       end
+    end
+
+
+    # Return a 3-tuple representing the segments of a List pattern in the
+    # format `{pre-splat, splat-collector, post-splat}`. The splat collector
+    # will be the single splat collector in the List literal. If more than
+    # one splat exists in the literal, an error will be raised.
+    private def chunk_list_pattern(pattern : ListLiteral)
+      left  = [] of Node
+      splat = nil
+      right = [] of Node
+
+      past_splat = false
+      pattern.elements.each do |el|
+        if el.is_a?(Splat)
+          if past_splat
+            raise "More than one splat collector in a List pattern is not allowed."
+          else
+            splat = el
+            past_splat = true
+          end
+        elsif past_splat
+          right.unshift(el)
+        else
+          left.push(el)
+        end
+      end
+
+      {left, splat, right}
     end
   end
 end

@@ -507,7 +507,6 @@ module Myst
   # For anything less precedent than a postfix expression (e.g., `a + b`),
   # parentheses can be used around the expression (e.g., `!(a + b)`).
   class Not < UnaryOp
-    def_equals_and_hash
   end
 
   # A negation expression. Mainly applicable for Integers, this node
@@ -516,7 +515,6 @@ module Myst
   #
   #   '-' postfix_expression
   class Negation < UnaryOp
-    def_equals_and_hash
   end
 
   # A splat expression. Splats deconstruct collections to be treated as
@@ -525,7 +523,6 @@ module Myst
   #
   #   '*' name
   class Splat < UnaryOp
-    def_equals_and_hash
   end
 
   # A method call. Calls are the building block of functionality. Any

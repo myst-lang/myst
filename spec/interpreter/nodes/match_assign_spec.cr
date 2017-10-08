@@ -63,4 +63,24 @@ describe "Interpreter - MatchAssign" do
     a = 2
     <a> =: 2.0
   ),             { "a" => val(2) }
+
+
+
+  # Splats in a List pattern collect remaining, unmatched entries from the value.
+  it_interprets_with_assignments %q([1, 2, *tail] =: [1, 2, 3, 4]), { "tail"  => val([3, 4]) }
+  it_interprets_with_assignments %q([*head, 3, 4] =: [1, 2, 3, 4]), { "head"  => val([1, 2]) }
+  it_interprets_with_assignments %q([1, *mid, 4]  =: [1, 2, 3, 4]), { "mid"   => val([2, 3]) }
+
+  # Splats can also match 0 or 1 elements and will still result in a List.
+  it_interprets_with_assignments %q([1, *mid, 2]  =: [1, 2]),     { "mid"   => TList.new }
+  it_interprets_with_assignments %q([1, *mid, 3]  =: [1, 2, 3]),  { "mid"   => val([2]) }
+
+  # Splats do not affect the value being collected. e.g., if a single List
+  # value remains to be collected by the splat, it will be wrapped inside
+  # another List, rather than being flattened into a single List.
+  it_interprets_with_assignments %q([1, *list]  =: [1, [2, 3]]),  { "list"  => val([[2, 3]]) }
+
+  # Multiple splats in a pattern are invalid
+  it_does_not_interpret %q([*a, *b]       =: [1, 2]),   /splat collector/
+  it_does_not_interpret %q([1, *a, 2, *b] =: [1, 2]),   /splat collector/
 end
