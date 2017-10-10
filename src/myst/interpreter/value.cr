@@ -7,7 +7,7 @@ module Myst
       # native method definitions for the Value.
       METHODS = Scope.new
 
-      def self.methods; METHODS; end
+      def methods; METHODS; end
     end
 
     def self.from_literal(literal : Node)
@@ -194,6 +194,10 @@ module Myst
 
     def initialize(parent : Scope)
       @scope = Scope.new(parent)
+    end
+
+    def methods
+      @scope
     end
 
     def_equals_and_hash scope

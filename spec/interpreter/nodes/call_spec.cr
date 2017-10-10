@@ -14,4 +14,35 @@ describe "Interpreter - Call" do
 
   it_interprets %q(1.to_s),       [val("1")]
   it_interprets %q((1 + 1).to_s), [val("2")]
+
+  # Functions in Modules
+  it_interprets %q(
+    module Foo
+      def bar
+        :called
+      end
+    end
+
+    Foo.bar
+  ),                [val(:called)]
+  it_interprets %q(
+    module Foo
+      def bar(a, b)
+        a + b
+      end
+    end
+
+    Foo.bar(1, 2)
+  ),                [val(3)]
+  it_interprets %q(
+    module Foo
+      module Bar
+        def baz
+          :nested
+        end
+      end
+    end
+
+    Foo.Bar.baz
+  ),                [val(:nested)]
 end
