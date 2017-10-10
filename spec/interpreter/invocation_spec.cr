@@ -51,6 +51,24 @@ FOO_DEFS = %q(
   end
 )
 
+MODULE_DEFS = %q(
+  module Foo
+    def foo(a)
+      :one_arg
+    end
+
+    def bar
+      :bar
+    end
+  end
+
+  module Foo
+    def foo(a, b)
+      :two_args
+    end
+  end
+)
+
 private def it_invokes(prelude, call, expected)
   itr = parse_and_interpret(prelude)
   # Running the prelude will leave the last definition on the stack. For
@@ -76,4 +94,9 @@ describe "Interpreter - Invocation" do
   it_invokes FOO_DEFS, "foo(nil, nil, 3, 4)",     val(:leading_splat)
   it_invokes FOO_DEFS, "foo(1, nil, nil, 4)",     val(:middle_splat)
   it_invokes FOO_DEFS, "foo(nil, nil, nil, nil)", val(:splat_all)
+
+
+  it_invokes MODULE_DEFS, "Foo.foo(1)",     val(:one_arg)
+  it_invokes MODULE_DEFS, "Foo.foo(1, 2)",  val(:two_args)
+  it_invokes MODULE_DEFS, "Foo.bar",        val(:bar)
 end
