@@ -17,7 +17,7 @@ describe "Interpreter - Call" do
 
   # Functions in Modules
   it_interprets %q(
-    module Foo
+    defmodule Foo
       def bar
         :called
       end
@@ -26,7 +26,7 @@ describe "Interpreter - Call" do
     Foo.bar
   ),                [val(:called)]
   it_interprets %q(
-    module Foo
+    defmodule Foo
       def bar(a, b)
         a + b
       end
@@ -35,8 +35,8 @@ describe "Interpreter - Call" do
     Foo.bar(1, 2)
   ),                [val(3)]
   it_interprets %q(
-    module Foo
-      module Bar
+    defmodule Foo
+      defmodule Bar
         def baz
           :nested
         end

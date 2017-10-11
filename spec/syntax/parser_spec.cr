@@ -818,26 +818,26 @@ describe "Parser" do
   # Module definitions
 
   it_parses %q(
-    module Foo
+    defmodule Foo
     end
   ),                              ModuleDef.new("Foo")
-  it_parses %q(module Foo; end),  ModuleDef.new("Foo")
+  it_parses %q(defmodule Foo; end),  ModuleDef.new("Foo")
   it_parses %q(
-    module Foo
+    defmodule Foo
       def foo; end
     end
   ),                ModuleDef.new("Foo", e(Def.new("foo")))
   # Modules allow immediate code evaluation on their scope.
   it_parses %q(
-    module Foo
+    defmodule Foo
       1 + 2
       a = 3
     end
   ),                ModuleDef.new("Foo", e(Call.new(l(1), "+", [l(2)]), SimpleAssign.new(v("a"), l(3))))
   # Modules can also be nested
   it_parses %q(
-    module Foo
-      module Bar
+    defmodule Foo
+      defmodule Bar
       end
     end
   ),                ModuleDef.new("Foo", e(ModuleDef.new("Bar")))
@@ -885,7 +885,7 @@ describe "Parser" do
   it_parses %q(include self),         Include.new(Self.new)
   it_parses %q(include <something>),  Include.new(i(Call.new(nil, "something")))
   it_parses %q(
-    module Thing
+    defmodule Thing
       include Other
     end
   ),                                  ModuleDef.new("Thing", e(Include.new(c("Other"))))
@@ -919,7 +919,7 @@ describe "Parser" do
   it_parses %q(require Thing.dep),    Require.new(Call.new(c("Thing"), "dep"))
   it_parses %q(require <something>),  Require.new(i(Call.new(nil, "something")))
   it_parses %q(
-    module Thing
+    defmodule Thing
       require "other_thing"
     end
   ),                                  ModuleDef.new("Thing", e(Require.new(l("other_thing"))))

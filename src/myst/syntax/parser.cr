@@ -109,7 +109,7 @@ module Myst
       case current_token.type
       when Token::Type::DEF
         parse_def
-      when Token::Type::MODULE
+      when Token::Type::DEFMODULE
         parse_module_def
       when Token::Type::INCLUDE
         parse_include
@@ -246,7 +246,7 @@ module Myst
     end
 
     def parse_module_def
-      start = expect(Token::Type::MODULE)
+      start = expect(Token::Type::DEFMODULE)
       skip_space
       name = expect(Token::Type::CONST).value
       skip_space

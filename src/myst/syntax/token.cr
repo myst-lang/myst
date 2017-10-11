@@ -11,7 +11,7 @@ module Myst
 
       REQUIRE       # require
       INCLUDE       # include
-      MODULE        # module
+      DEFMODULE     # defmodule
       DEF           # def
       DO            # do
       UNLESS        # unless
@@ -91,7 +91,7 @@ module Myst
 
       def self.keywords
         [ REQUIRE, INCLUDE,
-          MODULE, DEF, DO, END,
+          DEFMODULE, DEF, DO, END,
           WHEN, UNLESS, ELSE,
           WHILE, UNTIL,
           TRUE, FALSE, NIL,
@@ -105,7 +105,7 @@ module Myst
         {
           "require" => REQUIRE,
           "include" => INCLUDE,
-          "module" => MODULE,
+          "defmodule" => DEFMODULE,
           "def" => DEF,
           "do" => DO,
           "end" => END,
