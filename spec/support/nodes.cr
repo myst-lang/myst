@@ -69,3 +69,11 @@ end
 def e(*nodes : Node)
   Expressions.new(*nodes)
 end
+
+# prop(name, type=nil)
+#
+# Generate a Property node with the given and type. The type will be wrapped in
+# a Const node.
+def prop(name : String, type : String?=nil)
+  Property.new(name, type ? Const.new(type) : nil)
+end

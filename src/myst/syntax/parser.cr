@@ -107,10 +107,12 @@ module Myst
 
     def parse_expression
       case current_token.type
-      when Token::Type::DEF
+      when Token::Type::DEF, Token::Type::DEFSTATIC
         parse_def
       when Token::Type::DEFMODULE
         parse_module_def
+      when Token::Type::DEFTYPE
+        parse_type_def
       when Token::Type::INCLUDE
         parse_include
       when Token::Type::REQUIRE
@@ -127,10 +129,11 @@ module Myst
     end
 
     def parse_def
-      start = expect(Token::Type::DEF)
+      start = expect(Token::Type::DEF, Token::Type::DEFSTATIC)
+      static = (start.type == Token::Type::DEFSTATIC)
       skip_space
       name = expect(Token::Type::IDENT).value
-      method_def = Def.new(name).at(start.location)
+      method_def = Def.new(name, static: static).at(start.location)
       push_var_scope
 
       # If the Def has parameters, they must be parenthesized. If the token
@@ -261,6 +264,54 @@ module Myst
         finish = expect(Token::Type::END)
         pop_var_scope
         return ModuleDef.new(name, body).at(start.location).at_end(finish.location)
+      end
+    end
+
+    def parse_type_def
+      start = expect(Token::Type::DEFTYPE)
+      skip_space
+      name = expect(Token::Type::CONST).value
+      skip_space
+
+      properties = [] of Property
+      if accept(Token::Type::LCURLY)
+        skip_space_and_newlines
+        unless accept(Token::Type::RCURLY)
+          loop do
+            skip_space_and_newlines
+            prop_name = expect(Token::Type::IDENT)
+            skip_space
+
+            if accept(Token::Type::COLON)
+              skip_space
+              prop_type_name = expect(Token::Type::CONST)
+              prop_type = Const.new(prop_type_name.value).at(prop_type_name.location)
+              properties << Property.new(prop_name.value, prop_type).at(prop_name.location).at_end(prop_type)
+            else
+              properties << Property.new(prop_name.value).at(prop_name.location)
+            end
+
+            skip_space_and_newlines
+            # If there is no comma, this is the last property, and a closing
+            # brace should be expected.
+            unless accept(Token::Type::COMMA)
+              expect(Token::Type::RCURLY)
+              break
+            end
+          end
+        end
+      end
+
+      expect_delimiter
+
+      if finish = accept(Token::Type::END)
+        return TypeDef.new(name, properties).at(start.location).at_end(finish.location)
+      else
+        push_var_scope
+        body = parse_code_block(Token::Type::END)
+        finish = expect(Token::Type::END)
+        pop_var_scope
+        return TypeDef.new(name, properties, body).at(start.location).at_end(finish.location)
       end
     end
 
