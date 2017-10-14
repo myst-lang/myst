@@ -202,4 +202,43 @@ module Myst
 
     def_equals_and_hash scope
   end
+
+
+  class TType < Value
+    def self.type_name; "Type"; end
+    property name           : String
+    property scope          : Scope
+    property instance_scope : Scope
+
+    def initialize(@name : String, parent : Scope)
+      @scope = Scope.new(parent)
+      @instance_scope = Scope.new(parent)
+    end
+
+    def methods
+      @scope
+    end
+
+    def type_name
+      @name
+    end
+
+    def_equals_and_hash name, scope, instance_scope
+  end
+
+  class TInstance < Value
+    def self.type_name; "Instance"; end
+    property type : TType
+
+    def initialize(@type : TType)
+    end
+
+    def methods
+      type.instance_scope
+    end
+
+    def type_name
+      @type.type_name
+    end
+  end
 end

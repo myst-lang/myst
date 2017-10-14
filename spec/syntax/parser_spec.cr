@@ -857,50 +857,6 @@ describe "Parser" do
   # Types must specify a Constant as their name
   it_does_not_parse %q(deftype foo; end)
   it_does_not_parse %q(deftype _nope; end)
-  # Properties of the type can optionally provide a type for the property
-  it_parses %q(
-    deftype Thing{name}
-    end
-  ),                TypeDef.new("Thing", [prop("name")])
-  it_parses %q(
-    deftype Thing{name : String}
-    end
-  ),                TypeDef.new("Thing", [prop("name", "String")])
-
-  # Multiple properties can be given as a comma-delimited list, and may span multiple lines.
-  it_parses %q(
-    deftype Thing{name : String, color : Color}
-    end
-  ),                TypeDef.new("Thing", [prop("name", "String"), prop("color", "Color")])
-  it_parses %q(
-    deftype Thing{
-      name  : String,
-      color : Color
-    }
-    end
-  ),                TypeDef.new("Thing", [prop("name", "String"), prop("color", "Color")])
-  it_parses %q(
-    deftype Thing{name  : String,
-                  color : Color}
-    end
-  ),                TypeDef.new("Thing", [prop("name", "String"), prop("color", "Color")])
-  it_parses %q(
-    deftype Thing { name  : String, color : Color }
-    end
-  ),                TypeDef.new("Thing", [prop("name", "String"), prop("color", "Color")])
-  # Properties can mix having and not having types.
-  it_parses %q(
-    deftype Thing{
-      name,
-      color : Color,
-      price, style
-    }
-    end
-  ),                TypeDef.new("Thing", [prop("name"), prop("color", "Color"), prop("price"), prop("style")])
-  # Properties must be identifiers, not Consts or Underscores.
-  it_does_not_parse %q(deftype Thing{Name}; end)
-  # The type of a property must be a Const
-  it_does_not_parse %q(deftype Thing{name : not_a_const})
 
   # Types allow immediate code evaluation on their scope.
   it_parses %q(
@@ -917,25 +873,6 @@ describe "Parser" do
       end
     end
   ),                TypeDef.new("Thing", body: e(TypeDef.new("Part")))
-  it_parses %q(
-    deftype Thing
-      deftype Part{color : Color}
-      end
-    end
-  ),                TypeDef.new("Thing", body: e(TypeDef.new("Part", [prop("color", "Color")])))
-  it_parses %q(
-    deftype Thing{name : String}
-      deftype Part
-      end
-    end
-  ),                TypeDef.new("Thing", [prop("name", "String")], body: e(TypeDef.new("Part")))
-  it_parses %q(
-    deftype Thing{name : String}
-      deftype Part{color : Color}
-      end
-    end
-  ),                TypeDef.new("Thing", [prop("name", "String")], body: e(TypeDef.new("Part", [prop("color", "Color")])))
-
 
 
   # Type methods
@@ -945,31 +882,12 @@ describe "Parser" do
       def foo; end
     end
   ),                TypeDef.new("Foo", body: e(Def.new("foo")))
-  it_parses %q(
-    deftype Foo{name : String}
-      def foo; end
-    end
-  ),                TypeDef.new("Foo", [prop("name", "String")], body: e(Def.new("foo")))
 
   it_parses %q(
     deftype Foo
       defstatic foo; end
     end
   ),                TypeDef.new("Foo", body: e(Def.new("foo", static: true)))
-  it_parses %q(
-    deftype Foo{name : String}
-      defstatic foo; end
-    end
-  ),                TypeDef.new("Foo", [prop("name", "String")], body: e(Def.new("foo", static: true)))
-
-  # Properties of the type are still treated as Calls inside the type definition.
-  it_parses %q(
-    deftype Foo{name : String}
-      def foo
-        name
-      end
-    end
-  ),                TypeDef.new("Foo", [prop("name", "String")], body: e(Def.new("foo", body: e(Call.new(nil, "name")))))
 
   # Types and modules can be arbitrarily nested.
   it_parses %q(
@@ -988,6 +906,27 @@ describe "Parser" do
       end
     end
   ),                    ModuleDef.new("Foo", e(TypeDef.new("Bar", body: e(ModuleDef.new("Baz")))))
+
+
+
+  # Instance variables
+
+  # Instance variables are marked with an `@` prefix.
+  it_parses %q(@a),           iv("a")
+  it_parses %q(@variable),    iv("variable")
+  # Instance variables can appear as a primary value anywhere they are accepted.
+  it_parses %q(<@var>),       i(iv("var"))
+  it_parses %q(1 + @var),     Call.new(l(1), "+", [iv("var")] of Node)
+  it_parses %q(@var.each),    Call.new(iv("var"), "each")
+  it_parses %q(
+    def foo(<@var>)
+    end
+  ),                          Def.new("foo", [p(nil, i(iv("var")))])
+
+  # Instance variables can be the target of any assignment.
+  it_parses %q(@var = 1),           SimpleAssign.new(iv("var"), l(1))
+  it_parses %q([1, @a] =: [1, 2]),  MatchAssign.new(l([1, iv("a")]), l([1, 2]))
+  it_parses %q(@var ||= {}),        OpAssign.new(iv("var"), "||=", MapLiteral.new)
 
 
 

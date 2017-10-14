@@ -230,6 +230,10 @@ module Myst
         consume_whitespace
       when .ascii_uppercase?
         consume_constant
+      when '@'
+        @current_token.type = Token::Type::IVAR
+        read_char
+        consume_identifier
       else
         # Everything else should be tried as either a keyword or an identifier.
         # First, attempt to lex an identifier, then check if the identifier as

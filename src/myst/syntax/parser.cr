@@ -272,46 +272,17 @@ module Myst
       skip_space
       name = expect(Token::Type::CONST).value
       skip_space
-
-      properties = [] of Property
-      if accept(Token::Type::LCURLY)
-        skip_space_and_newlines
-        unless accept(Token::Type::RCURLY)
-          loop do
-            skip_space_and_newlines
-            prop_name = expect(Token::Type::IDENT)
-            skip_space
-
-            if accept(Token::Type::COLON)
-              skip_space
-              prop_type_name = expect(Token::Type::CONST)
-              prop_type = Const.new(prop_type_name.value).at(prop_type_name.location)
-              properties << Property.new(prop_name.value, prop_type).at(prop_name.location).at_end(prop_type)
-            else
-              properties << Property.new(prop_name.value).at(prop_name.location)
-            end
-
-            skip_space_and_newlines
-            # If there is no comma, this is the last property, and a closing
-            # brace should be expected.
-            unless accept(Token::Type::COMMA)
-              expect(Token::Type::RCURLY)
-              break
-            end
-          end
-        end
-      end
-
       expect_delimiter
+      skip_space_and_newlines
 
       if finish = accept(Token::Type::END)
-        return TypeDef.new(name, properties).at(start.location).at_end(finish.location)
+        return TypeDef.new(name, Nop.new).at(start.location).at_end(finish.location)
       else
         push_var_scope
         body = parse_code_block(Token::Type::END)
         finish = expect(Token::Type::END)
         pop_var_scope
-        return TypeDef.new(name, properties, body).at(start.location).at_end(finish.location)
+        return TypeDef.new(name, body).at(start.location).at_end(finish.location)
       end
     end
 
@@ -600,6 +571,10 @@ module Myst
         parse_value_interpolation
       when Token::Type::IDENT
         parse_var_or_call
+      when Token::Type::IVAR
+        token = current_token
+        read_token
+        return IVar.new(token.value).at(token.location)
       else
         parse_literal
       end
@@ -845,6 +820,8 @@ module Myst
         push_local_var(node.name)
         return node
       when Const
+        return node
+      when IVar
         return node
       when Call
         # If no explicit receiver was set on the Call, consider it a Var.

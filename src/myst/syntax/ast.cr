@@ -245,6 +245,20 @@ module Myst
     def_equals_and_hash
   end
 
+  # An instance variable. IVars are primarily used inside of types do define
+  # properties that are tied to an instance of an object. The name of an IVar
+  # includes the `@` character.
+  #
+  #   @[a-z][a-zA-Z0-9_]*
+  class IVar < Node
+    property name : String
+
+    def initialize(@name : String)
+    end
+
+    def_equals_and_hash name
+  end
+
   # A value interpolation. Interpolations are used to dynamically insert
   # values in places that normally expect a static value, such as keys in
   # Map literals, or expected values in patterns.
@@ -667,32 +681,16 @@ module Myst
   # type that can be instantiated similar to how Literals create primitives.
   #
   #   'deftype' const
-  #     [ property ]*
-  #   'defmethods'
   #     body
   #   'end'
   class TypeDef < Node
     property name       : String
-    property properties : Array(Property)
     property body       : Node
 
-    def initialize(@name, @properties=[] of Property, @body=Nop.new)
+    def initialize(@name, @body=Nop.new)
     end
 
-    def_equals_and_hash name, properties, body
-  end
-
-  # A property for a type definition.
-  #
-  #   name [ ':' type ]
-  class Property < Node
-    property  name  : String
-    property! type  : Const?
-
-    def initialize(@name : String, @type : Const?=nil)
-    end
-
-    def_equals_and_hash name, type?
+    def_equals_and_hash name, body
   end
 
   # A require expression. Requires are the primary mechanism for loading code

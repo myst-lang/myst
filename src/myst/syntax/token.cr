@@ -32,6 +32,7 @@ module Myst
       NIL           # nil
       IDENT         # [a-z][_a-zA-Z0-9]*
       CONST         # [A-Z][a-zA-Z0-9]*
+      IVAR          # @[a-z][_a-zA-Z0-9]*
 
       PLUS          # +
       MINUS         # -

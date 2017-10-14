@@ -70,10 +70,9 @@ def e(*nodes : Node)
   Expressions.new(*nodes)
 end
 
-# prop(name, type=nil)
+# iv(name)
 #
-# Generate a Property node with the given and type. The type will be wrapped in
-# a Const node.
-def prop(name : String, type : String?=nil)
-  Property.new(name, type ? Const.new(type) : nil)
+# Generate an IVar node with the given name.
+def iv(name)
+  IVar.new("@" + name)
 end
