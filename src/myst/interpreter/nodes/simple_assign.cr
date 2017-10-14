@@ -11,6 +11,8 @@ module Myst
         @symbol_table[target.name] = value
       when Underscore
         @symbol_table[target.name] = value
+      when IVar
+        @symbol_table[target.name] = value
       when Const
         if @symbol_table[target.name]?
           raise "Re-assignment to constant value #{target.name}."

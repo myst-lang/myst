@@ -228,13 +228,15 @@ module Myst
 
   class TInstance < Value
     def self.type_name; "Instance"; end
-    property type : TType
+    property type       : TType
+    property scope      : Scope
 
     def initialize(@type : TType)
+      @scope = Scope.new(@type.instance_scope)
     end
 
     def methods
-      type.instance_scope
+      @scope
     end
 
     def type_name
