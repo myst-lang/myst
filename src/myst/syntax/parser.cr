@@ -575,6 +575,8 @@ module Myst
         token = current_token
         read_token
         return IVar.new(token.value).at(token.location)
+      when Token::Type::MODULO
+        parse_instantiation
       else
         parse_literal
       end
@@ -699,6 +701,49 @@ module Myst
         finish = expect(end_token)
         return block.at_end(finish.location)
       end
+    end
+
+    def parse_instantiation
+      start = expect(Token::Type::MODULO)
+      type =
+        case current_token.type
+        when Token::Type::CONST
+          token = current_token
+          read_token
+          Const.new(token.value).at(token.location)
+        else
+          parse_value_interpolation
+        end
+
+      inst = Instantiation.new(type).at(start.location)
+      skip_space
+      expect(Token::Type::LCURLY)
+      skip_space_and_newlines
+
+      if finish = accept(Token::Type::RCURLY)
+        inst.at_end(finish.location)
+      else
+        loop do
+          skip_space_and_newlines
+          inst.args << parse_expression
+          skip_space_and_newlines
+
+          # If there is no comma, this is the last argument, and a closing
+          # parenthesis should be expected.
+          unless accept(Token::Type::COMMA)
+            finish = expect(Token::Type::RCURLY)
+            inst.at_end(finish.location)
+            break
+          end
+        end
+      end
+
+      skip_space
+      if inst.block = parse_optional_block
+        return inst.at_end(inst.block)
+      end
+
+      return inst
     end
 
     def parse_literal

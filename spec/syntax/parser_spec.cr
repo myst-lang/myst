@@ -930,6 +930,79 @@ describe "Parser" do
 
 
 
+  # Type initialization
+
+  # Instances of types are created with a percent characeter and brace syntax
+  # akin to blocks.
+  it_parses %q(%Thing{}),           Instantiation.new(c("Thing"))
+  it_parses %q(%Thing {}),          Instantiation.new(c("Thing"))
+  it_parses %q(%Thing   {   }),     Instantiation.new(c("Thing"))
+  it_parses %q(%Thing{ 1 }),        Instantiation.new(c("Thing"), [l(1)])
+  it_parses %q(%Thing{ 1, 2, 3 }),  Instantiation.new(c("Thing"), [l(1), l(2), l(3)])
+  it_parses %q(%Thing{ [nil, 1] }), Instantiation.new(c("Thing"), [l([nil, 1])])
+  it_parses %q(%Thing{1}),          Instantiation.new(c("Thing"), [l(1)])
+  it_parses %q(%Thing{1, 2, 3}),    Instantiation.new(c("Thing"), [l(1), l(2), l(3)])
+  it_parses %q(%Thing{[nil, 1]}),   Instantiation.new(c("Thing"), [l([nil, 1])])
+  it_parses %q(%Thing{
+    1
+  }),          Instantiation.new(c("Thing"), [l(1)])
+  it_parses %q(%Thing{
+    1, 2, 3
+  }),    Instantiation.new(c("Thing"), [l(1), l(2), l(3)])
+  it_parses %q(%Thing{
+    [nil, 1]
+  }),   Instantiation.new(c("Thing"), [l([nil, 1])])
+
+  # The braces are required for initialization, even when there are no arguments.
+  it_does_not_parse %q(%Thing)
+  # There must not be spaces between the percent and the type name
+  it_does_not_parse %q(%  Thing{   })
+  it_does_not_parse %q(%  Thing { })
+  # Similarly, the brace must appear inline  with the type.
+  it_does_not_parse %q(
+    %Thing
+    {}
+  )
+
+  # The type can be either a Const or an interpolation. Any interpolation is
+  # valid, and may span multiple lines.
+  it_parses %q(%<thing>{}),             Instantiation.new(i(Call.new(nil, "thing")))
+  it_parses %q(%<@type>{}),             Instantiation.new(i(iv("type")))
+  it_parses %q(%<1.type>{}),            Instantiation.new(i(Call.new(l(1), "type")))
+  it_parses %q(%<(type || Default)>{}), Instantiation.new(i(Or.new(Call.new(nil, "type"), c("Default"))))
+  it_parses %q(
+    %<(
+      type
+    )>{}
+  ),                                    Instantiation.new(i(Call.new(nil, "type")))
+
+  # Any other node is invalid as a type specification.
+  it_does_not_parse %q(%nil{})
+  it_does_not_parse %q(%false{})
+  it_does_not_parse %q(%1{})
+  it_does_not_parse %q(%"hello"{})
+  it_does_not_parse %q(%some_type{})
+
+  # Initializations are similar to Calls, allowing all the same syntax for the arguments, including blocks.
+  it_parses %q(%Thing{ *opts }),        Instantiation.new(c("Thing"), [Splat.new(Call.new(nil, "opts"))] of Node)
+  it_parses %q(%Thing{ } do; end),      Instantiation.new(c("Thing"), block: Block.new)
+  it_parses %q(%Thing{ } { }),          Instantiation.new(c("Thing"), block: Block.new)
+  it_parses %q(
+    %Thing{ } do |a,b|
+    end
+  ),                      Instantiation.new(c("Thing"), block: Block.new([p("a"), p("b")]))
+  it_parses %q(
+    %Thing{ } { |a,b| }
+  ),                      Instantiation.new(c("Thing"), block: Block.new([p("a"), p("b")]))
+
+  # Also as in a Call, trailing commas and the like are invalid
+  it_does_not_parse %q(%Thing{ 1, })
+  it_does_not_parse %q(%Thing{
+    1,
+  })
+
+
+
   # Calls
 
   test_calls_with_receiver("",                  nil)
@@ -944,6 +1017,8 @@ describe "Parser" do
   test_calls_with_receiver(%q("some string".),  l("some string"))
   test_calls_with_receiver("method{ }.",        Call.new(nil, "method", block: Block.new))
   test_calls_with_receiver("method do; end.",   Call.new(nil, "method", block: Block.new))
+  test_calls_with_receiver("@var.",             iv("var"))
+  test_calls_with_receiver("%Thing{}.",         Instantiation.new(c("Thing")))
 
 
 

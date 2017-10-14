@@ -693,6 +693,22 @@ module Myst
     def_equals_and_hash name, body
   end
 
+  # An instantiation of a type. Instantiations create new instances of the
+  # specified type. After creating the value for the new type, a callback on
+  # the instance will be called to initialize the properties of the instance.
+  #
+  #   '%' [ const | interpolation ] '{' [ arg [ ',' arg ]* ] '}' [ block ]
+  class Instantiation < Node
+    property  type    : Node
+    property  args    : Array(Node)
+    property! block   : Block?
+
+    def initialize(@type, @args=[] of Node, @block=nil)
+    end
+
+    def_equals_and_hash type, args, block?
+  end
+
   # A require expression. Requires are the primary mechanism for loading code
   # from other source files. Files will only be loaded once. If another
   # require appears that references the same file, it will not be loaded
