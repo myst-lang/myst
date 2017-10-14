@@ -1,5 +1,5 @@
 module Myst
-  TString::METHODS["+"] = TFunctor.new([
+  TString::SCOPE["+"] = TFunctor.new([
     TNativeDef.new(1) do |this, (arg), _block, _itr|
       this = this.as(TString)
       case arg
@@ -11,7 +11,7 @@ module Myst
     end
   ] of Callable)
 
-  TString::METHODS["*"] = TFunctor.new([
+  TString::SCOPE["*"] = TFunctor.new([
     TNativeDef.new(1) do |this, (arg), _block, _itr|
       this = this.as(TString)
       case arg
@@ -24,13 +24,13 @@ module Myst
     end
   ] of Callable)
 
-  TString::METHODS["to_s"] = TFunctor.new([
+  TString::SCOPE["to_s"] = TFunctor.new([
     TNativeDef.new(0) do |this, _args, _block, _itr|
       this.as(TString)
     end
   ] of Callable)
 
-  TString::METHODS["=="] = TFunctor.new([
+  TString::SCOPE["=="] = TFunctor.new([
     TNativeDef.new(1) do |this, (arg), _block, _itr|
       this = this.as(TString)
       case arg
@@ -42,7 +42,7 @@ module Myst
     end
   ] of Callable)
 
-  TString::METHODS["!="] = TFunctor.new([
+  TString::SCOPE["!="] = TFunctor.new([
     TNativeDef.new(1) do |this, (arg), _block, _itr|
       this = this.as(TString)
       case arg

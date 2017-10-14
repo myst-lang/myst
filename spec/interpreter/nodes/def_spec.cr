@@ -43,8 +43,8 @@ describe "Interpreter - Def" do
 
   it "only checks the current scope for existing functors" do
     itr = Interpreter.new
-    itr.symbol_table["foo"] = TFunctor.new([] of Callable, itr.current_scope)
-    itr.push_scope
+    itr.current_scope["foo"] = TFunctor.new([] of Callable, itr.current_scope)
+    itr.push_self(TModule.new)
     # With the new scope, the current scope does not have `foo` defined.
     itr.current_scope.has_key?("foo").should be_false
     # `def foo`, then, shouldn't find the existing functor from the parent

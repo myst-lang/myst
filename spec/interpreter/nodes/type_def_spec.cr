@@ -87,7 +87,7 @@ describe "Interpreter - TypeDef" do
       end
     end
   ) do |typ, itr|
-    bar = typ.instance_scope["Bar"].as(TType)
+    bar = typ.scope["Bar"].as(TType)
     bar.instance_scope.has_key?("foo").should be_truthy
     bar.instance_scope.has_key?("bar").should be_truthy
   end
@@ -108,7 +108,7 @@ describe "Interpreter - TypeDef" do
     typ.instance_scope.has_key?("foo").should be_falsey
     typ.instance_scope.has_key?("bar").should be_falsey
 
-    bar = typ.instance_scope["Bar"].as(TType)
+    bar = typ.scope["Bar"].as(TType)
     bar.instance_scope.has_key?("foo").should be_truthy
     bar.instance_scope.has_key?("bar").should be_truthy
   end

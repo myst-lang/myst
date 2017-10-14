@@ -7,7 +7,7 @@ module Myst
         if node.receiver?
           node.receiver.accept(self)
           receiver = stack.pop
-          receiver.methods
+          receiver.scope
         else
           current_scope
         end

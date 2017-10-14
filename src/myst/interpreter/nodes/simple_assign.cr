@@ -8,16 +8,16 @@ module Myst
 
       case target = node.target
       when Var
-        @symbol_table[target.name] = value
+        current_scope.assign(target.name, value)
       when Underscore
-        @symbol_table[target.name] = value
+        current_scope.assign(target.name, value)
       when IVar
-        @symbol_table[target.name] = value
+        current_scope[target.name] = value
       when Const
-        if @symbol_table[target.name]?
+        if current_scope.has_key?(target.name)
           raise "Re-assignment to constant value #{target.name}."
         else
-          @symbol_table[target.name] = value
+          current_scope.assign(target.name, value)
         end
       else
         # This _should_ never be reached. Assignments to non-assignable values
