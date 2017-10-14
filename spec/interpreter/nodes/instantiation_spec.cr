@@ -82,4 +82,32 @@ describe "Interpreter - Instantiation" do
     result = itr.stack.pop
     result.should eq(val(:static_baz))
   end
+
+  # Instantiations must resolve the type as a TType. Any other value is invalid.
+  # Because of interpolations, this cannot be asserted by the parser.
+  it_does_not_interpret %q(%<nil>{})
+  it_does_not_interpret %q(%<false>{})
+  it_does_not_interpret %q(%<1>{})
+  it_does_not_interpret %q(%<"hello">{})
+  it_does_not_interpret %q(%<[]>{})
+  it_does_not_interpret %q(%<{}>{})
+
+  it "allows interpolations of type values" do
+    itr = interpret_with_defs %q(
+      f = %<Foo>{}
+      f.baz
+    )
+    result = itr.stack.pop
+    result.should eq(val(:instance_baz))
+  end
+
+  it "allows interpolations of type values through other variables" do
+    itr = interpret_with_defs %q(
+      type = Foo
+      f = %<type>{}
+      f.baz
+    )
+    result = itr.stack.pop
+    result.should eq(val(:instance_baz))
+  end
 end
