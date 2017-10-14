@@ -69,3 +69,10 @@ end
 def e(*nodes : Node)
   Expressions.new(*nodes)
 end
+
+# iv(name)
+#
+# Generate an IVar node with the given name.
+def iv(name)
+  IVar.new("@" + name)
+end

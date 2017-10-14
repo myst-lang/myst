@@ -8,7 +8,12 @@ def it_interprets(node : String, expected_stack, itr=Interpreter.new)
     unless expected_stack.empty?
       stack = expected_stack
       if itr.stack.size != stack.size
-        raise "Stack size does not match expected (#{itr.stack.size} vs. #{stack.size})"
+        raise <<-ERROR_MSG
+          Stack size does not match expected (#{itr.stack.size} vs. #{stack.size}):
+              expected: #{itr.stack.inspect}
+
+              got: #{stack.inspect}
+        ERROR_MSG
       end
 
       itr.stack.zip(expected_stack).each do |stack, expected|

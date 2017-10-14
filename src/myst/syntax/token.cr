@@ -11,8 +11,10 @@ module Myst
 
       REQUIRE       # require
       INCLUDE       # include
-      MODULE        # module
+      DEFMODULE     # defmodule
+      DEFTYPE       # deftype
       DEF           # def
+      DEFSTATIC     # defstatic
       DO            # do
       UNLESS        # unless
       ELSE          # else
@@ -30,6 +32,7 @@ module Myst
       NIL           # nil
       IDENT         # [a-z][_a-zA-Z0-9]*
       CONST         # [A-Z][a-zA-Z0-9]*
+      IVAR          # @[a-z][_a-zA-Z0-9]*
 
       PLUS          # +
       MINUS         # -
@@ -91,7 +94,7 @@ module Myst
 
       def self.keywords
         [ REQUIRE, INCLUDE,
-          MODULE, DEF, DO, END,
+          DEFMODULE, DEFTYPE, DEF, DEFSTATIC, DO, END,
           WHEN, UNLESS, ELSE,
           WHILE, UNTIL,
           TRUE, FALSE, NIL,
@@ -105,8 +108,10 @@ module Myst
         {
           "require" => REQUIRE,
           "include" => INCLUDE,
-          "module" => MODULE,
+          "defmodule" => DEFMODULE,
+          "deftype" => DEFTYPE,
           "def" => DEF,
+          "defstatic" => DEFSTATIC,
           "do" => DO,
           "end" => END,
           "when" => WHEN,

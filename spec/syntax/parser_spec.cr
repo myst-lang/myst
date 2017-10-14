@@ -814,33 +814,192 @@ describe "Parser" do
 
 
 
-
   # Module definitions
 
   it_parses %q(
-    module Foo
+    defmodule Foo
     end
-  ),                              ModuleDef.new("Foo")
-  it_parses %q(module Foo; end),  ModuleDef.new("Foo")
+  ),                                  ModuleDef.new("Foo")
+  it_parses %q(defmodule Foo; end),   ModuleDef.new("Foo")
+  # Modules must specify a Constant as their name
+  it_does_not_parse %q(defmodule foo; end)
+  it_does_not_parse %q(defmodule _nope; end)
   it_parses %q(
-    module Foo
+    defmodule Foo
       def foo; end
     end
   ),                ModuleDef.new("Foo", e(Def.new("foo")))
   # Modules allow immediate code evaluation on their scope.
   it_parses %q(
-    module Foo
+    defmodule Foo
       1 + 2
       a = 3
     end
   ),                ModuleDef.new("Foo", e(Call.new(l(1), "+", [l(2)]), SimpleAssign.new(v("a"), l(3))))
   # Modules can also be nested
   it_parses %q(
-    module Foo
-      module Bar
+    defmodule Foo
+      defmodule Bar
       end
     end
   ),                ModuleDef.new("Foo", e(ModuleDef.new("Bar")))
+
+
+
+  # Type definitions
+
+  # A type definition can contain 0 or more properties
+  it_parses %q(
+    deftype Thing
+    end
+  ),                                  TypeDef.new("Thing")
+  it_parses %q(deftype Thing; end),   TypeDef.new("Thing")
+  # Types must specify a Constant as their name
+  it_does_not_parse %q(deftype foo; end)
+  it_does_not_parse %q(deftype _nope; end)
+
+  # Types allow immediate code evaluation on their scope.
+  it_parses %q(
+    deftype Thing
+      1 + 2
+      a = 3
+    end
+  ),                TypeDef.new("Thing", body: e(Call.new(l(1), "+", [l(2)]), SimpleAssign.new(v("a"), l(3))))
+
+  # Types can also be nested
+  it_parses %q(
+    deftype Thing
+      deftype Part
+      end
+    end
+  ),                TypeDef.new("Thing", body: e(TypeDef.new("Part")))
+
+
+  # Type methods
+
+  it_parses %q(
+    deftype Foo
+      def foo; end
+    end
+  ),                TypeDef.new("Foo", body: e(Def.new("foo")))
+
+  it_parses %q(
+    deftype Foo
+      defstatic foo; end
+    end
+  ),                TypeDef.new("Foo", body: e(Def.new("foo", static: true)))
+
+  # Types and modules can be arbitrarily nested.
+  it_parses %q(
+    deftype Foo
+      defmodule Bar
+        deftype Baz
+        end
+      end
+    end
+  ),                    TypeDef.new("Foo", body: e(ModuleDef.new("Bar", e(TypeDef.new("Baz")))))
+  it_parses %q(
+    defmodule Foo
+      deftype Bar
+        defmodule Baz
+        end
+      end
+    end
+  ),                    ModuleDef.new("Foo", e(TypeDef.new("Bar", body: e(ModuleDef.new("Baz")))))
+
+
+
+  # Instance variables
+
+  # Instance variables are marked with an `@` prefix.
+  it_parses %q(@a),           iv("a")
+  it_parses %q(@variable),    iv("variable")
+  # Instance variables can appear as a primary value anywhere they are accepted.
+  it_parses %q(<@var>),       i(iv("var"))
+  it_parses %q(1 + @var),     Call.new(l(1), "+", [iv("var")] of Node)
+  it_parses %q(@var.each),    Call.new(iv("var"), "each")
+  it_parses %q(
+    def foo(<@var>)
+    end
+  ),                          Def.new("foo", [p(nil, i(iv("var")))])
+
+  # Instance variables can be the target of any assignment.
+  it_parses %q(@var = 1),           SimpleAssign.new(iv("var"), l(1))
+  it_parses %q([1, @a] =: [1, 2]),  MatchAssign.new(l([1, iv("a")]), l([1, 2]))
+  it_parses %q(@var ||= {}),        OpAssign.new(iv("var"), "||=", MapLiteral.new)
+
+
+
+  # Type initialization
+
+  # Instances of types are created with a percent characeter and brace syntax
+  # akin to blocks.
+  it_parses %q(%Thing{}),           Instantiation.new(c("Thing"))
+  it_parses %q(%Thing {}),          Instantiation.new(c("Thing"))
+  it_parses %q(%Thing   {   }),     Instantiation.new(c("Thing"))
+  it_parses %q(%Thing{ 1 }),        Instantiation.new(c("Thing"), [l(1)])
+  it_parses %q(%Thing{ 1, 2, 3 }),  Instantiation.new(c("Thing"), [l(1), l(2), l(3)])
+  it_parses %q(%Thing{ [nil, 1] }), Instantiation.new(c("Thing"), [l([nil, 1])])
+  it_parses %q(%Thing{1}),          Instantiation.new(c("Thing"), [l(1)])
+  it_parses %q(%Thing{1, 2, 3}),    Instantiation.new(c("Thing"), [l(1), l(2), l(3)])
+  it_parses %q(%Thing{[nil, 1]}),   Instantiation.new(c("Thing"), [l([nil, 1])])
+  it_parses %q(%Thing{
+    1
+  }),          Instantiation.new(c("Thing"), [l(1)])
+  it_parses %q(%Thing{
+    1, 2, 3
+  }),    Instantiation.new(c("Thing"), [l(1), l(2), l(3)])
+  it_parses %q(%Thing{
+    [nil, 1]
+  }),   Instantiation.new(c("Thing"), [l([nil, 1])])
+
+  # The braces are required for initialization, even when there are no arguments.
+  it_does_not_parse %q(%Thing)
+  # There must not be spaces between the percent and the type name
+  it_does_not_parse %q(%  Thing{   })
+  it_does_not_parse %q(%  Thing { })
+  # Similarly, the brace must appear inline  with the type.
+  it_does_not_parse %q(
+    %Thing
+    {}
+  )
+
+  # The type can be either a Const or an interpolation. Any interpolation is
+  # valid, and may span multiple lines.
+  it_parses %q(%<thing>{}),             Instantiation.new(i(Call.new(nil, "thing")))
+  it_parses %q(%<@type>{}),             Instantiation.new(i(iv("type")))
+  it_parses %q(%<1.type>{}),            Instantiation.new(i(Call.new(l(1), "type")))
+  it_parses %q(%<(type || Default)>{}), Instantiation.new(i(Or.new(Call.new(nil, "type"), c("Default"))))
+  it_parses %q(
+    %<(
+      type
+    )>{}
+  ),                                    Instantiation.new(i(Call.new(nil, "type")))
+
+  # Any other node is invalid as a type specification.
+  it_does_not_parse %q(%nil{})
+  it_does_not_parse %q(%false{})
+  it_does_not_parse %q(%1{})
+  it_does_not_parse %q(%"hello"{})
+  it_does_not_parse %q(%some_type{})
+
+  # Initializations are similar to Calls, allowing all the same syntax for the arguments, including blocks.
+  it_parses %q(%Thing{ *opts }),        Instantiation.new(c("Thing"), [Splat.new(Call.new(nil, "opts"))] of Node)
+  it_parses %q(%Thing{ } do; end),      Instantiation.new(c("Thing"), block: Block.new)
+  it_parses %q(%Thing{ } { }),          Instantiation.new(c("Thing"), block: Block.new)
+  it_parses %q(
+    %Thing{ } do |a,b|
+    end
+  ),                      Instantiation.new(c("Thing"), block: Block.new([p("a"), p("b")]))
+  it_parses %q(
+    %Thing{ } { |a,b| }
+  ),                      Instantiation.new(c("Thing"), block: Block.new([p("a"), p("b")]))
+
+  # Also as in a Call, trailing commas and the like are invalid
+  it_does_not_parse %q(%Thing{ 1, })
+  it_does_not_parse %q(%Thing{
+    1,
+  })
 
 
 
@@ -858,6 +1017,8 @@ describe "Parser" do
   test_calls_with_receiver(%q("some string".),  l("some string"))
   test_calls_with_receiver("method{ }.",        Call.new(nil, "method", block: Block.new))
   test_calls_with_receiver("method do; end.",   Call.new(nil, "method", block: Block.new))
+  test_calls_with_receiver("@var.",             iv("var"))
+  test_calls_with_receiver("%Thing{}.",         Instantiation.new(c("Thing")))
 
 
 
@@ -885,7 +1046,7 @@ describe "Parser" do
   it_parses %q(include self),         Include.new(Self.new)
   it_parses %q(include <something>),  Include.new(i(Call.new(nil, "something")))
   it_parses %q(
-    module Thing
+    defmodule Thing
       include Other
     end
   ),                                  ModuleDef.new("Thing", e(Include.new(c("Other"))))
@@ -919,7 +1080,7 @@ describe "Parser" do
   it_parses %q(require Thing.dep),    Require.new(Call.new(c("Thing"), "dep"))
   it_parses %q(require <something>),  Require.new(i(Call.new(nil, "something")))
   it_parses %q(
-    module Thing
+    defmodule Thing
       require "other_thing"
     end
   ),                                  ModuleDef.new("Thing", e(Require.new(l("other_thing"))))

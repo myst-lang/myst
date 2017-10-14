@@ -1,5 +1,5 @@
 module Myst
-  TList::METHODS["each"] = TFunctor.new([
+  TList::SCOPE["each"] = TFunctor.new([
     TNativeDef.new(0) do |this, _args, block, itr|
       this = this.as(TList)
 

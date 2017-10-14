@@ -245,6 +245,20 @@ module Myst
     def_equals_and_hash
   end
 
+  # An instance variable. IVars are primarily used inside of types do define
+  # properties that are tied to an instance of an object. The name of an IVar
+  # includes the `@` character.
+  #
+  #   @[a-z][a-zA-Z0-9_]*
+  class IVar < Node
+    property name : String
+
+    def initialize(@name : String)
+    end
+
+    def_equals_and_hash name
+  end
+
   # A value interpolation. Interpolations are used to dynamically insert
   # values in places that normally expect a static value, such as keys in
   # Map literals, or expected values in patterns.
@@ -596,26 +610,29 @@ module Myst
 
   # A method definition. Parameters for methods must be wrapped in
   # parentheses. If the method does not accept parameters, the parentheses
-  # may be omitted.
+  # may be omitted. In the context of a type definition, methods can also be
+  # defined as "static" - or related to the type, rather than instances of the
+  # type - using the alternate keyword `defstatic`.
   #
-  #   'def' name '(' [ param [ ',' param ]* ] ')'
+  #   [ 'def' | 'defstatic' ] name '(' [ param [ ',' param ]* ] ')'
   #     body
   #   'end'
   # |
-  #   'def' name
+  #   [ 'def' | 'defstatic' ] name
   #     body
   #   'end'
   class Def < Node
-    property  name         : String
-    property  params       : Array(Param)
-    property! block_param  : Param?
-    property  body         : Node
-    property! splat_index  : Int32?
+    property  name          : String
+    property  params        : Array(Param)
+    property! block_param   : Param?
+    property  body          : Node
+    property! splat_index   : Int32?
+    property? static        : Bool
 
-    def initialize(@name, @params = [] of Param, @body=Nop.new, @block_param=nil, @splat_index=nil)
+    def initialize(@name, @params = [] of Param, @body=Nop.new, @block_param=nil, @splat_index=nil, @static=false)
     end
 
-    def_equals_and_hash name, params, block_param?, body, splat_index?
+    def_equals_and_hash name, params, block_param?, body, splat_index?, static?
   end
 
   # A block definition. Functionally, a block is equivalent to a method
@@ -634,6 +651,7 @@ module Myst
   class Block < Def
     def initialize(@params = [] of Param, @body=Nop.new, @block_param=nil, @splat_index=nil)
       @name = ""
+      @static = false
     end
 
     def_equals_and_hash
@@ -642,7 +660,7 @@ module Myst
   # A module definition. The name of the module must be a Constant (i.e., it
   # must start with a capital letter).
   #
-  #   'module' const
+  #   'defmodule' const
   #     body
   #   'end'
   class ModuleDef < Node
@@ -657,6 +675,38 @@ module Myst
     end
 
     def_equals_and_hash name, body
+  end
+
+  # A type definition. TypeDefs are similar to ModuleDefs, but define a data
+  # type that can be instantiated similar to how Literals create primitives.
+  #
+  #   'deftype' const
+  #     body
+  #   'end'
+  class TypeDef < Node
+    property name       : String
+    property body       : Node
+
+    def initialize(@name, @body=Nop.new)
+    end
+
+    def_equals_and_hash name, body
+  end
+
+  # An instantiation of a type. Instantiations create new instances of the
+  # specified type. After creating the value for the new type, a callback on
+  # the instance will be called to initialize the properties of the instance.
+  #
+  #   '%' [ const | interpolation ] '{' [ arg [ ',' arg ]* ] '}' [ block ]
+  class Instantiation < Node
+    property  type    : Node
+    property  args    : Array(Node)
+    property! block   : Block?
+
+    def initialize(@type, @args=[] of Node, @block=nil)
+    end
+
+    def_equals_and_hash type, args, block?
   end
 
   # A require expression. Requires are the primary mechanism for loading code

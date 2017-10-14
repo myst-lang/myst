@@ -3,11 +3,11 @@ module Myst
     def type_name; self.class.type_name; end
 
     macro inherited
-      # When a new Value type is created, add a METHODS constant to it to hold
-      # native method definitions for the Value.
-      METHODS = Scope.new
+      # When a new Value type is created, add a SCOPE constant to it to hold
+      # methods and attributes for the Value.
+      SCOPE = Scope.new
 
-      def methods; METHODS; end
+      def scope; SCOPE; end
     end
 
     def self.from_literal(literal : Node)
@@ -190,16 +190,45 @@ module Myst
 
   class TModule < Value
     def self.type_name; "Module"; end
-    property  scope   : Scope
+    property scope   : Scope
 
-    def initialize(parent : Scope)
+    def initialize(parent : Scope? = nil)
       @scope = Scope.new(parent)
     end
 
-    def methods
-      @scope
+    def_equals_and_hash scope
+  end
+
+
+  class TType < Value
+    def self.type_name; "Type"; end
+    property name           : String
+    property scope          : Scope
+    property instance_scope : Scope
+
+    def initialize(@name : String, parent : Scope)
+      @scope = Scope.new(parent)
+      @instance_scope = Scope.new(parent)
     end
 
-    def_equals_and_hash scope
+    def type_name
+      @name
+    end
+
+    def_equals_and_hash name, scope, instance_scope
+  end
+
+  class TInstance < Value
+    def self.type_name; "Instance"; end
+    property type       : TType
+    property scope      : Scope
+
+    def initialize(@type : TType)
+      @scope = Scope.new(@type.instance_scope)
+    end
+
+    def type_name
+      @type.type_name
+    end
   end
 end

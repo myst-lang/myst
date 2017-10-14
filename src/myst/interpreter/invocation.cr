@@ -20,11 +20,11 @@ module Myst
 
     def invoke
       result = @func.clauses.each do |clause|
-        @itr.push_scope
+        @itr.push_scope_override(Scope.new(@func.lexical_scope))
         if clause_matches?(clause, @args.dup)
           res = do_call(clause, @receiver, @args, @block)
         end
-        @itr.pop_scope
+        @itr.pop_scope_override
         break res if res
       end
 

@@ -107,10 +107,12 @@ module Myst
 
     def parse_expression
       case current_token.type
-      when Token::Type::DEF
+      when Token::Type::DEF, Token::Type::DEFSTATIC
         parse_def
-      when Token::Type::MODULE
+      when Token::Type::DEFMODULE
         parse_module_def
+      when Token::Type::DEFTYPE
+        parse_type_def
       when Token::Type::INCLUDE
         parse_include
       when Token::Type::REQUIRE
@@ -127,10 +129,11 @@ module Myst
     end
 
     def parse_def
-      start = expect(Token::Type::DEF)
+      start = expect(Token::Type::DEF, Token::Type::DEFSTATIC)
+      static = (start.type == Token::Type::DEFSTATIC)
       skip_space
       name = expect(Token::Type::IDENT).value
-      method_def = Def.new(name).at(start.location)
+      method_def = Def.new(name, static: static).at(start.location)
       push_var_scope
 
       # If the Def has parameters, they must be parenthesized. If the token
@@ -246,7 +249,7 @@ module Myst
     end
 
     def parse_module_def
-      start = expect(Token::Type::MODULE)
+      start = expect(Token::Type::DEFMODULE)
       skip_space
       name = expect(Token::Type::CONST).value
       skip_space
@@ -261,6 +264,25 @@ module Myst
         finish = expect(Token::Type::END)
         pop_var_scope
         return ModuleDef.new(name, body).at(start.location).at_end(finish.location)
+      end
+    end
+
+    def parse_type_def
+      start = expect(Token::Type::DEFTYPE)
+      skip_space
+      name = expect(Token::Type::CONST).value
+      skip_space
+      expect_delimiter
+      skip_space_and_newlines
+
+      if finish = accept(Token::Type::END)
+        return TypeDef.new(name, Nop.new).at(start.location).at_end(finish.location)
+      else
+        push_var_scope
+        body = parse_code_block(Token::Type::END)
+        finish = expect(Token::Type::END)
+        pop_var_scope
+        return TypeDef.new(name, body).at(start.location).at_end(finish.location)
       end
     end
 
@@ -549,6 +571,12 @@ module Myst
         parse_value_interpolation
       when Token::Type::IDENT
         parse_var_or_call
+      when Token::Type::IVAR
+        token = current_token
+        read_token
+        return IVar.new(token.value).at(token.location)
+      when Token::Type::MODULO
+        parse_instantiation
       else
         parse_literal
       end
@@ -675,6 +703,49 @@ module Myst
       end
     end
 
+    def parse_instantiation
+      start = expect(Token::Type::MODULO)
+      type =
+        case current_token.type
+        when Token::Type::CONST
+          token = current_token
+          read_token
+          Const.new(token.value).at(token.location)
+        else
+          parse_value_interpolation
+        end
+
+      inst = Instantiation.new(type).at(start.location)
+      skip_space
+      expect(Token::Type::LCURLY)
+      skip_space_and_newlines
+
+      if finish = accept(Token::Type::RCURLY)
+        inst.at_end(finish.location)
+      else
+        loop do
+          skip_space_and_newlines
+          inst.args << parse_expression
+          skip_space_and_newlines
+
+          # If there is no comma, this is the last argument, and a closing
+          # parenthesis should be expected.
+          unless accept(Token::Type::COMMA)
+            finish = expect(Token::Type::RCURLY)
+            inst.at_end(finish.location)
+            break
+          end
+        end
+      end
+
+      skip_space
+      if inst.block = parse_optional_block
+        return inst.at_end(inst.block)
+      end
+
+      return inst
+    end
+
     def parse_literal
       case (token = current_token).type
       when Token::Type::NIL
@@ -794,6 +865,8 @@ module Myst
         push_local_var(node.name)
         return node
       when Const
+        return node
+      when IVar
         return node
       when Call
         # If no explicit receiver was set on the Call, consider it a Var.

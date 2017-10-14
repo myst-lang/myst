@@ -52,7 +52,7 @@ FOO_DEFS = %q(
 )
 
 MODULE_DEFS = %q(
-  module Foo
+  defmodule Foo
     def foo(a)
       :one_arg
     end
@@ -62,7 +62,7 @@ MODULE_DEFS = %q(
     end
   end
 
-  module Foo
+  defmodule Foo
     def foo(a, b)
       :two_args
     end

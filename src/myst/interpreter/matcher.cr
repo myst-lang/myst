@@ -20,6 +20,9 @@ module Myst
       when Var, Underscore
         # Vars are always assigned in the current scope.
         current_scope.assign(pattern.name, value)
+      when IVar
+        # Vars are always assigned in the current scope.
+        current_scope.assign(pattern.name, value)
       when Const
         # Constants can't be re-assigned, so they are matched as if they were
         # literal values

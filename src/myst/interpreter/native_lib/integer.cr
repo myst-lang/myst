@@ -1,5 +1,5 @@
 module Myst
-  TInteger::METHODS["+"] = TFunctor.new([
+  TInteger::SCOPE["+"] = TFunctor.new([
     TNativeDef.new(1) do |this, (arg), _block, _itr|
       this = this.as(TInteger)
       case arg
@@ -13,7 +13,7 @@ module Myst
     end
   ] of Callable)
 
-  TInteger::METHODS["-"] = TFunctor.new([
+  TInteger::SCOPE["-"] = TFunctor.new([
     TNativeDef.new(1) do |this, (arg), _block, _itr|
       this = this.as(TInteger)
       case arg
@@ -27,7 +27,7 @@ module Myst
     end
   ] of Callable)
 
-  TInteger::METHODS["*"] = TFunctor.new([
+  TInteger::SCOPE["*"] = TFunctor.new([
     TNativeDef.new(1) do |this, (arg), _block, _itr|
       this = this.as(TInteger)
       case arg
@@ -41,7 +41,7 @@ module Myst
     end
   ] of Callable)
 
-  TInteger::METHODS["/"] = TFunctor.new([
+  TInteger::SCOPE["/"] = TFunctor.new([
     TNativeDef.new(1) do |this, (arg), _block, _itr|
       this = this.as(TInteger)
       case arg
@@ -57,7 +57,7 @@ module Myst
     end
   ] of Callable)
 
-  TInteger::METHODS["%"] = TFunctor.new([
+  TInteger::SCOPE["%"] = TFunctor.new([
     TNativeDef.new(1) do |this, (arg), _block, _itr|
       this = this.as(TInteger)
       case arg
@@ -73,7 +73,7 @@ module Myst
     end
   ] of Callable)
 
-  TInteger::METHODS["to_s"] = TFunctor.new([
+  TInteger::SCOPE["to_s"] = TFunctor.new([
     TNativeDef.new(0) do |this, _args, _block, _itr|
       this = this.as(TInteger)
       TString.new(this.value.to_s)
@@ -81,7 +81,7 @@ module Myst
   ] of Callable)
 
 
-  TInteger::METHODS["=="] = TFunctor.new([
+  TInteger::SCOPE["=="] = TFunctor.new([
     TNativeDef.new(1) do |this, (arg), _block, _itr|
       this = this.as(TInteger)
       case arg
@@ -93,7 +93,7 @@ module Myst
     end
   ] of Callable)
 
-  TInteger::METHODS["!="] = TFunctor.new([
+  TInteger::SCOPE["!="] = TFunctor.new([
     TNativeDef.new(1) do |this, (arg), _block, _itr|
       this = this.as(TInteger)
       case arg

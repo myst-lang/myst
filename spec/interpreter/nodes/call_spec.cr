@@ -17,7 +17,7 @@ describe "Interpreter - Call" do
 
   # Functions in Modules
   it_interprets %q(
-    module Foo
+    defmodule Foo
       def bar
         :called
       end
@@ -26,7 +26,7 @@ describe "Interpreter - Call" do
     Foo.bar
   ),                [val(:called)]
   it_interprets %q(
-    module Foo
+    defmodule Foo
       def bar(a, b)
         a + b
       end
@@ -35,8 +35,8 @@ describe "Interpreter - Call" do
     Foo.bar(1, 2)
   ),                [val(3)]
   it_interprets %q(
-    module Foo
-      module Bar
+    defmodule Foo
+      defmodule Bar
         def baz
           :nested
         end
@@ -45,4 +45,52 @@ describe "Interpreter - Call" do
 
     Foo.Bar.baz
   ),                [val(:nested)]
+
+  # Static functions in Types
+  it_interprets %q(
+    deftype Foo
+      defstatic bar
+        :called
+      end
+    end
+
+    Foo.bar
+  ),                [val(:called)]
+  it_interprets %q(
+    deftype Foo
+      defstatic bar(a, b)
+        a + b
+      end
+    end
+
+    Foo.bar(1, 2)
+  ),                [val(3)]
+  it_interprets %q(
+    deftype Foo
+      deftype Bar
+        defstatic baz
+          :nested
+        end
+      end
+    end
+
+    Foo.Bar.baz
+  ),                [val(:nested)]
+
+
+  # Functions have unique scopes. Assignment to a Var inside of a scope should
+  # create a new entry rather than assigning to the existing entry in a parent.
+  it_interprets_with_assignments %q(
+    a = 1
+    def foo; a = 2; end
+    foo
+  ),              { "a" => val(1) }
+
+  # However, reads from a variable that does not yet exist in the current scope
+  # should check parent scopes.
+  it_interprets %q(
+    a = 1
+    def foo; a; end
+    foo
+  ),              [val(1)]
 end

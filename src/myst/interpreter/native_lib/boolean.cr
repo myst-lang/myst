@@ -1,11 +1,11 @@
 module Myst
-  TBoolean::METHODS["to_s"] = TFunctor.new([
+  TBoolean::SCOPE["to_s"] = TFunctor.new([
     TNativeDef.new(0) do |this, _args, _block, _itr|
       TString.new(this.as(TBoolean).value ? "true" : "false")
     end
   ] of Callable)
 
-  TBoolean::METHODS["=="] = TFunctor.new([
+  TBoolean::SCOPE["=="] = TFunctor.new([
     TNativeDef.new(1) do |this, (arg), _block, _itr|
       this = this.as(TBoolean)
       case arg
@@ -17,7 +17,7 @@ module Myst
     end
   ] of Callable)
 
-  TBoolean::METHODS["!="] = TFunctor.new([
+  TBoolean::SCOPE["!="] = TFunctor.new([
     TNativeDef.new(1) do |this, (arg), _block, _itr|
       this = this.as(TBoolean)
       case arg

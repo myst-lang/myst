@@ -17,13 +17,13 @@ describe "Interpreter - SimpleAssign" do
 
   it "creates an entry in the symbol table for the assigned variable" do
     interpreter = parse_and_interpret %q(a = 1)
-    interpreter.symbol_table.has_key?("a").should be_true
-    interpreter.symbol_table["a"].should eq(val(1))
+    interpreter.current_scope.has_key?("a").should be_true
+    interpreter.current_scope["a"].should eq(val(1))
   end
 
   it "assigns constants" do
     interpreter = parse_and_interpret %q(THING = 2)
-    interpreter.symbol_table["THING"].should eq(val(2))
+    interpreter.current_scope["THING"].should eq(val(2))
   end
 
   it "does not allow re-assignment to constants" do

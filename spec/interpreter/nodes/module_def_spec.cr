@@ -13,7 +13,7 @@ end
 
 describe "Interpreter - ModuleDef" do
   it_interprets_the_module %q(
-    module Foo
+    defmodule Foo
     end
   ) do |mod, itr|
     mod.should be_a(Myst::TModule)
@@ -24,7 +24,7 @@ describe "Interpreter - ModuleDef" do
   # Functions defined within a module should have their lexical scope set as
   # that module.
   it_interprets_the_module %q(
-    module Foo
+    defmodule Foo
       def foo
       end
     end
@@ -38,7 +38,7 @@ describe "Interpreter - ModuleDef" do
   # Defining a function in a module should not make it available outside of
   # the module.
   it_interprets_the_module %q(
-    module Foo
+    defmodule Foo
       def foo
       end
     end
@@ -49,11 +49,11 @@ describe "Interpreter - ModuleDef" do
 
   # Defining a module more than once in the same scope re-opens the module.
   it_interprets_the_module %q(
-    module Foo
+    defmodule Foo
       def foo; end
     end
 
-    module Foo
+    defmodule Foo
       def bar; end
     end
   ) do |mod, itr|
@@ -63,12 +63,12 @@ describe "Interpreter - ModuleDef" do
 
   # Nesting modules have all the same behavior as top-level modules
   it_interprets_the_module %q(
-    module Foo
-      module Bar
+    defmodule Foo
+      defmodule Bar
         def foo; end
       end
 
-      module Bar
+      defmodule Bar
         def bar; end
       end
     end
@@ -79,14 +79,14 @@ describe "Interpreter - ModuleDef" do
   end
 
   it_interprets_the_module %q(
-    module Foo
-      module Bar
+    defmodule Foo
+      defmodule Bar
         def foo; end
       end
     end
 
-    module Foo
-      module Bar
+    defmodule Foo
+      defmodule Bar
         def bar; end
       end
     end
