@@ -9,7 +9,7 @@ module Myst
           receiver = stack.pop
           receiver.scope
         else
-          current_scope
+          current_self.scope
         end
 
       visit_call(node, receiver, scope[node.name]?)

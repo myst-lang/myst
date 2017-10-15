@@ -42,5 +42,13 @@ module Myst
     def assign(key : String, value : Value)
       @values[key] = value
     end
+
+
+    # Insert a Scope between this scope and its parent. Used for including
+    # modules into other values.
+    def insert_parent(scope : Scope)
+      scope.parent = @parent
+      @parent = scope
+    end
   end
 end
