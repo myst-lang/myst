@@ -19,6 +19,10 @@ module Myst
     end
 
     def invoke
+      # If the invocation has a receiver, use it as the current value of `self`
+      # for the duration of the Invocation.
+      @itr.push_self(@receiver.not_nil!) if @receiver
+
       result = @func.clauses.each do |clause|
         @itr.push_scope_override(Scope.new(@func.lexical_scope))
         if clause_matches?(clause, @args.dup)
@@ -28,6 +32,9 @@ module Myst
         break res if res
       end
 
+      # After the invocation, restore the current value of `self` to whatever
+      # it had been previously.
+      @itr.pop_self if @receiver
       result || raise "No clause matches with given parameters"
     end
 

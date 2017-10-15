@@ -12,7 +12,7 @@ module Myst
       when Underscore
         current_scope.assign(target.name, value)
       when IVar
-        current_scope[target.name] = value
+        current_self.ivars[target.name] = value
       when Const
         if current_scope.has_key?(target.name)
           raise "Re-assignment to constant value #{target.name}."

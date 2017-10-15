@@ -8,6 +8,11 @@ module Myst
       SCOPE = Scope.new
 
       def scope; SCOPE; end
+
+      # Instance variables are properties tied to the instance of an object.
+      # For consistency between native (Integer, String, etc.) and language-
+      # level types (IO, File, etc.), all values have an `ivars` property.
+      property ivars : Scope = Scope.new
     end
 
     def self.from_literal(literal : Node)

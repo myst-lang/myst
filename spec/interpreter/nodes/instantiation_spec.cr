@@ -110,4 +110,72 @@ describe "Interpreter - Instantiation" do
     result = itr.stack.pop
     result.should eq(val(:instance_baz))
   end
+
+
+  # An instantiation should always call the `initialize` method on the instance
+  # with the arguments/block given to the initialization.
+  it "calls `initialize` on the new instance" do
+    itr = parse_and_interpret %q(
+      deftype Foo
+        def initialize
+          @prop = 1
+        end
+
+        def prop
+          @prop
+        end
+      end
+
+      f = %Foo{}
+      f.prop
+    )
+
+    result = itr.stack.pop
+    result.should eq(val(1))
+  end
+
+  it "calls `initialize` with the arguments for the Instantiation" do
+    itr = parse_and_interpret %q(
+      deftype Foo
+        def initialize(p)
+          @prop = p
+        end
+
+        def prop
+          @prop
+        end
+      end
+
+      f = %Foo{"hello"}
+      f.prop
+    )
+
+    result = itr.stack.pop
+    result.should eq(val("hello"))
+  end
+
+  it "delegates to the appropriate definition for `initialize` based on arguments" do
+    itr = parse_and_interpret %q(
+      deftype Foo
+        def initialize(nil, b)
+          @prop = :nil
+        end
+
+        def initialize(a, b)
+          @prop = a
+        end
+
+        def prop
+          @prop
+        end
+      end
+
+      f1 = %Foo{"hello", 1}
+      f2 = %Foo{nil, "used nil"}
+      [f1.prop, f2.prop]
+    )
+
+    result = itr.stack.pop
+    result.should eq(val(["hello", :nil]))
+  end
 end
