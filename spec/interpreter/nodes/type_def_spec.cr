@@ -112,4 +112,16 @@ describe "Interpreter - TypeDef" do
     bar.instance_scope.has_key?("foo").should be_truthy
     bar.instance_scope.has_key?("bar").should be_truthy
   end
+
+
+  # The `self` inside of a type definition is the type itself, so static
+  # methods and other properties should be available there.
+  it_interprets %q(
+    deftype Foo
+      defstatic static_method
+      end
+
+      static_method
+    end
+  )
 end
