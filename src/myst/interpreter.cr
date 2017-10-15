@@ -45,7 +45,7 @@ module Myst
 
 
     def visit(node : Node)
-      node.accept_children(self)
+      raise "#{node} nodes are not yet supported."
     end
   end
 end
