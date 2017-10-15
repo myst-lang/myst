@@ -64,5 +64,14 @@ Dir.cd(__DIR__) do
         )
       end
     end
+
+    it "properly follows directories for nested requires" do
+      itr = parse_and_interpret %q(
+        require "./require_support/nested_require.mt"
+        bar(1, 2)
+      )
+
+      itr.stack.pop.should eq(val(3))
+    end
   end
 end
