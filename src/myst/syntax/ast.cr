@@ -1,7 +1,7 @@
 module Myst
   abstract class Node
-    property location : Location?
-    property end_location : Location?
+    property location      : Location?
+    property end_location  : Location?
 
     def at(@location : Location)
       self

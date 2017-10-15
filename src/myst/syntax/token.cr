@@ -183,7 +183,7 @@ module Myst
     property location : Location
 
 
-    def initialize(@type=Type::UNKNOWN, @value=nil, @raw="", @location=Location.new)
+    def initialize(@type=Type::UNKNOWN, @value=nil, @raw="", *, @location)
     end
 
 

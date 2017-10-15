@@ -3,12 +3,12 @@ require "./ast.cr"
 module Myst
   class Parser < Lexer
     def self.for_file(source_file)
-      new(File.open(source_file), source_file, File.expand_path(File.dirname(source_file)))
+      new(File.open(source_file), source_file)
     end
 
 
-    def initialize(source : IO, source_file : String? = nil, working_dir : String? = nil)
-      super(source, source_file, working_dir)
+    def initialize(source : IO, source_file : String)
+      super(source, source_file)
       # A stack to track of variables defined locally in the current scope.
       @local_vars = [Set(String).new]
       read_token

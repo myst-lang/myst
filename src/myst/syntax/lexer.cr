@@ -8,11 +8,7 @@ module Myst
     property reader : Reader
     # Full path to the source file used by this lexer. For STDIN and other
     # non-local input methods, this will be `nil`.
-    property source_file : String?
-    # Full path to the directory of the source. For STDIN and other non-local
-    # input methods, this will be the value of `pwd` where program Myst was
-    # run.
-    property working_dir : String
+    property source_file : String
 
     # Current line number in the source.
     property row : Int32
@@ -28,16 +24,18 @@ module Myst
 
 
 
-    def initialize(source : IO, source_file : String? = nil, working_dir : String? = nil)
+    def initialize(source : IO, source_file : String)
       @reader = Reader.new(source)
       @source_file = source_file
-      @working_dir = working_dir || (source_file ? File.dirname(source_file) : `pwd`)
 
       @row = 1
       @col = 0
       @last_char = ' '
 
-      @current_token = Token.new
+      # TODO: re-assignment to @current_token is currently necessary because
+      # Crystal does not understand that the ivar is being initialized in
+      # `advance_token`. I believe this is being addressed in 0.24.0.
+      @current_token = advance_token
       @buffer = IO::Memory.new
       @tokens = [] of Token
     end
@@ -50,10 +48,7 @@ module Myst
 
     # Move to a new token with a new buffer.
     def advance_token
-      @current_token = Token.new
-      @current_token.location.file  = @source_file
-      @current_token.location.line  = @row
-      @current_token.location.col   = @col
+      @current_token = Token.new(location: Location.new(@source_file, @row, @col))
     end
 
     def current_char : Char
