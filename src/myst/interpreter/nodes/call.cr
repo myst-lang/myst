@@ -3,16 +3,22 @@ module Myst
     def visit(node : Call)
       # If the Call has a receiver, lookup the Call on that receiver, otherwise
       # search the current scope.
-      scope =
+      receiver =
         if node.receiver?
           node.receiver.accept(self)
-          receiver = stack.pop
-          receiver.scope
+          stack.pop
         else
-          current_self.scope
+          current_self
         end
 
-      visit_call(node, receiver, scope[node.name]?)
+      func = receiver.scope[node.name]?
+      func ||= receiver.ancestors.each do |anc|
+        if found = anc.scope[node.name]?
+          break found
+        end
+      end
+
+      visit_call(node, receiver, func)
     end
 
     private def visit_call(node, receiver, func : TFunctor)

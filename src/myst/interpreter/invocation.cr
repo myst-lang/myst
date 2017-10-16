@@ -35,7 +35,7 @@ module Myst
       # After the invocation, restore the current value of `self` to whatever
       # it had been previously.
       @itr.pop_self if @receiver
-      result || raise "No clause matches with given parameters"
+      result || raise "No clause matches with given arguments: #{@args.inspect}"
     end
 
 

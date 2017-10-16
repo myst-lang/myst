@@ -2,19 +2,6 @@ module Myst
   abstract class Value
     def type_name; self.class.type_name; end
 
-    macro inherited
-      # When a new Value type is created, add a SCOPE constant to it to hold
-      # methods and attributes for the Value.
-      SCOPE = Scope.new
-
-      def scope; SCOPE; end
-
-      # Instance variables are properties tied to the instance of an object.
-      # For consistency between native (Integer, String, etc.) and language-
-      # level types (IO, File, etc.), all values have an `ivars` property.
-      property ivars : Scope = Scope.new
-    end
-
     def self.from_literal(literal : Node)
       case literal
       when IntegerLiteral
@@ -32,6 +19,37 @@ module Myst
       else
         raise "#{literal.class} cannot be converted to a Value."
       end
+    end
+
+
+    macro inherited
+      # When a new Value type is created, add a SCOPE constant to it to hold
+      # methods and attributes for the Value.
+      SCOPE = Scope.new
+
+      def scope; SCOPE; end
+    end
+
+    # Instance variables are properties tied to the instance of an object.
+    # For consistency between native (Integer, String, etc.) and language-
+    # level types (IO, File, etc.), all values have an `ivars` property.
+    property ivars : Scope = Scope.new
+
+    # Ancestors are the modules that have been included inside of a Type. For
+    # example, if a module includes Enumerable, then the ancestors for that
+    # module will contain Enumerable. The order of ancestors is from most to
+    # least recent (the last `include` will be first in this list).
+    property included_modules = [] of TModule
+
+    def ancestors : Array(TModule)
+      @included_modules.reduce(Set(TModule).new) do |acc, mod|
+        acc.add(mod)
+        acc.concat(mod.ancestors)
+      end.to_a
+    end
+
+    def insert_ancestor(anc : TModule)
+      @included_modules.unshift(anc)
     end
 
 
@@ -192,7 +210,6 @@ module Myst
     def_equals_and_hash impl
   end
 
-
   class TModule < Value
     def self.type_name; "Module"; end
     property scope   : Scope
@@ -230,6 +247,10 @@ module Myst
 
     def initialize(@type : TType)
       @scope = Scope.new(@type.instance_scope)
+    end
+
+    def ancestors
+      @type.ancestors
     end
 
     def type_name

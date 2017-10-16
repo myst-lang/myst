@@ -56,4 +56,32 @@ describe "Interpreter - Include" do
 
     itr.stack.pop.should eq(val(:called_bar))
   end
+
+  it "is allowed on Modules" do
+    itr = parse_and_interpret MODULE_DEF + %q(
+      defmodule Bar
+        include Foo
+      end
+
+      Bar.foo
+    )
+
+    itr.stack.pop.should eq(val(:included))
+  end
+
+  it "includes all ancestors of the included module" do
+    itr = parse_and_interpret MODULE_DEF + %q(
+      defmodule Bar
+        include Foo
+      end
+
+      defmodule Baz
+        include Bar
+      end
+
+      Baz.foo
+    )
+
+    itr.stack.pop.should eq(val(:included))
+  end
 end
