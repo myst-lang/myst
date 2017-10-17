@@ -10,52 +10,7 @@ More goals are sure to come as the language develops, but these are the driving 
 
 # Roadmap
 
-The following is a roadmap for a `v0.1.0` of Myst. It is _not necessarily_ comprehensive of the original [Syntax document](SYNTAX.md), but should provide the basis of a usable scripting language. As time goes on, this roadmap may be further refined and modified.
-
-- [X] Values
-  - [X] booleans
-  - [X] floats
-  - [X] functors
-  - [X] integers
-  - [X] lists
-  - [X] maps
-  - [X] nativefunctors
-  - [X] nils
-  - [X] strings
-  - [X] symbols
-- [X] Flow control and dependency loading
-  - [X] `when`/`unless`/`else`
-  - [X] `while`/`until`
-  - [X] `break`
-  - [X] `return`
-  - [X] `next`
-  - [X] `require`
-- [X] Functions/blocks
-  - [X] positional parameters
-  - [X] pattern matches
-  - [X] multiple definitions/clause-based lookup
-  - [X] type restrictions
-  - [X] positional splat collectors
-  - [X] explicit block parameters
-- [X] Modules
-  - [X] reopening
-  - [X] nested definitions
-  - [X] `include` other modules
-- [X] Decomposition/pattern matching
-  - [X] variable bindings
-  - [X] value interpolations
-  - [X] variable re-use (via interpolation)
-  - [X] splat collectors
-  - [X] list patterns
-  - [X] map patterns
-- [ ] Standard Library
-  - [ ] IO
-  - [ ] File
-  - [ ] Dir
-  - [ ] Math
-  - [ ] Enumerable
-
-The standard library will likely expand before a `0.1.0` is released. Another goal for `0.1.0` is 60+% test coverage, primarily at a feature test level.
+Progress towards `v0.1.0` is moving steadily. The goal is to have full support for the syntax defined in the original syntax document (with the addition of modules and types), full test coverage of the interpreter internals, and the ability to define tests in the language itself (this will then be the basis of future tests, mainly around the standard library).
 
 
 # Get Involved
