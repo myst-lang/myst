@@ -1,5 +1,6 @@
 module Myst
   class ControlException < Exception
+    property? caught : Bool = false
   end
 
   class ReturnException < ControlException; end

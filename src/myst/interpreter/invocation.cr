@@ -36,8 +36,16 @@ module Myst
       # it had been previously.
       @itr.pop_self if @receiver
       result || raise "No clause matches with given arguments: #{@args.inspect}"
-    rescue ReturnException
-      # Returns are caught by the first containing function.
+    rescue ex : BreakException
+      if ex.caught?
+        return @itr.stack.pop
+      else
+        ex.caught = true
+        raise ex
+      end
+    rescue ReturnException | NextException
+      # `return` is caught by the first containing function.
+      # `next` in the context of a call is equivalent to `return`.
       return @itr.stack.pop
     end
 
