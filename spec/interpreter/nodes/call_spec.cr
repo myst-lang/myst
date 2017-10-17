@@ -15,6 +15,37 @@ describe "Interpreter - Call" do
   it_interprets %q(1.to_s),       [val("1")]
   it_interprets %q((1 + 1).to_s), [val("2")]
 
+  # Block parameters are created as functors available in the current scope. As
+  # such, they can be used like any other functor.
+  it_interprets %q(
+    def foo(&block)
+      block(1)
+    end
+
+    foo do |a|
+      a + 1
+    end
+  ),                [val(2)]
+
+  # When looking up a function, the current lexical scope should be checked for
+  # overrides. However, parent lexical scopes should be ignored.
+  it_interprets %q(
+    defmodule Foo
+      def block
+        nil
+      end
+
+      def foo(&block)
+        block(1)
+      end
+    end
+
+    Foo.foo do |a|
+      a + 1
+    end
+  ),                [val(2)]
+
+
   # Functions in Modules
   it_interprets %q(
     defmodule Foo

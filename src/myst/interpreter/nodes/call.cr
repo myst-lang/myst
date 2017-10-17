@@ -11,8 +11,9 @@ module Myst
           current_self
         end
 
-      func = receiver.scope[node.name]?
-      func ||= receiver.ancestors.each do |anc|
+      func    = current_scope[node.name] if current_scope.has_key?(node.name)
+      func  ||= receiver.scope[node.name]?
+      func  ||= receiver.ancestors.each do |anc|
         if found = anc.scope[node.name]?
           break found
         end

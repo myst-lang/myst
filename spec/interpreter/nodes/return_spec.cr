@@ -28,4 +28,20 @@ describe "Interpreter - Return" do
 
     itr.stack.pop.should eq(val(nil))
   end
+
+  it "is contained by block scoping" do
+    itr = parse_and_interpret %q(
+      def foo(&block)
+        result = block(1)
+        result + 1
+      end
+
+      foo do |a|
+        return 5
+        return 0
+      end
+    )
+
+    itr.stack.pop.should eq(val(6))
+  end
 end
