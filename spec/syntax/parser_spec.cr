@@ -1427,6 +1427,9 @@ describe "Parser" do
     it_parses %q({{keyword}} "hello"),      {{node}}.new(l("hello"))
     it_parses %q({{keyword}} {a: 1, b: 2}), {{node}}.new(l({ :a => 1, :b => 2 }))
     it_parses %q({{keyword}} [1, 2, 3]),    {{node}}.new(l([1, 2, 3]))
+    it_parses %q({{keyword}} %Thing{}),     {{node}}.new(Instantiation.new(c("Thing")))
+    it_parses %q({{keyword}} Const),        {{node}}.new(c("Const"))
+    it_parses %q({{keyword}} a),            {{node}}.new(Call.new(nil, "a"))
     it_parses %q({{keyword}} 1 + 2),        {{node}}.new(Call.new(l(1), "+", [l(2)]))
     it_parses %q({{keyword}} *collection),  {{node}}.new(Splat.new(Call.new(nil, "collection")))
     it_parses %q(
@@ -1449,4 +1452,28 @@ describe "Parser" do
       {{keyword}} 1, 2
     )
   {% end %}
+
+
+
+  # Raise
+
+  # A Raise is syntactically valid so long as it is given an argument.
+  it_parses %q(raise "hello"),  Raise.new(l("hello"))
+  it_parses %q(raise :hi),      Raise.new(l(:hi))
+  it_parses %q(raise nil),      Raise.new(l(nil))
+  it_parses %q(raise true),     Raise.new(l(true))
+  it_parses %q(raise false),    Raise.new(l(false))
+  it_parses %q(raise 1),        Raise.new(l(1))
+  it_parses %q(raise 1.0),      Raise.new(l(1))
+  it_parses %q(raise []),       Raise.new(ListLiteral.new)
+  it_parses %q(raise {}),       Raise.new(MapLiteral.new)
+  it_parses %q(raise Thing),    Raise.new(c("Thing"))
+  it_parses %q(raise a),        Raise.new(Call.new(nil, "a"))
+  it_parses %q(raise %Thing{}), Raise.new(Instantiation.new(c("Thing")))
+  it_does_not_parse %q(raise),  /value/
+
+  # A Raise is _not_ a normal Call, and thus does not accept multiple parameters or a block.
+  it_does_not_parse %q(raise 1, 2)
+  it_does_not_parse %q(raise do; end)
+  it_does_not_parse %q(raise { |a| })
 end

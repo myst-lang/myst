@@ -25,6 +25,10 @@ module Myst
       RETURN        # return
       BREAK         # break
       NEXT          # next
+      RAISE         # raise
+      RESCUE        # rescue
+      ENSURE        # ensure
+
       SELF          # self
 
       TRUE          # true
@@ -99,6 +103,7 @@ module Myst
           WHILE, UNTIL,
           TRUE, FALSE, NIL,
           RETURN, BREAK, NEXT,
+          RAISE, RESCUE, ENSURE,
           SELF
         ]
       end
@@ -125,6 +130,9 @@ module Myst
           "return" => RETURN,
           "break" => BREAK,
           "next" => NEXT,
+          "raise" => RAISE,
+          "rescue" => RESCUE,
+          "ensure" => ENSURE,
           "self" => SELF
         }
       end

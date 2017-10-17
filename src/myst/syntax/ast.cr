@@ -781,4 +781,38 @@ module Myst
   class Break < ControlExpr
     def_equals_and_hash
   end
+
+  # A raise expression. Raise expressions create an Exception and cause the
+  # interpreter to immediately start backtracking up the callstack until a node
+  # capable of handling the Exception is encountered (i.e., has an attached
+  # `rescue` clause).
+  class Raise < ControlExpr
+    def_equals_and_hash
+  end
+
+  # A rescue expression. Rescues are used to capture Exceptions created with
+  # `raise`. Rescues may also provide a parameter (with all the same syntax as
+  # parameters used in Defs) to restrict what Exceptions can be handled by the
+  # expression.
+  class Rescue < Node
+    property! param : Param?
+
+    def initialize(@param : Param? = nil)
+    end
+  end
+
+  # A set of Expressions representing semantics for handling exceptions.
+  # Whenever a `rescue` or `ensure` is encountered at the end of a Def, Block,
+  # or Begin, the existing node is wrapped in an ExceptionHandler, and the
+  # handling blocks are parsed into this node.
+  class ExceptionHandler < Node
+    property  body     : Node
+    property  rescues  : Array(Rescue)?
+    property! else     : Node?
+    property! ensure   : Node?
+    property  implicit = false
+
+    def initialize(@body : Node, @rescues=[] of Rescue, @else : Node?=nil, @ensure : Node?=nil, @implicit=false)
+    end
+  end
 end

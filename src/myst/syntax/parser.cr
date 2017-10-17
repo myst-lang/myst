@@ -101,7 +101,7 @@ module Myst
         skip_space_and_newlines
       end
 
-      # If there were no expressions in the block, return a Nop instead.w
+      # If there were no expressions in the block, return a Nop instead.
       block || Nop.new
     end
 
@@ -117,7 +117,7 @@ module Myst
         parse_include
       when Token::Type::REQUIRE
         parse_require
-      when Token::Type::RETURN, Token::Type::BREAK, Token::Type::NEXT
+      when Token::Type::RETURN, Token::Type::BREAK, Token::Type::NEXT, Token::Type::RAISE
         parse_flow_control
       when Token::Type::WHEN, Token::Type::UNLESS
         parse_conditional
@@ -315,6 +315,8 @@ module Myst
           Break.new
         when accept(Token::Type::NEXT)
           Next.new
+        when accept(Token::Type::RAISE)
+          Raise.new
         else
           raise ParseError.new("Expected one of return, break, or next, got #{current_token.inspect}")
         end
@@ -323,6 +325,10 @@ module Myst
 
       unless current_token.type.delimiter?
         node.value = parse_expression
+      end
+
+      if node.is_a?(Raise) && !node.value?
+        raise ParseError.new("`raise` must be given a value.")
       end
 
       return node
