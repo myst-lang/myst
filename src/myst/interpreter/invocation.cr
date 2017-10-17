@@ -59,7 +59,7 @@ module Myst
           raise "Unmatched block parameter"
         end
 
-        return do_call(clause, @receiver, @args, @block)
+        return true
       rescue
         false
       end
@@ -67,7 +67,7 @@ module Myst
 
     private def clause_matches?(clause : TNativeDef, args)
       if @args.size == clause.arity
-        return do_call(clause, @receiver, @args, @block)
+        return true
       else
         false
       end
