@@ -1470,7 +1470,14 @@ describe "Parser" do
   it_parses %q(raise Thing),    Raise.new(c("Thing"))
   it_parses %q(raise a),        Raise.new(Call.new(nil, "a"))
   it_parses %q(raise %Thing{}), Raise.new(Instantiation.new(c("Thing")))
+  it_parses %q(raise <[1, 2]>), Raise.new(i(l([1, 2])))
   it_does_not_parse %q(raise),  /value/
+
+  # The argument to the raise must start on the same line as the keyword
+  it_does_not_parse %q(
+    raise
+      "some error"
+  ),                            /value/
 
   # A Raise is _not_ a normal Call, and thus does not accept multiple parameters or a block.
   it_does_not_parse %q(raise 1, 2)
