@@ -796,9 +796,12 @@ module Myst
   # expression.
   class Rescue < Node
     property! param : Param?
+    property  body  : Node
 
-    def initialize(@param : Param? = nil)
+    def initialize(@body : Node=Nop.new, @param : Param? = nil)
     end
+
+    def_equals_and_hash param?, body
   end
 
   # A set of Expressions representing semantics for handling exceptions.
@@ -807,12 +810,28 @@ module Myst
   # handling blocks are parsed into this node.
   class ExceptionHandler < Node
     property  body     : Node
-    property  rescues  : Array(Rescue)?
+    property  rescues  : Array(Rescue)
     property! else     : Node?
     property! ensure   : Node?
-    property  implicit = false
 
-    def initialize(@body : Node, @rescues=[] of Rescue, @else : Node?=nil, @ensure : Node?=nil, @implicit=false)
+    def initialize(@body : Node, @rescues=[] of Rescue, @else : Node?=nil, @ensure : Node?=nil)
     end
+
+    def location
+      @body.location
+    end
+
+    def end_location
+      case
+      when ensure?
+        self.ensure.end_location
+      when rescues.size > 0
+        self.rescues.last.end_location
+      else
+        body.end_location
+      end
+    end
+
+    def_equals_and_hash body, rescues, else?, ensure?
   end
 end

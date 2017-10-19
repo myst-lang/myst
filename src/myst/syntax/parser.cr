@@ -52,6 +52,10 @@ module Myst
       accept(*types) || raise ParseError.new("Expected one of #{types.join(',')} but got #{@current_token.type}")
     end
 
+    def accept_delimiter
+      accept(Token::Type::SEMI, Token::Type::NEWLINE)
+    end
+
     def expect_delimiter
       expect(Token::Type::SEMI, Token::Type::NEWLINE)
     end
@@ -187,7 +191,7 @@ module Myst
         pop_var_scope
         return method_def.at_end(finish.location)
       else
-        method_def.body = parse_code_block(Token::Type::END)
+        method_def.body = parse_exception_handler
         finish = expect(Token::Type::END)
         pop_var_scope
         return method_def.at_end(finish.location)
@@ -703,11 +707,66 @@ module Myst
       if finish = accept(end_token)
         return block.at_end(finish.location)
       else
-        block.body = parse_code_block(end_token)
+        if end_token == Token::Type::END
+          block.body = parse_exception_handler
+        else
+          block.body = parse_code_block(end_token)
+        end
         finish = expect(end_token)
         return block.at_end(finish.location)
       end
     end
+
+    def parse_exception_handler
+      body = parse_code_block(Token::Type::RESCUE, Token::Type::ENSURE, Token::Type::END)
+      handler = ExceptionHandler.new(body)
+
+      handler_needed = false
+      loop do
+        case current_token.type
+        when Token::Type::RESCUE
+          handler_needed = true
+          if handler.ensure?
+            # `ensure` _must_ be the last clause of an ExceptionHandler. A
+            # `rescue` after the `ensure` is invalid.
+            raise ParseError.new("ensure must be the last clause of an exception handler.")
+          end
+
+          rescue_start = expect(Token::Type::RESCUE)
+          skip_space
+          # If any other token appears before a delimiter, it must be part of
+          # a parameter for the Rescue.
+          unless accept_delimiter
+            param = parse_param
+          end
+          skip_space_and_newlines
+          rescue_body = parse_code_block(Token::Type::RESCUE, Token::Type::ENSURE, Token::Type::END)
+          handler.rescues << Rescue.new(rescue_body, param).at(rescue_start.location).at_end(rescue_body)
+        when Token::Type::ENSURE
+          handler_needed = true
+
+          ensure_start = expect(Token::Type::ENSURE)
+          skip_space
+          expect_delimiter
+          skip_space_and_newlines
+
+          if handler.ensure?
+            # Only 1 ensure is allowed in an ExceptionHandler.
+            raise ParseError.new("only one ensure clause may be provided for a block.")
+          else
+            handler.ensure = parse_code_block(Token::Type::RESCUE, Token::Type::ENSURE, Token::Type::END)
+          end
+        when Token::Type::END
+          break
+        else
+          raise ParseError.new("Expected one of `rescue`, `ensure`, or `else`")
+        end
+      end
+
+      # If no handler was created, just return the given body as-is.
+      return handler_needed ? handler : body
+    end
+
 
     def parse_instantiation
       start = expect(Token::Type::MODULO)
