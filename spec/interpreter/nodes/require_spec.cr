@@ -23,6 +23,13 @@ Dir.cd(__DIR__) do
       require "./require_support/bar_defs.mt"
     ),                  [val(false)]
 
+    # A files "loaded" status is determined by its absolute path. Using an
+    # alternate path for the same file should now load it again.
+    it_interprets %q(
+      require "./require_support/bar_defs.mt"
+      require "./require_support/../require_support/bar_defs.mt"
+    ),                  [val(false)]
+
     # `require` executes the code from the file within the scope that the
     # `require` appeared.
     it_interprets %q(

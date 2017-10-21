@@ -17,11 +17,6 @@ module Myst
 
       path_str = path.value
 
-      # If the file has already been loaded, return false.
-      if @loaded_files[path_str]?
-        stack.push(TBoolean.new(false))
-        return
-      end
 
       # The working directory for the require is always the directory of the
       # file that contains the `require` node being interpreted.
@@ -33,8 +28,13 @@ module Myst
         end
 
       full_path = resolve_path(path_str, working_dir)
+      # If the file has already been loaded, return false.
+      if @loaded_files[full_path]?
+        stack.push(TBoolean.new(false))
+        return
+      end
 
-      @loaded_files[path_str] = true
+      @loaded_files[full_path] = true
 
       required_source = Parser.for_file(full_path).parse
       visit(required_source)
