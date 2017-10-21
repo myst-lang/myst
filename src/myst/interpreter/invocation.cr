@@ -53,8 +53,8 @@ module Myst
     private def clause_matches?(clause : TFunctorDef, args)
       begin
         left, splat, right = chunk_params(clause)
-        left.each { |param| match_positional_arg(param, args.shift) }
-        right.each{ |param| match_positional_arg(param, args.pop)   }
+        left.each { |param| match_param(param, args.shift) }
+        right.each{ |param| match_param(param, args.pop)   }
 
         if splat.is_a?(Param)
           @itr.match(Var.new(splat.name), TList.new(args))
@@ -88,7 +88,7 @@ module Myst
       false
     end
 
-    private def match_positional_arg(param, arg)
+    private def match_param(param, arg)
       @itr.match(param.pattern, arg)        if param.pattern?
       @itr.match(Var.new(param.name), arg)  if param.name?
     end

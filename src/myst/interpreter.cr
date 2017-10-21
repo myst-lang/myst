@@ -45,6 +45,7 @@ module Myst
     end
 
     def push_scope_override(scope : Scope = Scope.new)
+      scope.parent ||= current_scope
       @scope_stack.push(scope)
     end
 
