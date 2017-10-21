@@ -24,6 +24,26 @@ describe "Interpreter - Raise" do
     it_raises %q(raise 1.0),    "1.0"
     it_raises %q(raise "err"),  "err"
     it_raises %q(raise :err),   "err"
+    # As they are not defined natively, stubbed `to_s` implementations are
+    # given for List and Map to ensure a consistent result here.
+    it_raises %q(
+      deftype List
+        def to_s
+          "a list"
+        end
+      end
+
+      raise []
+    ),                          "a list"
+    it_raises %q(
+      deftype Map
+        def to_s
+          "a map"
+        end
+      end
+
+      raise {}
+    ),                          "a map"
     it_raises %q(
       a = 1
       b = 2
