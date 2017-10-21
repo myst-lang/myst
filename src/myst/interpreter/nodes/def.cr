@@ -9,7 +9,7 @@ module Myst
           type.instance_scope
         when {Value, true}
           # Any other kind of value is not allowed to define static methods.
-          raise "Cannot define static method on #{current_self.type_name}"
+          raise "Cannot define static method on #{current_self.type.name}"
         else
           current_scope
         end

@@ -6,7 +6,7 @@ module Myst
       when TInteger, TFloat
         TFloat.new(this.value + arg.value)
       else
-        raise "invalid argument for Float#+: #{arg.type_name}"
+        raise "invalid argument for Float#+: #{arg.type.name}"
       end
     end
   ] of Callable)
@@ -18,7 +18,7 @@ module Myst
       when TInteger, TFloat
         TFloat.new(this.value - arg.value)
       else
-        raise "invalid argument for Float#-: #{arg.type_name}"
+        raise "invalid argument for Float#-: #{arg.type.name}"
       end
     end
   ] of Callable)
@@ -30,7 +30,7 @@ module Myst
       when TInteger, TFloat
         TFloat.new(this.value * arg.value)
       else
-        raise "invalid argument for Float#*: #{arg.type_name}"
+        raise "invalid argument for Float#*: #{arg.type.name}"
       end
     end
   ] of Callable)
@@ -43,7 +43,7 @@ module Myst
         raise "Division by zero" if arg.value == 0
         TFloat.new(this.value / arg.value)
       else
-        raise "invalid argument for Float#/: #{arg.type_name}"
+        raise "invalid argument for Float#/: #{arg.type.name}"
       end
     end
   ] of Callable)
@@ -56,7 +56,7 @@ module Myst
         raise "Division by zero" if arg.value == 0
         TFloat.new(this.value % arg.value)
       else
-        raise "invalid argument for Float#%: #{arg.type_name}"
+        raise "invalid argument for Float#%: #{arg.type.name}"
       end
     end
   ] of Callable)

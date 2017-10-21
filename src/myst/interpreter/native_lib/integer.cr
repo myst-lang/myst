@@ -8,7 +8,7 @@ module Myst
       when TFloat
         TFloat.new(this.value + arg.value)
       else
-        raise "invalid argument for Integer#+: #{arg.type_name}"
+        raise "invalid argument for Integer#+: #{arg.type.name}"
       end
     end
   ] of Callable)
@@ -22,7 +22,7 @@ module Myst
       when TFloat
         TFloat.new(this.value - arg.value)
       else
-        raise "invalid argument for Integer#-: #{arg.type_name}"
+        raise "invalid argument for Integer#-: #{arg.type.name}"
       end
     end
   ] of Callable)
@@ -36,7 +36,7 @@ module Myst
       when TFloat
         TFloat.new(this.value * arg.value)
       else
-        raise "invalid argument for Integer#*: #{arg.type_name}"
+        raise "invalid argument for Integer#*: #{arg.type.name}"
       end
     end
   ] of Callable)
@@ -52,7 +52,7 @@ module Myst
         raise "Division by zero" if arg.value == 0
         TFloat.new(this.value / arg.value)
       else
-        raise "invalid argument for Integer#/: #{arg.type_name}"
+        raise "invalid argument for Integer#/: #{arg.type.name}"
       end
     end
   ] of Callable)
@@ -68,7 +68,7 @@ module Myst
         raise "Division by zero" if arg.value == 0
         TFloat.new(this.value.to_f % arg.value)
       else
-        raise "invalid argument for Integer#%: #{arg.type_name}"
+        raise "invalid argument for Integer#%: #{arg.type.name}"
       end
     end
   ] of Callable)

@@ -6,7 +6,7 @@ module Myst
       when TString
         TString.new(this.value + arg.value)
       else
-        raise "invalid argument for String#+: #{arg.type_name}"
+        raise "invalid argument for String#+: #{arg.type.name}"
       end
     end
   ] of Callable)
@@ -19,7 +19,7 @@ module Myst
         # String multiplication repeats `this` `arg` times.
         TString.new(this.value * arg.value)
       else
-        raise "invalid argument for String#*: #{arg.type_name}"
+        raise "invalid argument for String#*: #{arg.type.name}"
       end
     end
   ] of Callable)

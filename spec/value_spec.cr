@@ -41,7 +41,7 @@ describe "Values" do
 
   describe "TNil" do
     it "has a type name of Nil" do
-      TNil.type_name.should eq("Nil")
+      TNil.new.type.name.should eq("Nil")
     end
 
     it "has a string representation of `nil`" do
@@ -67,7 +67,7 @@ describe "Values" do
 
   describe "TBoolean" do
     it "has a type name of Boolean" do
-      TBoolean.type_name.should eq("Boolean")
+      TBoolean.new(false).type.name.should eq("Boolean")
     end
 
     it "always equates FALSE and FALSE" do
@@ -109,7 +109,7 @@ describe "Values" do
 
   describe "TInteger" do
     it "has a type name of Integer" do
-      TInteger.type_name.should eq("Integer")
+      TInteger.new(1_i64).type.name.should eq("Integer")
     end
 
     it "can contain any 64-bit integer value" do
@@ -147,7 +147,7 @@ describe "Values" do
 
   describe "TFloat" do
     it "has a type name of Float" do
-      TFloat.type_name.should eq("Float")
+      TFloat.new(1.0).type.name.should eq("Float")
     end
 
     it "can contain any 64-bit float value" do
@@ -185,7 +185,7 @@ describe "Values" do
 
   describe "TString" do
     it "has a type name of String" do
-      TString.type_name.should eq("String")
+      TString.new("").type.name.should eq("String")
     end
 
     it "can contain strings of arbitrary length" do
@@ -228,7 +228,7 @@ hi
 
   describe "TSymbol" do
     it "has a type name of Symbol" do
-      TSymbol.type_name.should eq("Symbol")
+      TSymbol.new("").type.name.should eq("Symbol")
     end
 
     it "can be created from any string value" do
@@ -259,7 +259,7 @@ hi
 
   describe "TList" do
     it "has a type name of List" do
-      TList.type_name.should eq("List")
+      TList.new.type.name.should eq("List")
     end
 
     it "can be created with no elements" do
@@ -297,7 +297,7 @@ hi
 
   describe "TMap" do
     it "has a type name of Map" do
-      TMap.type_name.should eq("Map")
+      TMap.new.type.name.should eq("Map")
     end
 
     it "can be created with no elements" do
