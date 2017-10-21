@@ -45,6 +45,18 @@ def it_interprets_with_assignments(node : String, assignments : Hash(String, Mys
   end
 end
 
+def interpret_with_mocked_output(source)
+  itr = Interpreter.new(output: IO::Memory.new, errput: IO::Memory.new)
+  parse_and_interpret(source, itr)
+end
+
+def it_raises(source, error)
+  it "raises `#{error}` from `#{source}`" do
+    itr = interpret_with_mocked_output(source)
+    itr.errput.to_s.should contain(error)
+  end
+end
+
 
 def it_does_not_interpret(node : String, message=nil)
   it %Q(does not interpret #{node}) do
@@ -57,6 +69,7 @@ def it_does_not_interpret(node : String, message=nil)
     end
   end
 end
+
 
 # val(node)
 #

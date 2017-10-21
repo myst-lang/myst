@@ -77,7 +77,8 @@ module Myst
     end
 
     private def clause_matches?(clause : TNativeDef, args)
-      if @args.size == clause.arity
+      # An arity less than 0 implies the clause accepts any number of arguments.
+      if clause.arity < 0 || @args.size == clause.arity
         return true
       else
         false

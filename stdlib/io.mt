@@ -1,4 +1,4 @@
-module IO
+defmodule IO
   STDIN  = 0
   STDOUT = 1
   STDERR = 2

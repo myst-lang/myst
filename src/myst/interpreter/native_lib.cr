@@ -9,6 +9,13 @@ module Myst
     def call_func(itr, func : TFunctor, args : Array(Value), receiver : Value?=nil)
       Invocation.new(itr, func, receiver, args, nil).invoke
     end
+
+    # Same as `call_func`, but the function to call is given as a name to
+    # look up on the given receiver.
+    def call_func_by_name(itr, receiver : Value, name : String, args : Array(Value))
+      func = receiver.scope[name].as(TFunctor)
+      Invocation.new(itr, func, receiver, args, nil).invoke
+    end
   end
 end
 

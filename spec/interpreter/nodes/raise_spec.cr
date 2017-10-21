@@ -2,18 +2,6 @@ require "../../spec_helper.cr"
 require "../../support/nodes.cr"
 require "../../support/interpret.cr"
 
-private def interpret_with_mocked_output(source)
-  itr = Interpreter.new(output: IO::Memory.new, errput: IO::Memory.new)
-  parse_and_interpret(source, itr)
-end
-
-private def it_raises(source, error)
-  it "raises `#{error}` from `#{source}`" do
-    itr = interpret_with_mocked_output(source)
-    itr.errput.to_s.should contain(error)
-  end
-end
-
 describe "Interpreter - Raise" do
   # raise accepts any value as an argument.
   describe "with arbitrary arguments" do

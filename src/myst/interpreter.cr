@@ -32,6 +32,7 @@ module Myst
       kernel.scope["NativeDef"]   = NATIVE_DEF_TYPE
       kernel.scope["Module"]      = MODULE_TYPE
       kernel.scope["Type"]        = TYPE_TYPE
+      kernel.scope["IO"]          = IO_MODULE
       return kernel
     end
 
