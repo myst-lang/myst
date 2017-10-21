@@ -7,7 +7,11 @@ module Myst
     property stack : Array(Value)
     property self_stack : Array(Value)
 
-    def initialize
+    property output : IO
+    property errput : IO
+
+
+    def initialize(@output : IO = STDOUT, @errput : IO = STDERR)
       @stack = [] of Value
       @scope_stack = [] of Scope
       @self_stack = [TModule.new] of Value
@@ -46,6 +50,18 @@ module Myst
 
     def visit(node : Node)
       raise "#{node} nodes are not yet supported."
+    end
+
+    def put_error(error : RuntimeError)
+      value_to_s = error.value.scope["to_s"].as(TFunctor)
+      result = Invocation.new(self, value_to_s, error.value, [] of Value, nil).invoke
+      @errput.puts(result.as(TString).value)
+    end
+
+    def run(program)
+      visit(program)
+    rescue err : RuntimeError
+      put_error(err)
     end
   end
 end

@@ -53,4 +53,4 @@ end
 
 # Interpret the program
 interpreter = Interpreter.new
-program.accept(interpreter)
+interpreter.run(program)
