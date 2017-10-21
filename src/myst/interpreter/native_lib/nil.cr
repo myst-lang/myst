@@ -1,11 +1,11 @@
 module Myst
-  TNil::SCOPE["to_s"] = TFunctor.new([
+  NIL_TYPE.instance_scope["to_s"] = TFunctor.new([
     TNativeDef.new(0) do |_this, _args, _block, _itr|
       TString.new("nil")
     end
   ] of Callable)
 
-  TNil::SCOPE["=="] = TFunctor.new([
+  NIL_TYPE.instance_scope["=="] = TFunctor.new([
     TNativeDef.new(1) do |this, (arg), _block, _itr|
       this = this.as(TNil)
       case arg
@@ -17,7 +17,7 @@ module Myst
     end
   ] of Callable)
 
-  TNil::SCOPE["!="] = TFunctor.new([
+  NIL_TYPE.instance_scope["!="] = TFunctor.new([
     TNativeDef.new(1) do |this, (arg), _block, _itr|
       this = this.as(TNil)
       case arg

@@ -1,5 +1,5 @@
 module Myst
-  TFloat::SCOPE["+"] = TFunctor.new([
+  FLOAT_TYPE.instance_scope["+"] = TFunctor.new([
     TNativeDef.new(1) do |this, (arg), _block, _itr|
       this = this.as(TFloat)
       case arg
@@ -11,7 +11,7 @@ module Myst
     end
   ] of Callable)
 
-  TFloat::SCOPE["-"] = TFunctor.new([
+  FLOAT_TYPE.instance_scope["-"] = TFunctor.new([
     TNativeDef.new(1) do |this, (arg), _block, _itr|
       this = this.as(TFloat)
       case arg
@@ -23,7 +23,7 @@ module Myst
     end
   ] of Callable)
 
-  TFloat::SCOPE["*"] = TFunctor.new([
+  FLOAT_TYPE.instance_scope["*"] = TFunctor.new([
     TNativeDef.new(1) do |this, (arg), _block, _itr|
       this = this.as(TFloat)
       case arg
@@ -35,7 +35,7 @@ module Myst
     end
   ] of Callable)
 
-  TFloat::SCOPE["/"] = TFunctor.new([
+  FLOAT_TYPE.instance_scope["/"] = TFunctor.new([
     TNativeDef.new(1) do |this, (arg), _block, _itr|
       this = this.as(TFloat)
       case arg
@@ -48,7 +48,7 @@ module Myst
     end
   ] of Callable)
 
-  TFloat::SCOPE["%"] = TFunctor.new([
+  FLOAT_TYPE.instance_scope["%"] = TFunctor.new([
     TNativeDef.new(1) do |this, (arg), _block, _itr|
       this = this.as(TFloat)
       case arg
@@ -61,14 +61,14 @@ module Myst
     end
   ] of Callable)
 
-  TFloat::SCOPE["to_s"] = TFunctor.new([
+  FLOAT_TYPE.instance_scope["to_s"] = TFunctor.new([
     TNativeDef.new(0) do |this, _args, _block, _itr|
       this = this.as(TFloat)
       TString.new(this.value.to_s)
     end
   ] of Callable)
 
-  TFloat::SCOPE["=="] = TFunctor.new([
+  FLOAT_TYPE.instance_scope["=="] = TFunctor.new([
     TNativeDef.new(1) do |this, (arg), _block, _itr|
       this = this.as(TFloat)
       case arg
@@ -80,7 +80,7 @@ module Myst
     end
   ] of Callable)
 
-  TFloat::SCOPE["!="] = TFunctor.new([
+  FLOAT_TYPE.instance_scope["!="] = TFunctor.new([
     TNativeDef.new(1) do |this, (arg), _block, _itr|
       this = this.as(TFloat)
       case arg

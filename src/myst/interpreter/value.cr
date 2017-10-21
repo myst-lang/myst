@@ -20,20 +20,10 @@ module Myst
     end
 
 
-    macro inherited
-      # When a new Value type is created, add a SCOPE constant to it to hold
-      # methods and attributes for the Value.
-      SCOPE = Scope.new
-
-      def scope; SCOPE; end
-    end
-
-
     # Instance variables are properties tied to the instance of an object.
     # For consistency between native (Integer, String, etc.) and language-
     # level types (IO, File, etc.), all values have an `ivars` property.
     property ivars : Scope = Scope.new
-
 
     # Ancestors are the modules that have been included inside of a Type. For
     # example, if a module includes Enumerable, then the ancestors for that
@@ -59,6 +49,10 @@ module Myst
 
     def type
       raise "Compiler bug: Unknown type for value #{self}"
+    end
+
+    def scope
+      self.type.instance_scope
     end
   end
 

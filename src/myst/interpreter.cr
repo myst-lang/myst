@@ -14,7 +14,25 @@ module Myst
     def initialize(@output : IO = STDOUT, @errput : IO = STDERR)
       @stack = [] of Value
       @scope_stack = [] of Scope
-      @self_stack = [TModule.new] of Value
+      @self_stack = [create_kernel] of Value
+    end
+
+    private def create_kernel
+      kernel = TModule.new
+      kernel.scope["Nil"]         = NIL_TYPE
+      kernel.scope["Boolean"]     = BOOLEAN_TYPE
+      kernel.scope["Integer"]     = INTEGER_TYPE
+      kernel.scope["Float"]       = FLOAT_TYPE
+      kernel.scope["String"]      = STRING_TYPE
+      kernel.scope["Symbol"]      = SYMBOL_TYPE
+      kernel.scope["List"]        = LIST_TYPE
+      kernel.scope["Map"]         = MAP_TYPE
+      kernel.scope["Functor"]     = FUNCTOR_TYPE
+      kernel.scope["FunctorDef"]  = FUNCTOR_DEF_TYPE
+      kernel.scope["NativeDef"]   = NATIVE_DEF_TYPE
+      kernel.scope["Module"]      = MODULE_TYPE
+      kernel.scope["Type"]        = TYPE_TYPE
+      return kernel
     end
 
 

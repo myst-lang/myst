@@ -1,5 +1,5 @@
 module Myst
-  TSymbol::SCOPE["to_s"] = TFunctor.new([
+  SYMBOL_TYPE.instance_scope["to_s"] = TFunctor.new([
     TNativeDef.new(0) do |this, _args, _block, _itr|
       this = this.as(TSymbol)
       TString.new(this.name)
@@ -7,7 +7,7 @@ module Myst
     ] of Callable)
 
 
-  TSymbol::SCOPE["=="] = TFunctor.new([
+  SYMBOL_TYPE.instance_scope["=="] = TFunctor.new([
     TNativeDef.new(1) do |this, (arg), _block, _itr|
       this = this.as(TSymbol)
       case arg
@@ -19,7 +19,7 @@ module Myst
     end
   ] of Callable)
 
-  TSymbol::SCOPE["!="] = TFunctor.new([
+  SYMBOL_TYPE.instance_scope["!="] = TFunctor.new([
     TNativeDef.new(1) do |this, (arg), _block, _itr|
       this = this.as(TSymbol)
       case arg
