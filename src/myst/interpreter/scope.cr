@@ -18,7 +18,7 @@ module Myst
     end
 
     def [](key : String) : Value
-      self[key]? || raise IndexError.new
+      self[key]? || raise IndexError.new("No entry `#{key}` for `#{self.inspect}`")
     end
 
     def []=(key : String, value : Value) : Value
@@ -43,12 +43,9 @@ module Myst
       @values[key] = value
     end
 
-
-    # Insert a Scope between this scope and its parent. Used for including
-    # modules into other values.
-    def insert_parent(scope : Scope)
-      scope.parent = @parent
-      @parent = scope
+    # Remove all values from this scope. Parent scopes are not affected.
+    def clear
+      @values.clear
     end
   end
 end

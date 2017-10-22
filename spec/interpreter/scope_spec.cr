@@ -64,4 +64,23 @@ describe "Interpreter - Scope" do
       (scope["a"] = val(1)).should eq(val(1))
     end
   end
+
+
+  describe "#clear" do
+    it "removes all entries from the scope" do
+      scope = Scope.new
+      scope["a"] = TNil.new
+      scope["Thing"] = TType.new("Thing")
+      scope["x"] = TInteger.new(100_i64)
+
+      scope.values.size.should eq(3)
+
+      scope.clear
+
+      scope.values.size.should eq(0)
+      scope.has_key?("a").should be_false
+      scope.has_key?("Thing").should be_false
+      scope.has_key?("x").should be_false
+    end
+  end
 end
