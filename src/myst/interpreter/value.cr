@@ -57,19 +57,20 @@ module Myst
   end
 
 
-  NIL_TYPE          = TType.new("Nil")
-  BOOLEAN_TYPE      = TType.new("Boolean")
-  INTEGER_TYPE      = TType.new("Integer")
-  FLOAT_TYPE        = TType.new("Float")
-  STRING_TYPE       = TType.new("String")
-  SYMBOL_TYPE       = TType.new("Symbol")
-  LIST_TYPE         = TType.new("List")
-  MAP_TYPE          = TType.new("Map")
-  FUNCTOR_TYPE      = TType.new("Functor")
-  FUNCTOR_DEF_TYPE  = TType.new("FunctorDef")
-  NATIVE_DEF_TYPE   = TType.new("NativeDef")
-  MODULE_TYPE       = TType.new("Module")
-  TYPE_TYPE         = TType.new("Type")
+  KERNEL            = TModule.new
+  NIL_TYPE          = TType.new("Nil",        KERNEL.scope)
+  BOOLEAN_TYPE      = TType.new("Boolean",    KERNEL.scope)
+  INTEGER_TYPE      = TType.new("Integer",    KERNEL.scope)
+  FLOAT_TYPE        = TType.new("Float",      KERNEL.scope)
+  STRING_TYPE       = TType.new("String",     KERNEL.scope)
+  SYMBOL_TYPE       = TType.new("Symbol",     KERNEL.scope)
+  LIST_TYPE         = TType.new("List",       KERNEL.scope)
+  MAP_TYPE          = TType.new("Map",        KERNEL.scope)
+  FUNCTOR_TYPE      = TType.new("Functor",    KERNEL.scope)
+  FUNCTOR_DEF_TYPE  = TType.new("FunctorDef", KERNEL.scope)
+  NATIVE_DEF_TYPE   = TType.new("NativeDef",  KERNEL.scope)
+  MODULE_TYPE       = TType.new("Module",     KERNEL.scope)
+  TYPE_TYPE         = TType.new("Type",       KERNEL.scope)
 
   class TType < Value
     property name           : String
