@@ -1,7 +1,8 @@
 module Myst
   class Interpreter
-    def init_boolean
-      boolean_type = TType.new("Boolean")
+    def init_boolean(root_scope : Scope)
+      boolean_type = TType.new("Boolean", root_scope)
+
       boolean_type.instance_scope["to_s"] = TFunctor.new([
         TNativeDef.new(0) do |this, _args, _block, _itr|
           TString.new(this.as(TBoolean).value ? "true" : "false")

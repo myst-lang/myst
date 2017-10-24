@@ -1,7 +1,8 @@
 module Myst
   class Interpreter
-    def init_float
-      float_type = TType.new("Float")
+    def init_float(root_scope : Scope)
+      float_type = TType.new("Float", root_scope)
+
       float_type.instance_scope["+"] = TFunctor.new([
         TNativeDef.new(1) do |this, (arg), _block, _itr|
           this = this.as(TFloat)

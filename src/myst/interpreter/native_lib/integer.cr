@@ -1,7 +1,8 @@
 module Myst
   class Interpreter
-    def init_integer
-      integer_type = TType.new("Integer")
+    def init_integer(root_scope : Scope)
+      integer_type = TType.new("Integer", root_scope)
+
       integer_type.instance_scope["+"] = TFunctor.new([
         TNativeDef.new(1) do |this, (arg), _block, _itr|
           this = this.as(TInteger)

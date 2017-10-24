@@ -1,7 +1,8 @@
 module Myst
   class Interpreter
-    def init_symbol
-      symbol_type = TType.new("Symbol")
+    def init_symbol(root_scope : Scope)
+      symbol_type = TType.new("Symbol", root_scope)
+
       symbol_type.instance_scope["to_s"] = TFunctor.new([
         TNativeDef.new(0) do |this, _args, _block, _itr|
           this = this.as(TSymbol)

@@ -1,7 +1,8 @@
 module Myst
   class Interpreter
-    def init_string
-      string_type = TType.new("String")
+    def init_string(root_scope : Scope)
+      string_type = TType.new("String", root_scope)
+
       string_type.instance_scope["+"] = TFunctor.new([
         TNativeDef.new(1) do |this, (arg), _block, _itr|
           this = this.as(TString)

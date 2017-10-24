@@ -1,7 +1,8 @@
 module Myst
   class Interpreter
-    def init_nil
-      nil_type = TType.new("Nil")
+    def init_nil(root_scope : Scope)
+      nil_type = TType.new("Nil", root_scope)
+
       nil_type.instance_scope["to_s"] = TFunctor.new([
         TNativeDef.new(0) do |_this, _args, _block, _itr|
           TString.new("nil")

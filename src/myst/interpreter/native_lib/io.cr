@@ -1,7 +1,8 @@
 module Myst
   class Interpreter
-    def init_io
-      io_module = TModule.new("IO")
+    def init_io(root_scope : Scope)
+      io_module = TModule.new("IO", root_scope)
+
       io_module.scope["puts"] = TFunctor.new([
         TNativeDef.new(-1) do |_this, args, _block, itr|
           if args.size == 0
