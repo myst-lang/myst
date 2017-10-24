@@ -14,13 +14,20 @@ module Myst
           current_scope
         end
 
-      # If a functor with the same name already exists in the current scope,
-      # use it. Otherwise, create a new functor in the current scope.
-      if scope.has_key?(node.name)
-        functor = scope[node.name].as(TFunctor)
+      # Blocks are _anonymous_ Defs, meaning they should never be assigned in
+      # to a scope. In other words, every Block should be considered its own
+      # Functor.
+      unless node.is_a?(Block)
+        # If a functor with the same name already exists in the current scope,
+        # use it. Otherwise, create a new functor in the current scope.
+        if scope.has_key?(node.name)
+          functor = scope[node.name].as(TFunctor)
+        else
+          functor = TFunctor.new([] of Callable, scope)
+          scope.assign(node.name, functor)
+        end
       else
         functor = TFunctor.new([] of Callable, scope)
-        scope.assign(node.name, functor)
       end
 
       functor.add_clause(TFunctorDef.new(node))
