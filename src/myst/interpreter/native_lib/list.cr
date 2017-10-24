@@ -1,15 +1,22 @@
 module Myst
-  LIST_TYPE.instance_scope["each"] = TFunctor.new([
-    TNativeDef.new(0) do |this, _args, block, itr|
-      this = this.as(TList)
+  class Interpreter
+    def init_list
+      list_type = TType.new("List")
+      list_type.instance_scope["each"] = TFunctor.new([
+        TNativeDef.new(0) do |this, _args, block, itr|
+          this = this.as(TList)
 
-      if block
-        this.elements.each do |elem|
-          NativeLib.call_func(itr, block, [elem], nil)
+          if block
+            this.elements.each do |elem|
+              NativeLib.call_func(itr, block, [elem], nil)
+            end
+          end
+
+          this
         end
-      end
+      ] of Callable)
 
-      this
+      @kernel.scope["List"] = list_type
     end
-  ] of Callable)
+  end
 end

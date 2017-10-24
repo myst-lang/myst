@@ -6,6 +6,7 @@ module Myst
   class Interpreter
     property stack : Array(Value)
     property self_stack : Array(Value)
+    property kernel = TModule.new("Kernel")
 
     property output : IO
     property errput : IO
@@ -14,32 +15,31 @@ module Myst
     def initialize(@output : IO = STDOUT, @errput : IO = STDERR)
       @stack = [] of Value
       @scope_stack = [] of Scope
-      @self_stack = [KERNEL] of Value
+      @self_stack = [@kernel] of Value
 
       init_kernel
     end
 
     private def init_kernel
-      KERNEL.scope.clear
-      KERNEL.scope["Nil"]         = NIL_TYPE
-      KERNEL.scope["Boolean"]     = BOOLEAN_TYPE
-      KERNEL.scope["Integer"]     = INTEGER_TYPE
-      KERNEL.scope["Float"]       = FLOAT_TYPE
-      KERNEL.scope["String"]      = STRING_TYPE
-      KERNEL.scope["Symbol"]      = SYMBOL_TYPE
-      KERNEL.scope["List"]        = LIST_TYPE
-      KERNEL.scope["Map"]         = MAP_TYPE
-      KERNEL.scope["Functor"]     = FUNCTOR_TYPE
-      KERNEL.scope["FunctorDef"]  = FUNCTOR_DEF_TYPE
-      KERNEL.scope["NativeDef"]   = NATIVE_DEF_TYPE
-      KERNEL.scope["Module"]      = MODULE_TYPE
-      KERNEL.scope["Type"]        = TYPE_TYPE
-      KERNEL.scope["IO"]          = IO_MODULE
+      init_nil
+      init_boolean
+      init_integer
+      init_float
+      init_string
+      init_symbol
+      init_list
+      init_map
+      init_io
+      # @kernel.scope["Functor"]     = FUNCTOR_TYPE
+      # @kernel.scope["FunctorDef"]  = FUNCTOR_DEF_TYPE
+      # @kernel.scope["NativeDef"]   = NATIVE_DEF_TYPE
+      # @kernel.scope["Module"]      = MODULE_TYPE
+      # @kernel.scope["Type"]        = TYPE_TYPE
     end
 
 
     def current_scope
-      scope_override || current_self.scope
+      scope_override || __scopeof(current_self)
     end
 
     def scope_override
@@ -74,7 +74,7 @@ module Myst
     end
 
     def put_error(error : RuntimeError)
-      value_to_s = error.value.scope["to_s"].as(TFunctor)
+      value_to_s = __scopeof(error.value)["to_s"].as(TFunctor)
       result = Invocation.new(self, value_to_s, error.value, [] of Value, nil).invoke
       @errput.puts(result.as(TString).value)
     end

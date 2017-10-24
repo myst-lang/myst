@@ -7,7 +7,12 @@ module Myst
         raise "Cannot include non-module value. Got #{_module}"
       end
 
-      current_self.insert_ancestor(_module)
+      slf = current_self
+      if slf.is_a?(ContainerType)
+        slf.insert_ancestor(_module)
+      else
+        raise "Cannot include in non-container type."
+      end
 
       # The result of an Include is the module that was included.
       stack.push(_module)
