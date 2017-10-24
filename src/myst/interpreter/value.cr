@@ -29,23 +29,11 @@ module Myst
     def truthy?
       true
     end
+
+    def type_name
+      raise "Compiler bug: unknown type name for value #{self}"
+    end
   end
-
-
-  KERNEL            = TModule.new
-  NIL_TYPE          = TType.new("Nil",        KERNEL.scope)
-  BOOLEAN_TYPE      = TType.new("Boolean",    KERNEL.scope)
-  INTEGER_TYPE      = TType.new("Integer",    KERNEL.scope)
-  FLOAT_TYPE        = TType.new("Float",      KERNEL.scope)
-  STRING_TYPE       = TType.new("String",     KERNEL.scope)
-  SYMBOL_TYPE       = TType.new("Symbol",     KERNEL.scope)
-  LIST_TYPE         = TType.new("List",       KERNEL.scope)
-  MAP_TYPE          = TType.new("Map",        KERNEL.scope)
-  FUNCTOR_TYPE      = TType.new("Functor",    KERNEL.scope)
-  FUNCTOR_DEF_TYPE  = TType.new("FunctorDef", KERNEL.scope)
-  NATIVE_DEF_TYPE   = TType.new("NativeDef",  KERNEL.scope)
-  MODULE_TYPE       = TType.new("Module",     KERNEL.scope)
-  TYPE_TYPE         = TType.new("Type",       KERNEL.scope)
 
   abstract class ContainerType < Value
     property name           : String = ""
@@ -75,6 +63,10 @@ module Myst
       @scope = Scope.new(parent)
     end
 
+    def type_name
+      "Module"
+    end
+
     def_equals_and_hash scope
   end
 
@@ -85,6 +77,10 @@ module Myst
     def initialize(@name : String, parent : Scope?=nil)
       @scope = Scope.new(parent)
       @instance_scope = Scope.new(parent)
+    end
+
+    def type_name
+      "Type"
     end
 
     def_equals_and_hash name, scope, instance_scope
@@ -101,6 +97,12 @@ module Myst
     def ancestors
       @type.ancestors
     end
+
+    def type_name
+      @type.name
+    end
+
+    def_equals_and_hash type, scope
   end
 
 
@@ -133,6 +135,10 @@ module Myst
       false
     end
 
+    def type_name
+      "Nil"
+    end
+
     def_equals_and_hash
   end
 
@@ -144,11 +150,19 @@ module Myst
     def truthy?
       @value
     end
+
+    def type_name
+      "Boolean"
+    end
   end
 
   class TInteger < TPrimitive(Int64)
     def ==(other : TFloat)
       self.value == other.value
+    end
+
+    def type_name
+      "Integer"
     end
   end
 
@@ -156,9 +170,16 @@ module Myst
     def ==(other : TInteger)
       self.value == other.value
     end
+
+    def type_name
+      "Float"
+    end
   end
 
   class TString < TPrimitive(String)
+    def type_name
+      "String"
+    end
   end
 
   class TSymbol < TPrimitive(UInt64)
@@ -168,6 +189,10 @@ module Myst
     property name : String
 
     def initialize(@value : UInt64, @name : String)
+    end
+
+    def type_name
+      "Symbol"
     end
 
     def self.new(name)
@@ -186,6 +211,10 @@ module Myst
     def initialize(@elements=[] of Value)
     end
 
+    def type_name
+      "List"
+    end
+
     def_equals_and_hash elements
   end
 
@@ -193,6 +222,10 @@ module Myst
     property entries : Hash(Value, Value)
 
     def initialize(@entries={} of Value => Value)
+    end
+
+    def type_name
+      "Map"
     end
 
     def_equals_and_hash entries
@@ -216,6 +249,10 @@ module Myst
       clauses.push(definition)
     end
 
+    def type_name
+      "Functor"
+    end
+
     def_equals_and_hash clauses, lexical_scope, parent?
   end
 
@@ -227,6 +264,10 @@ module Myst
     def initialize(@definition : Def)
     end
 
+    def type_name
+      "FunctorDef"
+    end
+
     def_equals_and_hash definition
   end
 
@@ -236,6 +277,10 @@ module Myst
     property impl   : FuncT
 
     def initialize(@arity : Int32, &@impl : FuncT)
+    end
+
+    def type_name
+      "NativeDef"
     end
 
     def_equals_and_hash impl

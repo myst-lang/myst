@@ -6,34 +6,12 @@ module Myst
     # Types and Modules, the value itself is returned.
     def __typeof(value : Value)
       case value
-      when TNil
-        @kernel.scope["Nil"].as(TType)
-      when TBoolean
-        @kernel.scope["Boolean"].as(TType)
-      when TInteger
-        @kernel.scope["Integer"].as(TType)
-      when TFloat
-        @kernel.scope["Float"].as(TType)
-      when TString
-        @kernel.scope["String"].as(TType)
-      when TSymbol
-        @kernel.scope["Symbol"].as(TType)
-      when TList
-        @kernel.scope["List"].as(TType)
-      when TMap
-        @kernel.scope["Map"].as(TType)
-      when TFunctor
-        @kernel.scope["Functor"].as(TType)
-      when TFunctorDef
-        @kernel.scope["FunctorDef"].as(TType)
-      when TNativeDef
-        @kernel.scope["NativeDef"].as(TType)
+      when ContainerType
+        value
       when TInstance
         value.type
-      when TType
-        value
-      when TModule
-        value
+      when Value
+        @kernel.scope[value.type_name].as(TType)
       else
         raise "Can't resolve type of #{value}"
       end
