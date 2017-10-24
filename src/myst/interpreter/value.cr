@@ -25,6 +25,18 @@ module Myst
     # level types (IO, File, etc.), all values have an `ivars` property.
     property ivars : Scope = Scope.new
 
+
+    def truthy?
+      true
+    end
+
+    def type_name
+      raise "Compiler bug: unknown type name for value #{self}"
+    end
+  end
+
+  abstract class ContainerType < Value
+    property name           : String = ""
     # Ancestors are the modules that have been included inside of a Type. For
     # example, if a module includes Enumerable, then the ancestors for that
     # module will contain Enumerable. The order of ancestors is from most to
@@ -41,39 +53,24 @@ module Myst
     def insert_ancestor(anc : TModule)
       @included_modules.unshift(anc)
     end
-
-
-    def truthy?
-      true
-    end
-
-    def type
-      raise "Compiler bug: Unknown type for value #{self}"
-    end
-
-    def scope
-      self.type.instance_scope
-    end
   end
 
+  class TModule < ContainerType
+    property scope   : Scope
 
-  KERNEL            = TModule.new
-  NIL_TYPE          = TType.new("Nil",        KERNEL.scope)
-  BOOLEAN_TYPE      = TType.new("Boolean",    KERNEL.scope)
-  INTEGER_TYPE      = TType.new("Integer",    KERNEL.scope)
-  FLOAT_TYPE        = TType.new("Float",      KERNEL.scope)
-  STRING_TYPE       = TType.new("String",     KERNEL.scope)
-  SYMBOL_TYPE       = TType.new("Symbol",     KERNEL.scope)
-  LIST_TYPE         = TType.new("List",       KERNEL.scope)
-  MAP_TYPE          = TType.new("Map",        KERNEL.scope)
-  FUNCTOR_TYPE      = TType.new("Functor",    KERNEL.scope)
-  FUNCTOR_DEF_TYPE  = TType.new("FunctorDef", KERNEL.scope)
-  NATIVE_DEF_TYPE   = TType.new("NativeDef",  KERNEL.scope)
-  MODULE_TYPE       = TType.new("Module",     KERNEL.scope)
-  TYPE_TYPE         = TType.new("Type",       KERNEL.scope)
+    def initialize(name : String? = nil, parent : Scope? = nil)
+      @name = name if name
+      @scope = Scope.new(parent)
+    end
 
-  class TType < Value
-    property name           : String
+    def type_name
+      "Module"
+    end
+
+    def_equals_and_hash scope
+  end
+
+  class TType < ContainerType
     property scope          : Scope
     property instance_scope : Scope
 
@@ -82,8 +79,8 @@ module Myst
       @instance_scope = Scope.new(parent)
     end
 
-    def type
-      TYPE_TYPE
+    def type_name
+      "Type"
     end
 
     def_equals_and_hash name, scope, instance_scope
@@ -100,6 +97,12 @@ module Myst
     def ancestors
       @type.ancestors
     end
+
+    def type_name
+      @type.name
+    end
+
+    def_equals_and_hash type, scope
   end
 
 
@@ -132,8 +135,8 @@ module Myst
       false
     end
 
-    def type
-      NIL_TYPE
+    def type_name
+      "Nil"
     end
 
     def_equals_and_hash
@@ -148,8 +151,8 @@ module Myst
       @value
     end
 
-    def type
-      BOOLEAN_TYPE
+    def type_name
+      "Boolean"
     end
   end
 
@@ -158,8 +161,8 @@ module Myst
       self.value == other.value
     end
 
-    def type
-      INTEGER_TYPE
+    def type_name
+      "Integer"
     end
   end
 
@@ -168,14 +171,14 @@ module Myst
       self.value == other.value
     end
 
-    def type
-      FLOAT_TYPE
+    def type_name
+      "Float"
     end
   end
 
   class TString < TPrimitive(String)
-    def type
-      STRING_TYPE
+    def type_name
+      "String"
     end
   end
 
@@ -188,16 +191,16 @@ module Myst
     def initialize(@value : UInt64, @name : String)
     end
 
+    def type_name
+      "Symbol"
+    end
+
     def self.new(name)
       SYMBOLS[name] ||= begin
         instance = TSymbol.allocate
         instance.initialize(@@next_id += 1, name)
         instance
       end
-    end
-
-    def type
-      SYMBOL_TYPE
     end
   end
 
@@ -208,8 +211,8 @@ module Myst
     def initialize(@elements=[] of Value)
     end
 
-    def type
-      LIST_TYPE
+    def type_name
+      "List"
     end
 
     def_equals_and_hash elements
@@ -221,8 +224,8 @@ module Myst
     def initialize(@entries={} of Value => Value)
     end
 
-    def type
-      MAP_TYPE
+    def type_name
+      "Map"
     end
 
     def_equals_and_hash entries
@@ -246,8 +249,8 @@ module Myst
       clauses.push(definition)
     end
 
-    def type
-      FUNCTOR_TYPE
+    def type_name
+      "Functor"
     end
 
     def_equals_and_hash clauses, lexical_scope, parent?
@@ -261,8 +264,8 @@ module Myst
     def initialize(@definition : Def)
     end
 
-    def type
-      FUNCTOR_DEF_TYPE
+    def type_name
+      "FunctorDef"
     end
 
     def_equals_and_hash definition
@@ -276,24 +279,10 @@ module Myst
     def initialize(@arity : Int32, &@impl : FuncT)
     end
 
-    def type
-      NATIVE_DEF_TYPE
+    def type_name
+      "NativeDef"
     end
 
     def_equals_and_hash impl
-  end
-
-  class TModule < Value
-    property scope   : Scope
-
-    def initialize(parent : Scope? = nil)
-      @scope = Scope.new(parent)
-    end
-
-    def type
-      MODULE_TYPE
-    end
-
-    def_equals_and_hash scope
   end
 end

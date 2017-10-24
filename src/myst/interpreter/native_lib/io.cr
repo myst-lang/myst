@@ -1,21 +1,27 @@
 module Myst
-  IO_MODULE = TModule.new
-  IO_MODULE.scope["puts"] = TFunctor.new([
-    TNativeDef.new(-1) do |_this, args, _block, itr|
-      if args.size == 0
-        itr.output.puts
-      else
-        args.each do |arg|
-          string = NativeLib.call_func_by_name(itr, arg, "to_s", [] of Value)
-          if string.is_a?(TString)
-            itr.output.puts(string.value)
+  class Interpreter
+    def init_io
+      io_module = TModule.new("IO")
+      io_module.scope["puts"] = TFunctor.new([
+        TNativeDef.new(-1) do |_this, args, _block, itr|
+          if args.size == 0
+            itr.output.puts
           else
-            raise RuntimeError.new(TString.new("expected String argument. Got #{string.type.name}"))
+            args.each do |arg|
+              string = NativeLib.call_func_by_name(itr, arg, "to_s", [] of Value)
+              if string.is_a?(TString)
+                itr.output.puts(string.value)
+              else
+                raise RuntimeError.new(TString.new("expected String argument. Got #{__typeof(string).name}"))
+              end
+            end
           end
-        end
-      end
 
-      TNil.new
+          TNil.new
+        end
+      ] of Callable)
+
+      io_module
     end
-  ] of Callable)
+  end
 end

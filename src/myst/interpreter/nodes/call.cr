@@ -12,9 +12,9 @@ module Myst
         end
 
       func    = current_scope[node.name] if current_scope.has_key?(node.name)
-      func  ||= receiver.scope[node.name]?
-      func  ||= receiver.ancestors.each do |anc|
-        if found = anc.scope[node.name]?
+      func  ||= __scopeof(receiver)[node.name]?
+      func  ||= __typeof(receiver).ancestors.each do |anc|
+        if found = __scopeof(anc)[node.name]?
           break found
         end
       end

@@ -6,7 +6,7 @@ module Myst
       if current_scope.has_key?(node.name)
         _module = current_scope[node.name].as(TModule)
       else
-        _module = TModule.new(current_scope)
+        _module = TModule.new(node.name, current_scope)
         current_scope.assign(node.name, _module)
       end
 

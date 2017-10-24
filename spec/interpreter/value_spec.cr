@@ -1,4 +1,4 @@
-require "./spec_helper.cr"
+require "../spec_helper.cr"
 
 describe "Values" do
   describe "::from_literal" do
@@ -40,10 +40,6 @@ describe "Values" do
 
 
   describe "TNil" do
-    it "has a type name of Nil" do
-      TNil.new.type.name.should eq("Nil")
-    end
-
     it "has a string representation of `nil`" do
       TNil.new.to_s.should eq("nil")
     end
@@ -66,10 +62,6 @@ describe "Values" do
   end
 
   describe "TBoolean" do
-    it "has a type name of Boolean" do
-      TBoolean.new(false).type.name.should eq("Boolean")
-    end
-
     it "always equates FALSE and FALSE" do
       TBoolean.new(false).should eq(TBoolean.new(false))
     end
@@ -108,10 +100,6 @@ describe "Values" do
   end
 
   describe "TInteger" do
-    it "has a type name of Integer" do
-      TInteger.new(1_i64).type.name.should eq("Integer")
-    end
-
     it "can contain any 64-bit integer value" do
       TInteger.new( 9_223_372_036_854_775_807)
       TInteger.new(-9_223_372_036_854_775_807)
@@ -146,10 +134,6 @@ describe "Values" do
   end
 
   describe "TFloat" do
-    it "has a type name of Float" do
-      TFloat.new(1.0).type.name.should eq("Float")
-    end
-
     it "can contain any 64-bit float value" do
       TFloat.new( 1.7976931348623157e+308)
       TFloat.new(-1.7976931348623157e+308)
@@ -184,10 +168,6 @@ describe "Values" do
   end
 
   describe "TString" do
-    it "has a type name of String" do
-      TString.new("").type.name.should eq("String")
-    end
-
     it "can contain strings of arbitrary length" do
       TString.new("hello"*1000)
     end
@@ -227,10 +207,6 @@ hi
   end
 
   describe "TSymbol" do
-    it "has a type name of Symbol" do
-      TSymbol.new("").type.name.should eq("Symbol")
-    end
-
     it "can be created from any string value" do
       TSymbol.new("hello"*1000)
       TSymbol.new("hello\n\t\0")
@@ -258,10 +234,6 @@ hi
 
 
   describe "TList" do
-    it "has a type name of List" do
-      TList.new.type.name.should eq("List")
-    end
-
     it "can be created with no elements" do
       TList.new
     end
@@ -296,10 +268,6 @@ hi
 
 
   describe "TMap" do
-    it "has a type name of Map" do
-      TMap.new.type.name.should eq("Map")
-    end
-
     it "can be created with no elements" do
       TMap.new
     end
