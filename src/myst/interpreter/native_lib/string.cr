@@ -57,7 +57,7 @@ module Myst
         end
       ] of Callable)
 
-      @kernel.scope["String"] = string_type
+      string_type
     end
   end
 end

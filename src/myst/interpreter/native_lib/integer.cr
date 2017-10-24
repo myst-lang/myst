@@ -108,7 +108,7 @@ module Myst
         end
       ] of Callable)
 
-      @kernel.scope["Integer"] = integer_type
+      integer_type
     end
   end
 end

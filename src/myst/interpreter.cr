@@ -6,35 +6,16 @@ module Myst
   class Interpreter
     property stack : Array(Value)
     property self_stack : Array(Value)
-    property kernel = TModule.new("Kernel")
+    property kernel : TModule
 
     property output : IO
     property errput : IO
 
-
     def initialize(@output : IO = STDOUT, @errput : IO = STDERR)
       @stack = [] of Value
       @scope_stack = [] of Scope
+      @kernel = create_kernel
       @self_stack = [@kernel] of Value
-
-      init_kernel
-    end
-
-    private def init_kernel
-      init_nil
-      init_boolean
-      init_integer
-      init_float
-      init_string
-      init_symbol
-      init_list
-      init_map
-      init_io
-      # @kernel.scope["Functor"]     = FUNCTOR_TYPE
-      # @kernel.scope["FunctorDef"]  = FUNCTOR_DEF_TYPE
-      # @kernel.scope["NativeDef"]   = NATIVE_DEF_TYPE
-      # @kernel.scope["Module"]      = MODULE_TYPE
-      # @kernel.scope["Type"]        = TYPE_TYPE
     end
 
 

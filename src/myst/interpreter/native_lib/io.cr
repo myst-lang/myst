@@ -21,7 +21,7 @@ module Myst
         end
       ] of Callable)
 
-      @kernel.scope["IO"] = io_module
+      io_module
     end
   end
 end

@@ -17,7 +17,7 @@ module Myst
         end
       ] of Callable)
 
-      @kernel.scope["Map"] = map_type
+      map_type
     end
   end
 end

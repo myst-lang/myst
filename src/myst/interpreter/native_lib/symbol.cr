@@ -34,7 +34,7 @@ module Myst
         end
       ] of Callable)
 
-      @kernel.scope["Symbol"] = symbol_type
+      symbol_type
     end
   end
 end

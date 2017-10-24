@@ -16,7 +16,7 @@ module Myst
         end
       ] of Callable)
 
-      @kernel.scope["List"] = list_type
+      list_type
     end
   end
 end

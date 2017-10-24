@@ -95,8 +95,7 @@ module Myst
         end
       ] of Callable)
 
-
-      @kernel.scope["Float"] = float_type
+      float_type
     end
   end
 end

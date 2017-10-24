@@ -32,7 +32,7 @@ module Myst
         end
       ] of Callable)
 
-      @kernel.scope["Nil"] = nil_type
+      nil_type
     end
   end
 end
