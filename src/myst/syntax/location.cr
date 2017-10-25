@@ -1,3 +1,5 @@
+require "colorize"
+
 module Myst
   class Location
     property file   : String
@@ -8,8 +10,14 @@ module Myst
     def initialize(@file="", @line=0, @col=0, @length=0)
     end
 
-    def to_s
-      "#{@file || "unknown"}:#{@line}:#{@col}"
+    def to_s(colorize=false)
+      was_coloring = Colorize.enabled?
+      Colorize.enabled = colorize
+      location_str =  "#{@file || "anonymous"}".colorize(:red).to_s +
+                      ":#{@line}".colorize(:blue).to_s +
+                      ":#{@col}".colorize(:dark_gray).to_s
+      Colorize.enabled = was_coloring
+      location_str
     end
 
     def to_s(io : IO)

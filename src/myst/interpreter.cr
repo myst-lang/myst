@@ -6,14 +6,17 @@ module Myst
   class Interpreter
     property stack : Array(Value)
     property self_stack : Array(Value)
+    property callstack : Callstack
     property kernel : TModule
 
     property output : IO
     property errput : IO
 
+
     def initialize(@output : IO = STDOUT, @errput : IO = STDERR)
       @stack = [] of Value
       @scope_stack = [] of Scope
+      @callstack = Callstack.new
       @kernel = create_kernel
       @self_stack = [@kernel] of Value
     end
@@ -57,7 +60,10 @@ module Myst
     def put_error(error : RuntimeError)
       value_to_s = __scopeof(error.value)["to_s"].as(TFunctor)
       result = Invocation.new(self, value_to_s, error.value, [] of Value, nil).invoke
-      @errput.puts(result.as(TString).value)
+      @errput.puts("Uncaught Exception: " + result.as(TString).value)
+      error.trace.each do |frame|
+        @errput.puts "  at #{frame.location}"
+      end
     end
 
     def run(program)

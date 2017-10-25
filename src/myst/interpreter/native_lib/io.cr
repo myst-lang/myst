@@ -13,7 +13,7 @@ module Myst
               if string.is_a?(TString)
                 itr.output.puts(string.value)
               else
-                raise RuntimeError.new(TString.new("expected String argument. Got #{__typeof(string).name}"))
+                raise RuntimeError.new(TString.new("expected String argument. Got #{__typeof(string).name}"), itr.callstack)
               end
             end
           end

@@ -30,7 +30,9 @@ module Myst
         block = stack.pop.as(TFunctor)
       end
 
+      @callstack.push(node)
       result = Invocation.new(self, func, receiver, args, block).invoke
+      @callstack.pop
       stack.push(result)
     end
 
