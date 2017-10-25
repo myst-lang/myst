@@ -5,7 +5,7 @@ require "../../support/interpret.cr"
 describe "Interpreter - Raise" do
   # raise accepts any value as an argument.
   describe "with arbitrary arguments" do
-    it_raises %q(raise nil),    "nil"
+    it_raises %q(raise nil),    ""
     it_raises %q(raise false),  "false"
     it_raises %q(raise true),   "true"
     it_raises %q(raise 1),      "1"

@@ -1,26 +1,27 @@
 module Myst
   class Interpreter
+    NativeLib.method :io_puts, Value do
+      if __args.size == 0
+        self.output.puts
+      else
+        __args.each do |arg|
+          string = NativeLib.call_func_by_name(self, arg, "to_s", [] of Value)
+          if string.is_a?(TString)
+            self.output.puts(string.value)
+          else
+            raise RuntimeError.new(TString.new("expected String argument. Got #{__typeof(string).name}"), self.callstack)
+          end
+        end
+      end
+
+      TNil.new
+    end
+
+
     def init_io(root_scope : Scope)
       io_module = TModule.new("IO", root_scope)
 
-      io_module.scope["puts"] = TFunctor.new([
-        TNativeDef.new(-1) do |_this, args, _block, itr|
-          if args.size == 0
-            itr.output.puts
-          else
-            args.each do |arg|
-              string = NativeLib.call_func_by_name(itr, arg, "to_s", [] of Value)
-              if string.is_a?(TString)
-                itr.output.puts(string.value)
-              else
-                raise RuntimeError.new(TString.new("expected String argument. Got #{__typeof(string).name}"), itr.callstack)
-              end
-            end
-          end
-
-          TNil.new
-        end
-      ] of Callable)
+      NativeLib.def_method(io_module, :puts, :io_puts)
 
       io_module
     end

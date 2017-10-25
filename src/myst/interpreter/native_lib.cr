@@ -16,6 +16,34 @@ module Myst
       func = itr.__scopeof(receiver)[name].as(TFunctor)
       Invocation.new(itr, func, receiver, args, nil).invoke
     end
+
+    macro method(name, this_type, *params, &block)
+      def {{name.id}}(this : Value, __args : Array(Value), block : TFunctor?) : Value
+        this = this.as({{this_type}})
+
+        {% for type, index in params %}
+          {{params[index].var}} = __args[{{index}}].as({{params[index].type}})
+        {% end %}
+
+        result = begin
+          {{block.body}}
+        end
+
+        result.as(Value)
+      end
+    end
+
+    macro def_method(type, name, impl_name)
+      {{type}}.scope["{{name.id}}"] = TFunctor.new([
+        ->{{impl_name.id}}(Value, Array(Value), TFunctor?).as(Callable)
+      ] of Callable)
+    end
+
+    macro def_instance_method(type, name, impl_name)
+      {{type}}.instance_scope["{{name.id}}"] = TFunctor.new([
+        ->{{impl_name.id}}(Value, Array(Value), TFunctor?).as(Callable)
+      ] of Callable)
+    end
   end
 end
 

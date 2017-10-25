@@ -76,13 +76,10 @@ module Myst
       end
     end
 
+    # For simplicity, native clauses always match. Argument management is the
+    # responsibility of the method itself.
     private def clause_matches?(clause : TNativeDef, args)
-      # An arity less than 0 implies the clause accepts any number of arguments.
-      if clause.arity < 0 || @args.size == clause.arity
-        return true
-      else
-        false
-      end
+      true
     end
 
     private def clause_matches?(_func, _args)
@@ -95,13 +92,13 @@ module Myst
     end
 
 
-    private def do_call(func : TFunctorDef, receiver : Value?, args : Array(Value), block : TFunctor?)
+    private def do_call(func : TFunctorDef, _receiver, _args, _block)
       @itr.visit(func.body)
       return @itr.stack.pop
     end
 
-    private def do_call(func : TNativeDef, receiver : Value?, args : Array(Value), block : TFunctor?)
-      func.impl.call(receiver, args, block, @itr)
+    private def do_call(func : TNativeDef, receiver : Value, args : Array(Value), block : TFunctor?)
+      func.call(receiver, args, block)
     end
 
     private def do_call(_func, _receiver, _args, _block)

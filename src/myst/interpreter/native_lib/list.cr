@@ -1,29 +1,25 @@
 module Myst
   class Interpreter
+    NativeLib.method :list_each, TList do
+      if block
+        this.elements.each do |elem|
+          NativeLib.call_func(self, block, [elem], nil)
+        end
+      end
+
+      this
+    end
+
+    NativeLib.method :list_add, TList, other : TList do
+      TList.new(this.elements + other.elements)
+    end
+
+
     def init_list(root_scope : Scope)
       list_type = TType.new("List", root_scope)
 
-      list_type.instance_scope["each"] = TFunctor.new([
-        TNativeDef.new(0) do |this, _args, block, itr|
-          this = this.as(TList)
-
-          if block
-            this.elements.each do |elem|
-              NativeLib.call_func(itr, block, [elem], nil)
-            end
-          end
-
-          this
-        end
-      ] of Callable)
-
-      list_type.instance_scope["+"] = TFunctor.new([
-        TNativeDef.new(1) do |this, (other), block, itr|
-          this = this.as(TList)
-          other = other.as(TList)
-          TList.new(this.elements + other.elements)
-        end
-      ] of Callable)
+      NativeLib.def_instance_method(list_type, :each, :list_each)
+      NativeLib.def_instance_method(list_type, :+,    :list_add)
 
       list_type
     end

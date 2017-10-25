@@ -232,8 +232,20 @@ module Myst
   end
 
 
-  abstract class Callable < Value
+  class TFunctorDef < Value
+    property  definition : Def
+
+    delegate params, block_param, block_param?, body, splat_index?, splat_index, to: definition
+
+    def initialize(@definition : Def)
+    end
+
+    def_equals_and_hash definition
   end
+
+  alias TNativeDef = Value, Array(Value), TFunctor? -> Value
+  alias Callable = TFunctorDef | TNativeDef
+
 
   # A Functor is a container for multiple functor definitions, which can either
   # be language-level or native.
@@ -254,35 +266,5 @@ module Myst
     end
 
     def_equals_and_hash clauses, lexical_scope, parent?
-  end
-
-  class TFunctorDef < Callable
-    property  definition : Def
-
-    delegate params, block_param, block_param?, body, splat_index?, splat_index, to: definition
-
-    def initialize(@definition : Def)
-    end
-
-    def type_name
-      "FunctorDef"
-    end
-
-    def_equals_and_hash definition
-  end
-
-  class TNativeDef < Callable
-    alias FuncT = (Value?, Array(Value), TFunctor?, Interpreter -> Value)
-    property arity  : Int32
-    property impl   : FuncT
-
-    def initialize(@arity : Int32, &@impl : FuncT)
-    end
-
-    def type_name
-      "NativeDef"
-    end
-
-    def_equals_and_hash impl
   end
 end

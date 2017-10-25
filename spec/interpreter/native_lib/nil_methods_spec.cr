@@ -4,7 +4,7 @@ require "../../support/interpret.cr"
 
 describe "NativeLib - Nil Methods" do
   describe "#to_s" do
-    it_interprets %q(nil.to_s), [val("nil")]
+    it_interprets %q(nil.to_s), [val("")]
   end
 
   describe "#==" do

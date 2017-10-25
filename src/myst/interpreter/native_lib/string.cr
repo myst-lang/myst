@@ -1,62 +1,55 @@
 module Myst
   class Interpreter
+    NativeLib.method :string_add, TString, other : Value do
+      case other
+      when TString
+        TString.new(this.value + other.value)
+      else
+        raise "invalid argument for String#+: #{__typeof(other).name}"
+      end
+    end
+
+    NativeLib.method :string_multiply, TString, other : Value do
+      case other
+      when TInteger
+        # String multiplication repeats `this` `arg` times.
+        TString.new(this.value * other.value)
+      else
+        raise "invalid argument for String#*: #{__typeof(other).name}"
+      end
+    end
+
+    NativeLib.method :string_to_s, TString do
+      this.as(TString)
+    end
+
+    NativeLib.method :string_eq, TString, other : Value do
+      case other
+      when TString
+        TBoolean.new(this.value == other.value)
+      else
+        TBoolean.new(false)
+      end
+    end
+
+    NativeLib.method :string_not_eq, TString, other : Value do
+      case other
+      when TString
+        TBoolean.new(this.value != other.value)
+      else
+        TBoolean.new(true)
+      end
+    end
+
+
     def init_string(root_scope : Scope)
       string_type = TType.new("String", root_scope)
 
-      string_type.instance_scope["+"] = TFunctor.new([
-        TNativeDef.new(1) do |this, (arg), _block, _itr|
-          this = this.as(TString)
-          case arg
-          when TString
-            TString.new(this.value + arg.value)
-          else
-            raise "invalid argument for String#+: #{__typeof(arg).name}"
-          end
-        end
-      ] of Callable)
-
-      string_type.instance_scope["*"] = TFunctor.new([
-        TNativeDef.new(1) do |this, (arg), _block, _itr|
-          this = this.as(TString)
-          case arg
-          when TInteger
-            # String multiplication repeats `this` `arg` times.
-            TString.new(this.value * arg.value)
-          else
-            raise "invalid argument for String#*: #{__typeof(arg).name}"
-          end
-        end
-      ] of Callable)
-
-      string_type.instance_scope["to_s"] = TFunctor.new([
-        TNativeDef.new(0) do |this, _args, _block, _itr|
-          this.as(TString)
-        end
-      ] of Callable)
-
-      string_type.instance_scope["=="] = TFunctor.new([
-        TNativeDef.new(1) do |this, (arg), _block, _itr|
-          this = this.as(TString)
-          case arg
-          when TString
-            TBoolean.new(this.value == arg.value)
-          else
-            TBoolean.new(false)
-          end
-        end
-      ] of Callable)
-
-      string_type.instance_scope["!="] = TFunctor.new([
-        TNativeDef.new(1) do |this, (arg), _block, _itr|
-          this = this.as(TString)
-          case arg
-          when TString
-            TBoolean.new(this.value != arg.value)
-          else
-            TBoolean.new(true)
-          end
-        end
-      ] of Callable)
+      NativeLib.def_instance_method(string_type, :+,     :string_add)
+      NativeLib.def_instance_method(string_type, :*,     :string_multiply)
+      NativeLib.def_instance_method(string_type, :to_s,  :string_to_s)
+      NativeLib.def_instance_method(string_type, :==,    :string_eq)
+      NativeLib.def_instance_method(string_type, :!=,    :string_not_eq)
 
       string_type
     end
