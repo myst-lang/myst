@@ -26,7 +26,7 @@ module Myst
 
     def initialize(source : IO, source_file : String)
       @reader = Reader.new(source)
-      @source_file = source_file
+      @source_file = File.expand_path(source_file)
 
       @row = 1
       @col = 0

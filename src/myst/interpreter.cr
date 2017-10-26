@@ -62,7 +62,11 @@ module Myst
       result = Invocation.new(self, value_to_s, error.value, [] of Value, nil).invoke
       @errput.puts("Uncaught Exception: " + result.as(TString).value)
       error.trace.each do |frame|
-        @errput.puts "  at #{frame.location}"
+        if frame.responds_to?(:name)
+          @errput.puts "  in `#{frame.name}` at #{frame.location}"
+        else
+          @errput.puts "  at #{frame.location}"
+        end
       end
     end
 

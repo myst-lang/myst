@@ -41,7 +41,7 @@ module Myst
     end
 
     private def visit_call(_node, _receiver, _value)
-      raise "No method #{_node.name} for #{_receiver}."
+      raise RuntimeError.new(TString.new("No method #{_node.name} for #{_receiver}."), callstack)
     end
   end
 end

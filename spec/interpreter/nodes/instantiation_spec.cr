@@ -47,12 +47,12 @@ describe "Interpreter - Instantiation" do
 
   it "cannot access static methods through the instance" do
     # bar is a static method on Foo, so `f.bar` should not resolve.
-    expect_raises do
-      itr = interpret_with_defs %q(
-        f = %Foo{}
-        f.bar
-      )
-    end
+    itr = interpret_with_mocked_output DEFS + %q(
+      f = %Foo{}
+      f.bar
+    )
+
+    itr.errput.to_s.should contain("Uncaught Exception")
   end
 
   it "resolves to instance methods, not static methods" do
