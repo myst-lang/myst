@@ -1,11 +1,24 @@
 # Myst
 
-**A practical, dynamic language.** The primary goals of the language are:
+**A structured, dynamic, general-purpose language.**
 
-- **Be easy to understand:** Avoid special characters wherever possible. Expressions should flow in syntax as they do in thought. Don't surprise the user. Developers with a background in Ruby, Elixir, Crystal, or other similar languages should feel right at home, though feature parity with any of these is not a goal.
-- **Be reasonably fast:** Myst is a straight-forward, interpreted language, so it should be expected to perform competitively with similar established languages like Python and Ruby, and comparably with others like Elixir. It's okay to trade flexibility for performance.
+```ruby
+def fib(0); 1; end
+def fib(1); 1; end
+def fib(n : Integer)
+  fib(n-1) + fib(n-2)
+end
 
-More goals are sure to come as the language develops, but these are the driving points for now.
+[5, 6, 7, 8].map{ |n| fib(n) } #=> [5, 8, 13, 21]
+```
+
+Some of the high-level features include:
+
+- **Pattern-matching everywhere.** Assignments, method parameters, rescue clauses, etc.
+- **Multiple-clause functions.** All functions can define multiple clauses to adapt functionality based on inputs.
+- **Value interpolations.** Interpolate any value anywhere (even in method parameters) with the `<>` syntax.
+- **Soft typing.** Optional type annotations help control functionality without cluttering your code with conditionals.
+- **Raise anything.** Any value can be raised as an Exception and pattern matched in a rescue block.
 
 
 # Roadmap
