@@ -57,6 +57,12 @@ module Myst
       raise "#{node} nodes are not yet supported."
     end
 
+
+    def warn(message : String)
+      @errput.puts("WARNING: #{message}")
+    end
+
+
     def put_error(error : RuntimeError)
       value_to_s = __scopeof(error.value)["to_s"].as(TFunctor)
       result = Invocation.new(self, value_to_s, error.value, [] of Value, nil).invoke
