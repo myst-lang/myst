@@ -14,12 +14,17 @@ module Myst
       TList.new(this.elements + other.elements)
     end
 
+    NativeLib.method :list_access, TList, index : TInteger do
+      this.elements[index.value]
+    end
+
 
     def init_list(root_scope : Scope)
       list_type = TType.new("List", root_scope)
 
       NativeLib.def_instance_method(list_type, :each, :list_each)
       NativeLib.def_instance_method(list_type, :+,    :list_add)
+      NativeLib.def_instance_method(list_type, :[],   :list_access)
 
       list_type
     end
