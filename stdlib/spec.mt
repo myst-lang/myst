@@ -11,7 +11,7 @@ defmodule Spec
     end
 
     def to_s
-      name.to_s
+      @name
     end
   end
 

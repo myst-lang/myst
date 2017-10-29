@@ -10,7 +10,7 @@ module Myst
 
       instance = TInstance.new(type)
       # Allow access to the type from the instance through `.type`.
-      instance.scope["type"] = type
+      instance.scope.assign("type", type)
 
       # If the instance has an `initialize` method, call it with the arguments
       # given to the Instantiation.
