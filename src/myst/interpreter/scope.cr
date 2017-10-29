@@ -44,8 +44,6 @@ module Myst
     end
 
     # Remove all values from this scope. Parent scopes are not affected.
-    def clear
-      @values.clear
-    end
+    delegate each, clear, to: @values
   end
 end

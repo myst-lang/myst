@@ -252,7 +252,6 @@ module Myst
   class TFunctor < Value
     property  clauses         : Array(Callable)
     property  lexical_scope   : Scope
-    property! parent          : TFunctor?
 
     def initialize(@clauses=[] of Callable, @lexical_scope : Scope=Scope.new)
     end
@@ -265,6 +264,6 @@ module Myst
       "Functor"
     end
 
-    def_equals_and_hash clauses, lexical_scope, parent?
+    def_equals_and_hash clauses, lexical_scope
   end
 end
