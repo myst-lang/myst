@@ -46,8 +46,10 @@ describe "Interpreter - ExceptionHandler" do
         itr = interpret_with_mocked_output %q(
           def foo
             raise "an error"
-          rescue Integer
-            @rescued_integer = true
+          rescue Float
+            @rescued_float = true
+          rescue String
+            @rescued_string = true
           rescue
             @rescued_other = true
           end
@@ -55,8 +57,39 @@ describe "Interpreter - ExceptionHandler" do
           foo
         )
 
-        itr.current_self.ivars.has_key?("@rescued_integer").should be_false
-        itr.current_self.ivars.has_key?("@rescued_other").should be_true
+        itr.current_self.ivars.has_key?("@rescued_string").should be_true
+        itr.current_self.ivars.has_key?("@rescued_float").should be_false
+        itr.current_self.ivars.has_key?("@rescued_other").should be_false
+      end
+
+      it "performs type restriction when given" do
+        itr = interpret_with_mocked_output %q(
+          def foo
+            raise "an error"
+          rescue err : String
+            @message = err
+          end
+
+          foo
+        )
+
+        itr.current_self.ivars["@message"].should eq(val("an error"))
+      end
+
+      it "performs pattern and name matching when given" do
+        itr = interpret_with_mocked_output %q(
+          def foo
+            raise [1, 2]
+          rescue [a, b] =: list
+            @sum = a + b
+            @list = list
+          end
+
+          foo
+        )
+
+        itr.current_self.ivars["@sum"].should   eq(val(3))
+        itr.current_self.ivars["@list"].should  eq(val([1,2]))
       end
 
       it "makes named parameters available in the rescue scope" do

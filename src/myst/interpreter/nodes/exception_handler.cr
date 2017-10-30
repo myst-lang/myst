@@ -35,6 +35,7 @@ module Myst
     private def rescue_matches?(param : Param, arg : Value)
       self.match(param.pattern, arg)        if param.pattern?
       self.match(Var.new(param.name), arg)  if param.name?
+      self.match(param.restriction, arg)    if param.restriction?
       # `match` will raise a MatchError if the match was not successful.
       # Getting to this point means the match was successful.
       return true
