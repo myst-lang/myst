@@ -196,10 +196,18 @@ module Myst
     end
 
     def self.new(name)
-      SYMBOLS[name] ||= begin
+      # TODO: Revert to the following once Crystal 0.24.0 is released. This
+      # currently causes a bug (see crystal-lang/crystal#4600).
+      # SYMBOLS[name] ||= begin
+      # instance = TSymbol.allocate
+      # instance.initialize(@@next_id += 1, name)
+      # SYMBOLS[name] = instance
+      if SYMBOLS[name]?
+        SYMBOLS[name]
+      else
         instance = TSymbol.allocate
         instance.initialize(@@next_id += 1, name)
-        instance
+        SYMBOLS[name] = instance
       end
     end
   end
