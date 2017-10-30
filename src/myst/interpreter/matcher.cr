@@ -35,11 +35,19 @@ module Myst
     # For simplicity and efficiency, the equality of values according to a
     # match operation is determined by the native equality of the values, not
     # by any override of `==`.
-    private def match_value(pattern : Node, value : Value)
+    private def match_value(pattern : Node, right : Value)
       visit(pattern)
-      result = stack.pop
+      left = stack.pop
+      success =
+        if left.is_a?(TType) && !right.is_a?(TType)
+          # For types, check that `right` is either an instance of that type, or
+          # the type itself.
+          left == __typeof(right)
+        else
+          left == right
+        end
 
-      raise MatchError.new unless result == value
+      success || raise MatchError.new
     end
 
     private def match_list(pattern : ListLiteral, value : Value)

@@ -84,6 +84,7 @@ module Myst
 
     def init_integer(root_scope : Scope)
       integer_type = TType.new("Integer", root_scope)
+      integer_type.instance_scope["type"] = integer_type
 
       NativeLib.def_instance_method(integer_type, :+,     :int_add)
       NativeLib.def_instance_method(integer_type, :-,     :int_subtract)

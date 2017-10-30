@@ -2,7 +2,7 @@ require "../spec_helper.cr"
 require "../support/nodes.cr"
 require "../support/interpret.cr"
 
-macro it_matches(pattern, value)
+macro it_matches(pattern, value, setup=nil)
   it %q(matches `{{pattern}}` and `{{value}}`) do
     itr = Interpreter.new
     result = itr.match({{pattern}}, {{value}})
@@ -28,6 +28,20 @@ describe "Interpreter - #match" do
   it_matches l(1.0),    val(1.0)
   it_matches l("hi"),   val("hi")
   it_matches l(:hi),    val(:hi)
+
+  # Integer and Floats can be matched when the Float has no decimal precision.
+  it_matches l(1),      val(1.0)
+  it_matches l(1.0),    val(1)
+  it_does_not_match l(1.01),    val(1)
+  it_does_not_match l(1),       val(1.01)
+  it_does_not_match l(nil),     val(false)
+  it_does_not_match l(nil),     val(true)
+  it_does_not_match l(nil),     val(true)
+  it_does_not_match l(true),    val(false)
+  it_does_not_match l(false),   val(true)
+  it_does_not_match l(1),       val("1")
+  it_does_not_match l(1),       val(:"1")
+  it_does_not_match l(:hi),     val("hi")
 
 
   # List matching is exhaustive. All elements in the value _must_ be captured
@@ -108,4 +122,10 @@ describe "Interpreter - #match" do
     # The value of `a` should not have changed from the match.
     itr.current_scope["a"].should eq(val(1))
   end
+
+  # Consts can be used to match the type of a value.
+  it_matches c("Integer"),  val(1)
+  it_matches c("List"),     TList.new
+  it_matches c("String"),   val("hello world")
+  it_matches c("Nil"),      val(nil)
 end

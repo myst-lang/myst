@@ -8,7 +8,7 @@ def fib(0); 1; end
 def fib(1); 1; end
 # For any other integer, use the equation a_n = a_n-1 + a_n-2. However, negative
 # integers are invalid, so only accept positive ones.
-def fib(n : Integer| > 1)
+def fib(n : Integer)
   fib(n-1) + fib(n-2)
 end
 
@@ -19,13 +19,13 @@ end
 # This is largely unecessary, but shows the utility and flexibility of
 # pattern-matching in function heads.
 def fib(arg)
-  puts "#{arg} is not a valid argument for fibonnaci!"
+  arg.to_s + " is not a valid argument for fibonnaci!"
 end
 
 
-fib(1)        #=> 1
-fib(6)        #=> 8
-fib("hello")  #=> "hello is not a valid argument for fibonnaci!"
+IO.puts(fib(1))        #=> 1
+IO.puts(fib(6))        #=> 8
+IO.puts(fib("hello"))  #=> "hello is not a valid argument for fibonnaci!"
 
 
 
@@ -34,6 +34,6 @@ fib("hello")  #=> "hello is not a valid argument for fibonnaci!"
 
 numbers = [1, 1]
 
-def fib(n : Integer| > 0)
+def fib(n : Integer)
   numbers[n] ||= fib(n-1) + fib(n-2)
 end

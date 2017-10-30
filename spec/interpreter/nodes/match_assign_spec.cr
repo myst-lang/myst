@@ -26,7 +26,7 @@ describe "Interpreter - MatchAssign" do
 
   # Matches between different classes (other than Integer and Float), can never
   # match successfully.
-  distinct_types = ["nil", "true", "false", "1", "\"hi\"", ":hi", "[]", "{}"]
+  distinct_types = ["nil", "true", "false", "1", "1.5", "\"hi\"", ":hi", "[]", "{}"]
   distinct_types.each_with_index do |a, i|
     distinct_types.each_with_index do |b, j|
       next if i == j
@@ -83,4 +83,46 @@ describe "Interpreter - MatchAssign" do
   # Multiple splats in a pattern are invalid
   it_does_not_interpret %q([*a, *b]       =: [1, 2]),   /splat collector/
   it_does_not_interpret %q([1, *a, 2, *b] =: [1, 2]),   /splat collector/
+
+
+  # Matching a Const that refers to a TType will check the type of the value.
+  it_interprets %q(List     =: [1, 2])
+  it_interprets %q(Integer  =: 1)
+  it_interprets %q(Nil      =: nil)
+  it_interprets %q(String   =: "hello")
+
+  # If the value is _not_ an instance of the pattern type, the match fails.
+  it_does_not_interpret %q(String   =: :hello)
+  it_does_not_interpret %q(Integer  =: 1.0)
+  it_does_not_interpret %q(Boolean  =: nil)
+
+  # When a Const refers to anything other than a TType, the match will act like
+  # a normal value match.
+  it_interprets %q(
+    A = 10
+    A =: 10
+  )
+
+  it_does_not_interpret %q(
+    A = false
+    A =: true
+  ), /match/
+
+  # Both styles of matching with Consts works through interpolation.
+  it_interprets %q(<String>   =: "hello")
+  it_interprets %q(
+    A = 1
+    <A> =: 1
+  )
+
+
+  # Type matching works even when the pattern is not a Const.
+  it_interprets %q(
+    int_type = 1.type
+    <int_type> =: 5
+  )
+  it_does_not_interpret %q(
+    float_type = 1.5.type
+    <float_type> =: 1
+  ),  /match/
 end

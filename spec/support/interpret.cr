@@ -3,7 +3,7 @@ require "../spec_helper.cr"
 def it_interprets(node : String, expected_stack, itr=Interpreter.new)
   it %Q(interprets #{node}) do
     program = parse_program(node)
-    program.accept(itr)
+    itr.run(program)
 
     unless expected_stack.empty?
       stack = expected_stack
@@ -37,7 +37,7 @@ end
 def it_interprets_with_assignments(node : String, assignments : Hash(String, Myst::Value), itr=Interpreter.new)
   it %Q(interprets #{node}) do
     program = parse_program(node)
-    program.accept(itr)
+    itr.run(program)
 
     assignments.each do |name, value|
       itr.current_scope[name.to_s].should eq(value)
@@ -62,7 +62,7 @@ def it_does_not_interpret(node : String, message=nil)
   it %Q(does not interpret #{node}) do
     itr = Interpreter.new
     program = parse_program(node)
-    exception = expect_raises{ program.accept(itr) }
+    exception = expect_raises{ itr.run(program) }
 
     if message
       (exception.message || "").downcase.should match(message)

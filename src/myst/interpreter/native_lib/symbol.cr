@@ -25,6 +25,7 @@ module Myst
 
     def init_symbol(root_scope : Scope)
       symbol_type = TType.new("Symbol", root_scope)
+      symbol_type.instance_scope["type"] = symbol_type
 
       NativeLib.def_instance_method(symbol_type, :to_s,  :symbol_to_s)
       NativeLib.def_instance_method(symbol_type, :==,    :symbol_eq)

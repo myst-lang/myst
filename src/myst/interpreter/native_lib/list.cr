@@ -21,6 +21,7 @@ module Myst
 
     def init_list(root_scope : Scope)
       list_type = TType.new("List", root_scope)
+      list_type.instance_scope["type"] = list_type
 
       NativeLib.def_instance_method(list_type, :each, :list_each)
       NativeLib.def_instance_method(list_type, :+,    :list_add)

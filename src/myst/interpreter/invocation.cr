@@ -89,6 +89,7 @@ module Myst
     private def match_param(param, arg)
       @itr.match(param.pattern, arg)        if param.pattern?
       @itr.match(Var.new(param.name), arg)  if param.name?
+      @itr.match(param.restriction, arg)    if param.restriction?
     end
 
 
