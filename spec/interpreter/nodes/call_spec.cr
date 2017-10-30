@@ -112,11 +112,11 @@ describe "Interpreter - Call" do
   # Functions have unique scopes. Assignment to a Var inside of a scope should
   # create a new entry rather than assigning to the existing entry in a parent.
   # TODO: revisit this spec when closures are properly implemented
-  # it_interprets_with_assignments %q(
-  #   a = 1
-  #   def foo; a = 2; end
-  #   foo
-  # ),              { "a" => val(1) }
+  it_interprets_with_assignments %q(
+    a = 1
+    def foo; a = 2; end
+    foo
+  ),              { "a" => val(1) }
 
   # However, reads from a variable that does not yet exist in the current scope
   # should check parent scopes.

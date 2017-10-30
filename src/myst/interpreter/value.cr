@@ -252,8 +252,9 @@ module Myst
   class TFunctor < Value
     property  clauses         : Array(Callable)
     property  lexical_scope   : Scope
+    property? closure         : Bool
 
-    def initialize(@clauses=[] of Callable, @lexical_scope : Scope=Scope.new)
+    def initialize(@clauses=[] of Callable, @lexical_scope : Scope=Scope.new, @closure : Bool=false)
     end
 
     def add_clause(definition : Callable)
@@ -262,6 +263,10 @@ module Myst
 
     def type_name
       "Functor"
+    end
+
+    def new_scope
+      closure? ? ClosureScope.new(@lexical_scope) : Scope.new(@lexical_scope)
     end
 
     def_equals_and_hash clauses, lexical_scope

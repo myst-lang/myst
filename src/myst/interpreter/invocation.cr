@@ -24,7 +24,7 @@ module Myst
       @itr.push_self(@receiver.not_nil!) if @receiver
 
       result = @func.clauses.each do |clause|
-        @itr.push_scope_override(@func.lexical_scope)
+        @itr.push_scope_override(@func.new_scope)
         if clause_matches?(clause, @args.dup)
           res = do_call(clause, @receiver, @args, @block)
         end

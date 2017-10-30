@@ -23,11 +23,11 @@ module Myst
         if scope.has_key?(node.name)
           functor = scope[node.name].as(TFunctor)
         else
-          functor = TFunctor.new([] of Callable, scope)
+          functor = TFunctor.new([] of Callable, scope, closure: false)
           scope.assign(node.name, functor)
         end
       else
-        functor = TFunctor.new([] of Callable, scope)
+        functor = TFunctor.new([] of Callable, scope, closure: true)
       end
 
       functor.add_clause(TFunctorDef.new(node))

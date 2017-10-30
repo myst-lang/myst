@@ -6,8 +6,8 @@ describe "Interpreter - Block" do
   # Blocks are mainly identical to Defs, except they should always instantiate
   # a new functor, and the result should not be assigned in the current scope.
   it "does not assign the block into the current scope" do
-    # TODO: revisit this spec when closures are properly implemented
-    next
+    # # TODO: revisit this spec when closures are properly implemented
+    # next
     # Ensure a clean slate for the test (no kernel, etc.)
     itr = Interpreter.new
     itr.current_scope.clear
@@ -19,7 +19,7 @@ describe "Interpreter - Block" do
 
       foo{ }
     ), itr
-    itr.current_scope.values.size.should eq(2)
+    itr.current_scope.values.size.should eq(1)
   end
 
   it "creates a new functor for each block" do
