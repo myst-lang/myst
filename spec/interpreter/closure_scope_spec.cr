@@ -108,6 +108,20 @@ describe "Interpreter - ClosureScope" do
       scope.has_key?("Thing").should be_false
       scope.has_key?("x").should be_false
     end
+
+    it "does not remove values from the closured scope" do
+      parent = Scope.new
+      parent["a"] = val(1)
+      scope = ClosureScope.new(parent)
+      scope["b"] = val(2)
+
+      scope.values.size.should eq(1)
+
+      scope.clear
+
+      scope.values.size.should eq(0)
+      parent["a"].should eq(val(1))
+    end
   end
 
 
