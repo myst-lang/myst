@@ -1,4 +1,5 @@
-# For now, treat Myst source files with Ruby syntax highlighting.
-# They are similar enough that this should be fairly accurate.
-# Anything is better than Mathetmatica, though.
-*.mt linguist-language=Ruby
+# Since GitHub doesn't want to flood their language detection with
+# tiny, unpopular languages, we can manually override their detection
+# for `.mt` files. This will disable highlighting, but will accurately
+# reflect the language in the info bar for the repo.
+*.mt linguist-language=Myst
