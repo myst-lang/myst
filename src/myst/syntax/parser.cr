@@ -436,7 +436,7 @@ module Myst
       if op = accept(Token::Type::EQUALEQUAL, Token::Type::NOTEQUAL)
         skip_space_and_newlines
         right = parse_equality
-        return Call.new(left, op.value, [right] of Node).at(left).at_end(right)
+        return Call.new(left, op.value, [right] of Node, infix: true).at(left).at_end(right)
       end
 
       return left
@@ -449,7 +449,7 @@ module Myst
       if op = accept(Token::Type::LESS, Token::Type::LESSEQUAL, Token::Type::GREATEREQUAL, Token::Type::GREATER)
         skip_space_and_newlines
         right = parse_comparative
-        return Call.new(left, op.value, [right] of Node).at(left).at_end(right)
+        return Call.new(left, op.value, [right] of Node, infix: true).at(left).at_end(right)
       end
 
       return left
@@ -465,7 +465,7 @@ module Myst
       if op = accept(Token::Type::PLUS, Token::Type::MINUS)
         skip_space_and_newlines
         right = parse_multiplicative
-        call = Call.new(left, op.value, [right] of Node).at(left).at_end(right)
+        call = Call.new(left, op.value, [right] of Node, infix: true).at(left).at_end(right)
         return parse_additive(call)
       end
 
@@ -479,7 +479,7 @@ module Myst
       if op = accept(Token::Type::STAR, Token::Type::SLASH, Token::Type::MODULO)
         skip_space_and_newlines
         right = parse_assign
-        call = Call.new(left, op.value, [right] of Node).at(left).at_end(right)
+        call = Call.new(left, op.value, [right] of Node, infix: true).at(left).at_end(right)
         return parse_multiplicative(call)
       end
 

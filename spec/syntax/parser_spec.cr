@@ -32,7 +32,7 @@ private def test_calls_with_receiver(receiver_source, receiver_node)
   it_parses %Q(#{receiver_source}call),            Call.new(receiver_node, "call")
   it_parses %Q(#{receiver_source}call()),          Call.new(receiver_node, "call")
   it_parses %Q(#{receiver_source}call(1)),         Call.new(receiver_node, "call", [l(1)])
-  it_parses %Q(#{receiver_source}call(1, 2 + 3)),  Call.new(receiver_node, "call", [l(1), Call.new(l(2), "+", [l(3)])])
+  it_parses %Q(#{receiver_source}call(1, 2 + 3)),  Call.new(receiver_node, "call", [l(1), Call.new(l(2), "+", [l(3)], infix: true)])
   it_parses %Q(#{receiver_source}call (1)),        Call.new(receiver_node, "call", [l(1)])
   it_parses %Q(
     #{receiver_source}call(
@@ -267,7 +267,7 @@ describe "Parser" do
   it_parses %q(<a(1, 2)[0]>),   i(Call.new(Call.new(nil, "a", [l(1), l(2)]), "[]", [l(0)]))
   # Complex expressions must be wrapped in parentheses.
   it_parses %q(<(a)>),          i(Call.new(nil, "a"))
-  it_parses %q(<(1 + 2)>),      i(Call.new(l(1), "+", [l(2)]))
+  it_parses %q(<(1 + 2)>),      i(Call.new(l(1), "+", [l(2)], infix: true))
   it_does_not_parse %q(<1 + 2>)
   it_does_not_parse %q(<a + b>)
   it_does_not_parse %q(< a + b >)
@@ -280,7 +280,7 @@ describe "Parser" do
   >),                           i(Call.new(nil, "a"))
   it_parses %q(<
     (1 + 2)
-  >),                           i(Call.new(l(1), "+", [l(2)]))
+  >),                           i(Call.new(l(1), "+", [l(2)], infix: true))
   # Interpolations can also be used as Map keys.
   it_parses %q(
     {
@@ -291,7 +291,7 @@ describe "Parser" do
   # Interpolations can be used as a replacement for any primary expression.
   it_parses %q([1, <2>, 3]),    l([1, i(2), 3])
   it_parses %q([1, <a.b>, 3]),  l([1, i(Call.new(Call.new(nil, "a"), "b")), 3])
-  it_parses %q(<a[0]> + 4),     Call.new(i(Call.new(Call.new(nil, "a"), "[]", [l(0)])), "+", [l(4)])
+  it_parses %q(<a[0]> + 4),     Call.new(i(Call.new(Call.new(nil, "a"), "[]", [l(0)])), "+", [l(4)], infix: true)
 
 
   # Infix expressions
@@ -301,49 +301,49 @@ describe "Parser" do
   it_parses %q(1 && 2),         And.new(l(1), l(2))
   it_parses %q(1 && 2 && 3),    And.new(l(1), And.new(l(2), l(3)))
 
-  it_parses %q(1 == 2),         Call.new(l(1), "==",  [l(2)])
-  it_parses %q(1 != 2),         Call.new(l(1), "!=",  [l(2)])
-  it_parses %q(1  < 2),         Call.new(l(1), "<",   [l(2)])
-  it_parses %q(1 <= 2),         Call.new(l(1), "<=",  [l(2)])
-  it_parses %q(1 >= 2),         Call.new(l(1), ">=",  [l(2)])
-  it_parses %q(1  > 2),         Call.new(l(1), ">",   [l(2)])
+  it_parses %q(1 == 2),         Call.new(l(1), "==",  [l(2)], infix: true)
+  it_parses %q(1 != 2),         Call.new(l(1), "!=",  [l(2)], infix: true)
+  it_parses %q(1  < 2),         Call.new(l(1), "<",   [l(2)], infix: true)
+  it_parses %q(1 <= 2),         Call.new(l(1), "<=",  [l(2)], infix: true)
+  it_parses %q(1 >= 2),         Call.new(l(1), ">=",  [l(2)], infix: true)
+  it_parses %q(1  > 2),         Call.new(l(1), ">",   [l(2)], infix: true)
 
 
-  it_parses %q(1 + 2),          Call.new(l(1), "+",   [l(2)])
-  it_parses %q(1 - 2),          Call.new(l(1), "-",   [l(2)])
-  it_parses %q(1 * 2),          Call.new(l(1), "*",   [l(2)])
-  it_parses %q(1 / 2),          Call.new(l(1), "/",   [l(2)])
-  it_parses %q(1 % 2),          Call.new(l(1), "%",   [l(2)])
-  it_parses %q("hello" * 2),    Call.new(l("hello"), "*", [l(2)])
-  it_parses %q([1] - [2]),      Call.new(l([1]), "-", [l([2])])
+  it_parses %q(1 + 2),          Call.new(l(1), "+",   [l(2)], infix: true)
+  it_parses %q(1 - 2),          Call.new(l(1), "-",   [l(2)], infix: true)
+  it_parses %q(1 * 2),          Call.new(l(1), "*",   [l(2)], infix: true)
+  it_parses %q(1 / 2),          Call.new(l(1), "/",   [l(2)], infix: true)
+  it_parses %q(1 % 2),          Call.new(l(1), "%",   [l(2)], infix: true)
+  it_parses %q("hello" * 2),    Call.new(l("hello"), "*", [l(2)], infix: true)
+  it_parses %q([1] - [2]),      Call.new(l([1]), "-", [l([2])], infix: true)
 
   # Precedence
   it_parses %q(1 && 2 || 3),    Or.new(And.new(l(1), l(2)), l(3))
   it_parses %q(1 || 2 && 3),    Or.new(l(1), And.new(l(2), l(3)))
-  it_parses %q(1 == 2 && 3),    And.new(Call.new(l(1), "==", [l(2)]).as(Node), l(3))
-  it_parses %q(1 && 2 == 3),    And.new(l(1), Call.new(l(2), "==", [l(3)]))
-  it_parses %q(1  < 2 == 3),    Call.new(Call.new(l(1), "<",  [l(2)]).as(Node), "==", [l(3)])
-  it_parses %q(1 == 2  < 3),    Call.new(l(1), "==", [Call.new(l(2), "<",  [l(3)]).as(Node)])
-  it_parses %q(1  + 2  < 3),    Call.new(Call.new(l(1), "+",  [l(2)]).as(Node), "<",  [l(3)])
-  it_parses %q(1  < 2  + 3),    Call.new(l(1), "<",  [Call.new(l(2), "+",  [l(3)]).as(Node)])
-  it_parses %q(1  * 2  + 3),    Call.new(Call.new(l(1), "*",  [l(2)]).as(Node), "+",  [l(3)])
-  it_parses %q(1  + 2  * 3),    Call.new(l(1), "+",  [Call.new(l(2), "*",  [l(3)]).as(Node)])
+  it_parses %q(1 == 2 && 3),    And.new(Call.new(l(1), "==", [l(2)], infix: true).as(Node), l(3))
+  it_parses %q(1 && 2 == 3),    And.new(l(1), Call.new(l(2), "==", [l(3)], infix: true))
+  it_parses %q(1  < 2 == 3),    Call.new(Call.new(l(1), "<",  [l(2)], infix: true).as(Node), "==", [l(3)], infix: true)
+  it_parses %q(1 == 2  < 3),    Call.new(l(1), "==", [Call.new(l(2), "<",  [l(3)], infix: true).as(Node)], infix: true)
+  it_parses %q(1  + 2  < 3),    Call.new(Call.new(l(1), "+",  [l(2)], infix: true).as(Node), "<",  [l(3)], infix: true)
+  it_parses %q(1  < 2  + 3),    Call.new(l(1), "<",  [Call.new(l(2), "+",  [l(3)], infix: true).as(Node)], infix: true)
+  it_parses %q(1  * 2  + 3),    Call.new(Call.new(l(1), "*",  [l(2)], infix: true).as(Node), "+",  [l(3)], infix: true)
+  it_parses %q(1  + 2  * 3),    Call.new(l(1), "+",  [Call.new(l(2), "*",  [l(3)], infix: true).as(Node)], infix: true)
 
   # Left-associativity for arithmetic expressions
-  it_parses %q(1 - 1 - 1),      Call.new(Call.new(l(1), "-", [l(1)]), "-", [l(1)])
-  it_parses %q(1 + 1 - 1),      Call.new(Call.new(l(1), "+", [l(1)]), "-", [l(1)])
-  it_parses %q(1 - 1 + 1),      Call.new(Call.new(l(1), "-", [l(1)]), "+", [l(1)])
-  it_parses %q(1 / 1 / 1),      Call.new(Call.new(l(1), "/", [l(1)]), "/", [l(1)])
-  it_parses %q(1 * 1 / 1),      Call.new(Call.new(l(1), "*", [l(1)]), "/", [l(1)])
-  it_parses %q(1 / 1 * 1),      Call.new(Call.new(l(1), "/", [l(1)]), "*", [l(1)])
-  it_parses %q(1 / 1 % 1),      Call.new(Call.new(l(1), "/", [l(1)]), "%", [l(1)])
-  it_parses %q(1 % 1 / 1),      Call.new(Call.new(l(1), "%", [l(1)]), "/", [l(1)])
-  it_parses %q(1 % 1 % 1),      Call.new(Call.new(l(1), "%", [l(1)]), "%", [l(1)])
+  it_parses %q(1 - 1 - 1),      Call.new(Call.new(l(1), "-", [l(1)], infix: true), "-", [l(1)], infix: true)
+  it_parses %q(1 + 1 - 1),      Call.new(Call.new(l(1), "+", [l(1)], infix: true), "-", [l(1)], infix: true)
+  it_parses %q(1 - 1 + 1),      Call.new(Call.new(l(1), "-", [l(1)], infix: true), "+", [l(1)], infix: true)
+  it_parses %q(1 / 1 / 1),      Call.new(Call.new(l(1), "/", [l(1)], infix: true), "/", [l(1)], infix: true)
+  it_parses %q(1 * 1 / 1),      Call.new(Call.new(l(1), "*", [l(1)], infix: true), "/", [l(1)], infix: true)
+  it_parses %q(1 / 1 * 1),      Call.new(Call.new(l(1), "/", [l(1)], infix: true), "*", [l(1)], infix: true)
+  it_parses %q(1 / 1 % 1),      Call.new(Call.new(l(1), "/", [l(1)], infix: true), "%", [l(1)], infix: true)
+  it_parses %q(1 % 1 / 1),      Call.new(Call.new(l(1), "%", [l(1)], infix: true), "/", [l(1)], infix: true)
+  it_parses %q(1 % 1 % 1),      Call.new(Call.new(l(1), "%", [l(1)], infix: true), "%", [l(1)], infix: true)
 
-  it_parses %q(1 * (2 || 3)),   Call.new(l(1), "*", [Or.new(l(2), l(3)).as(Node)])
+  it_parses %q(1 * (2 || 3)),   Call.new(l(1), "*", [Or.new(l(2), l(3)).as(Node)], infix: true)
 
   # Ensure Calls can be used as operands to infix expressions
-  it_parses %q(call + other * last), Call.new(Call.new(nil, "call"), "+", [Call.new(Call.new(nil, "other"), "*", [Call.new(nil, "last").as(Node)]).as(Node)])
+  it_parses %q(call + other * last), Call.new(Call.new(nil, "call"), "+", [Call.new(Call.new(nil, "other"), "*", [Call.new(nil, "last").as(Node)], infix: true).as(Node)], infix: true)
 
 
 
@@ -363,14 +363,14 @@ describe "Parser" do
     it_parses %q({{op[0].id}}<1.5>),      {{op[1]}}.new(i(1.5))
     it_parses %q({{op[0].id}}<other>),    {{op[1]}}.new(i(Call.new(nil, "other")))
     it_parses %q({{op[0].id}}a),          {{op[1]}}.new(Call.new(nil, "a"))
-    it_parses %q({{op[0].id}}(1 + 2)),    {{op[1]}}.new(Call.new(l(1), "+", [l(2)]))
+    it_parses %q({{op[0].id}}(1 + 2)),    {{op[1]}}.new(Call.new(l(1), "+", [l(2)], infix: true))
     it_parses %q({{op[0].id}}a.b),        {{op[1]}}.new(Call.new(Call.new(nil, "a"), "b"))
     it_parses %q({{op[0].id}}Thing.b),    {{op[1]}}.new(Call.new(c("Thing"), "b"))
     it_parses %q(
       {{op[0].id}}(
         1 + 2
       )
-    ),                {{op[1]}}.new(Call.new(l(1), "+", [l(2)]))
+    ),                {{op[1]}}.new(Call.new(l(1), "+", [l(2)], infix: true))
 
     # Unary operators can be chained any number of times.
     it_parses %q({{op[0].id}}{{op[0].id}}a),              {{op[1]}}.new({{op[1]}}.new(Call.new(nil, "a")))
@@ -385,8 +385,8 @@ describe "Parser" do
     )
 
     # Unary operations are more precedent than binary operations
-    it_parses %q({{op[0].id}}1 + 2),    Call.new({{op[1]}}.new(l(1)), "+", [l(2)])
-    it_parses %q(1 + {{op[0].id}}2),    Call.new(l(1), "+", [{{op[1]}}.new(l(2)).as(Node)])
+    it_parses %q({{op[0].id}}1 + 2),    Call.new({{op[1]}}.new(l(1)), "+", [l(2)], infix: true)
+    it_parses %q(1 + {{op[0].id}}2),    Call.new(l(1), "+", [{{op[1]}}.new(l(2)).as(Node)], infix: true)
 
     # Unary operations can be used anywherea primary expression is expected.
     it_parses %q([1, {{op[0].id}}a]),   l([1, {{op[1]}}.new(Call.new(nil, "a"))])
@@ -398,9 +398,9 @@ describe "Parser" do
   it_parses %q(-!*[1,2]), Negation.new(Not.new(Splat.new(l([1, 2]))))
 
   # Unary operators have a higher precedence than any binary operation.
-  it_parses %q(-1 +  -2),   Call.new(Negation.new(l(1)), "+", [Negation.new(l(2)).as(Node)])
+  it_parses %q(-1 +  -2),   Call.new(Negation.new(l(1)), "+", [Negation.new(l(2)).as(Node)], infix: true)
   it_parses %q(!1 || !2),   Or.new(Not.new(l(1)), Not.new(l(2)).as(Node))
-  it_parses %q(-1 == -2),   Call.new(Negation.new(l(1)), "==", [Negation.new(l(2)).as(Node)])
+  it_parses %q(-1 == -2),   Call.new(Negation.new(l(1)), "==", [Negation.new(l(2)).as(Node)], infix: true)
   it_parses %q( a =  -1),   SimpleAssign.new(v("a"), Negation.new(l(1)))
 
 
@@ -418,7 +418,7 @@ describe "Parser" do
   it_parses %q(1 || b = 2),  Or.new(l(1), SimpleAssign.new(v("b"), l(2)))
   # Assignments take over the remainder of the expression when appearing in a logical operation.
   it_parses %q(1 || b = 2 && 3), Or.new(l(1), SimpleAssign.new(v("b"), And.new(l(2), l(3))))
-  it_parses %q(1 || b = 2 + c = 3 || 4), Or.new(l(1), SimpleAssign.new(v("b"), Call.new(l(2), "+", [SimpleAssign.new(v("c"), Or.new(l(3), l(4))).as(Node)])))
+  it_parses %q(1 || b = 2 + c = 3 || 4), Or.new(l(1), SimpleAssign.new(v("b"), Call.new(l(2), "+", [SimpleAssign.new(v("c"), Or.new(l(3), l(4))).as(Node)], infix: true)))
   # Assignments within parentheses are contained by them.
   it_parses %q(1 || (b = 2) && 3), Or.new(l(1), And.new(SimpleAssign.new(v("b"), l(2)), l(3)))
   # Once a variable has been assigned, future references to it should be a Var, not a Call.
@@ -505,29 +505,29 @@ describe "Parser" do
     # When the left-hand-side is an identifier, treat it as a Var.
     it_parses %q(a {{op.id}} 1),              OpAssign.new(v("a"), {{op}}, l(1))
     it_parses %q(a {{op.id}} a {{op.id}} 1),  OpAssign.new(v("a"), {{op}}, OpAssign.new(v("a"), {{op}}, l(1)))
-    it_parses %q(a {{op.id}} 1 + 2),          OpAssign.new(v("a"), {{op}}, Call.new(l(1), "+", [l(2)]))
+    it_parses %q(a {{op.id}} 1 + 2),          OpAssign.new(v("a"), {{op}}, Call.new(l(1), "+", [l(2)], infix: true))
     it_parses %q(a {{op.id}} Thing.member),   OpAssign.new(v("a"), {{op}}, Call.new(c("Thing"), "member"))
 
     # The left-hand-side can also be any simple Call
     it_parses %q(a.b {{op.id}} 1),                OpAssign.new(Call.new(Call.new(nil, "a"), "b"), {{op}}, l(1))
     it_parses %q(a.b {{op.id}} a.b {{op.id}} 1),  OpAssign.new(Call.new(Call.new(nil, "a"), "b"), {{op}}, OpAssign.new(Call.new(Call.new(nil, "a"), "b"), {{op}}, l(1)))
-    it_parses %q(a.b {{op.id}} 1 + 2),            OpAssign.new(Call.new(Call.new(nil, "a"), "b"), {{op}}, Call.new(l(1), "+", [l(2)]))
+    it_parses %q(a.b {{op.id}} 1 + 2),            OpAssign.new(Call.new(Call.new(nil, "a"), "b"), {{op}}, Call.new(l(1), "+", [l(2)], infix: true))
     it_parses %q(a.b {{op.id}} Thing.member),     OpAssign.new(Call.new(Call.new(nil, "a"), "b"), {{op}}, Call.new(c("Thing"), "member"))
     it_parses %q(a[0] {{op.id}} 1),                 OpAssign.new(Call.new(Call.new(nil, "a"), "[]", [l(0)]), {{op}}, l(1))
     it_parses %q(a[0] {{op.id}} a[0] {{op.id}} 1),  OpAssign.new(Call.new(Call.new(nil, "a"), "[]", [l(0)]), {{op}}, OpAssign.new(Call.new(Call.new(nil, "a"), "[]", [l(0)]), {{op}}, l(1)))
-    it_parses %q(a[0] {{op.id}} 1 + 2),             OpAssign.new(Call.new(Call.new(nil, "a"), "[]", [l(0)]), {{op}}, Call.new(l(1), "+", [l(2)]))
+    it_parses %q(a[0] {{op.id}} 1 + 2),             OpAssign.new(Call.new(Call.new(nil, "a"), "[]", [l(0)]), {{op}}, Call.new(l(1), "+", [l(2)], infix: true))
     it_parses %q(a[0] {{op.id}} Thing.member),      OpAssign.new(Call.new(Call.new(nil, "a"), "[]", [l(0)]), {{op}}, Call.new(c("Thing"), "member"))
 
     # As an infix expression, the value can appear on a new line
     it_parses %q(
       a.b {{op.id}}
         1 + 2
-    ),              OpAssign.new(Call.new(Call.new(nil, "a"), "b"), {{op}}, Call.new(l(1), "+", [l(2)]))
+    ),              OpAssign.new(Call.new(Call.new(nil, "a"), "b"), {{op}}, Call.new(l(1), "+", [l(2)], infix: true))
     it_parses %q(
       a.b {{op.id}} (1 +
         2
       )
-    ),              OpAssign.new(Call.new(Call.new(nil, "a"), "b"), {{op}}, Call.new(l(1), "+", [l(2)]))
+    ),              OpAssign.new(Call.new(Call.new(nil, "a"), "b"), {{op}}, Call.new(l(1), "+", [l(2)], infix: true))
 
     # The left-hand-side must be an assignable value (i.e., not a literal)
     it_does_not_parse %q(1 {{op.id}} 2)
@@ -545,7 +545,7 @@ describe "Parser" do
   it_parses %q(list[1]),      Call.new(Call.new(nil, "list"), "[]", [l(1)])
   it_parses %q(list[a]),      Call.new(Call.new(nil, "list"), "[]", [Call.new(nil, "a").as(Node)])
   it_parses %q(list[Thing]),  Call.new(Call.new(nil, "list"), "[]", [c("Thing").as(Node)])
-  it_parses %q(list[1 + 2]),  Call.new(Call.new(nil, "list"), "[]", [Call.new(l(1), "+", [l(2)]).as(Node)])
+  it_parses %q(list[1 + 2]),  Call.new(Call.new(nil, "list"), "[]", [Call.new(l(1), "+", [l(2)], infix: true).as(Node)])
   it_parses %q(list[a = 1]),  Call.new(Call.new(nil, "list"), "[]", [SimpleAssign.new(v("a"), l(1)).as(Node)])
   it_parses %q(list[a = 1]),  Call.new(Call.new(nil, "list"), "[]", [SimpleAssign.new(v("a"), l(1)).as(Node)])
   it_parses %q(list["hi"]),   Call.new(Call.new(nil, "list"), "[]", [l("hi")])
@@ -554,7 +554,7 @@ describe "Parser" do
   it_parses %q(list[1, 2]),         Call.new(Call.new(nil, "list"), "[]", [l(1), l(2)])
   it_parses %q(list[nil, false]),   Call.new(Call.new(nil, "list"), "[]", [l(nil), l(false)])
   # The receiver can be any expression.
-  it_parses %q((1 + 2)[0]),   Call.new(Call.new(l(1), "+", [l(2)]), "[]", [l(0)])
+  it_parses %q((1 + 2)[0]),   Call.new(Call.new(l(1), "+", [l(2)], infix: true), "[]", [l(0)])
   it_parses %q((a = 1)[0]),   Call.new(SimpleAssign.new(v("a"), l(1)), "[]", [l(0)])
   it_parses %q(false[0]),     Call.new(l(false), "[]", [l(0)])
   it_parses %q("hello"[0]),   Call.new(l("hello"), "[]", [l(0)])
@@ -581,7 +581,7 @@ describe "Parser" do
     list[
       1 + 2
     ]
-  ),            Call.new(Call.new(nil, "list"), "[]", [Call.new(l(1), "+", [l(2)]).as(Node)])
+  ),            Call.new(Call.new(nil, "list"), "[]", [Call.new(l(1), "+", [l(2)], infix: true).as(Node)])
   it_parses %q(
     list
     [1, 2]
@@ -605,7 +605,7 @@ describe "Parser" do
   it_parses %q(
     a = 1
     a + 2
-  ),              SimpleAssign.new(v("a"), l(1)), Call.new(v("a"), "+", [l(2)])
+  ),              SimpleAssign.new(v("a"), l(1)), Call.new(v("a"), "+", [l(2)], infix: true)
   it_parses %q(
     nil
     [4, 5]
@@ -614,7 +614,7 @@ describe "Parser" do
   it_parses %q(
     a = 1; a + 2;
     b = 2;
-  ),              SimpleAssign.new(v("a"), l(1)), Call.new(v("a"), "+", [l(2)]), SimpleAssign.new(v("b"), l(2))
+  ),              SimpleAssign.new(v("a"), l(1)), Call.new(v("a"), "+", [l(2)], infix: true), SimpleAssign.new(v("b"), l(2))
   # Without the semicolon, a syntax error should occur
   it_does_not_parse %q(a = 1 b = 2)
   # Expression with operators must include the operator on the first line, but
@@ -629,7 +629,7 @@ describe "Parser" do
   it_parses %q(
     var1 +
     var2
-  ),              Call.new(Call.new(nil, "var1"), "+", [Call.new(nil, "var2").as(Node)])
+  ),              Call.new(Call.new(nil, "var1"), "+", [Call.new(nil, "var2").as(Node)], infix: true)
   it_does_not_parse %q(
     var1
     + var2
@@ -660,14 +660,14 @@ describe "Parser" do
     def foo
       1 + 2
     end
-  ),            Def.new("foo", body: e(Call.new(l(1), "+", [l(2)])))
+  ),            Def.new("foo", body: e(Call.new(l(1), "+", [l(2)], infix: true)))
 
   it_parses %q(
     def foo
       a = 1
       a * 4
     end
-  ),            Def.new("foo", body: e(SimpleAssign.new(v("a"), l(1)), Call.new(v("a"), "*", [l(4)])))
+  ),            Def.new("foo", body: e(SimpleAssign.new(v("a"), l(1)), Call.new(v("a"), "*", [l(4)], infix: true)))
 
   # A Splat collector can appear anywhere in the param list
   it_parses %q(def foo(*a); end),       Def.new("foo", [p("a", splat: true)], splat_index: 0)
@@ -801,7 +801,7 @@ describe "Parser" do
   it_parses %q(
     def foo(<(1 +
                   2)> =: a : Integer); end
-  ),                                    Def.new("foo", [p("a", i(Call.new(l(1), "+", [l(2)])), restriction: c("Integer"))])
+  ),                                    Def.new("foo", [p("a", i(Call.new(l(1), "+", [l(2)], infix: true)), restriction: c("Integer"))])
   # Parameters may each appear on their own line for clarity
   it_parses %q(
     def foo(
@@ -835,7 +835,7 @@ describe "Parser" do
       1 + 2
       a = 3
     end
-  ),                ModuleDef.new("Foo", e(Call.new(l(1), "+", [l(2)]), SimpleAssign.new(v("a"), l(3))))
+  ),                ModuleDef.new("Foo", e(Call.new(l(1), "+", [l(2)], infix: true), SimpleAssign.new(v("a"), l(3))))
   # Modules can also be nested
   it_parses %q(
     defmodule Foo
@@ -864,7 +864,7 @@ describe "Parser" do
       1 + 2
       a = 3
     end
-  ),                TypeDef.new("Thing", body: e(Call.new(l(1), "+", [l(2)]), SimpleAssign.new(v("a"), l(3))))
+  ),                TypeDef.new("Thing", body: e(Call.new(l(1), "+", [l(2)], infix: true), SimpleAssign.new(v("a"), l(3))))
 
   # Types can also be nested
   it_parses %q(
@@ -916,7 +916,7 @@ describe "Parser" do
   it_parses %q(@variable),    iv("variable")
   # Instance variables can appear as a primary value anywhere they are accepted.
   it_parses %q(<@var>),       i(iv("var"))
-  it_parses %q(1 + @var),     Call.new(l(1), "+", [iv("var")] of Node)
+  it_parses %q(1 + @var),     Call.new(l(1), "+", [iv("var")] of Node, infix: true)
   it_parses %q(@var.each),    Call.new(iv("var"), "each")
   it_parses %q(
     def foo(<@var>)
@@ -1015,6 +1015,7 @@ describe "Parser" do
   test_calls_with_receiver("list[1].",          Call.new(Call.new(nil, "list"), "[]", [l(1)]))
   test_calls_with_receiver("list[1, 2].",       Call.new(Call.new(nil, "list"), "[]", [l(1), l(2)]))
   test_calls_with_receiver(%q("some string".),  l("some string"))
+  test_calls_with_receiver("(1 + 2).",          Call.new(l(1), "+", [l(2)], infix: true))
   test_calls_with_receiver("method{ }.",        Call.new(nil, "method", block: Block.new))
   test_calls_with_receiver("method do; end.",   Call.new(nil, "method", block: Block.new))
   test_calls_with_receiver("@var.",             iv("var"))
@@ -1028,7 +1029,7 @@ describe "Parser" do
   it_parses %q(self),                 Self.new
   it_parses %q(-self),                Negation.new(Self.new)
   it_parses %q(<self>),               i(Self.new)
-  it_parses %q(self + self),          Call.new(Self.new, "+", [Self.new.as(Node)])
+  it_parses %q(self + self),          Call.new(Self.new, "+", [Self.new.as(Node)], infix: true)
   test_calls_with_receiver("self.",   Self.new)
   it_parses %q(self[0]),              Call.new(Self.new, "[]", [l(0)])
   # `self` can not be used as the name of a Call
@@ -1042,7 +1043,7 @@ describe "Parser" do
   it_parses %q(include Thing),        Include.new(c("Thing"))
   it_parses %q(include Thing.Other),  Include.new(Call.new(c("Thing"), "Other"))
   it_parses %q(include dynamic),      Include.new(Call.new(nil, "dynamic"))
-  it_parses %q(include 1 + 2),        Include.new(Call.new(l(1), "+", [l(2)]))
+  it_parses %q(include 1 + 2),        Include.new(Call.new(l(1), "+", [l(2)], infix: true))
   it_parses %q(include self),         Include.new(Self.new)
   it_parses %q(include <something>),  Include.new(i(Call.new(nil, "something")))
   it_parses %q(
@@ -1064,7 +1065,7 @@ describe "Parser" do
   it_parses %q(
     include 1 +
             2
-  ),                                  Include.new(Call.new(l(1), "+", [l(2)]))
+  ),                                  Include.new(Call.new(l(1), "+", [l(2)], infix: true))
   # Only one value is expected. Providing multiple values is invalid.
   it_does_not_parse %q(
     include Thing1, Thing2
@@ -1076,7 +1077,7 @@ describe "Parser" do
 
   # Requires are syntactically similar to includes, but the expected value is a String.
   it_parses %q(require "some_file"),  Require.new(l("some_file"))
-  it_parses %q(require base + path),  Require.new(Call.new(Call.new(nil, "base"), "+", [Call.new(nil, "path").as(Node)]))
+  it_parses %q(require base + path),  Require.new(Call.new(Call.new(nil, "base"), "+", [Call.new(nil, "path").as(Node)], infix: true))
   it_parses %q(require Thing.dep),    Require.new(Call.new(c("Thing"), "dep"))
   it_parses %q(require <something>),  Require.new(i(Call.new(nil, "something")))
   it_parses %q(
@@ -1096,7 +1097,7 @@ describe "Parser" do
   it_parses %q(
     require base +
             path
-  ),                                  Require.new(Call.new(Call.new(nil, "base"), "+", [Call.new(nil, "path").as(Node)]))
+  ),                                  Require.new(Call.new(Call.new(nil, "base"), "+", [Call.new(nil, "path").as(Node)], infix: true))
   # Only one value is expected. Providing multiple values is invalid.
   it_does_not_parse %q(
     require "file1", "file2"
@@ -1113,7 +1114,7 @@ describe "Parser" do
     end
   ),                                When.new(l(true))
   it_parses %q(when true; end),     When.new(l(true))
-  it_parses %q(when a == 1; end),   When.new(Call.new(Call.new(nil, "a"), "==", [l(1)]))
+  it_parses %q(when a == 1; end),   When.new(Call.new(Call.new(nil, "a"), "==", [l(1)], infix: true))
   # Any expression can be used as a condition
   it_parses %q(
     when a = 1
@@ -1122,7 +1123,7 @@ describe "Parser" do
   it_parses %q(
     when 1 + 2
     end
-  ),                                When.new(Call.new(l(1), "+", [l(2)]))
+  ),                                When.new(Call.new(l(1), "+", [l(2)], infix: true))
   it_parses %q(
     when call(1, 2)
     end
@@ -1137,7 +1138,7 @@ describe "Parser" do
       1 + 1
       do_something
     end
-  ),                                When.new(l(true), e(Call.new(l(1), "+", [l(1)]), Call.new(nil, "do_something")))
+  ),                                When.new(l(true), e(Call.new(l(1), "+", [l(1)], infix: true), Call.new(nil, "do_something")))
   # Whens can be chained together for more complex logic. This is most similar
   # to `else if` in other languages.
   it_parses %q(
@@ -1185,7 +1186,7 @@ describe "Parser" do
     end
   ),                                Unless.new(l(true))
   it_parses %q(unless true; end),   Unless.new(l(true))
-  it_parses %q(unless a == 1; end), Unless.new(Call.new(Call.new(nil, "a"), "==", [l(1)]))
+  it_parses %q(unless a == 1; end), Unless.new(Call.new(Call.new(nil, "a"), "==", [l(1)], infix: true))
   it_parses %q(
     unless a = 1
     end
@@ -1193,7 +1194,7 @@ describe "Parser" do
   it_parses %q(
     unless 1 + 2
     end
-  ),                                Unless.new(Call.new(l(1), "+", [l(2)]))
+  ),                                Unless.new(Call.new(l(1), "+", [l(2)], infix: true))
   it_parses %q(
     unless call(1, 2)
     end
@@ -1207,7 +1208,7 @@ describe "Parser" do
       1 + 1
       do_something
     end
-  ),                                Unless.new(l(true), e(Call.new(l(1), "+", [l(1)]), Call.new(nil, "do_something")))
+  ),                                Unless.new(l(true), e(Call.new(l(1), "+", [l(1)], infix: true), Call.new(nil, "do_something")))
   it_parses %q(
     unless true
       # Do a thing
@@ -1338,7 +1339,7 @@ describe "Parser" do
     end
   ),                                While.new(l(true))
   it_parses %q(while true; end),    While.new(l(true))
-  it_parses %q(while a == 1; end),  While.new(Call.new(Call.new(nil, "a"), "==", [l(1)]))
+  it_parses %q(while a == 1; end),  While.new(Call.new(Call.new(nil, "a"), "==", [l(1)], infix: true))
   it_parses %q(
     while a = 1
     end
@@ -1346,7 +1347,7 @@ describe "Parser" do
   it_parses %q(
     while 1 + 2
     end
-  ),                                While.new(Call.new(l(1), "+", [l(2)]))
+  ),                                While.new(Call.new(l(1), "+", [l(2)], infix: true))
   it_parses %q(
     while call(1, 2)
     end
@@ -1360,14 +1361,14 @@ describe "Parser" do
       1 + 1
       do_something
     end
-  ),                                While.new(l(true), e(Call.new(l(1), "+", [l(1)]), Call.new(nil, "do_something")))
+  ),                                While.new(l(true), e(Call.new(l(1), "+", [l(1)], infix: true), Call.new(nil, "do_something")))
 
   it_parses %q(
     until true
     end
   ),                                Until.new(l(true))
   it_parses %q(until true; end),    Until.new(l(true))
-  it_parses %q(until a == 1; end),  Until.new(Call.new(Call.new(nil, "a"), "==", [l(1)]))
+  it_parses %q(until a == 1; end),  Until.new(Call.new(Call.new(nil, "a"), "==", [l(1)], infix: true))
   it_parses %q(
     until a = 1
     end
@@ -1375,7 +1376,7 @@ describe "Parser" do
   it_parses %q(
     until 1 + 2
     end
-  ),                                Until.new(Call.new(l(1), "+", [l(2)]))
+  ),                                Until.new(Call.new(l(1), "+", [l(2)], infix: true))
   it_parses %q(
     until call(1, 2)
     end
@@ -1389,7 +1390,7 @@ describe "Parser" do
       1 + 1
       do_something
     end
-  ),                                Until.new(l(true), e(Call.new(l(1), "+", [l(1)]), Call.new(nil, "do_something")))
+  ),                                Until.new(l(true), e(Call.new(l(1), "+", [l(1)], infix: true), Call.new(nil, "do_something")))
 
   # Loops can be nested directly
   it_parses %q(
@@ -1411,7 +1412,7 @@ describe "Parser" do
       when a == b
       end
     end
-  ),                                While.new(l(true), e(When.new(Call.new(Call.new(nil, "a"), "==", [Call.new(nil, "b").as(Node)]))))
+  ),                                While.new(l(true), e(When.new(Call.new(Call.new(nil, "a"), "==", [Call.new(nil, "b").as(Node)], infix: true))))
 
 
 
@@ -1430,21 +1431,21 @@ describe "Parser" do
     it_parses %q({{keyword}} %Thing{}),     {{node}}.new(Instantiation.new(c("Thing")))
     it_parses %q({{keyword}} Const),        {{node}}.new(c("Const"))
     it_parses %q({{keyword}} a),            {{node}}.new(Call.new(nil, "a"))
-    it_parses %q({{keyword}} 1 + 2),        {{node}}.new(Call.new(l(1), "+", [l(2)]))
+    it_parses %q({{keyword}} 1 + 2),        {{node}}.new(Call.new(l(1), "+", [l(2)], infix: true))
     it_parses %q({{keyword}} *collection),  {{node}}.new(Splat.new(Call.new(nil, "collection")))
     it_parses %q(
       {{keyword}} 1 +
                   2
-    ),                                      {{node}}.new(Call.new(l(1), "+", [l(2)]))
+    ),                                      {{node}}.new(Call.new(l(1), "+", [l(2)], infix: true))
     it_parses %q(
       {{keyword}} (
         1 + 2
       )
-    ),                                      {{node}}.new(Call.new(l(1), "+", [l(2)]))
+    ),                                      {{node}}.new(Call.new(l(1), "+", [l(2)], infix: true))
     it_parses %q(
       {{keyword}}
       1 + 2
-    ),                                      {{node}}.new, Call.new(l(1), "+", [l(2)])
+    ),                                      {{node}}.new, Call.new(l(1), "+", [l(2)], infix: true)
 
     # Carrying multiple values implicitly is not supported. To simulate this,
     # use a List instead.
@@ -1469,6 +1470,8 @@ describe "Parser" do
   it_parses %q(raise {}),       Raise.new(MapLiteral.new)
   it_parses %q(raise Thing),    Raise.new(c("Thing"))
   it_parses %q(raise a),        Raise.new(Call.new(nil, "a"))
+  it_parses %q(raise a.b),      Raise.new(Call.new(Call.new(nil, "a"), "b"))
+  it_parses %q(raise 1 + 2),    Raise.new(Call.new(l(1), "+", [l(2)], infix: true))
   it_parses %q(raise %Thing{}), Raise.new(Instantiation.new(c("Thing")))
   it_parses %q(raise <[1, 2]>), Raise.new(i(l([1, 2])))
   it_does_not_parse %q(raise),  /value/
@@ -1504,7 +1507,7 @@ describe "Parser" do
       1 + 2
       a = 1
     end
-  ),                Def.new("foo", body: ExceptionHandler.new(Nop.new, [Rescue.new(e(Call.new(l(1), "+", [l(2)]), SimpleAssign.new(v("a"), l(1))))]))
+  ),                Def.new("foo", body: ExceptionHandler.new(Nop.new, [Rescue.new(e(Call.new(l(1), "+", [l(2)], infix: true), SimpleAssign.new(v("a"), l(1))))]))
   it_parses %q(def foo; rescue; a; end), Def.new("foo", body: ExceptionHandler.new(Nop.new, [Rescue.new(e(Call.new(nil, "a")))]))
 
   # `rescue` can also accept a single Param (with the same syntax as Def) to restrict what Exceptions it can handle.
@@ -1779,7 +1782,7 @@ describe "Parser" do
     rescue <(1 +
                   2)> =: a : Integer
     end
-  ),                                    Def.new("foo", body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p("a", i(Call.new(l(1), "+", [l(2)])), restriction: c("Integer")))]))
+  ),                                    Def.new("foo", body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p("a", i(Call.new(l(1), "+", [l(2)], infix: true)), restriction: c("Integer")))]))
 
 
   # Multiple `rescue` clauses can be specified.
@@ -1871,7 +1874,7 @@ describe "Parser" do
       1 + 2
       a = 1
     end
-  ),                Call.new(nil, "each", block: Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(e(Call.new(l(1), "+", [l(2)]), SimpleAssign.new(v("a"), l(1))))])))
+  ),                Call.new(nil, "each", block: Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(e(Call.new(l(1), "+", [l(2)], infix: true), SimpleAssign.new(v("a"), l(1))))])))
   it_parses %q(each do; rescue; a; end), Call.new(nil, "each", block: Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(e(Call.new(nil, "a")))])))
 
   # `rescue` can also accept a single Param (with the same syntax as Def) to restrict what Exceptions it can handle.
@@ -2146,7 +2149,7 @@ describe "Parser" do
     rescue <(1 +
                   2)> =: a : Integer
     end
-  ),                                    Call.new(nil, "each", block: Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p("a", i(Call.new(l(1), "+", [l(2)])), restriction: c("Integer")))])))
+  ),                                    Call.new(nil, "each", block: Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p("a", i(Call.new(l(1), "+", [l(2)], infix: true)), restriction: c("Integer")))])))
 
 
   # Multiple `rescue` clauses can be specified.

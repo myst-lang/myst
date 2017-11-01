@@ -559,8 +559,9 @@ module Myst
     property  name      : String
     property  args      : Array(Node)
     property! block     : Block?
+    property? infix     : Bool
 
-    def initialize(@receiver, @name, @args = [] of Node, @block=nil)
+    def initialize(@receiver, @name, @args = [] of Node, @block=nil, @infix=false)
     end
 
     def accept_children(visitor)
@@ -569,7 +570,7 @@ module Myst
       block?.try(&.accept(visitor))
     end
 
-    def_equals_and_hash receiver?, name, args, block?
+    def_equals_and_hash name, receiver?, args, block?, infix?
   end
 
   # A parameter for a method definition. Parameters can take many forms. The
