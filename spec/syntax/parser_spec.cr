@@ -3,8 +3,8 @@ require "../support/nodes.cr"
 
 # Check that parsing the given source succeeds. If given, additionally check
 # that the result of parsing the source matches the given nodes.
-private def it_parses(source, *expected)
-  it %Q(parses `#{source}`) do
+private def it_parses(source, *expected, file=__FILE__, line=__LINE__, end_line=__END_LINE__)
+  it %Q(parses `#{source}`), file, line, end_line do
     result = parse_program(source)
     unless expected.empty?
       result.should eq(Expressions.new(*expected))
@@ -14,8 +14,8 @@ end
 
 # Expect the given source to raise an error when parsed. If `message` is given,
 # the raised error will be expected to contain at least that content.
-private def it_does_not_parse(source, message=nil)
-  it %Q(does not parse `#{source}`) do
+private def it_does_not_parse(source, message=nil, file=__FILE__, line=__LINE__, end_line=__END_LINE__)
+  it %Q(does not parse `#{source}`), file, line, end_line do
     exception = expect_raises(ParseError) do
       result = parse_program(source)
     end

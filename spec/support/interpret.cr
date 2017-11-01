@@ -1,7 +1,7 @@
 require "../spec_helper.cr"
 
-def it_interprets(node : String, expected_stack, itr=Interpreter.new)
-  it %Q(interprets #{node}) do
+def it_interprets(node : String, expected_stack : Array(Myst::Value), itr=Interpreter.new, file=__FILE__, line=__LINE__, end_line=__END_LINE__)
+  it %Q(interprets #{node}), file, line, end_line do
     program = parse_program(node)
     itr.run(program)
 
@@ -23,19 +23,19 @@ def it_interprets(node : String, expected_stack, itr=Interpreter.new)
   end
 end
 
-def it_interprets(node : String)
+def it_interprets(node : String, file=__FILE__, line=__LINE__, end_line=__END_LINE__)
   itr = Interpreter.new
   expected_stack = yield itr
-  it_interprets(node, expected_stack, itr)
+  it_interprets(node, expected_stack, itr, file, line, end_line)
 end
 
-def it_interprets(node : String)
-  it_interprets(node, [] of Myst::Value, Interpreter.new)
+def it_interprets(node : String, file=__FILE__, line=__LINE__, end_line=__END_LINE__)
+  it_interprets(node, [] of Myst::Value, Interpreter.new, file, line, end_line)
 end
 
 
-def it_interprets_with_assignments(node : String, assignments : Hash(String, Myst::Value), itr=Interpreter.new)
-  it %Q(interprets #{node}) do
+def it_interprets_with_assignments(node : String, assignments : Hash(String, Myst::Value), itr=Interpreter.new, file=__FILE__, line=__LINE__, end_line=__END_LINE__)
+  it %Q(interprets #{node}), file, line, end_line do
     program = parse_program(node)
     itr.run(program)
 
@@ -50,16 +50,16 @@ def interpret_with_mocked_output(source)
   parse_and_interpret(source, itr)
 end
 
-def it_raises(source, error)
-  it "raises `#{error}` from `#{source}`" do
+def it_raises(source, error, file=__FILE__, line=__LINE__, end_line=__END_LINE__)
+  it "raises `#{error}` from `#{source}`", file, line, end_line do
     itr = interpret_with_mocked_output(source)
     itr.errput.to_s.should contain(error)
   end
 end
 
 
-def it_does_not_interpret(node : String, message=nil)
-  it %Q(does not interpret #{node}) do
+def it_does_not_interpret(node : String, message=nil, file=__FILE__, line=__LINE__, end_line=__END_LINE__)
+  it %Q(does not interpret #{node}), file, line, end_line do
     itr = Interpreter.new
     program = parse_program(node)
     exception = expect_raises{ itr.run(program) }
