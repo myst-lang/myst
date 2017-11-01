@@ -10,11 +10,6 @@ module Myst
     end
 
 
-    def visit(node : Node, io : IO)
-    end
-
-
-
     ##
     # For simplicity with searching, the ordering of nodes here should match
     # the ordering of nodes defined in `src/myst/syntax/ast.cr`. Tangential
@@ -89,6 +84,37 @@ module Myst
 
       io << entry_strs.join(", ")
       io << "}"
+    end
+
+
+    def visit(node : Var, io : IO)
+      io << node.name
+    end
+
+    def visit(node : Const, io : IO)
+      io << node.name
+    end
+
+    def visit(node : Underscore, io : IO)
+      io << node.name
+    end
+
+    def visit(node : IVar, io : IO)
+      io << node.name
+    end
+
+
+    def visit(node : SimpleAssign, io : IO)
+      visit(node.target, io)
+      io << " = "
+      visit(node.value, io)
+    end
+
+
+
+    # Catch all for unimplemented nodes
+    def visit(node, io)
+      STDERR.puts "Attempting to print unknown node type: #{node.class.name}"
     end
   end
 end
