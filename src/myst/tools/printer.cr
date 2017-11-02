@@ -104,10 +104,45 @@ module Myst
       io << node.name
     end
 
+    def visit(node : ValueInterpolation, io : IO)
+      io << "<"
+      visit(node.value, io)
+      io << ">"
+    end
+
 
     def visit(node : SimpleAssign, io : IO)
       visit(node.target, io)
       io << " = "
+      visit(node.value, io)
+    end
+
+
+    def visit(node : Or, io : IO)
+      visit(node.left, io)
+      io << " || "
+      visit(node.right, io)
+    end
+
+    def visit(node : And, io : IO)
+      visit(node.left, io)
+      io << " && "
+      visit(node.right, io)
+    end
+
+
+    def visit(node : Splat, io : IO)
+      io << "*"
+      visit(node.value, io)
+    end
+
+    def visit(node : Not, io : IO)
+      io << "!"
+      visit(node.value, io)
+    end
+
+    def visit(node : Negation, io : IO)
+      io << "-"
       visit(node.value, io)
     end
 
@@ -160,6 +195,67 @@ module Myst
         # TODO: block stuff
         # With no arguments or block, a blank call is just the name
       end
+    end
+
+
+    def visit(node : Param, io : IO)
+      # Splats and blocks are special cases
+      if node.splat?
+        io << "*"
+        io << node.name
+        return
+      end
+
+      if node.block?
+        io << "&"
+        io << node.name
+        return
+      end
+
+      if node.pattern?
+        visit(node.pattern, io)
+        # The match operator is only necessary if a name is also given.
+        if node.name?
+          io << " =: "
+        end
+      end
+
+      if node.name?
+        io << node.name
+      end
+
+      # A restriction can only be given if another component exists, so the
+      # punctuation and spacing is guaranteed to exist.
+      if node.restriction?
+        io << " : "
+        visit(node.restriction, io)
+      end
+    end
+
+
+    def visit(node : Def, io : IO)
+      io << (node.static? ? "defstatic" : "def")
+      io << " "
+
+      io << node.name
+
+      if node.params.size > 0 || node.block_param?
+        io << "("
+
+        param_strs = node.params.map do |param|
+          String.build{ |str| visit(param, str) }
+        end
+
+        if node.block_param?
+          param_strs << String.build{ |str| visit(node.block_param, str) }
+        end
+
+        io << param_strs.join(", ")
+        io << ")"
+      end
+
+      io << "\n"
+      io << "end"
     end
 
 
