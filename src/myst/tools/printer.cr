@@ -22,9 +22,10 @@ module Myst
     end
 
     def visit(node : Expressions, io : IO)
-      node.children.each do |n|
-        visit(n, io)
+      expr_strs = node.children.map do |n|
+        String.build{ |str| visit(n, str) }
       end
+      io << expr_strs.join("\n")
     end
 
     def visit(node : NilLiteral, io : IO)
