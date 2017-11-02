@@ -36,10 +36,11 @@ describe "Printer - Literals" do
   assert_print  %q([nil, true, false])
   assert_print  %q([true, false, 1])
   assert_print  %q([:hello, "hi", 10.054])
+  assert_print  %q([:hello, [1, 2, 3], "hi", 10.054])
 
 
   # Maps
   assert_print  %q({a: 1, b: 2})
   assert_print  %q({a: "hello", b: :hi})
-  assert_print  %q({a: nil, b: false, c: 10.242, d: 3})
+  assert_print  %q({a: nil, b: {x: 8, y: 9}, c: 10.242, d: 3})
 end

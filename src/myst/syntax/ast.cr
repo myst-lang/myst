@@ -555,11 +555,11 @@ module Myst
   # The last form is for infix operations, such as `a + b` shown above, where
   # `operator` would be the `+`.
   class Call < Node
-    property! receiver  : Node?
-    property  name      : String
-    property  args      : Array(Node)
-    property! block     : Block?
-    property? infix     : Bool
+    property! receiver    : Node?
+    property  name        : String
+    property  args        : Array(Node)
+    property! block       : Block?
+    property? infix       : Bool
 
     def initialize(@receiver, @name, @args = [] of Node, @block=nil, @infix=false)
     end
@@ -650,7 +650,11 @@ module Myst
   # Convention recommends that the brace form only be used for single-line
   # blocks, and the `do...end` form only be used for multi-line blocks.
   class Block < Def
-    def initialize(@params = [] of Param, @body=Nop.new, @block_param=nil, @splat_index=nil)
+    # Style should be `:doend` or `:brace`, respectively, based on the bracing
+    # style used, as shown above.
+    property  style  : Symbol
+
+    def initialize(@params = [] of Param, @body=Nop.new, @block_param=nil, @splat_index=nil, @style=:brace)
       @name = ""
       @static = false
     end

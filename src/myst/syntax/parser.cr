@@ -652,9 +652,11 @@ module Myst
       end_token =
         case
         when start = accept(Token::Type::LCURLY)
+          block.style = :brace
           block.at(start.location)
           Token::Type::RCURLY
         when start = accept(Token::Type::DO)
+          block.style = :doend
           block.at(start.location)
           Token::Type::END
         else

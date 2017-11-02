@@ -111,6 +111,57 @@ module Myst
     end
 
 
+    def visit(node : Call, io : IO)
+      if node.infix?
+        visit(node.receiver, io)
+        io << " #{node.name} "
+        # Infix calls will only have one argument and no block
+        visit(node.args.first, io)
+        return
+      end
+
+      # Access notation is a special case where arguments are placed between
+      # the braces, rather than in separate parentheses.
+      if node.name == "[]"
+        visit(node.receiver, io)
+        io << "["
+        arg_strs = node.args.map do |arg|
+          String.build do |str|
+            visit(arg, str)
+          end
+        end
+
+        io << arg_strs.join(", ")
+        io << "]"
+        return
+      end
+
+      if node.receiver?
+        visit(node.receiver, io)
+        io << "."
+      end
+
+      io << node.name
+
+      if node.args.size > 0
+        io << "("
+        arg_strs = node.args.map do |arg|
+          String.build do |str|
+            visit(arg, str)
+          end
+        end
+
+        io << arg_strs.join(", ")
+        io << ")"
+      end
+
+      if node.block?
+        # TODO: block stuff
+        # With no arguments or block, a blank call is just the name
+      end
+    end
+
+
 
     # Catch all for unimplemented nodes
     def visit(node, io)
