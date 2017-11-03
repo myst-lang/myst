@@ -27,7 +27,6 @@ defmodule Enumerable
         str = str + delimiter + e.to_s
       end
     end
-
     str
   end
 end

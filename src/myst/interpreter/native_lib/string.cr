@@ -53,6 +53,10 @@ module Myst
       TList.new(this.value.split(delimiter).map{ |s| TString.new(s).as(Value) })
     end
 
+    NativeLib.method :string_size, TString do
+      TInteger.new(this.value.size.to_i64)
+    end
+
 
     def init_string(root_scope : Scope)
       string_type = TType.new("String", root_scope)
@@ -64,6 +68,7 @@ module Myst
       NativeLib.def_instance_method(string_type, :==,     :string_eq)
       NativeLib.def_instance_method(string_type, :!=,     :string_not_eq)
       NativeLib.def_instance_method(string_type, :split,  :string_split)
+      NativeLib.def_instance_method(string_type, :size,   :string_size)
 
       string_type
     end

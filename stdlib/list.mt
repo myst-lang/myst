@@ -1,5 +1,3 @@
-require "./enumerable.mt"
-
 deftype List
   include Enumerable
 

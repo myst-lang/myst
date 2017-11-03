@@ -10,4 +10,7 @@
 # it includes the most commonly used modules that most (if not all) programs
 # will use constantly.
 
+require "./enumerable.mt"
+require "./list.mt"
 require "./io.mt"
+require "./file.mt"
