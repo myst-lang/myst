@@ -54,7 +54,7 @@ module Myst
 
 
     def visit(node : Node)
-      raise "#{node} nodes are not yet supported."
+      raise "Compiler bug: #{node} nodes are not yet supported."
     end
 
 
