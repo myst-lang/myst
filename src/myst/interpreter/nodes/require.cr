@@ -59,12 +59,15 @@ module Myst
         paths.concat([
           # Then add the current working directory.
           Dir.current,
-          # Finally, the directory where the executable is installed. This is not
-          # _guaranteed_ on all systems, but support is good enough, so a non-nil
-          # assertion is made.
+          # Finally, the directory where the executable is installed. This is
+          # not _guaranteed_ on all systems, but support is good enough, so a
+          # non-nil assertion is made.
+          #
+          # This assumes that the executable exists under a `bin/` folder. The
+          # path added here will be the directory that contains `bin`.
           #
           # This is needed to locate the stdlib.
-          File.dirname(Process.executable_path.not_nil!)
+          File.dirname(File.dirname(File.join(Process.executable_path.not_nil!)))
         ])
 
         paths
