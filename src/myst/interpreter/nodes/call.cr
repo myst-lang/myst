@@ -19,7 +19,13 @@ module Myst
         end
       end
 
-      visit_call(node, receiver, func)
+      @callstack.push(node)
+      if func
+        visit_call(node, receiver, func)
+      else
+        raise_not_found(node.name, receiver)
+      end
+      @callstack.pop
     end
 
     private def visit_call(node, receiver, func : TFunctor)
@@ -30,18 +36,12 @@ module Myst
         block = stack.pop.as(TFunctor)
       end
 
-      @callstack.push(node)
       result = Invocation.new(self, func, receiver, args, block).invoke
-      @callstack.pop
       stack.push(result)
     end
 
     private def visit_call(_node, _receiver, value : Value)
       stack.push(value)
-    end
-
-    private def visit_call(_node, _receiver, _value)
-      raise RuntimeError.new(TString.new("No method #{_node.name} for #{_receiver}."), callstack)
     end
   end
 end

@@ -576,7 +576,7 @@ module Myst
       when Token::Type::CONST
         token = current_token
         read_token
-        return Const.new(token.value)
+        return Const.new(token.value).at(token.location)
       when Token::Type::LESS
         parse_value_interpolation
       when Token::Type::IDENT

@@ -5,6 +5,6 @@ module Myst
     def initialize(@context = [] of Node)
     end
 
-    delegate each, push, pop, to: context
+    delegate reverse_each, push, pop, to: context
   end
 end

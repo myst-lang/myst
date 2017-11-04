@@ -67,9 +67,9 @@ module Myst
       value_to_s = __scopeof(error.value)["to_s"].as(TFunctor)
       result = Invocation.new(self, value_to_s, error.value, [] of Value, nil).invoke
       @errput.puts("Uncaught Exception: " + result.as(TString).value)
-      error.trace.each do |frame|
+      error.trace.reverse_each do |frame|
         if frame.responds_to?(:name)
-          @errput.puts "  in `#{frame.name}` at #{frame.location}"
+          @errput.puts "  from `#{frame.name}` at #{frame.location}"
         else
           @errput.puts "  at #{frame.location}"
         end
