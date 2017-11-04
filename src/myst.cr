@@ -51,6 +51,10 @@ if show_ast
   program.accept(visitor)
 end
 
-# Interpret the program
 interpreter = Interpreter.new
+# Load the prelude file
+prelude_require = Require.new(StringLiteral.new("./stdlib/prelude.mt")).at(Location.new(__DIR__))
+interpreter.run(prelude_require)
+
+# Interpret the program
 interpreter.run(program)

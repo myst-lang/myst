@@ -12,5 +12,4 @@
 
 require "./enumerable.mt"
 require "./list.mt"
-require "./io.mt"
 require "./file.mt"
