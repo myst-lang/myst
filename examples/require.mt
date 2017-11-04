@@ -2,7 +2,7 @@
 # the behavior is slightly different. In Myst, any path starting with `./` or
 # `../` is treated as a file-relative path (the equivalent of Ruby's
 # `require_relative`). All other paths will be searched for in the directories
-# defined in the `MYST_LOAD_DIRS` environment variable.
+# defined in the `MYST_PATH` environment variable.
 #
 # `require`s act as simple extensions to the current file. Their contents are
 # essentially copy-pasted in place into the current file (most similar to the

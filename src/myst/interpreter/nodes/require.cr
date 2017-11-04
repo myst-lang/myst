@@ -51,15 +51,24 @@ module Myst
     # with bare paths (not explicitly relative).
     def load_dirs
       @load_dirs ||= begin
-        if paths = ENV["MYST_LOAD_DIRS"]?
-          paths.split(':')
-        else
-          # Until Myst is distributed as a binary and meant to be installable
-          # as a global command, just the execution's local path will be
-          # considered as a load path.
-          [Dir.current]
+        paths = [] of String
+        # Use any specified environment paths first.
+        if env_paths = ENV["MYST_PATH"]?
+          paths.concat(env_paths.split(':'))
         end
-      end
+        paths.concat([
+          # Then add the current working directory.
+          Dir.current,
+          # Finally, the directory where the executable is installed. This is not
+          # _guaranteed_ on all systems, but support is good enough, so a non-nil
+          # assertion is made.
+          #
+          # This is needed to locate the stdlib.
+          File.dirname(Process.executable_path.not_nil!)
+        ])
+
+        paths
+      end.as(Array(String))
     end
 
 
@@ -86,13 +95,10 @@ module Myst
     end
 
 
-    # Validate that the given path resolves to a real, readable file. Return
-    # false if that is not true.
+    # Return a boolean indicating whether the given path resolves to a real,
+    # readable file.
     private def validate_path(full_path)
-      unless File.exists?(full_path) && File.readable?(full_path)
-        raise "File '#{full_path}' is not available (unreadable or does not exist)."
-      end
-      false
+      File.exists?(full_path) && File.readable?(full_path)
     end
 
     private def is_relative?(path)

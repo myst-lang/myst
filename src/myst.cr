@@ -53,7 +53,7 @@ end
 
 interpreter = Interpreter.new
 # Load the prelude file
-prelude_require = Require.new(StringLiteral.new("./stdlib/prelude.mt")).at(Location.new(__DIR__))
+prelude_require = Require.new(StringLiteral.new("stdlib/prelude.mt")).at(Location.new(__DIR__))
 interpreter.run(prelude_require)
 
 # Interpret the program
