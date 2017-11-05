@@ -68,11 +68,8 @@ STATIC_TOKENS = {
   Token::Type::NIL          =>  "nil"
 }
 
-# This spec only tests simple token types. Types whose value is not static
-# (strings, identifiers, numerics, symbols, etc.) each have their own, more
-# comprehensive specs.
-describe "Lexer" do
 
+describe "Lexer" do
   {% for type, token in STATIC_TOKENS %}
     it "lexes `" + {{token}} + "`" do
       assert_token_type {{token}}, {{type}}
@@ -129,6 +126,18 @@ describe "Lexer" do
     assert_token_type %q("hello, world"), Token::Type::STRING
     assert_token_type %q("hello,
     world"),                              Token::Type::STRING
+  end
+
+  it "lexes ? as an identifier modifier" do
+    token = tokenize(%q(hello?)).first
+    token.type.should eq(Token::Type::IDENT)
+    token.value.should eq("hello?")
+  end
+
+  it "lexes ! as an identifier modifier" do
+    token = tokenize(%q(hello!)).first
+    token.type.should eq(Token::Type::IDENT)
+    token.value.should eq("hello!")
   end
 
   it "allows escape characters in strings" do
