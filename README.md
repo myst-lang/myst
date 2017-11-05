@@ -53,7 +53,18 @@ _Note that you'll need `crystal` installed for the build to succeed. This depend
 	#curl https://dist.crystal-lang.org/apt/setup.sh | bash
 	#apt-get install crystal
 
-First, download the [latest release](https://github.com/myst-lang/myst/releases/latest) and untar it somewhere.
+Now, install `myst`. `cd` to your prefered root dir, then :
+
+First, download the [latest release](https://github.com/myst-lang/myst/releases/latest) or the development (master) reposirtory :
+
+	wget https://github.com/myst-lang/myst/archive/v0.1.0.tar.gz
+
+	wget https://github.com/myst-lang/myst/archive/master.tar.gz
+
+then untar it somewhere and go to the extracted directory
+
+	tar xvf v0.1.0.tar.gz
+	cd myst-0.1.0/
 
 In that directory, run `shards build`. This will give you a `bin` folder with a `myst` executable inside of it. Now, there are two options:
 
@@ -69,7 +80,7 @@ In that directory, run `shards build`. This will give you a `bin` folder with a 
   root
   |- bin
   |  |- myst
-  |- stlib
+  |- stdlib
   |  |- enumerable.mt
   |  |- ...
   |  |- prelude.mt
