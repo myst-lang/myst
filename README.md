@@ -47,7 +47,11 @@ And that's it! You should now have a `myst` executable in your `$PATH` that can 
 
 There is currently no native package manager solution for Myst on linux systems. Instead, you'll need to build and install the binary manually. Luckily it's not too complicated.
 
-_Note that you'll need `crystal` installed for the build to succeed. This dependency is automatically managed on macOS._
+_Note that you'll need `crystal` installed for the build to succeed. This dependency is automatically managed on macOS._ To install `crystal`, follow these steps :
+
+	#apt-get install dirmngr
+	#curl https://dist.crystal-lang.org/apt/setup.sh | bash
+	#apt-get install crystal
 
 First, download the [latest release](https://github.com/myst-lang/myst/releases/latest) and untar it somewhere.
 
