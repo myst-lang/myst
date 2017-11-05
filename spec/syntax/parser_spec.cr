@@ -433,9 +433,13 @@ describe "Parser" do
   it_parses %q(_ = 2),      SimpleAssign.new(u("_"), l(2))
   # The left hand side may also be a Call expression as long as the Call has a receiver.
   it_parses %q(a.b = 1),          SimpleAssign.new(Call.new(Call.new(nil, "a"), "b"), l(1))
+  it_parses %q(a.b.c = 1),        SimpleAssign.new(Call.new(Call.new(Call.new(nil, "a"), "b"), "c"), l(1))
   it_parses %q(a[0] = 1),         SimpleAssign.new(Call.new(Call.new(nil, "a"), "[]", [l(0)]), l(1))
   it_parses %q(a.b = c.d = 1),    SimpleAssign.new(Call.new(Call.new(nil, "a"), "b"), SimpleAssign.new(Call.new(Call.new(nil, "c"), "d"), l(1)).as(Node))
   it_parses %q(a[0] = b[0] = 1),  SimpleAssign.new(Call.new(Call.new(nil, "a"), "[]", [l(0)]), SimpleAssign.new(Call.new(Call.new(nil, "b"), "[]", [l(0)]), l(1)).as(Node))
+  # Assignments are not allowed to methods with modifiers
+  it_does_not_parse %q(a.b? = 1)
+  it_does_not_parse %q(a.b! = 1)
 
   # Assignments can not be made to literal values.
   it_does_not_parse %q(2 = 4),          /cannot assign to literal value/i
@@ -645,6 +649,21 @@ describe "Parser" do
   ),                          Def.new("foo") # `@body` will be a Nop
   # Semicolons can be used as delimiters to compact the definition.
   it_parses %q(def foo; end), Def.new("foo")
+
+  # Any identifier is valid as a definition name
+  it_parses %q(def foo_;  end), Def.new("foo_")
+  it_parses %q(def _foo;  end), Def.new("_foo")
+  it_parses %q(def foo?;  end), Def.new("foo?")
+  it_parses %q(def foo!;  end), Def.new("foo!")
+  it_parses %q(def foo_!; end), Def.new("foo_!")
+  it_parses %q(def foo_?; end), Def.new("foo_?")
+
+  # `=` can also be appended to any non-modified identifier.
+  it_parses %q(def foo=;    end), Def.new("foo=")
+  it_parses %q(def foo_=(); end), Def.new("foo_=")
+  it_parses %q(def _foo=(); end), Def.new("_foo=")
+  it_does_not_parse %q(def foo?=; end)
+  it_does_not_parse %q(def foo!=; end)
 
   it_parses %q(
     def foo(a, b)
