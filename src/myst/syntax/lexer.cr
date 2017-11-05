@@ -399,6 +399,12 @@ module Myst
         end
       end
 
+      # Identifiers may end with a query (`?`) or bang (`!`) modifier as the
+      # last character.
+      if current_char == '?' || current_char == '!'
+        read_char
+      end
+
       @current_token.value = @reader.buffer_value
     end
   end

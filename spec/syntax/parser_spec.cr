@@ -28,12 +28,15 @@ end
 
 
 private def test_calls_with_receiver(receiver_source, receiver_node)
-  # Bare identifiers are considered calls, as long as they have not already been defined as Vars.
-  it_parses %Q(#{receiver_source}call),            Call.new(receiver_node, "call")
-  it_parses %Q(#{receiver_source}call()),          Call.new(receiver_node, "call")
-  it_parses %Q(#{receiver_source}call(1)),         Call.new(receiver_node, "call", [l(1)])
-  it_parses %Q(#{receiver_source}call(1, 2 + 3)),  Call.new(receiver_node, "call", [l(1), Call.new(l(2), "+", [l(3)], infix: true)])
-  it_parses %Q(#{receiver_source}call (1)),        Call.new(receiver_node, "call", [l(1)])
+  it_parses %Q(#{receiver_source}call),             Call.new(receiver_node, "call")
+  it_parses %Q(#{receiver_source}call?),            Call.new(receiver_node, "call?")
+  it_parses %Q(#{receiver_source}call!),            Call.new(receiver_node, "call!")
+  it_parses %Q(#{receiver_source}call()),           Call.new(receiver_node, "call")
+  it_parses %Q(#{receiver_source}call?()),          Call.new(receiver_node, "call?")
+  it_parses %Q(#{receiver_source}call!()),          Call.new(receiver_node, "call!")
+  it_parses %Q(#{receiver_source}call(1)),          Call.new(receiver_node, "call", [l(1)])
+  it_parses %Q(#{receiver_source}call(1, 2 + 3)),   Call.new(receiver_node, "call", [l(1), Call.new(l(2), "+", [l(3)], infix: true)])
+  it_parses %Q(#{receiver_source}call (1)),         Call.new(receiver_node, "call", [l(1)])
   it_parses %Q(
     #{receiver_source}call(
       1,
@@ -60,12 +63,16 @@ private def test_calls_with_receiver(receiver_source, receiver_node)
   ),                              Call.new(receiver_node, "call", block: Block.new)
 
   # The `do...end` syntax can also have a delimiter after the `do` and parameters.
-  it_parses %Q(#{receiver_source}call do; end),     Call.new(receiver_node, "call", block: Block.new)
-  it_parses %Q(#{receiver_source}call   do; end),   Call.new(receiver_node, "call", block: Block.new)
-  it_parses %Q(#{receiver_source}call do |a|; end), Call.new(receiver_node, "call", block: Block.new([p("a")]))
+  it_parses %Q(#{receiver_source}call do; end),       Call.new(receiver_node, "call",   block: Block.new)
+  it_parses %Q(#{receiver_source}call? do; end),      Call.new(receiver_node, "call?",  block: Block.new)
+  it_parses %Q(#{receiver_source}call! do; end),      Call.new(receiver_node, "call!",  block: Block.new)
+  it_parses %Q(#{receiver_source}call   do; end),     Call.new(receiver_node, "call",   block: Block.new)
+  it_parses %Q(#{receiver_source}call do |a|; end),   Call.new(receiver_node, "call",   block: Block.new([p("a")]))
 
   # Brace blocks accept arguments after the opening brace.
-  it_parses %Q(#{receiver_source}call{ |a,b| }),                  Call.new(receiver_node, "call", block: Block.new([p("a"), p("b")]))
+  it_parses %Q(#{receiver_source}call{ |a,b| }),                  Call.new(receiver_node, "call",   block: Block.new([p("a"), p("b")]))
+  it_parses %Q(#{receiver_source}call?{ |a,b| }),                 Call.new(receiver_node, "call?",  block: Block.new([p("a"), p("b")]))
+  it_parses %Q(#{receiver_source}call!{ |a,b| }),                 Call.new(receiver_node, "call!",  block: Block.new([p("a"), p("b")]))
   # Block parameters are exactly like normal Def parameters, with the same syntax support.
   it_parses %Q(#{receiver_source}call{ | | }),                    Call.new(receiver_node, "call", block: Block.new())
   it_parses %Q(#{receiver_source}call{ |a,*b| }),                 Call.new(receiver_node, "call", block: Block.new([p("a"), p("b", splat: true)]))
@@ -249,8 +256,12 @@ describe "Parser" do
   it_parses %q(<[1, 2]>),       i([1, 2])
   it_parses %q(<[a, *b]>),      i(l([Call.new(nil, "a"), Splat.new(Call.new(nil, "b"))]))
   it_parses %q(<{a: 1}>),       i({:a => 1})
+  # Interpolations are valid as receivers for Calls
+  test_calls_with_receiver("<a>.",  i(Call.new(nil, "a")))
   # Calls, Vars, Consts, Underscores are also valid.
   it_parses %q(<a>),            i(Call.new(nil, "a"))
+  it_parses %q(<a?>),           i(Call.new(nil, "a?"))
+  it_parses %q(<a!>),           i(Call.new(nil, "a!"))
   it_parses %q(<a(1, 2)>),      i(Call.new(nil, "a", [l(1), l(2)]))
   it_parses %q(<a.b(1)>),       i(Call.new(Call.new(nil, "a"), "b", [l(1)]))
   it_parses %q(<a.b.c>),        i(Call.new(Call.new(Call.new(nil, "a"), "b"), "c"))
@@ -432,10 +443,14 @@ describe "Parser" do
   it_parses %q(THING = 4),  SimpleAssign.new(c("THING"), l(4))
   it_parses %q(_ = 2),      SimpleAssign.new(u("_"), l(2))
   # The left hand side may also be a Call expression as long as the Call has a receiver.
-  it_parses %q(a.b = 1),          SimpleAssign.new(Call.new(Call.new(nil, "a"), "b"), l(1))
-  it_parses %q(a[0] = 1),         SimpleAssign.new(Call.new(Call.new(nil, "a"), "[]", [l(0)]), l(1))
-  it_parses %q(a.b = c.d = 1),    SimpleAssign.new(Call.new(Call.new(nil, "a"), "b"), SimpleAssign.new(Call.new(Call.new(nil, "c"), "d"), l(1)).as(Node))
-  it_parses %q(a[0] = b[0] = 1),  SimpleAssign.new(Call.new(Call.new(nil, "a"), "[]", [l(0)]), SimpleAssign.new(Call.new(Call.new(nil, "b"), "[]", [l(0)]), l(1)).as(Node))
+  it_parses %q(a.b = 1),          Call.new(Call.new(nil, "a"), "b=", [l(1)])
+  it_parses %q(a.b.c = 1),        Call.new(Call.new(Call.new(nil, "a"), "b"), "c=", [l(1)])
+  it_parses %q(a[0] = 1),         Call.new(Call.new(nil, "a"), "[]=", [l(0), l(1)])
+  it_parses %q(a.b = c.d = 1),    Call.new(Call.new(nil, "a"), "b=", [Call.new(Call.new(nil, "c"), "d=", [l(1)]).as(Node)])
+  it_parses %q(a[0] = b[0] = 1),  Call.new(Call.new(nil, "a"), "[]=", [l(0), Call.new(Call.new(nil, "b"), "[]=", [l(0), l(1)]).as(Node)])
+  # Assignments are not allowed to methods with modifiers
+  it_does_not_parse %q(a.b? = 1)
+  it_does_not_parse %q(a.b! = 1)
 
   # Assignments can not be made to literal values.
   it_does_not_parse %q(2 = 4),          /cannot assign to literal value/i
@@ -645,6 +660,23 @@ describe "Parser" do
   ),                          Def.new("foo") # `@body` will be a Nop
   # Semicolons can be used as delimiters to compact the definition.
   it_parses %q(def foo; end), Def.new("foo")
+
+  # Any identifier is valid as a definition name
+  it_parses %q(def foo_;  end), Def.new("foo_")
+  it_parses %q(def _foo;  end), Def.new("_foo")
+  it_parses %q(def foo?;  end), Def.new("foo?")
+  it_parses %q(def foo!;  end), Def.new("foo!")
+  it_parses %q(def foo_!; end), Def.new("foo_!")
+  it_parses %q(def foo_?; end), Def.new("foo_?")
+
+  # `=` can also be appended to any non-modified identifier.
+  it_parses %q(def foo=;    end), Def.new("foo=")
+  it_parses %q(def foo_=(); end), Def.new("foo_=")
+  it_parses %q(def _foo=(); end), Def.new("_foo=")
+  # Multiple modifiers are not allowed
+  it_does_not_parse %q(def foo?=; end)
+  it_does_not_parse %q(def foo!=; end)
+
 
   it_parses %q(
     def foo(a, b)
@@ -1007,6 +1039,8 @@ describe "Parser" do
 
   test_calls_with_receiver("",                  nil)
   test_calls_with_receiver("object.",           Call.new(nil, "object"))
+  test_calls_with_receiver("object?.",          Call.new(nil, "object?"))
+  test_calls_with_receiver("object!.",          Call.new(nil, "object!"))
   test_calls_with_receiver("nested.object.",    Call.new(Call.new(nil, "nested"), "object"))
   test_calls_with_receiver("Thing.member.",     Call.new(c("Thing"), "member"))
   test_calls_with_receiver("Thing.Other.",      Call.new(c("Thing"), "Other"))

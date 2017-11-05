@@ -137,6 +137,11 @@ module Myst
       static = (start.type == Token::Type::DEFSTATIC)
       skip_space
       name = expect(Token::Type::IDENT).value
+      # If the name is unmodified, it can be followed by an `=` to create an
+      # assignment method.
+      if !modified_ident?(name) && accept(Token::Type::EQUAL)
+        name += "="
+      end
       method_def = Def.new(name, static: static).at(start.location)
       push_var_scope
 
@@ -493,7 +498,22 @@ module Myst
       when accept(Token::Type::EQUAL)
         skip_space_and_newlines
         value = parse_expression
-        return SimpleAssign.new(to_lhs(target), value).at(target).at_end(value)
+        case target = to_lhs(target)
+        when Call
+          # Call targets get re-written from a SimpleAssign to a method call
+          # with a `=` appended to the given name. For example, the assignment
+          # `a.b = c` would be re-written as a Call on `a` to the method `b=`
+          # with an argument of `c`.
+          #
+          # This also applies to access notation calls. They are rewritten from
+          # `a[b] = c` to a Call on `a` to the method `[]=` with the arguments
+          # `b, c`, this could also be written as `a.[]=(b, c)
+          target.name += "="
+          target.args << value
+          return target
+        else
+          return SimpleAssign.new(target, value).at(target).at_end(value)
+        end
       when accept(Token::Type::MATCH)
         skip_space_and_newlines
         value = parse_expression
@@ -936,6 +956,11 @@ module Myst
       when IVar
         return node
       when Call
+        # Method names with modifiers (e.g., `foo?`) are not allowed on the
+        # left-hand-side of an assignment
+        if modified_ident?(node.name)
+          raise ParseError.new("Method names with modifiers (`?` and `!`) are not allowed as targets for assignment")
+        end
         # If no explicit receiver was set on the Call, consider it a Var.
         if node.receiver? || node.block? || !node.args.empty?
           return node
@@ -986,7 +1011,8 @@ module Myst
     ###
     # Utilities
     #
-    # Utility methods for managing the state of the parser.
+    # Utility methods for managing the state of the parser or for making
+    # complex assertions on values.
     ###
 
     def push_var_scope(scope=Set(String).new)
@@ -1003,6 +1029,12 @@ module Myst
 
     def is_local_var?(name : String)
       @local_vars.last.includes?(name)
+    end
+
+    # Returns true if the given identifier is modified (i.e., ends with a
+    # `?` or `!`).
+    def modified_ident?(ident : String)
+      ident.ends_with?('?') || ident.ends_with?('!')
     end
   end
 end

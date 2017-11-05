@@ -4,10 +4,7 @@ require "../../support/interpret.cr"
 
 # This section uses a small sample of Call formats to test the general ability
 # of the interpreter to evaluate them. Coverage of infix operators, native
-# functions, and standard library functions will be done separately.
-#
-# This section of tests relies on the Integer type with `+` and `to_s` methods
-# defined.
+# functions, and standard library functions will mostly be done separately.
 describe "Interpreter - Call" do
   it_interprets %q(1 + 1),        [val(2)]
   it_interprets %q(1 + 1 + 1),    [val(3)]
@@ -27,6 +24,49 @@ describe "Interpreter - Call" do
     end
   ),                [val(2)]
 
+  # Methods with modifiers act identically to regular calls
+  it_interprets %q(
+    def is_3?(a, b)
+      a + b == 3
+    end
+
+    is_3?(2, 1)
+  ),                [val(true)]
+
+  it_interprets %q(
+    def is_3!(a, b)
+      a + b == 3
+    end
+
+    is_3!(2, 1)
+  ),                [val(true)]
+
+  # Assignments with Calls as targets are re-written to lookup a method with
+  # a trailing `=`. The only way for a Call to be the receiver of an assignment
+  # is with a receiver, so this test must be done is done with a module method.
+  it_interprets %q(
+    defmodule Foo
+      def foo(a);  @called = :no_modifier; end
+      def foo=(a); @called = :assignment;  end
+
+      def called; @called; end
+    end
+
+    Foo.foo = 1
+    Foo.called
+  ),              [val(:assignment)]
+
+  # Methods with modifiers can be used as arguments in other calls
+  it_interprets %q(
+    defmodule Foo
+      def a?; 1; end
+      def b!; 2; end
+    end
+
+    Foo.a? + Foo.b!
+  ),              [val(3)]
+
+
   # When looking up a function, the current lexical scope should be checked for
   # overrides. However, parent lexical scopes should be ignored.
   it_interprets %q(
@@ -36,6 +76,8 @@ describe "Interpreter - Call" do
       end
 
       def foo(&block)
+        # As a parameter, `block` is added as an entry in the local scope,
+        # superceding the `Foo.block` method defined above.
         block(1)
       end
     end
