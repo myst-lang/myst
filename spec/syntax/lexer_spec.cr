@@ -140,6 +140,15 @@ describe "Lexer" do
     token.value.should eq("hello!")
   end
 
+  it "does not allow multiple modifiers on an identifier" do
+    parser = Parser.new(IO::Memory.new(%q(hello??)), File.join(Dir.current, "_.mt"))
+    # Instantiating the parser will parse the first token.
+    token = parser.current_token
+    token.type.should eq(Token::Type::IDENT)
+    # The lexer should only accept a single modifier as part of the identifier
+    token.value.should eq("hello?")
+  end
+
   it "allows escape characters in strings" do
     assert_token_type %q("\""),   Token::Type::STRING
     assert_token_type %q("\0"),   Token::Type::STRING

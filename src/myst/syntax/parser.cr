@@ -498,7 +498,22 @@ module Myst
       when accept(Token::Type::EQUAL)
         skip_space_and_newlines
         value = parse_expression
-        return SimpleAssign.new(to_lhs(target), value).at(target).at_end(value)
+        case target = to_lhs(target)
+        when Call
+          # Call targets get re-written from a SimpleAssign to a method call
+          # with a `=` appended to the given name. For example, the assignment
+          # `a.b = c` would be re-written as a Call on `a` to the method `b=`
+          # with an argument of `c`.
+          #
+          # This also applies to access notation calls. They are rewritten from
+          # `a[b] = c` to a Call on `a` to the method `[]=` with the arguments
+          # `b, c`, this could also be written as `a.[]=(b, c)
+          target.name += "="
+          target.args << value
+          return target
+        else
+          return SimpleAssign.new(target, value).at(target).at_end(value)
+        end
       when accept(Token::Type::MATCH)
         skip_space_and_newlines
         value = parse_expression
