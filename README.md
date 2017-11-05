@@ -23,7 +23,8 @@ Some of the high-level features include:
 
 # Installation
 
-_NOTE: Due to Crystal's current limitations with compiling on Windows, Myst is only works on macOS and Linux systems._
+_NOTE: Due to Crystal's current limitations with compiling on Windows, Myst 
+only works on macOS and Linux systems._
 
 ### macOS
 
