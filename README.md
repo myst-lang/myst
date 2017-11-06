@@ -23,7 +23,8 @@ Some of the high-level features include:
 
 # Installation
 
-_NOTE: Due to Crystal's current limitations with compiling on Windows, Myst is only works on macOS and Linux systems._
+_NOTE: Due to Crystal's current limitations with compiling on Windows, Myst 
+only works on macOS and Linux systems._
 
 ### macOS
 
@@ -46,25 +47,53 @@ And that's it! You should now have a `myst` executable in your `$PATH` that can 
 
 There is currently no native package manager solution for Myst on linux systems. Instead, you'll need to build and install the binary manually. Luckily it's not too complicated.
 
-_Note that you'll need `crystal` installed for the build to succeed. This dependency is automatically managed on macOS._
+_Note that you'll need `crystal` installed for the build to succeed. This dependency is automatically managed on macOS._ To install `crystal`, follow these steps :
 
-First, download the [latest release](https://github.com/myst-lang/myst/releases/latest) and untar it somewhere.
+	# apt-get install dirmngr
+	# curl https://dist.crystal-lang.org/apt/setup.sh | bash
+	# apt-get install crystal
 
-In that directory, run `shards build`. This will give you a `bin` folder with a `myst` executable inside of it. Now, there are two options:
+Now, install `myst`. `cd` to your prefered root dir, then :
 
-1. The simplest option is to create a symlink from `/usr/local/bin` or some other folder on your `$PATH` to the `bin` folder that `shards build` generated.
+First, download the [latest release](https://github.com/myst-lang/myst/releases/latest) or the development (master) reposirtory :
+
+	$ wget https://github.com/myst-lang/myst/archive/v0.1.0.tar.gz
+	or
+	$ wget https://github.com/myst-lang/myst/archive/master.tar.gz
+
+then untar it somewhere and go to the extracted directory
+
+	```
+	$ tar xvf v0.1.0.tar.gz
+	or 
+	$ tar xvf master.tar.gz
+	
+	$ cd myst-0.1.0/
+	$ shards build
+	```
+
+This will give you a `bin` folder with a `myst` executable inside of it. Now, there are two options:
+
+1. Simply add the bin/ directory to your PATH environment variable at the end
+   of your *~/.bash_profile* file :
+
+		export PATH="$PATH:/path/to/bin/myst"
+
+  Then, update your current profile using the `source ~/.bashrc` command.
+
+2. The second option is to create a symlink from `/usr/local/bin` or some other folder on your `$PATH` to the `bin` folder that `shards build` generated.
 
   ```
   ln -s /path/to/bin/myst /usr/local/bin/myst
   ```
   
-2. The second option is to move the entire Myst folder to a folder on your `$PATH`. The executable needs to be in a folder that is a sibling to the `stdlib` folder at the root of this project. For example:
+3. The third option is to move the entire Myst folder to a folder on your `$PATH`. The executable needs to be in a folder that is a sibling to the `stdlib` folder at the root of this project. For example:
 
   ```
   root
   |- bin
   |  |- myst
-  |- stlib
+  |- stdlib
   |  |- enumerable.mt
   |  |- ...
   |  |- prelude.mt
