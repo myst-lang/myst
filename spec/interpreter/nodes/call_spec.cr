@@ -91,6 +91,30 @@ describe "Interpreter - Call" do
       f3 = f1 #{op} f2
       f3.a
     ),              [val(3)]
+
+    # Operators can also be defined statically to do some type algebra.
+    it_interprets %Q(
+      deftype Foo
+        defstatic #{op}(other : Foo)
+          :called_op_on_type
+        end
+      end
+
+      Foo #{op} Foo
+    ),              [val(:called_op_on_type)]
+
+    # Or on modules, for whatever that might be worth... (I guess this could
+    # define operators in a module that could be included? Not sure why it
+    # would be done outside of an `include`, though).
+    it_interprets %Q(
+      defmodule Foo
+        def #{op}(other)
+          :called_op_on_module
+        end
+      end
+
+      Foo #{op} Foo
+    ),              [val(:called_op_on_module)]
   end
 
   # Access and access assignment can also be overloaded.
