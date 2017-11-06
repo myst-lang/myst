@@ -203,11 +203,10 @@ module Myst
     def_equals_and_hash entries
   end
 
-  # A local variable. Distinct from Calls based on assignments that have been
-  # made in the current scope.
-  #
-  #   [a-z][a-zA-Z0-9_]*
-  class Var < Node
+  # Any node that can appear as-is on the left-hand side of an assignment. This
+  # type is only necessary to avoid some type unioning issues with Var, Const,
+  # and Underscore throughout the interpreter.
+  class StaticAssignable < Node
     property name : String
 
     def initialize(@name : String)
@@ -216,17 +215,18 @@ module Myst
     def_equals_and_hash name
   end
 
+  # A local variable. Distinct from Calls based on assignments that have been
+  # made in the current scope.
+  #
+  #   [a-z][a-zA-Z0-9_]*
+  class Var < StaticAssignable
+  end
+
   # A constant. Distinct from other identifiers by a capital letter as the
   # first character. Constants do not allow re-assignment to their values.
   #
   #   [A-Z][a-zA-Z0-9]*
-  class Const < Node
-    property name : String
-
-    def initialize(@name : String)
-    end
-
-    def_equals_and_hash name
+  class Const < StaticAssignable
   end
 
   # An underscore-prefixed identifier. Underscores are specifically intended
@@ -234,12 +234,7 @@ module Myst
   # semantically correct, but where the value is not used).
   #
   #   _[a-zA-Z0-9]*
-  class Underscore < Node
-    property name : String
-
-    def initialize(@name : String)
-    end
-
+  class Underscore < StaticAssignable
     # The name of an underscore is inconsequential. So long as two objects
     # are Underscore nodes, they should be considered equal.
     def_equals_and_hash
