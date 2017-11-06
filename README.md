@@ -49,32 +49,45 @@ There is currently no native package manager solution for Myst on linux systems.
 
 _Note that you'll need `crystal` installed for the build to succeed. This dependency is automatically managed on macOS._ To install `crystal`, follow these steps :
 
-	#apt-get install dirmngr
-	#curl https://dist.crystal-lang.org/apt/setup.sh | bash
-	#apt-get install crystal
+	# apt-get install dirmngr
+	# curl https://dist.crystal-lang.org/apt/setup.sh | bash
+	# apt-get install crystal
 
 Now, install `myst`. `cd` to your prefered root dir, then :
 
 First, download the [latest release](https://github.com/myst-lang/myst/releases/latest) or the development (master) reposirtory :
 
-	wget https://github.com/myst-lang/myst/archive/v0.1.0.tar.gz
-
-	wget https://github.com/myst-lang/myst/archive/master.tar.gz
+	$ wget https://github.com/myst-lang/myst/archive/v0.1.0.tar.gz
+	or
+	$ wget https://github.com/myst-lang/myst/archive/master.tar.gz
 
 then untar it somewhere and go to the extracted directory
 
-	tar xvf v0.1.0.tar.gz
-	cd myst-0.1.0/
+	```
+	$ tar xvf v0.1.0.tar.gz
+	or 
+	$ tar xvf master.tar.gz
+	
+	$ cd myst-0.1.0/
+	$ shards build
+	```
 
-In that directory, run `shards build`. This will give you a `bin` folder with a `myst` executable inside of it. Now, there are two options:
+This will give you a `bin` folder with a `myst` executable inside of it. Now, there are two options:
 
-1. The simplest option is to create a symlink from `/usr/local/bin` or some other folder on your `$PATH` to the `bin` folder that `shards build` generated.
+1. Simply add the bin/ directory to your PATH environment variable at the end
+   of your *~/.bash_profile* file :
+
+		export PATH="$PATH:/path/to/bin/myst"
+
+  Then, update your current profile using the `source ~/.bashrc` command.
+
+2. The second option is to create a symlink from `/usr/local/bin` or some other folder on your `$PATH` to the `bin` folder that `shards build` generated.
 
   ```
   ln -s /path/to/bin/myst /usr/local/bin/myst
   ```
   
-2. The second option is to move the entire Myst folder to a folder on your `$PATH`. The executable needs to be in a folder that is a sibling to the `stdlib` folder at the root of this project. For example:
+3. The third option is to move the entire Myst folder to a folder on your `$PATH`. The executable needs to be in a folder that is a sibling to the `stdlib` folder at the root of this project. For example:
 
   ```
   root
