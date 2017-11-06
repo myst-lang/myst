@@ -167,8 +167,13 @@ module Myst
       end
 
       def self.binary_operators
-        [ PLUS, MINUS, STAR, SLASH, EQUAL, MATCH, LESS, LESSEQUAL,
+        [ PLUS, MINUS, STAR, SLASH, MODULO, EQUAL, MATCH, LESS, LESSEQUAL,
           GREATEREQUAL, GREATER, NOTEQUAL, EQUALEQUAL, ANDAND, OROR]
+      end
+
+      def self.overloadable_operators
+        [ PLUS, MINUS, STAR, SLASH, MODULO, MATCH, LESS, LESSEQUAL,
+          NOTEQUAL, EQUALEQUAL, GREATEREQUAL, GREATER]
       end
 
       def unary_operator?
@@ -177,6 +182,10 @@ module Myst
 
       def binary_operator?
         self.class.binary_operators.includes?(self)
+      end
+
+      def overloadable_operator?
+        self.class.overloadable_operators.includes?(self)
       end
 
       def operator?

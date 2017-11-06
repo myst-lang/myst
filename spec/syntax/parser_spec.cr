@@ -844,6 +844,16 @@ describe "Parser" do
     end
   ),                            Def.new("foo", [p("list", l([1, u("_")]), restriction: c("List")), p(nil, l(nil)), p("b", restriction: c("Integer"))])
 
+  # Some operators are also allowed as method names for overloading.
+  [
+    "+", "-", "*", "/", "%", "[]", "[]=",
+    "<", "<=", "!=", "==", ">=", ">"
+  ].each do |op|
+    it_parses %Q(def #{op}; end),         Def.new(op)
+    it_parses %Q(def #{op}(); end),       Def.new(op)
+    it_parses %Q(def #{op}(other); end),  Def.new(op, [p("other")])
+    it_parses %Q(def #{op}(a, b); end),   Def.new(op, [p("a"), p("b")])
+  end
 
 
   # Module definitions

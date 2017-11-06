@@ -136,12 +136,7 @@ module Myst
       start = expect(Token::Type::DEF, Token::Type::DEFSTATIC)
       static = (start.type == Token::Type::DEFSTATIC)
       skip_space
-      name = expect(Token::Type::IDENT).value
-      # If the name is unmodified, it can be followed by an `=` to create an
-      # assignment method.
-      if !modified_ident?(name) && accept(Token::Type::EQUAL)
-        name += "="
-      end
+      name = parse_def_name
       method_def = Def.new(name, static: static).at(start.location)
       push_var_scope
 
@@ -200,6 +195,37 @@ module Myst
         finish = expect(Token::Type::END)
         pop_var_scope
         return method_def.at_end(finish.location)
+      end
+    end
+
+    def parse_def_name
+      case (token = current_token).type
+      when Token::Type::IDENT
+        expect(Token::Type::IDENT)
+        name = token.value
+        # If the name is unmodified, it can be followed by an `=` to create an
+        # assignment method.
+        if !modified_ident?(name) && accept(Token::Type::EQUAL)
+          name += "="
+        end
+        name
+      when Token::Type::LBRACE
+        # An access overload is written as `[]`, so an RBRACE must also be
+        # given for the method name to be valid.
+        expect(Token::Type::LBRACE)
+        expect(Token::Type::RBRACE)
+        # An `=` can also be given to specify access assignment
+        if accept(Token::Type::EQUAL)
+          return "[]="
+        else
+          return "[]"
+        end
+      when .overloadable_operator?
+        read_token
+        # Any overloadable operator is also allowed
+        token.value
+      else
+        raise ParseError.new("Invalid name for def: #{token.value}")
       end
     end
 
