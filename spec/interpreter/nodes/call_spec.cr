@@ -66,6 +66,80 @@ describe "Interpreter - Call" do
     Foo.a? + Foo.b!
   ),              [val(3)]
 
+  # Operators can be overloaded by defining a method with the operator as the
+  # name on an object.
+  # The match operator overload will have special semantics. These are TBD from
+  # https://github.com/myst-lang/myst/issues/11.
+  [
+    "+", "-", "*", "/", "%",
+    "<", "<=", "!=", "==", ">=", ">"
+  ].each do |op|
+    it_interprets %Q(
+      deftype Foo
+        def a; @a; end
+        def initialize(a)
+          @a = a
+        end
+
+        def #{op}(other : Foo)
+          %Foo{@a + other.a}
+        end
+      end
+
+      f1 = %Foo{1}
+      f2 = %Foo{2}
+      f3 = f1 #{op} f2
+      f3.a
+    ),              [val(3)]
+
+    # Operators can also be defined statically to do some type algebra.
+    it_interprets %Q(
+      deftype Foo
+        defstatic #{op}(other : Foo)
+          :called_op_on_type
+        end
+      end
+
+      Foo #{op} Foo
+    ),              [val(:called_op_on_type)]
+
+    # Or on modules, for whatever that might be worth... (I guess this could
+    # define operators in a module that could be included? Not sure why it
+    # would be done outside of an `include`, though).
+    it_interprets %Q(
+      defmodule Foo
+        def #{op}(other)
+          :called_op_on_module
+        end
+      end
+
+      Foo #{op} Foo
+    ),              [val(:called_op_on_module)]
+  end
+
+  # Access and access assignment can also be overloaded.
+  it_interprets %q(
+    deftype Foo
+      def initialize
+        @values = [1, 2, 3]
+      end
+
+      def [](idx : Integer)
+        @values[idx]
+      end
+
+      def []=(idx : Integer, value)
+        @values[idx] = value
+      end
+
+      def values; @values; end
+    end
+
+    f1 = %Foo{}
+    f1[2] = 5
+    f1.values
+  ),                [val([1, 2, 5])]
+
 
   # When looking up a function, the current lexical scope should be checked for
   # overrides. However, parent lexical scopes should be ignored.
