@@ -24,12 +24,12 @@ module Myst
 
 
 
-    def initialize(source : IO, source_file : String)
+    def initialize(source : IO, source_file : String, row_start=1, col_start=0)
       @reader = Reader.new(source)
       @source_file = File.expand_path(source_file)
 
-      @row = 1
-      @col = 0
+      @row = row_start
+      @col = col_start
       @last_char = ' '
 
       # TODO: re-assignment to @current_token is currently necessary because
@@ -297,16 +297,50 @@ module Myst
       # Read the starting quote character
       read_char
 
+      # The stack of bracing characters that have been encountered so far. When
+      # an opening brace is encountered (`{`), it is pushed here. When a
+      # matching closing brace is found (`}`), it's opener is popped.
+      #
+      # Note that this intentionally does _not_ allow early termination of the
+      # string. All braces must be matched for the string to finish. Otherwise,
+      # the string will continue to the end of the input sequence (potentially
+      # infinite). To ensure this does not block indefinitely, an error is
+      # raised if a null character (`\0`) is found.
+      brace_stack = ['"'] of Char
+
+
       loop do
+        if brace_stack.empty?
+          break
+        end
+
         case current_char
-        when '"'
+        when '\0'
+          # A null character within a string is a syntax error.
+          raise SyntaxError.new(current_location, "Unterminated string literal. Reached EOF without terminating.")
           # Read the closing quote, then stop
           read_char
           break
         when '\\'
           # Read two characters to naively support escaped characters.
+          # This ensures that escaped quotes do not terminate the string.
           read_char
           read_char
+        when '#'
+          read_char
+          if current_char == '{'
+            brace_stack.push('{')
+          end
+        when '}'
+          read_char
+          if brace_stack.last == '{'
+            brace_stack.pop
+          end
+        when '"'
+          read_char
+          if brace_stack.last == '"'
+            brace_stack.pop
+          end
         else
           read_char
         end
