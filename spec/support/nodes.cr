@@ -33,6 +33,14 @@ def i(value : Node);  ValueInterpolation.new(value);    end
 def i(value);         ValueInterpolation.new(l(value)); end
 
 
+# istr(*components)
+#
+# Join the given nodes together under an InterpolatedStringLiteral.
+def istr(*components : Node)
+  InterpolatedStringLiteral.new(components.map{ |n| n.as(Node) }.to_a).as(Node)
+end
+
+
 # v(name)
 #
 # Generate a Var node with the given name.

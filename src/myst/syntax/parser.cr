@@ -876,9 +876,8 @@ module Myst
       when Token::Type::FLOAT
         read_token
         FloatLiteral.new(token.value).at(token.location)
-      when Token::Type::STRING
-        read_token
-        StringLiteral.new(token.value).at(token.location)
+      when Token::Type::STRING, Token::Type::INTERP_START
+        parse_string_literal
       when Token::Type::SYMBOL
         read_token
         SymbolLiteral.new(token.value).at(token.location)
@@ -888,6 +887,43 @@ module Myst
         parse_map_literal
       else
         raise ParseError.new("Expected a literal value. Got #{current_token.inspect} instead")
+      end
+    end
+
+
+    def parse_string_literal
+      pieces = [] of Node
+      loop do
+        case (token = current_token).type
+        when Token::Type::STRING
+          expect(Token::Type::STRING)
+          # Only add the string piece if it contains one or more characters.
+          # Strings of zero width are not valuable.
+          if token.value.size > 0
+            pieces.push(StringLiteral.new(token.value).at(token.location))
+          end
+        when Token::Type::INTERP_START
+          expect(Token::Type::INTERP_START)
+          interpolated_expression = parse_code_block(Token::Type::INTERP_END)
+          # Nops are similarly not valuable, so they can be ignored.
+          unless interpolated_expression.is_a?(Nop)
+            pieces.push(interpolated_expression)
+          end
+          expect(Token::Type::INTERP_END)
+        else
+          break
+        end
+      end
+
+      case
+      when pieces.size == 0
+        # If there are no pieces to the string literal after parsing, infer a
+        # blank string.
+        return StringLiteral.new("").at(current_location)
+      when pieces.size == 1 && pieces.first.is_a?(StringLiteral)
+        return pieces.first
+      else
+        return InterpolatedStringLiteral.new(pieces).at(pieces.first).at_end(pieces.last)
       end
     end
 
