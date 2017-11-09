@@ -329,50 +329,53 @@ describe "Parser" do
   it_parses %q("hello<()>, world"),           istr(l("hello"), l(", world"))
   it_parses %q("<()>hello<()>, world<()>!"),  istr(l("hello"), l(", world"), l("!"))
   # Simple expressions
-  it_parses %q("<(a)>"),                      istr(e(Call.new(nil, "a")))
-  it_parses %q("<(nil)>"),                    istr(e(l(nil)))
-  it_parses %q("<(true)>"),                   istr(e(l(true)))
-  it_parses %q("<(false)>"),                  istr(e(l(false)))
-  it_parses %q("<(1)>"),                      istr(e(l(1)))
-  it_parses %q("<(1.0)>"),                    istr(e(l(1.0)))
-  it_parses %q("<("hi")>"),                   istr(e(l("hi")))
-  it_parses %q("<("")>"),                     istr(e(l("")))
-  it_parses %q("<(:hi)>"),                    istr(e(l(:hi)))
-  it_parses %q("<([])>"),                     istr(e(ListLiteral.new))
-  it_parses %q("<({})>"),                     istr(e(MapLiteral.new))
+  it_parses %q("<(a)>"),                      istr(Call.new(nil, "a"))
+  it_parses %q("<(nil)>"),                    istr(l(nil))
+  it_parses %q("<(true)>"),                   istr(l(true))
+  it_parses %q("<(false)>"),                  istr(l(false))
+  it_parses %q("<(1)>"),                      istr(l(1))
+  it_parses %q("<(1.0)>"),                    istr(l(1.0))
+  it_parses %q("<("hi")>"),                   istr(l("hi"))
+  it_parses %q("<("")>"),                     istr(l(""))
+  it_parses %q("<(:hi)>"),                    istr(l(:hi))
+  it_parses %q("<([])>"),                     istr(ListLiteral.new)
+  it_parses %q("<({})>"),                     istr(MapLiteral.new)
 
   # Unterminated string literals and unclosed interpolations are caught and
   # handled by the lexer. For example, the code `"<("` will raise a SyntaxError
   # before being lexed.
 
   # Spacing within the interpolation is not important
-  it_parses %q("<(  {}  )>"),               istr(e(MapLiteral.new))
+  it_parses %q("<(  {}  )>"),               istr(MapLiteral.new)
+  it_parses %q("<(
+    {}  )>"),                               istr(MapLiteral.new)
+  it_parses %q("<(
+    )>"),                                   l("")
   # Arbitrary newlines are also allowed, and are not included in the resulting
   # string contents.
   it_parses %q("hello<(
     ""
-  )>, world"),                              istr(l("hello"), e(l("")), l(", world"))
+  )>, world"),                              istr(l("hello"), l(""), l(", world"))
 
   # Local variables are preserved inside the interpolation
-  it_parses %q(a = 1; "<(a)>"),             SimpleAssign.new(v("a"), l(1)), istr(e(v("a")))
+  it_parses %q(a = 1; "<(a)>"),             SimpleAssign.new(v("a"), l(1)), istr(v("a"))
 
   # Complex expressions
-  it_parses %q("2 is <(1 + 1)>"),           istr(l("2 is "), e(Call.new(l(1), "+", [l(1)], infix: true)))
+  it_parses %q("2 is <(1 + 1)>"),           istr(l("2 is "), Call.new(l(1), "+", [l(1)], infix: true))
 
   # Nested interpolations
-  it_parses %q("<( "<(b)>" )>"),            istr(e(istr(e(Call.new(nil, "b")))))
+  it_parses %q("<( "<(b)>" )>"),            istr(istr(Call.new(nil, "b")))
 
   # Maps and brace blocks in interpolations are potentially ambiguous.
   # Syntax errors here are hard to source properly.
-  it_parses %q("<(a.b{ |e| e*2 })>"),     istr(e(Call.new(Call.new(nil, "a"), "b", block: Block.new([p("e")], Call.new(v("e"), "*", [l(2)], infix: true)))))
-  it_parses %q("<(a.b{ |e| "<(e)>" })>"), istr(e(Call.new(Call.new(nil, "a"), "b", block: Block.new([p("e")], istr(e(v("e")))))))
-  it_parses %q("<({a: "<(2)>"})>"),       istr(e(l({:a => istr(e(l(2)))})))
+  it_parses %q("<(a.b{ |e| e*2 })>"),     istr(Call.new(Call.new(nil, "a"), "b", block: Block.new([p("e")], Call.new(v("e"), "*", [l(2)], infix: true))))
+  it_parses %q("<(a.b{ |e| "<(e)>" })>"), istr(Call.new(Call.new(nil, "a"), "b", block: Block.new([p("e")], istr(v("e")))))
+  it_parses %q("<({a: "<(2)>"})>"),       istr(l({:a => istr(l(2))}))
 
   # Multiple interpolations
-  it_parses %q("hello, <(first_name)> <(last_name)>"),  istr(l("hello, "), e(Call.new(nil, "first_name")), l(" "), e(Call.new(nil, "last_name")))
-  it_parses %q("<(first_name)><(last_name)>"),          istr(e(Call.new(nil, "first_name")), e(Call.new(nil, "last_name")))
-  it_parses %q("hello, <(first_name)>, or <(other)>"),  istr(l("hello, "), e(Call.new(nil, "first_name")), l(", or "), e(Call.new(nil, "other")))
-
+  it_parses %q("hello, <(first_name)> <(last_name)>"),  istr(l("hello, "), Call.new(nil, "first_name"), l(" "), Call.new(nil, "last_name"))
+  it_parses %q("<(first_name)><(last_name)>"),          istr(Call.new(nil, "first_name"), Call.new(nil, "last_name"))
+  it_parses %q("hello, <(first_name)>, or <(other)>"),  istr(l("hello, "), Call.new(nil, "first_name"), l(", or "), Call.new(nil, "other"))
 
 
 

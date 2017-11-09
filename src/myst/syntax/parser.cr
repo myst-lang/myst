@@ -891,8 +891,12 @@ module Myst
     end
 
 
+    record StringPiece,
+      node : Node,
+      type : Symbol
+
     def parse_string_literal
-      pieces = [] of Node
+      pieces = [] of StringPiece
       loop do
         case (token = current_token).type
         when Token::Type::STRING
@@ -900,16 +904,26 @@ module Myst
           # Only add the string piece if it contains one or more characters.
           # Strings of zero width are not valuable.
           if token.value.size > 0
-            pieces.push(StringLiteral.new(token.value).at(token.location))
+            pieces.push(StringPiece.new(
+              node: StringLiteral.new(token.value).at(token.location),
+              type: :string
+            ))
           end
         when Token::Type::INTERP_START
           expect(Token::Type::INTERP_START)
-          interpolated_expression = parse_code_block(Token::Type::INTERP_END)
-          # Nops are similarly not valuable, so they can be ignored.
-          unless interpolated_expression.is_a?(Nop)
-            pieces.push(interpolated_expression)
+          # If the interpolation contains no expression, it can be ignored.
+          skip_space_and_newlines
+          if accept(Token::Type::INTERP_END)
+            next
+          else
+            interpolated_expression = parse_expression
+            skip_space_and_newlines
+            expect(Token::Type::INTERP_END)
+            pieces.push(StringPiece.new(
+              node: interpolated_expression,
+              type: :interpolation
+            ))
           end
-          expect(Token::Type::INTERP_END)
         else
           break
         end
@@ -920,10 +934,13 @@ module Myst
         # If there are no pieces to the string literal after parsing, infer a
         # blank string.
         return StringLiteral.new("").at(current_location)
-      when pieces.size == 1 && pieces.first.is_a?(StringLiteral)
-        return pieces.first
+      when pieces.size == 1 && pieces.first.type == :string
+        return pieces.first.node
       else
-        return InterpolatedStringLiteral.new(pieces).at(pieces.first).at_end(pieces.last)
+        piece_nodes = pieces.map(&.node)
+        first_node = piece_nodes.first
+        last_node = piece_nodes.last
+        return InterpolatedStringLiteral.new(piece_nodes).at(first_node).at_end(last_node)
       end
     end
 
