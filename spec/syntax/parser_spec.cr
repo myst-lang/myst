@@ -366,11 +366,12 @@ describe "Parser" do
   # Nested interpolations
   it_parses %q("<( "<(b)>" )>"),            istr(istr(Call.new(nil, "b")))
 
-  # Maps and brace blocks in interpolations are potentially ambiguous.
-  # Syntax errors here are hard to source properly.
+  # Maps, brace blocks, and calls with arguments in interpolations are all
+  # potentially ambiguous.
   it_parses %q("<(a.b{ |e| e*2 })>"),     istr(Call.new(Call.new(nil, "a"), "b", block: Block.new([p("e")], Call.new(v("e"), "*", [l(2)], infix: true))))
   it_parses %q("<(a.b{ |e| "<(e)>" })>"), istr(Call.new(Call.new(nil, "a"), "b", block: Block.new([p("e")], istr(v("e")))))
   it_parses %q("<({a: "<(2)>"})>"),       istr(l({:a => istr(l(2))}))
+  it_parses %q("<(a.join(","))>"),        istr(Call.new(Call.new(nil, "a"), "join", [l(",")]))
 
   # Multiple interpolations
   it_parses %q("hello, <(first_name)> <(last_name)>"),  istr(l("hello, "), Call.new(nil, "first_name"), l(" "), Call.new(nil, "last_name"))
