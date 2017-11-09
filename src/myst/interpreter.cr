@@ -60,9 +60,12 @@ module Myst
     end
 
 
-    def warn(message : String)
-      @warnings += 1 
-      @errput.puts("WARNING: #{message}") unless ENV["MYST_ENV"] == "test"
+    def warn(message : String, node : Node)
+      @warnings += 1
+      unless ENV["MYST_ENV"] == "test"
+        @errput.puts("WARNING: #{message}") 
+        @errput.puts("  from `#{node.name}` at #{node.location.to_s}")
+      end
     end
 
 

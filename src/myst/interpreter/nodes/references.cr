@@ -27,7 +27,7 @@ module Myst
       warn("Reference to an underscore value `#{node.name}`\n" +
            "Underscores indicate that a variable should not be referenced.\n" +
            "If this reference is intentional, consider removing the " +
-           "leading `_`.")
+           "leading `_`.", node)
       stack.push(lookup(node))
     end
   end
