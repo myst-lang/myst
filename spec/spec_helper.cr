@@ -46,3 +46,11 @@ def parse_and_interpret(source, interpreter=Interpreter.new)
   interpreter.run(program)
   interpreter
 end
+
+# Parse and run the given program then, and test if the numebr of warnings
+# equal to expected
+def it_warns(source, expected, interpreter=Interpreter.new)
+  program = parse_program(source)
+  interpreter.run(program)
+  interpreter.warnings.should eq expected
+end

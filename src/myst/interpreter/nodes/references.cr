@@ -24,6 +24,8 @@ module Myst
     end
 
     def visit(node : Underscore)
+      # I'm pretty sure the warning should go there
+      warn("Reference to an underscore value `#{node.name}`")
       stack.push(lookup(node))
     end
   end
