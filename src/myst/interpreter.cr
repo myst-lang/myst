@@ -12,6 +12,7 @@ module Myst
     property output : IO
     property errput : IO
 
+    property warnings
 
     def initialize(@output : IO = STDOUT, @errput : IO = STDERR)
       @stack = [] of Value
@@ -19,6 +20,7 @@ module Myst
       @callstack = Callstack.new
       @kernel = create_kernel
       @self_stack = [@kernel] of Value
+      @warnings = 0
     end
 
 
@@ -59,6 +61,7 @@ module Myst
 
 
     def warn(message : String)
+      @warnings += 1 
       @errput.puts("WARNING: #{message}")
     end
 
