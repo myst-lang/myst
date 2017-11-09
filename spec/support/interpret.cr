@@ -57,12 +57,15 @@ def it_raises(source, error, file=__FILE__, line=__LINE__, end_line=__END_LINE__
   end
 end
 
-# Parse and run the given program and test if the numebr of warnings is
+# Parse and run the given program and test if the number of warnings is
 # equal to expected
-def it_warns(source, expected, interpreter=Interpreter.new)
-  program = parse_program(source)
-  interpreter.run(program)
-  interpreter.warnings.should eq expected
+def it_warns(source, expected, file=__FILE__, line=__LINE__, end_line=__END_LINE__)
+  it "raises warning from `#{source}`", file, line, end_line do
+    interpreter=Interpreter.new
+    program = parse_program(source)
+    interpreter.run(program)
+    interpreter.warnings.should eq expected
+  end
 end
 
 def it_does_not_interpret(node : String, message=nil, file=__FILE__, line=__LINE__, end_line=__END_LINE__)

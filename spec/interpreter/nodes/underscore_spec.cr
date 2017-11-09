@@ -10,7 +10,7 @@ describe "Interpreter - Underscore" do
   ## Continue parsing. It's only a warning, prg must compile and return value
   it_interprets %q(_a = 1;_b = 2;_c = 1 + 2; _c), [val(3)]
   ## Simply test for number of warnings
-  it_warns %q(_a = 1;_b = 2;_c = 5 + _b;), 1
+  it_warns %q(_a = 1;_b = 2;_c = 5 + _b;), 3
   it_warns %q(_a = 1;_b = 2;_c = _a + _b;), 2
 end
 
