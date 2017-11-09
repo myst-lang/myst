@@ -21,15 +21,29 @@ module Myst
     property current_token : Token
     # List of tokens already parsed.
     property tokens : Array(Token)
+    # List of currently-unmatched braces in the source.
+    property brace_stack : Array(Char)
 
 
+    enum Context
+      # Normal functioning context of the lexer.
+      NORMAL
+      # Context inside of a double quote string.
+      STRING
+      # Context inside of an interpolation within a string.
+      STRING_INTERP
+    end
 
-    def initialize(source : IO, source_file : String)
+    # Stack of contexts that the lexer is within.
+    property context_stack : Array(Context)
+
+
+    def initialize(source : IO, source_file : String, row_start=1, col_start=0)
       @reader = Reader.new(source)
       @source_file = File.expand_path(source_file)
 
-      @row = 1
-      @col = 0
+      @row = row_start
+      @col = col_start
       @last_char = ' '
 
       # TODO: re-assignment to @current_token is currently necessary because
@@ -38,6 +52,9 @@ module Myst
       @current_token = advance_token
       @buffer = IO::Memory.new
       @tokens = [] of Token
+
+      @brace_stack = [] of Char
+      @context_stack = [Context::NORMAL]
     end
 
     def lex_all
@@ -51,6 +68,10 @@ module Myst
       @current_token = Token.new(location: Location.new(@source_file, @row, @col))
     end
 
+    def token_is_empty?
+      @reader.buffer_value.empty?
+    end
+
     def current_char : Char
       @reader.current_char
     end
@@ -60,7 +81,7 @@ module Myst
     end
 
     # Consume a single character from the source.
-    def read_char : Char
+    def read_char(save_to_buffer=true) : Char
       last_char = current_char
       if last_char == '\n'
         @row += 1
@@ -70,7 +91,12 @@ module Myst
       @col += 1
       @current_token.location.length += 1
 
-      @reader.read_char
+      @reader.read_char(save_to_buffer)
+    end
+
+    def skip_char : Char
+      @reader.skip_last_char
+      read_char
     end
 
     def peek_char : Char
@@ -81,10 +107,76 @@ module Myst
       @reader.finished?
     end
 
-    # Consume and store a single token from the source.
-    def read_token : Token
+
+    def push_brace(type : Symbol)
+      brace_to_push =
+        case type
+        when :paren         then '('
+        when :square        then '['
+        when :curly         then '{'
+        when :double_quote  then '"'
+        else
+          raise "Lexer bug: Attempted to push unknown brace type `#{type}`."
+        end
+
+      @brace_stack.push(brace_to_push)
+    end
+
+    # Attempts to pop the top bracing character from the stack, but only if it
+    # matches the given type. Returns false if the type does not match.
+    def pop_brace(type : Symbol)
+      brace_to_pop =
+        case type
+        when :paren         then '('
+        when :square        then '['
+        when :curly         then '{'
+        when :double_quote  then '"'
+        else
+          raise "Lexer bug: Attempted to pop unknown brace type `#{type}`."
+        end
+
+      if current_brace == brace_to_pop
+        @brace_stack.pop
+      else
+        return false
+      end
+    end
+
+    def current_brace : Char
+      @brace_stack.last? || '\0'
+    end
+
+
+    def push_context(context : Context)
+      @context_stack.push(context)
+    end
+
+    def pop_context
+      @context_stack.pop
+    end
+
+    def current_context
+      @context_stack.last
+    end
+
+
+    def read_token
       advance_token
 
+      case current_context
+      when Context::NORMAL
+        read_normal_token
+      when Context::STRING
+        read_string_token
+      when Context::STRING_INTERP
+        read_string_interp_token
+      end
+
+      finalize_token
+    end
+
+    # Consume and store a single token from the source.
+    def read_normal_token
       # By default, assume a token will be an identifier
       @current_token.type = Token::Type::IDENT
 
@@ -194,29 +286,37 @@ module Myst
         @current_token.type = Token::Type::COMMENT
         consume_comment
       when '"'
-        @current_token.type = Token::Type::STRING
-        consume_string
+        skip_char
+        push_brace(:double_quote)
+        push_context(Context::STRING)
+        read_string_token
       when ':'
         consume_symbol_or_colon
       when ';'
         @current_token.type = Token::Type::SEMI
         read_char
       when '('
+        push_brace(:paren)
         @current_token.type = Token::Type::LPAREN
         read_char
       when ')'
+        pop_brace(:paren)
         @current_token.type = Token::Type::RPAREN
         read_char
       when '['
+        push_brace(:square)
         @current_token.type = Token::Type::LBRACE
         read_char
       when ']'
+        pop_brace(:square)
         @current_token.type = Token::Type::RBRACE
         read_char
       when '{'
+        push_brace(:curly)
         @current_token.type = Token::Type::LCURLY
         read_char
       when '}'
+        pop_brace(:curly)
         @current_token.type = Token::Type::RCURLY
         read_char
       when .ascii_number?
@@ -238,9 +338,81 @@ module Myst
         consume_identifier
         check_for_keyword
       end
-
-      finalize_token
     end
+
+    def read_string_token
+      @current_token.type = Token::Type::STRING
+
+      # If the first characters of the token are an interpolation, push that
+      # context and return an INTERP_START token.
+      if current_char == '<' && peek_char == '('
+        @current_token.type = Token::Type::INTERP_START
+        read_char
+        read_char
+        push_context(Context::STRING_INTERP)
+        return
+      end
+
+      # Otherwise, parse until either an interpolation or ending quote is
+      # encountered.
+      loop do
+        case current_char
+        when '\0'
+          # A null character within a string literal is a syntax error.
+          raise SyntaxError.new(current_location, "Unterminated string literal. Reached EOF without terminating.")
+        when '\\'
+          # Read two characters to naively support escaped characters.
+          # This ensures that escaped quotes do not terminate the string.
+          read_char
+          read_char
+        when '<'
+          # Don't actually consume the start of the interpolation yet. It will
+          # be consumed by the next read.
+          if peek_char == '('
+            break
+          end
+        when '"'
+          skip_char
+          if pop_brace(:double_quote)
+            pop_context
+            break
+          end
+        else
+          read_char
+        end
+      end
+
+      replace_escape_characters(@reader.buffer_value)
+    end
+
+    def replace_escape_characters(raw)
+      # Replace escape codes
+      @current_token.value = raw.gsub(/\\./) do |code|
+        case code
+        when "\\n"  then '\n'
+        when "\\\"" then '"'
+        when "\\t"  then '\t'
+        when "\\0"  then '\0'
+        end
+      end
+    end
+
+
+    def read_string_interp_token
+      # If the first characters of the token are a closing interpolation, pop
+      # this context and return an INTERP_END token.
+      if current_char == ')' && peek_char == '>'
+        @current_token.type = Token::Type::INTERP_END
+        pop_context
+        read_char
+        read_char
+        return
+      end
+
+      # Otherwise, read the next token as normal.
+      read_normal_token
+    end
+
 
     # Assign the tokens final value and add it to the consumed tokens list.
     def finalize_token
@@ -261,6 +433,7 @@ module Myst
         @current_token.type = kw_type
       end
     end
+
 
 
     def consume_numeric
@@ -293,38 +466,6 @@ module Myst
       @current_token.type = has_decimal ? Token::Type::FLOAT : Token::Type::INTEGER
     end
 
-    def consume_string
-      # Read the starting quote character
-      read_char
-
-      loop do
-        case current_char
-        when '"'
-          # Read the closing quote, then stop
-          read_char
-          break
-        when '\\'
-          # Read two characters to naively support escaped characters.
-          read_char
-          read_char
-        else
-          read_char
-        end
-      end
-
-      # Replace escape codes
-      @current_token.value = @reader.buffer_value.gsub(/\\./) do |code|
-        case code
-        when "\\n"  then '\n'
-        when "\\\"" then '"'
-        when "\\t"  then '\t'
-        when "\\0"  then '\0'
-        end
-      end
-
-      # Strip the containing quote characters
-      @current_token.value = @current_token.value[1..-2]
-    end
 
     def consume_symbol_or_colon
       # Read the starting colon
@@ -333,9 +474,22 @@ module Myst
       force_symbol = false
       case current_char
       when '"'
+        skip_char
         # Quoted values allow for arbitrary symbol names. An empty string (:"")
         # will still be considered a symbol
-        consume_string
+        loop do
+          # Allow single character escapes
+          case current_char
+          when '\\'
+            read_char
+            read_char
+          when '"'
+            skip_char
+            break
+          else
+            read_char
+          end
+        end
         force_symbol = true
       when .ascii_whitespace?
       when '\0'
@@ -346,9 +500,9 @@ module Myst
         consume_identifier
       end
 
-      if force_symbol || @current_token.value.size > 1
+      if force_symbol || @reader.buffer_value.size > 1
         @current_token.type = Token::Type::SYMBOL
-        @current_token.value = @current_token.value[1..-1]
+        replace_escape_characters(@reader.buffer_value[1..-1])
       else
         @current_token.type = Token::Type::COLON
       end

@@ -10,9 +10,9 @@ def it_interprets(node : String, expected_stack : Array(Myst::Value), itr=Interp
       if itr.stack.size != stack.size
         raise <<-ERROR_MSG
           Stack size does not match expected (#{itr.stack.size} vs. #{stack.size}):
-              expected: #{itr.stack.inspect}
+              expected: #{stack.inspect}
 
-              got: #{stack.inspect}
+              got: #{itr.stack.inspect}
         ERROR_MSG
       end
 

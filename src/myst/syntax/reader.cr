@@ -11,15 +11,22 @@ module Myst
       @current_char = read_char
     end
 
-    def read_char : Char
+    def read_char(save_to_buffer=true) : Char
       char = @source.read_char
       char = '\0' unless char.is_a?(Char)
 
       @current_char = char
       @pos += 1
-      @buffer << char
+      @buffer << char if save_to_buffer
 
       char
+    end
+
+    # Remove the last-read character from the buffer, effectively skipping it.
+    def skip_last_char
+      # TODO: This feels slow and is definitely inaccurate when dealing with
+      # multi-byte characters. Will need revisiting at some point.
+      @buffer.seek(-1, IO::Seek::Current)
     end
 
     def peek_char : Char

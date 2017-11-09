@@ -139,6 +139,19 @@ module Myst
     def_equals_and_hash value
   end
 
+  # A string literal with interpolations. Any string that includes a
+  # `<(...)>` construct will be considered an InterpolatedStringLiteral.
+  #
+  #   '"' [\w*(<()>)?]* '"'
+  class InterpolatedStringLiteral < Literal
+    property components : Array(Node)
+
+    def initialize(@components=[] of Node)
+    end
+
+    def_equals_and_hash components
+  end
+
   # A symbol literal. The value stored by this node does not include the
   # designating colon.
   #

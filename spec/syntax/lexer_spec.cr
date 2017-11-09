@@ -120,14 +120,6 @@ describe "Lexer" do
     assert_token_type "1000.000_0",   Token::Type::FLOAT
   end
 
-  it "lexes strings" do
-    assert_token_type %q(""),             Token::Type::STRING
-    assert_token_type %q("   "),          Token::Type::STRING
-    assert_token_type %q("hello, world"), Token::Type::STRING
-    assert_token_type %q("hello,
-    world"),                              Token::Type::STRING
-  end
-
   it "lexes ? as an identifier modifier" do
     token = tokenize(%q(hello?)).first
     token.type.should eq(Token::Type::IDENT)
@@ -147,14 +139,6 @@ describe "Lexer" do
     token.type.should eq(Token::Type::IDENT)
     # The lexer should only accept a single modifier as part of the identifier
     token.value.should eq("hello?")
-  end
-
-  it "allows escape characters in strings" do
-    assert_token_type %q("\""),   Token::Type::STRING
-    assert_token_type %q("\0"),   Token::Type::STRING
-    assert_token_type %q("\t"),   Token::Type::STRING
-    assert_token_type %q("\n"),   Token::Type::STRING
-    assert_token_type %q("\\"),   Token::Type::STRING
   end
 
   it "lexes symbols" do

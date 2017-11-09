@@ -9,6 +9,10 @@ module Myst
       CHAR          # 'c'
       SYMBOL        # :symbol
 
+      # INTERP_* tokens will only appear within a string.
+      INTERP_START  # <(
+      INTERP_END    # )>
+
       REQUIRE       # require
       INCLUDE       # include
       DEFMODULE     # defmodule

@@ -179,6 +179,11 @@ end
 
 
 describe "Parser" do
+  # Empty program
+  # An empty program should not contain any nodes under the root Expressions.
+  it_parses %q()
+
+
   # Literals
 
   it_parses %q(nil),    l(nil)
@@ -200,6 +205,7 @@ describe "Parser" do
 
   it_parses %q(:name),          l(:name)
   it_parses %q(:"hello world"), l(:"hello world")
+
 
   # Identifiers not previously defined as locals are considered Calls.
   it_parses %q(what),             Call.new(nil, "what")
@@ -303,6 +309,75 @@ describe "Parser" do
   it_parses %q([1, <2>, 3]),    l([1, i(2), 3])
   it_parses %q([1, <a.b>, 3]),  l([1, i(Call.new(Call.new(nil, "a"), "b")), 3])
   it_parses %q(<a[0]> + 4),     Call.new(i(Call.new(Call.new(nil, "a"), "[]", [l(0)])), "+", [l(4)], infix: true)
+
+
+
+  # String Interpolations
+
+  # Strings with interpolations are lexed as single String tokens. The parser
+  # splits the string into components around `<(...)>` constructs, then parses
+  # the contents of those constructs and joins them together to form a list of
+  # String components consisting of StringLiterals and arbitrary Nodes.
+
+  # Empty interpolations and string pieces should be removed, and the
+  # surrounding string pieces should be merged. If the string is otherwise
+  # empty, a blank string literal is used. If the remainder is a single
+  # StringLiteral, it is not wrapped in an InterpolatedStringLiteral.
+  it_parses %q("<()>"),                       l("")
+  it_parses %q("hello<()>"),                  l("hello")
+  it_parses %q("<()>, world"),                l(", world")
+  it_parses %q("hello<()>, world"),           istr(l("hello"), l(", world"))
+  it_parses %q("<()>hello<()>, world<()>!"),  istr(l("hello"), l(", world"), l("!"))
+  # Simple expressions
+  it_parses %q("<(a)>"),                      istr(Call.new(nil, "a"))
+  it_parses %q("<(nil)>"),                    istr(l(nil))
+  it_parses %q("<(true)>"),                   istr(l(true))
+  it_parses %q("<(false)>"),                  istr(l(false))
+  it_parses %q("<(1)>"),                      istr(l(1))
+  it_parses %q("<(1.0)>"),                    istr(l(1.0))
+  it_parses %q("<("hi")>"),                   istr(l("hi"))
+  it_parses %q("<("")>"),                     istr(l(""))
+  it_parses %q("<(:hi)>"),                    istr(l(:hi))
+  it_parses %q("<([])>"),                     istr(ListLiteral.new)
+  it_parses %q("<({})>"),                     istr(MapLiteral.new)
+
+  # Unterminated string literals and unclosed interpolations are caught and
+  # handled by the lexer. For example, the code `"<("` will raise a SyntaxError
+  # before being lexed.
+
+  # Spacing within the interpolation is not important
+  it_parses %q("<(  {}  )>"),               istr(MapLiteral.new)
+  it_parses %q("<(
+    {}  )>"),                               istr(MapLiteral.new)
+  it_parses %q("<(
+    )>"),                                   l("")
+  # Arbitrary newlines are also allowed, and are not included in the resulting
+  # string contents.
+  it_parses %q("hello<(
+    ""
+  )>, world"),                              istr(l("hello"), l(""), l(", world"))
+
+  # Local variables are preserved inside the interpolation
+  it_parses %q(a = 1; "<(a)>"),             SimpleAssign.new(v("a"), l(1)), istr(v("a"))
+
+  # Complex expressions
+  it_parses %q("2 is <(1 + 1)>"),           istr(l("2 is "), Call.new(l(1), "+", [l(1)], infix: true))
+
+  # Nested interpolations
+  it_parses %q("<( "<(b)>" )>"),            istr(istr(Call.new(nil, "b")))
+
+  # Maps, brace blocks, and calls with arguments in interpolations are all
+  # potentially ambiguous.
+  it_parses %q("<(a.b{ |e| e*2 })>"),     istr(Call.new(Call.new(nil, "a"), "b", block: Block.new([p("e")], Call.new(v("e"), "*", [l(2)], infix: true))))
+  it_parses %q("<(a.b{ |e| "<(e)>" })>"), istr(Call.new(Call.new(nil, "a"), "b", block: Block.new([p("e")], istr(v("e")))))
+  it_parses %q("<({a: "<(2)>"})>"),       istr(l({:a => istr(l(2))}))
+  it_parses %q("<(a.join(","))>"),        istr(Call.new(Call.new(nil, "a"), "join", [l(",")]))
+
+  # Multiple interpolations
+  it_parses %q("hello, <(first_name)> <(last_name)>"),  istr(l("hello, "), Call.new(nil, "first_name"), l(" "), Call.new(nil, "last_name"))
+  it_parses %q("<(first_name)><(last_name)>"),          istr(Call.new(nil, "first_name"), Call.new(nil, "last_name"))
+  it_parses %q("hello, <(first_name)>, or <(other)>"),  istr(l("hello, "), Call.new(nil, "first_name"), l(", or "), Call.new(nil, "other"))
+
 
 
   # Infix expressions
