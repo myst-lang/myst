@@ -12,7 +12,7 @@ module Myst
     property output : IO
     property errput : IO
 
-    property warnings
+    property warnings : Int32
 
     def initialize(@output : IO = STDOUT, @errput : IO = STDERR)
       @stack = [] of Value
