@@ -24,6 +24,10 @@ module Myst
     end
 
     def visit(node : Underscore)
+      warn("Reference to an underscore value `#{node.name}`\n" +
+           "Underscores indicate that a variable should not be referenced.\n" +
+           "If this reference is intentional, consider removing the " +
+           "leading `_`.", node)
       stack.push(lookup(node))
     end
   end
