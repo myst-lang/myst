@@ -62,7 +62,7 @@ module Myst
 
     def warn(message : String)
       @warnings += 1 
-      @errput.puts("WARNING: #{message}")
+      @errput.puts("WARNING: #{message}") unless ENV["MYST_ENV"] == "test"
     end
 
 

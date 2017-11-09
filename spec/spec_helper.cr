@@ -1,6 +1,9 @@
 require "spec"
 require "../src/myst/**"
 
+# An environment variable to test if we're running unit tests or prod.
+ENV["MYST_ENV"] = "test"
+
 include Myst
 
 # Run the Myst parser on the given source code, returning the AST that the
