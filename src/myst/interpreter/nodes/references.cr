@@ -24,8 +24,10 @@ module Myst
     end
 
     def visit(node : Underscore)
-      # I'm pretty sure the warning should go there
-      warn("Reference to an underscore value `#{node.name}`")
+      warn("Reference to an underscore value `#{node.name}`\n" +
+           "Underscores indicate that a variable should not be referenced.\n" +
+           "If this reference is intentional, consider removing the " +
+           "leading `_`.")
       stack.push(lookup(node))
     end
   end

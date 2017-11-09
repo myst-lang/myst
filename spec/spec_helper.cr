@@ -1,7 +1,8 @@
 require "spec"
 require "../src/myst/**"
 
-# An environment variable to test if we're running unit tests or prod.
+# An environment variable to be able to test if we're running in
+# unit tests or in production (prod. declaration in src/myst.cr)
 ENV["MYST_ENV"] = "test"
 
 include Myst
@@ -50,7 +51,7 @@ def parse_and_interpret(source, interpreter=Interpreter.new)
   interpreter
 end
 
-# Parse and run the given program then, and test if the numebr of warnings
+# Parse and run the given program and test if the numebr of warnings is
 # equal to expected
 def it_warns(source, expected, interpreter=Interpreter.new)
   program = parse_program(source)

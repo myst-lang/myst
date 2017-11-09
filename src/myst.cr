@@ -3,7 +3,8 @@ require "option_parser"
 require "./myst/**"
 include Myst
 
-# Just telling warn() we're not in test mode
+# Just telling warn() we're not in test mode (test  declaration in
+# spec/spec_helper.cr)
 ENV["MYST_ENV"] = "prod"
 
 source_file = ""
