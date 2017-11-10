@@ -17,6 +17,11 @@ module Myst
       Invocation.new(itr, func, receiver, args, nil).invoke
     end
 
+    # Return a RuntimeError with the given string as the value.
+    def error(message : String, trace : Callstack)
+      RuntimeError.new(TString.new(message), trace)
+    end
+
     macro method(name, this_type, *params, &block)
       def {{name.id}}(this : Value, __args : Array(Value), block : TFunctor?) : Value
         this = this.as({{this_type}})
