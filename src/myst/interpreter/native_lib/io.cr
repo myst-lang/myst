@@ -18,8 +18,8 @@ module Myst
     end
 
 
-    def init_io(root_scope : Scope)
-      io_module = TModule.new("IO", root_scope)
+    def init_io(kernel : TModule)
+      io_module = TModule.new("IO", kernel.scope)
 
       NativeLib.def_method(io_module, :puts, :io_puts)
 

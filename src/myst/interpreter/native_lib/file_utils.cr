@@ -39,8 +39,8 @@ module Myst
     end
 
 
-    def init_file_utils(root_scope : Scope)
-      fs_utils_module = TModule.new("FSUtils", root_scope)
+    def init_file_utils(kernel : TModule)
+      fs_utils_module = TModule.new("FSUtils", kernel.scope)
 
       NativeLib.def_method(fs_utils_module, :open,      :fs_utils_open)
       NativeLib.def_method(fs_utils_module, :close,     :fs_utils_close)

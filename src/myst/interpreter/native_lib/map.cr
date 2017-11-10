@@ -11,8 +11,8 @@ module Myst
     end
 
 
-    def init_map(root_scope : Scope)
-      map_type = TType.new("Map", root_scope)
+    def init_map(kernel : TModule)
+      map_type = TType.new("Map", kernel.scope)
       map_type.instance_scope["type"] = map_type
 
       NativeLib.def_instance_method(map_type, :each, :map_each)

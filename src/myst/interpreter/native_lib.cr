@@ -22,7 +22,7 @@ module Myst
         this = this.as({{this_type}})
 
         {% for type, index in params %}
-          {{params[index].var}} = __args[{{index}}].as({{params[index].type}})
+          {{params[index].var}} = __args[{{index}}]?.as({{params[index].type}})
         {% end %}
 
         result = begin

@@ -58,8 +58,8 @@ module Myst
     end
 
 
-    def init_string(root_scope : Scope)
-      string_type = TType.new("String", root_scope)
+    def init_string(kernel : TModule)
+      string_type = TType.new("String", kernel.scope)
       string_type.instance_scope["type"] = string_type
 
       NativeLib.def_instance_method(string_type, :+,      :string_add)
