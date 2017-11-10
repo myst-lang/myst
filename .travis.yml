@@ -1,1 +1,9 @@
 language: crystal
+
+install:
+  # Ensure that the build will be executable
+  - crystal build src/myst.cr
+
+script:
+  - crystal spec
+  - ./myst ./spec/myst/spec.mt
