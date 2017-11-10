@@ -29,7 +29,7 @@ defmodule Spec
   end
 
   def it(&block)
-    it("unnamed") { }
+    it("unnamed") { block() }
   end
 
   def it(name)
