@@ -40,31 +40,29 @@ describe("Integer#+") do
     assert(a + b == 3)
   end
 
-  # TODO: something is currently causing the value of `self` to change beyond
-  # the first call to `expect_raises`. Likely that the value is not popped.
-  #it("does not accept nil as an operand") do
-  #  expect_raises{ 1 + nil }
-  #end
-  #
-  #it("does not accept a boolean as an operand") do
-  #  expect_raises{ 1 + true }
-  #end
-  #
-  #it("does not accept a list as an operand") do
-  #  expect_raises{ 1 + [] }
-  #  expect_raises{ 1 + [1, 2] }
-  #end
-  #
-  #it("does not accept a map as an operand") do
-  #  expect_raises{ 1 + {} }
-  #  expect_raises{ 1 + {a: 1} }
-  #end
-  #
-  #it("does not accept a string as an operand") do
-  #  expect_raises{ 1 + "a" }
-  #end
-  #
-  #it("does not accept a symbol as an operand") do
-  #  expect_raises{ 1 + :hi }
-  #end
+  it("does not accept nil as an operand") do
+    expect_raises{ 1 + nil }
+  end
+
+  it("does not accept a boolean as an operand") do
+    expect_raises{ 1 + true }
+  end
+
+  it("does not accept a list as an operand") do
+    expect_raises{ 1 + [] }
+    expect_raises{ 1 + [1, 2] }
+  end
+
+  it("does not accept a map as an operand") do
+    expect_raises{ 1 + {} }
+    expect_raises{ 1 + {a: 1} }
+  end
+
+  it("does not accept a string as an operand") do
+    expect_raises{ 1 + "a" }
+  end
+
+  it("does not accept a symbol as an operand") do
+    expect_raises{ 1 + :hi }
+  end
 end

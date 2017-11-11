@@ -7,7 +7,7 @@ module Myst
       when TFloat
         TFloat.new(this.value + other.value)
       else
-        raise "invalid argument for Integer#+: #{__typeof(other).name}"
+        raise NativeLib.error("invalid argument for Integer#+: #{__typeof(other).name}", callstack)
       end
     end
 
