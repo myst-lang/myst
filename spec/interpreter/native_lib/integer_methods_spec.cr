@@ -3,33 +3,35 @@ require "../../support/interpret.cr"
 
 
 describe "NativeLib - Integer Methods" do
-  describe "#+" do
-    it_interprets %q(1 + 1),        [val(2)]
-    it_interprets %q(1 + 1 + 1),    [val(3)]
+  # These specs have been moved into `spec/myst/integer_spec.mt`. They will be
+  # completely removed after the rest of this file has been ported as well.
+  # describe "#+" do
+  #   it_interprets %q(1 + 1),        [val(2)]
+  #   it_interprets %q(1 + 1 + 1),    [val(3)]
 
-    it_interprets %q(10_000 + 100_000),               [val(110_000)]
-    it_interprets %q(1234567890 + 987654310),         [val(2_222_222_200)]
-    # Additions around max int wrap around to negatives.
-    it_interprets %q(9_223_372_036_854_775_807 + 1),  [val(-9_223_372_036_854_775_808)]
+  #   it_interprets %q(10_000 + 100_000),               [val(110_000)]
+  #   it_interprets %q(1234567890 + 987654310),         [val(2_222_222_200)]
+  #   # Additions around max int wrap around to negatives.
+  #   it_interprets %q(9_223_372_036_854_775_807 + 1),  [val(-9_223_372_036_854_775_808)]
 
-    # Addition with 0 does nothing
-    it_interprets %q(0 + 100),      [val(100)]
-    it_interprets %q(100 + 0),      [val(100)]
-    it_interprets %q(10 + 0 + 10),  [val( 20)]
-    it_interprets %q(0 + 100 + 0),  [val(100)]
+  #   # Addition with 0 does nothing
+  #   it_interprets %q(0 + 100),      [val(100)]
+  #   it_interprets %q(100 + 0),      [val(100)]
+  #   it_interprets %q(10 + 0 + 10),  [val( 20)]
+  #   it_interprets %q(0 + 100 + 0),  [val(100)]
 
-    # Addition with floats will always return a float.
-    it_interprets %q(1 + 1.0),      [val(2.0)]
-    it_interprets %q(123 + 12_396_851_265_129.468), [val(12_396_851_265_252.468)]
+  #   # Addition with floats will always return a float.
+  #   it_interprets %q(1 + 1.0),      [val(2.0)]
+  #   it_interprets %q(123 + 12_396_851_265_129.468), [val(12_396_851_265_252.468)]
 
-    # Addition with any other type is not supported
-    it_does_not_interpret %q(1 + nil),  /invalid argument/
-    it_does_not_interpret %q(1 + true), /invalid argument/
-    it_does_not_interpret %q(1 + []),   /invalid argument/
-    it_does_not_interpret %q(1 + {}),   /invalid argument/
-    it_does_not_interpret %q(1 + "a"),  /invalid argument/
-    it_does_not_interpret %q(1 + :hi),  /invalid argument/
-  end
+  #   # Addition with any other type is not supported
+  #   it_does_not_interpret %q(1 + nil),  /invalid argument/
+  #   it_does_not_interpret %q(1 + true), /invalid argument/
+  #   it_does_not_interpret %q(1 + []),   /invalid argument/
+  #   it_does_not_interpret %q(1 + {}),   /invalid argument/
+  #   it_does_not_interpret %q(1 + "a"),  /invalid argument/
+  #   it_does_not_interpret %q(1 + :hi),  /invalid argument/
+  # end
 
 
   describe "#-" do
