@@ -178,4 +178,22 @@ describe "Interpreter - Instantiation" do
     result = itr.stack.pop
     result.should eq(val(["hello", :nil]))
   end
+
+  it "can find sibling types from instance scopes (GitHub issue #37)" do
+    itr = interpret_with_mocked_output %q(
+      deftype Foo
+        deftype Bar
+        end
+
+        def foo
+          %Bar{}
+        end
+      end
+
+      instance  = %Foo{}.foo
+    )
+
+    itr.errput.to_s.should eq("")
+    itr.__typeof(itr.current_scope["instance"]).name.should eq("Bar")
+  end
 end

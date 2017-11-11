@@ -20,7 +20,12 @@ module Myst
     end
 
     def visit(node : Const)
-      stack.push(lookup(node))
+      if value = current_scope[node.name]? || __typeof(current_self).scope[node.name]
+        stack.push(value)
+      else
+        @callstack.push(node)
+        raise_not_found(node.name, current_self)
+      end
     end
 
     def visit(node : Underscore)
