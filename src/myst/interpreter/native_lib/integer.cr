@@ -7,7 +7,7 @@ module Myst
       when TFloat
         TFloat.new(this.value + other.value)
       else
-        raise "invalid argument for Integer#+: #{__typeof(other).name}"
+        raise NativeLib.error("invalid argument for Integer#+: #{__typeof(other).name}", callstack)
       end
     end
 
@@ -82,8 +82,8 @@ module Myst
     end
 
 
-    def init_integer(root_scope : Scope)
-      integer_type = TType.new("Integer", root_scope)
+    def init_integer(kernel : TModule)
+      integer_type = TType.new("Integer", kernel.scope)
       integer_type.instance_scope["type"] = integer_type
 
       NativeLib.def_instance_method(integer_type, :+,     :int_add)

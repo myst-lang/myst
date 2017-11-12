@@ -49,7 +49,7 @@ module Myst
     end
 
     def expect(*types : Token::Type)
-      accept(*types) || raise ParseError.new("Expected one of #{types.join(',')} but got #{@current_token.type}")
+      accept(*types) || raise ParseError.new(current_location, "Expected one of #{types.join(',')} but got #{@current_token.type}")
     end
 
     def accept_delimiter
@@ -165,7 +165,7 @@ module Myst
               if accept(Token::Type::RPAREN)
                 break
               else
-                raise ParseError.new("Block parameter must be the last parameter in a Def.")
+                raise ParseError.new(current_location, "Block parameter must be the last parameter in a Def.")
               end
             end
 
@@ -225,7 +225,7 @@ module Myst
         # Any overloadable operator is also allowed
         token.value
       else
-        raise ParseError.new("Invalid name for def: #{token.value}")
+        raise ParseError.new(current_location, "Invalid name for def: #{token.value}")
       end
     end
 
@@ -241,7 +241,7 @@ module Myst
           param.name = name.value
           return param.at(start.location).at_end(name.location)
         else
-          raise ParseError.new("Multiple splat parameters are not allowed in a definition.")
+          raise ParseError.new(current_location, "Multiple splat parameters are not allowed in a definition.")
         end
       when start = accept(Token::Type::AMPERSAND)
         param.block = true
@@ -325,7 +325,7 @@ module Myst
       start = expect(Token::Type::INCLUDE)
       skip_space
       if current_token.type == Token::Type::NEWLINE
-        raise ParseError.new("expected value for include")
+        raise ParseError.new(current_location, "expected value for include")
       end
       path = parse_expression
       return Include.new(path).at(start.location).at_end(path)
@@ -335,7 +335,7 @@ module Myst
       start = expect(Token::Type::REQUIRE)
       skip_space
       if current_token.type == Token::Type::NEWLINE
-        raise ParseError.new("expected value for require")
+        raise ParseError.new(current_location, "expected value for require")
       end
       path = parse_expression
       return Require.new(path).at(start.location).at_end(path)
@@ -353,7 +353,7 @@ module Myst
         when accept(Token::Type::RAISE)
           Raise.new
         else
-          raise ParseError.new("Expected one of return, break, or next, got #{current_token.inspect}")
+          raise ParseError.new(current_location, "Expected one of return, break, or next, got #{current_token.inspect}")
         end
 
       skip_space
@@ -363,7 +363,7 @@ module Myst
       end
 
       if node.is_a?(Raise) && !node.value?
-        raise ParseError.new("`raise` must be given a value.")
+        raise ParseError.new(current_location, "`raise` must be given a value.")
       end
 
       return node
@@ -402,7 +402,7 @@ module Myst
         return Nop.new.at_end(finish.location)
       else
         # This may be reached if a conditional is not properly closed.
-        raise ParseError.new("Expected one of `when`, `unless`, or `else`, got #{current_token.inspect}")
+        raise ParseError.new(current_location, "Expected one of `when`, `unless`, or `else`, got #{current_token.inspect}")
       end
     end
 
@@ -430,7 +430,7 @@ module Myst
         return Until.new(condition, body).at(start.location).at_end(body)
       else
         # This should never be reached.
-        raise ParseError.new("Expected one of `while` or `until`, got #{current_token.inspect}")
+        raise ParseError.new(current_location, "Expected one of `while` or `until`, got #{current_token.inspect}")
       end
     end
 
@@ -733,7 +733,7 @@ module Myst
               if accept(Token::Type::PIPE)
                 break
               else
-                raise ParseError.new("Block parameter must be the last parameter in a Def.")
+                raise ParseError.new(current_location, "Block parameter must be the last parameter in a Def.")
               end
             end
 
@@ -777,7 +777,7 @@ module Myst
           if handler.ensure?
             # `ensure` _must_ be the last clause of an ExceptionHandler. A
             # `rescue` after the `ensure` is invalid.
-            raise ParseError.new("ensure must be the last clause of an exception handler.")
+            raise ParseError.new(current_location, "ensure must be the last clause of an exception handler.")
           end
 
           rescue_start = expect(Token::Type::RESCUE)
@@ -800,14 +800,14 @@ module Myst
 
           if handler.ensure?
             # Only 1 ensure is allowed in an ExceptionHandler.
-            raise ParseError.new("only one ensure clause may be provided for a block.")
+            raise ParseError.new(current_location, "only one ensure clause may be provided for a block.")
           else
             handler.ensure = parse_code_block(Token::Type::RESCUE, Token::Type::ENSURE, Token::Type::END)
           end
         when Token::Type::END
           break
         else
-          raise ParseError.new("Expected one of `rescue`, `ensure`, or `else`")
+          raise ParseError.new(current_location, "Expected one of `rescue`, `ensure`, or `else`")
         end
       end
 
@@ -886,7 +886,7 @@ module Myst
       when Token::Type::LCURLY
         parse_map_literal
       else
-        raise ParseError.new("Expected a literal value. Got #{current_token.inspect} instead")
+        raise ParseError.new(current_location, "Expected a literal value. Got #{current_token.inspect} instead")
       end
     end
 
@@ -1003,7 +1003,7 @@ module Myst
         when Token::Type::LESS
           parse_value_interpolation
         else
-          raise ParseError.new("#{current_token} is not a valid map key")
+          raise ParseError.new(current_location, "#{current_token} is not a valid map key")
         end
       # Keys must be _immediately_ followed by a colon, with no spaces between
       # the end of the key and the colon. This applies to both symbols and
@@ -1038,7 +1038,7 @@ module Myst
         # Method names with modifiers (e.g., `foo?`) are not allowed on the
         # left-hand-side of an assignment
         if modified_ident?(node.name)
-          raise ParseError.new("Method names with modifiers (`?` and `!`) are not allowed as targets for assignment")
+          raise ParseError.new(current_location, "Method names with modifiers (`?` and `!`) are not allowed as targets for assignment")
         end
         # If no explicit receiver was set on the Call, consider it a Var.
         if node.receiver? || node.block? || !node.args.empty?
@@ -1048,9 +1048,9 @@ module Myst
           return Var.new(node.name).at(node)
         end
       when Literal
-        raise ParseError.new("Cannot assign to literal value.")
+        raise ParseError.new(current_location, "Cannot assign to literal value.")
       else
-        raise ParseError.new("Invalid value for LHS of Assign: #{node}")
+        raise ParseError.new(current_location, "Invalid value for LHS of Assign: #{node}")
       end
     end
 
