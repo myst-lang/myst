@@ -9,12 +9,13 @@ module Myst
     property callstack : Callstack
     property kernel : TModule
 
+    property input : IO
     property output : IO
     property errput : IO
 
     property warnings : Int32
 
-    def initialize(@output : IO = STDOUT, @errput : IO = STDERR)
+    def initialize(@input : IO = STDIN, @output : IO = STDOUT, @errput : IO = STDERR)
       @stack = [] of Value
       @scope_stack = [] of Scope
       @callstack = Callstack.new
