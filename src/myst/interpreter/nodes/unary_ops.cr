@@ -2,18 +2,14 @@ module Myst
   class Interpreter
 
     def visit(node : Negation)
-      # Default case for Myst::IntegerLiteral
-      null = val(0)
+      visit(node.value)
+      value = stack.pop()
 
-      # This block is used to avoid a cast error to TInteger to TFloat when
-      # calling :float_subtract
-      if  node.value.class == Myst::FloatLiteral
-        null = val(0.0)
-      end
-
-      v = Value.from_literal(node.value)
-      substract = self.__scopeof(v)["-"].as(TFunctor)
-      result = Invocation.new(self, substract, null, [v] , nil).invoke
+      puts("Pop: #{value} ! #{value.to_s}")
+      negate = self.__scopeof(value)["negate"].as(TFunctor)
+      # got a ast from Nil to Myst::Value+ failed here
+      result = Invocation.new(self, negate, value, [] of Value, nil).invoke
+      puts("Pop: #{result} ! #{result.to_s}")
       stack.push(result)
     end
 
