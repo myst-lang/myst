@@ -246,8 +246,9 @@ describe "Parser" do
     }
   ),                            l({ :something => "hello", :other => 5.4 })
 
-
-
+  it_parses %q(__FILE__),       MagicConst.new(:file)
+  it_parses %q(__LINE__),       MagicConst.new(:line)
+  
   # Value interpolations
 
   # Any literal value is valid in an interpolation.

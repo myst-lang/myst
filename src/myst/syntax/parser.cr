@@ -127,6 +127,8 @@ module Myst
         parse_conditional
       when Token::Type::WHILE, Token::Type::UNTIL
         parse_loop
+      when Token::Type::MAGIC_CONST
+        parse_magic_constant
       else
         parse_logical_or
       end
@@ -944,6 +946,12 @@ module Myst
       end
     end
 
+    def parse_magic_constant
+      start = expect(Token::Type::MAGIC_CONST)
+      skip_space
+
+      return MagicConst.from(start.value).at(start.location)        
+    end
 
     def parse_list_literal
       start = expect(Token::Type::LBRACE)
