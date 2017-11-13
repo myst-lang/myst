@@ -156,4 +156,9 @@ describe "Lexer" do
     assert_token_type %q(:"   "),          Token::Type::SYMBOL
     assert_token_type %q(:"hello, world"), Token::Type::SYMBOL
   end
+
+  it "lexes magic constants"do
+    assert_token_type %q(__FILE__),             Token::Type::MAGIC_CONST
+    assert_token_type %q(__LINE__),             Token::Type::MAGIC_CONST  
+  end
 end

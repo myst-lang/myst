@@ -558,6 +558,10 @@ module Myst
       if current_char == '?' || current_char == '!'
         read_char
       end
+      
+      if @reader.buffer_value == "__FILE__" || @reader.buffer_value == "__LINE__"
+        @current_token.type = Token::Type::MAGIC_CONST
+      end
 
       @current_token.value = @reader.buffer_value
     end

@@ -216,6 +216,32 @@ module Myst
     def_equals_and_hash entries
   end
 
+  class MagicConst < Node
+    property type : Symbol
+
+    def self.from(name)
+      case name
+      when "__FILE__"
+        new(:file)
+      else "__LINE__"
+        new(:line)        
+      end
+    end
+
+    def initialize(@type : Symbol)
+    end
+
+    def line
+      location.try(&.line) || 0
+    end
+
+    def file
+      location.try(&.file) || ""
+    end
+
+    def_equals_and_hash type    
+  end
+
   # Any node that can appear as-is on the left-hand side of an assignment. This
   # type is only necessary to avoid some type unioning issues with Var, Const,
   # and Underscore throughout the interpreter.
