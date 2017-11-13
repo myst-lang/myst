@@ -55,4 +55,31 @@ describe "NativeLib - IO Methods" do
       itr.output.to_s.should eq("")
     end
   end
+
+  describe "#gets" do
+    it "no input" do
+      itr = interpret_with_mocked_input %q(
+        IO.gets
+      ), nil
+
+      itr.stack.pop.should eq(val(nil))
+    end
+
+    it "a string from the IO" do
+      itr = interpret_with_mocked_input %q(
+        IO.gets               
+      ), "hello, world"
+
+      itr.stack.pop.should eq(val("hello, world"))
+    end
+
+    it "multiple inputs from the IO" do
+      itr = interpret_with_mocked_input %q(
+        IO.gets
+        IO.gets         
+      ), "hello, world\nhello, again\n"
+
+      itr.stack.pop.should eq(val("hello, again"))
+    end
+  end
 end

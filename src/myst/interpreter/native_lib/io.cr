@@ -17,11 +17,20 @@ module Myst
       TNil.new
     end
 
+    NativeLib.method :io_gets, Value do
+      input = self.input.gets
+      if input
+        TString.new(input)
+      else
+        TNil.new
+      end
+    end
 
     def init_io(kernel : TModule)
       io_module = TModule.new("IO", kernel.scope)
 
       NativeLib.def_method(io_module, :puts, :io_puts)
+      NativeLib.def_method(io_module, :gets, :io_gets)
 
       io_module
     end
