@@ -81,8 +81,8 @@ module Myst
       end
     end
 
-    NativeLib.method :int_negate, TInteger, other : Value do
-      TInteger.new(this.value)
+    NativeLib.method :int_negate, TInteger do
+      TInteger.new(-this.value)
     end
 
     def init_integer(kernel : TModule)
