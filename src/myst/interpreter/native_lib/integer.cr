@@ -81,6 +81,9 @@ module Myst
       end
     end
 
+    NativeLib.method :int_negate, TInteger do
+      TInteger.new(-this.value)
+    end
 
     def init_integer(kernel : TModule)
       integer_type = TType.new("Integer", kernel.scope)
@@ -94,6 +97,7 @@ module Myst
       NativeLib.def_instance_method(integer_type, :==,    :int_eq)
       NativeLib.def_instance_method(integer_type, :!=,    :int_not_eq)
       NativeLib.def_instance_method(integer_type, :to_s,  :int_to_s)
+      NativeLib.def_instance_method(integer_type, :negate,:int_negate)
 
       integer_type
     end

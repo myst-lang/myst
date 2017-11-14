@@ -69,6 +69,9 @@ module Myst
       end
     end
 
+    NativeLib.method :float_negate, TFloat do
+      TFloat.new(-this.value)
+    end
 
     def init_float(kernel : TModule)
       float_type = TType.new("Float", kernel.scope)
@@ -82,6 +85,7 @@ module Myst
       NativeLib.def_instance_method(float_type, :==,    :float_eq)
       NativeLib.def_instance_method(float_type, :!=,    :float_not_eq)
       NativeLib.def_instance_method(float_type, :to_s,  :float_to_s)
+      NativeLib.def_instance_method(float_type, :negate,:float_negate)
 
       float_type
     end

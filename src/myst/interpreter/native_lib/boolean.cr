@@ -22,7 +22,6 @@ module Myst
       end
     end
 
-
     def init_boolean(kernel : TModule)
       boolean_type = TType.new("Boolean", kernel.scope)
       boolean_type.instance_scope["type"] = boolean_type
