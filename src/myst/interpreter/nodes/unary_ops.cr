@@ -4,12 +4,8 @@ module Myst
     def visit(node : Negation)
       visit(node.value)
       value = stack.pop()
-
-      puts("Pop: #{value} ! #{value.to_s}")
       negate = self.__scopeof(value)["negate"].as(TFunctor)
-      # got a ast from Nil to Myst::Value+ failed here
       result = Invocation.new(self, negate, value, [] of Value, nil).invoke
-      puts("Pop: #{result} ! #{result.to_s}")
       stack.push(result)
     end
 
