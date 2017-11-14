@@ -10,12 +10,18 @@ module Myst
     end
 
     def visit(node : Not)
-      v = Value.from_literal(node.value)
-      if v.to_s == "true"
-        stack.push(TBoolean.new(false))
-      else
-        stack.push(TBoolean.new(true))
-      end
+      visit(node.value)
+      value = stack.pop()
+
+      result =
+        if not_method = self.__scopeof(value)["not"]?
+          not_method = not_method.as(TFunctor)
+          Invocation.new(self, not_method, value, [] of Value , nil).invoke
+        else
+          TBoolean.new(!value.truthy?)
+        end
+
+      stack.push(result)
     end
 
   end

@@ -16,7 +16,7 @@ describe "Interpreter - OpUnary" do
   end
 
   it "handle not for booleans" do
-#    it_interprets %q(!true), [val(false)]
-#    it_interprets %q(a=false; b = !a; b), [val(true)]
+    it_interprets %q(!true), [val(false)]
+    it_interprets %q(a=false; b = !a; b), [val(true)]
   end
 end
