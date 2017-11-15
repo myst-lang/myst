@@ -106,7 +106,7 @@ module Myst
 
       def self.keywords
         [ REQUIRE, INCLUDE,
-          DEFMODULE, DEFTYPE, DEF, DEFSTATIC, DO, END,
+          DEFMODULE, DEFTYPE, DEF, DEFSTATIC, FN, DO, END,
           WHEN, UNLESS, ELSE,
           WHILE, UNTIL,
           TRUE, FALSE, NIL,
