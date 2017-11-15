@@ -254,8 +254,12 @@ module Myst
       when '-'
         @current_token.type = Token::Type::MINUS
         read_char
-        if current_char == '='
+        case current_char
+        when '='
           @current_token.type = Token::Type::MINUSOP
+          read_char
+        when '>'
+          @current_token.type = Token::Type::STAB
           read_char
         end
       when '*'
@@ -558,7 +562,7 @@ module Myst
       if current_char == '?' || current_char == '!'
         read_char
       end
-      
+
       if @reader.buffer_value == "__FILE__" || @reader.buffer_value == "__LINE__"
         @current_token.type = Token::Type::MAGIC_CONST
       end

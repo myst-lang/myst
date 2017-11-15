@@ -19,6 +19,7 @@ module Myst
       DEFTYPE       # deftype
       DEF           # def
       DEFSTATIC     # defstatic
+      FN            # fn
       DO            # do
       UNLESS        # unless
       ELSE          # else
@@ -81,6 +82,8 @@ module Myst
       LCURLY        # {
       RCURLY        # }
 
+      STAB          # ->
+
       COMMA         # ,
       POINT         # .
       COLON         # :
@@ -122,6 +125,7 @@ module Myst
           "deftype" => DEFTYPE,
           "def" => DEF,
           "defstatic" => DEFSTATIC,
+          "fn" => FN,
           "do" => DO,
           "end" => END,
           "when" => WHEN,
