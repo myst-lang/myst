@@ -117,6 +117,8 @@ module Myst
         parse_module_def
       when Token::Type::DEFTYPE
         parse_type_def
+      when Token::Type::FN
+        parse_anonymous_function
       when Token::Type::INCLUDE
         parse_include
       when Token::Type::REQUIRE
@@ -142,47 +144,8 @@ module Myst
       method_def = Def.new(name, static: static).at(start.location)
       push_var_scope
 
-      # If the Def has parameters, they must be parenthesized. If the token
-      # after the opening parenthesis is a closing one, then there are no
-      # parameters.
       skip_space
-      if accept(Token::Type::LPAREN)
-        skip_space_and_newlines
-        unless accept(Token::Type::RPAREN)
-          allow_splat = true
-          param_index = 0
-          loop do
-            skip_space_and_newlines
-            next_param = parse_param(allow_splat)
-            skip_space_and_newlines
-            # Only one splat collector is allowed in a parameter list.
-            if next_param.splat?
-              allow_splat = false
-              method_def.splat_index = param_index
-            end
-
-            # The block parameter must be the last parameter.
-            if next_param.block?
-              method_def.block_param = next_param
-              if accept(Token::Type::RPAREN)
-                break
-              else
-                raise ParseError.new(current_location, "Block parameter must be the last parameter in a Def.")
-              end
-            end
-
-            method_def.params << next_param
-            param_index += 1
-
-            # If there is no comma, this is the last parameter, and a closing
-            # parenthesis should be expected.
-            unless accept(Token::Type::COMMA)
-              expect(Token::Type::RPAREN)
-              break
-            end
-          end
-        end
-      end
+      parse_param_list(into: method_def)
 
       skip_space
       expect_delimiter
@@ -228,6 +191,50 @@ module Myst
         token.value
       else
         raise ParseError.new(current_location, "Invalid name for def: #{token.value}")
+      end
+    end
+
+    # If a Def has parameters, they must be parenthesized. If the token after
+    # the opening parenthesis is a closing one, then there are no parameters.
+    def parse_param_list(into target : Def, require_parens=false)
+      if (require_parens ? expect(Token::Type::LPAREN) : accept(Token::Type::LPAREN))
+        skip_space_and_newlines
+
+        unless accept(Token::Type::RPAREN)
+          allow_splat = true
+          param_index = 0
+
+          loop do
+            skip_space_and_newlines
+            next_param = parse_param(allow_splat)
+            skip_space_and_newlines
+            # Only one splat collector is allowed in a parameter list.
+            if next_param.splat?
+              allow_splat = false
+              target.splat_index = param_index
+            end
+
+            # The block parameter must be the last parameter.
+            if next_param.block?
+              target.block_param = next_param
+              if accept(Token::Type::RPAREN)
+                break
+              else
+                raise ParseError.new(current_location, "Block parameter must be the last parameter in a Def.")
+              end
+            end
+
+            target.params << next_param
+            param_index += 1
+
+            # If there is no comma, this is the last parameter, and a closing
+            # parenthesis should be expected.
+            unless accept(Token::Type::COMMA)
+              expect(Token::Type::RPAREN)
+              break
+            end
+          end
+        end
       end
     end
 
@@ -283,6 +290,57 @@ module Myst
       end
 
       return param
+    end
+
+    def parse_anonymous_function
+      start = expect(Token::Type::FN)
+      skip_space_and_newlines
+      if accept(Token::Type::END)
+        raise ParseError.new(current_location, "No clause given for anonymous function; at least one is required.")
+      end
+
+      func = AnonymousFunction.new.at(start.location)
+      loop do
+        skip_space_and_newlines
+
+        # Anonymous functions _must_ contain at least one clause definition, so
+        # a stab is always expected.
+        expect(Token::Type::STAB)
+        skip_space
+
+        push_var_scope
+        block = Block.new
+        parse_param_list(into: block, require_parens: true)
+        skip_space
+
+        closing_brace =
+          case
+          when accept(Token::Type::DO)
+            Token::Type::END
+          when accept(Token::Type::LCURLY)
+            Token::Type::RCURLY
+          else
+            raise ParseError.new(current_location, "Expected `{` or `do` to start a block body. Got #{current_token.type}.")
+          end
+
+        skip_space_and_newlines
+        block.body = parse_code_block(closing_brace)
+        skip_space_and_newlines
+        expect(closing_brace)
+
+        skip_space_and_newlines
+        pop_var_scope
+        func.clauses << block
+
+        # Anonymous functions are closed by an `end` keyword. Once that is encountered, the
+        # loop for clauses can end.
+        if finish = accept(Token::Type::END)
+          func.at_end(finish.location)
+          break
+        end
+      end
+
+      return func
     end
 
     def parse_module_def
@@ -950,7 +1008,7 @@ module Myst
       start = expect(Token::Type::MAGIC_CONST)
       skip_space
 
-      return MagicConst.from(start.value).at(start.location)        
+      return MagicConst.from(start.value).at(start.location)
     end
 
     def parse_list_literal

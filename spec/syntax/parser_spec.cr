@@ -248,7 +248,7 @@ describe "Parser" do
 
   it_parses %q(__FILE__),       MagicConst.new(:file)
   it_parses %q(__LINE__),       MagicConst.new(:line)
-  
+
   # Value interpolations
 
   # Any literal value is valid in an interpolation.
@@ -2360,5 +2360,168 @@ describe "Parser" do
     ensure
       # still wrong
     }
+  )
+
+
+
+  # Anonymous functions
+
+  # Anonymous functions are shorthand wrappers for multi-clause functions with no name. They
+  # are created with an `fn ... end` block, where each clause is indicated by a "stab" (`->`),
+  # followed by parenthesized parameters (even when no parameters are given), and then a block
+  # for the body (either brace-block or do-end-block style).
+  it_parses %q(
+    fn
+      ->() { }
+    end
+  ),                          AnonymousFunction.new([Block.new])
+  it_parses %q(
+    fn
+      ->() do
+      end
+    end
+  ),                          AnonymousFunction.new([Block.new(style: :doend)])
+
+  it_parses %q(
+    fn
+      ->(a, b) { a + b }
+    end
+  ),                          AnonymousFunction.new([Block.new([p("a"), p("b")], e(Call.new(v("a"), "+", [v("b")] of Node)))])
+  it_parses %q(
+    fn
+      ->(a, b) do
+        a + b
+      end
+    end
+  ),                          AnonymousFunction.new([Block.new([p("a"), p("b")], e(Call.new(v("a"), "+", [v("b")] of Node)), style: :doend)])
+
+  it_parses %q(
+    fn
+      ->(1, :hi) { true || false }
+    end
+  ),                        AnonymousFunction.new([Block.new([p(nil, l(1)), p(nil, l(:hi))], e(Or.new(l(true), l(false))))])
+
+
+  # The bodies of each clause may contain multiple expressions
+  it_parses %q(
+    fn
+      ->(1, :hi) { 1 + 1; 2 + 2; }
+    end
+  ),                        AnonymousFunction.new([Block.new([p(nil, l(1)), p(nil, l(:hi))], e(Call.new(l(1), "+", [l(1)]), Call.new(l(2), "+", [l(2)])))])
+  it_parses %q(
+    fn
+      ->(1, :hi) do
+        1 + 1
+        2 + 2
+      end
+    end
+  ),                        AnonymousFunction.new([Block.new([p(nil, l(1)), p(nil, l(:hi))], e(Call.new(l(1), "+", [l(1)]), Call.new(l(2), "+", [l(2)])), style: :doend)])
+
+  # Multiple clauses can be given in a row.
+  it_parses %q(
+    fn
+      ->(a) { }
+      ->(b) { }
+    end
+  ),                        AnonymousFunction.new([Block.new([p("a")]), Block.new([p("b")])])
+
+  # Blank lines between clauses are also allowed
+  it_parses %q(
+    fn
+      ->(a) { }
+
+
+      ->(b) { }
+    end
+  ),                        AnonymousFunction.new([Block.new([p("a")]), Block.new([p("b")])])
+
+  # Bracing styles can be mixed in the same definition.
+  it_parses %q(
+    fn
+      ->() { }
+      ->() do
+      end
+    end
+  ),                        AnonymousFunction.new([Block.new, Block.new(style: :doend)])
+
+  # The parameter syntax is just like normal functions. Pattern matching and all.
+  it_parses %q(
+    fn
+      ->([a, *_, b] =: p, &block) { }
+    end
+  ),                       AnonymousFunction.new([Block.new([p("p", l([v("a"), Splat.new(u("_")), v("b")])), p("block", block: true)])])
+
+  # Anonymous functions can be compacted to a single line if desired. This syntax
+  # is generally unnecessary, since the normal block syntax is clearner and
+  # shorter for single clauses anyway.
+  it_parses %q(fn ->()  {}    end), AnonymousFunction.new([Block.new])
+  it_parses %q(fn ->(a) { 1 } end), AnonymousFunction.new([Block.new([p("a")], e(l(1)))])
+
+  # It is invalid for an anonymous function to contain less than 1 clause.
+  it_does_not_parse %q(fn end),   /no clause/
+  it_does_not_parse %q(
+    fn
+    end
+  ),                              /no clause/
+
+  # All clauses must include parentheses, even if no parameters are given
+  it_does_not_parse %q(
+    fn
+      -> {}
+    end
+  )
+  it_does_not_parse %q(
+    fn
+      -> do
+      end
+    end
+  )
+
+  # The parentheses for a clause must start on the same line as the stab, but are
+  # allowed to span multiple lines.
+  it_does_not_parse %q(
+    fn
+      ->
+        () { }
+    end
+  )
+
+  it_parses %q(
+    fn
+      ->(
+        a,
+        c
+      ) { }
+    end
+  ),              AnonymousFunction.new([Block.new([p("a"), p("b")])])
+
+  # Similarly, the start of the block must appear on the same line as the closing
+  # parenthesis of the parameter list.
+  it_does_not_parse %q(
+    fn
+      -> ()
+        { }
+    end
+  )
+  it_does_not_parse %q(
+    fn
+      -> ()
+        do
+      end
+    end
+  )
+
+  # All clauses must have their bodies wrapped with a bracing construct, even for
+  # single-expression bodies.
+  it_does_not_parse %q(
+    fn
+      ->(a) a + 1
+    end
+  )
+  it_does_not_parse %q(
+    fn
+      ->(1) { 1 }
+      ->(a) a + 1
+    end
   )
 end

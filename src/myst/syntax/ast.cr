@@ -704,6 +704,30 @@ module Myst
     def_equals_and_hash
   end
 
+  # A shorthand function definition with multiple clauses. AnonymousFunctions
+  # are most commonly used to define complex behavior in place of a block
+  # parameter for a function. Clauses are defined using a "stab" (`->`),
+  # followed by a parenthesized parameter list, then a clause body wrapped like
+  # a normal block (either with `{...}` or `do...end`).
+  #
+  # An anonymous function must be given at least one clause to be valid.
+  #
+  #   'fn'
+  #     [
+  #       '->' '(' [ param [ ',' param ]* ]? ')' [ '{' | 'do' ]
+  #         body
+  #       [ '}' | 'end' ]
+  #     ]+
+  #   'end'
+  class AnonymousFunction < Node
+    property clauses : Array(Block)
+
+    def initialize(@clauses = [] of Block)
+    end
+
+    def_equals_and_hash clauses
+  end
+
   # A module definition. The name of the module must be a Constant (i.e., it
   # must start with a capital letter).
   #
