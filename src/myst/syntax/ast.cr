@@ -216,6 +216,14 @@ module Myst
     def_equals_and_hash entries
   end
 
+  # A constant defined by the interpreter. MagicConsts are often used for
+  # meta-programming or tooling for libraries to better support end users. All
+  # MagicConsts are written in SCREAMING_CASE, and are surrounded by double
+  # underscores (`__`).
+  #
+  #   __FILE__
+  # |
+  #   __LINE__
   class MagicConst < Node
     property type : Symbol
 
@@ -224,7 +232,7 @@ module Myst
       when "__FILE__"
         new(:file)
       else "__LINE__"
-        new(:line)        
+        new(:line)
       end
     end
 
@@ -239,7 +247,7 @@ module Myst
       location.try(&.file) || ""
     end
 
-    def_equals_and_hash type    
+    def_equals_and_hash type
   end
 
   # Any node that can appear as-is on the left-hand side of an assignment. This
