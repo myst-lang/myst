@@ -40,6 +40,7 @@ STATIC_TOKENS = {
   Token::Type::RBRACE       =>  "]",
   Token::Type::LCURLY       =>  "{",
   Token::Type::RCURLY       =>  "}",
+  Token::Type::STAB         =>  "->",
   Token::Type::EOF          =>  "\0",
   Token::Type::NEWLINE      =>  "\n",
   Token::Type::WHITESPACE   =>  " ",
@@ -49,6 +50,7 @@ STATIC_TOKENS = {
   Token::Type::DEFTYPE      =>  "deftype",
   Token::Type::DEFSTATIC    =>  "defstatic",
   Token::Type::DEF          =>  "def",
+  Token::Type::FN           =>  "fn",
   Token::Type::DO           =>  "do",
   Token::Type::UNLESS       =>  "unless",
   Token::Type::ELSE         =>  "else",
@@ -159,6 +161,6 @@ describe "Lexer" do
 
   it "lexes magic constants"do
     assert_token_type %q(__FILE__),             Token::Type::MAGIC_CONST
-    assert_token_type %q(__LINE__),             Token::Type::MAGIC_CONST  
+    assert_token_type %q(__LINE__),             Token::Type::MAGIC_CONST
   end
 end
