@@ -2524,4 +2524,65 @@ describe "Parser" do
       ->(a) a + 1
     end
   )
+
+
+
+  # Function capturing
+
+  # Functions can be captured using an `&` prefix.
+  it_parses %q(&foo),               FunctionCapture.new(Call.new(nil, "foo"))
+  # The value of a capture can be any primary expression
+  it_parses %q(&self.foo),          FunctionCapture.new(Call.new(Self.new, "foo"))
+  it_parses %q(&(a || b)),          FunctionCapture.new(Or.new(Call.new(nil, "a"), Call.new(nil, "b")))
+  it_parses %q(&callbacks[:start]), FunctionCapture.new(Call.new(Call.new(nil, "callbacks"), "[]", [l(:start)]))
+  it_parses %q(&a.b.c),             FunctionCapture.new(Call.new(Call.new(Call.new(nil, "a"), "b"), "c"))
+
+  # Spacing between the ampersand and the expression is allowed, but not newlines.
+  it_parses %q(& foo),              FunctionCapture.new(Call.new(nil, "foo"))
+  it_does_not_parse %q(
+    &
+    foo
+  )
+
+  # An anonymous function can be the value of a function capture. Other literals
+  # are parseable in captures, but will fail in the interpreter.
+  it_parses %q(
+    &fn
+      ->() { }
+    end
+  ),                                FunctionCapture.new(AnonymousFunction.new([Block.new]))
+
+
+  # A function capture given as the last argument to a function call will be considered
+  # the block argument for the function.
+  it_parses %q(foo(1, 2, &bar)),    Call.new(nil, "foo", [l(1), l(2)], block: FunctionCapture.new(Call.new(nil, "bar")))
+  it_parses %q(foo(&bar)),          Call.new(nil, "foo", block: FunctionCapture.new(Call.new(nil, "bar")))
+
+  # A function capture given as anything other than the last argument is invalid.
+  it_does_not_parse %q(foo(1, &bar, 2))
+
+  # Passing functions as arguments can be achieved by capturing the function in a
+  # separate expression
+  it_parses %q(
+    bar = &baz
+    foo(1, bar, 2)
+  ),                                SimpleAssign.new(v("bar"), FunctionCapture.new(Call.new(nil, "baz"))), Call.new(nil, "foo", [l(1), v("bar"), l(2)])
+
+  # The most common use case of function capturing is to define multi-clause anonymous
+  # functions as the block argument for a Call
+  it_parses %q(
+    foo(1, 2, &fn
+      ->(1) { true }
+      ->(2) { false }
+    end)
+  ),                                Call.new(nil, "foo", [l(1), l(2)], block: FunctionCapture.new(AnonymousFunction.new([Block.new([p(nil, l(1))], body: e(l(true))), Block.new([p(nil, l(2))], body: e(l(false)))])))
+
+  # If a function capture is given as a block argument, an inline block is not allowed.
+  it_does_not_parse %q(
+    foo(&bar) { }
+  ),                /captured function/
+  it_does_not_parse %q(
+    foo(&bar) do
+    end
+  ),                /captured function/
 end
