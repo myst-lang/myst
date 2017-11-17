@@ -733,12 +733,24 @@ module Myst
         else
           loop do
             skip_space_and_newlines
-            call.args << parse_expression
+            case current_token.type
+            when Token::Type::AMPERSAND
+              call.block = parse_function_capture
+            else
+              call.args << parse_expression
+            end
             skip_space_and_newlines
 
-            # If there is no comma, this is the last argument, and a closing
-            # parenthesis should be expected.
-            unless accept(Token::Type::COMMA)
+            if accept(Token::Type::COMMA)
+              # Function captures must be given as the last argument in a Call.
+              # If a comma was encountered after the block has been set, then
+              # the capture was not the last argument, and thus invalid.
+              if call.block?
+                raise ParseError.new(current_location, "Function captures as block arguments must be given as the last argument for a Call.")
+              end
+            else
+              # If there is no comma, this is the last argument, and a closing
+              # parenthesis should be expected.
               finish = expect(Token::Type::RPAREN)
               call.at_end(finish.location)
               break
@@ -748,7 +760,15 @@ module Myst
       end
 
       skip_space
-      if call.block = parse_optional_block
+      if inline_block = parse_optional_block
+        # If a block argument was already specified by a function capture,
+        # inline blocks are not allowed. Checking this after parsing the
+        # optional block allows for a more helpful error message.
+        if call.block?
+          raise ParseError.new(current_location, "A block argument has already been given by a captured function. Defining an extra inline block is not allowed.")
+        end
+
+        call.block = inline_block
         return call.at_end(call.block)
       end
 

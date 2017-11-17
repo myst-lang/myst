@@ -609,7 +609,7 @@ module Myst
     property! receiver    : Node?
     property  name        : String
     property  args        : Array(Node)
-    property! block       : Block?
+    property! block       : (Block | FunctionCapture)?
     property? infix       : Bool
 
     def initialize(@receiver, @name, @args = [] of Node, @block=nil, @infix=false)
