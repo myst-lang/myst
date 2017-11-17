@@ -2524,4 +2524,31 @@ describe "Parser" do
       ->(a) a + 1
     end
   )
+
+
+
+  # Function capturing
+
+  # Functions can be captured using an `&` prefix.
+  it_parses %q(&foo),               FunctionCapture.new(Call.new(nil, "foo"))
+  # The value of a capture can be any primary expression
+  it_parses %q(&self.foo),          FunctionCapture.new(Call.new(Self.new, "foo"))
+  it_parses %q(&(a || b)),          FunctionCapture.new(Or.new(Call.new(nil, "a"), Call.new(nil, "b")))
+  it_parses %q(&callbacks[:start]), FunctionCapture.new(Call.new(Call.new(nil, "callbacks"), "[]", [l(:start)]))
+  it_parses %q(&a.b.c),             FunctionCapture.new(Call.new(Call.new(Call.new(nil, "a"), "b"), "c"))
+
+  # Spacing between the ampersand and the expression is allowed, but not newlines.
+  it_parses %q(& foo),              FunctionCapture.new(Call.new(nil, "foo"))
+  it_does_not_parse %q(
+    &
+    foo
+  )
+
+  # An anonymous function can be the value of a function capture. Other literals
+  # are parseable in captures, but will fail in the interpreter.
+  it_parses %q(
+    &fn
+      ->() { }
+    end
+  ),                                FunctionCapture.new(AnonymousFunction.new([Block.new]))
 end

@@ -250,6 +250,15 @@ module Myst
     def_equals_and_hash type
   end
 
+  class FunctionCapture < Node
+    property value : Node
+
+    def initialize(@value : Node)
+    end
+
+    def_equals_and_hash value
+  end
+
   # Any node that can appear as-is on the left-hand side of an assignment. This
   # type is only necessary to avoid some type unioning issues with Var, Const,
   # and Underscore throughout the interpreter.

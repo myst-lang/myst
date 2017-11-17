@@ -129,6 +129,8 @@ module Myst
         parse_conditional
       when Token::Type::WHILE, Token::Type::UNTIL
         parse_loop
+      when Token::Type::AMPERSAND
+        parse_function_capture
       when Token::Type::MAGIC_CONST
         parse_magic_constant
       else
@@ -1076,6 +1078,15 @@ module Myst
       # value interpolations.
       expect(Token::Type::COLON)
       return key
+    end
+
+
+    def parse_function_capture
+      start = expect(Token::Type::AMPERSAND)
+      skip_space
+
+      value = parse_expression
+      return FunctionCapture.new(value).at(start.location).at_end(value)
     end
 
 
