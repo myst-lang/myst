@@ -1,6 +1,19 @@
 module Myst
   class Interpreter
     def visit(node : Call)
+      receiver, func = lookup_call(node)
+
+      @callstack.push(node)
+      if func
+        visit_call(node, receiver, func)
+      else
+        raise_not_found(node.name, receiver)
+      end
+      @callstack.pop
+    end
+
+
+    private def lookup_call(node : Call) : Tuple(Value, Value?)
       # If the Call has a receiver, lookup the Call on that receiver, otherwise
       # search the current scope.
       receiver =
@@ -19,14 +32,9 @@ module Myst
         end
       end
 
-      @callstack.push(node)
-      if func
-        visit_call(node, receiver, func)
-      else
-        raise_not_found(node.name, receiver)
-      end
-      @callstack.pop
+      {receiver, func}
     end
+
 
     private def visit_call(node, receiver, func : TFunctor)
       args = node.args.map{ |a| a.accept(self); stack.pop }
