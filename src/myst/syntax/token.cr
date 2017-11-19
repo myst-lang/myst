@@ -182,7 +182,7 @@ module Myst
 
       def self.overloadable_operators
         [ PLUS, MINUS, STAR, SLASH, MODULO, MATCH, LESS, LESSEQUAL,
-          NOTEQUAL, EQUALEQUAL, GREATEREQUAL, GREATER]
+          NOTEQUAL, EQUALEQUAL, GREATEREQUAL, GREATER, NOT]
       end
 
       def unary_operator?
