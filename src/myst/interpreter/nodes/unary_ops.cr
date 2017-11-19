@@ -14,7 +14,7 @@ module Myst
       value = stack.pop()
 
       result =
-        if not_method = self.__scopeof(value)["not"]?
+        if not_method = self.__scopeof(value)["!"]?
           not_method = not_method.as(TFunctor)
           Invocation.new(self, not_method, value, [] of Value , nil).invoke
         else
