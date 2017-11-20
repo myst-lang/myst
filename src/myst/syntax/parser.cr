@@ -712,8 +712,9 @@ module Myst
     def parse_var_or_call(receiver=nil)
       start = expect(Token::Type::IDENT, Token::Type::CONST)
       name  = start.value
-
-      if receiver.nil?
+      
+      skip_space      
+      if receiver.nil? && current_token.type != Token::Type::LPAREN
         if name.starts_with?('_')
           return Underscore.new(name).at(start.location)
         end
@@ -724,7 +725,6 @@ module Myst
       end
 
       call = Call.new(receiver, name).at(start.location)
-      skip_space
       if accept(Token::Type::LPAREN)
         skip_space_and_newlines
 

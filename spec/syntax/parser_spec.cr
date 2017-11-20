@@ -527,7 +527,21 @@ describe "Parser" do
   # Assignments are not allowed to methods with modifiers
   it_does_not_parse %q(a.b? = 1)
   it_does_not_parse %q(a.b! = 1)
-
+  # Assigned Anonymous Functions called should be coerced to a Call
+  it_parses %q(
+    foo = fn 
+            ->() { } 
+          end
+    foo()
+  ), SimpleAssign.new(v("foo"), AnonymousFunction.new([Block.new])), Call.new(nil, "foo")
+  it_parses %q(
+    foo = fn 
+            ->() { } 
+          end
+    bar = foo
+    bar()
+  ), SimpleAssign.new(v("foo"), AnonymousFunction.new([Block.new])), SimpleAssign.new(v("bar"), v("foo")), Call.new(nil, "bar")
+  
   # Assignments can not be made to literal values.
   it_does_not_parse %q(2 = 4),          /cannot assign to literal value/i
   it_does_not_parse %q(2.56 = 4),       /cannot assign to literal value/i
