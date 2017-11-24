@@ -3,7 +3,7 @@
 **A structured, dynamic, general-purpose language.**
 
 ```ruby
-def fib(0); 1; end
+def fib(0); 0; end
 def fib(1); 1; end
 def fib(n : Integer)
   fib(n-1) + fib(n-2)
