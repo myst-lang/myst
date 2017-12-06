@@ -1,4 +1,5 @@
 require "../spec_helper.cr"
+require "./nodes.cr"
 
 def it_interprets(node : String, expected_stack : Array(Myst::Value), itr=Interpreter.new, file=__FILE__, line=__LINE__, end_line=__END_LINE__)
   it %Q(interprets #{node}), file, line, end_line do
