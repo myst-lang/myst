@@ -10,6 +10,10 @@ module Myst
       this
     end
 
+    NativeLib.method :map_size, TMap do
+      TInteger.new(this.entries.size.to_i64)
+    end
+
     NativeLib.method :map_add, TMap, other : TMap do
       TMap.new(this.entries.merge(other.entries))
     end
@@ -19,6 +23,7 @@ module Myst
       map_type.instance_scope["type"] = map_type
 
       NativeLib.def_instance_method(map_type, :each, :map_each)
+      NativeLib.def_instance_method(map_type, :size, :map_size)
       NativeLib.def_instance_method(map_type, :+, :map_add)
 
       map_type
