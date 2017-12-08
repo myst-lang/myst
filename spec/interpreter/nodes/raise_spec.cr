@@ -48,13 +48,10 @@ describe "Interpreter - Raise" do
     ),                          "some exception"
     it_raises %q(
       deftype ClassException
-        defstatic to_s
-          "class exception"
-        end
       end
 
       raise ClassException
-    ),                          "class exception"
+    ),                          "ClassException"
     it_raises %q(
       defmodule ModuleException
         def to_s
