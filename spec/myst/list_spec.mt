@@ -9,3 +9,13 @@ describe("List#size") do
     assert([1,2,3].size == 3)
   end
 end
+
+describe("List#empty?") do
+  it("should return true when list size is 0") do
+    assert([].empty? == true)
+  end
+
+  it("should return false when list size is 2") do
+    assert([1, 2].empty? == false)
+  end
+end

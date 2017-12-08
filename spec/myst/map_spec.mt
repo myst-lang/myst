@@ -10,3 +10,12 @@ describe("Map#size") do
   end
 end
 
+describe("Map#empty?") do
+  it("should return true when map size is 0") do
+    assert({}.empty? == true)
+  end
+
+  it("should return false when map size is 2") do
+    assert({key: 1, b: "hello"}.empty? == false)
+  end
+end
