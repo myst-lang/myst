@@ -77,6 +77,14 @@ module Myst
     def initialize(@name : String, parent : Scope?=nil)
       @scope = Scope.new(parent)
       @instance_scope = Scope.new(parent)
+      # TODO: revist this when base object for TType is in place
+      # Currently this prevents to_s from being overriden on Types
+      @scope["to_s"] = TFunctor.new([
+        ->ttype_to_s(Value, Array(Value), TFunctor?)] of Callable)
+    end
+
+    def ttype_to_s(_a, _b, _c)
+      TString.new(@name).as(Value)
     end
 
     def type_name
