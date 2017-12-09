@@ -1,13 +1,16 @@
 module Myst
   class Interpreter
     def visit(node : ExceptionHandler)
-      stack_size_at_entry = stack.size
+      selfstack_size_at_entry = self_stack.size
 
       begin
         visit(node.body)
       rescue err : RuntimeError
         # Before rescuing, restore the stack to its state from before
         # executing the body.
+        pop_self(to_size: selfstack_size_at_entry)
+
+
         handled = false
         node.rescues.each do |resc|
           self.push_scope_override
@@ -19,6 +22,12 @@ module Myst
           else
             self.pop_scope_override
           end
+
+        end
+
+        if node.ensure?
+          visit(node.ensure)
+          stack.pop
         end
 
         raise err unless handled
