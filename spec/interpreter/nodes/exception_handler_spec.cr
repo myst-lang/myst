@@ -122,10 +122,34 @@ describe "Interpreter - ExceptionHandler" do
         itr.current_self.ivars["@matched_values"].should eq(val([1, 2]))
       end
     end
+
+    it "restores `self` when rescuing from a `raise` (see #59)" do
+      itr = interpret_with_mocked_output %q(
+        defmodule Foo
+          def run(&block)
+            block()
+            nil
+          rescue failure
+            do_rescue
+          end
+
+          def do_rescue
+            IO.puts(:saved)
+          end
+        end
+
+        Foo.run do
+          [1, 2, 3].each{ |e| raise :woops }
+        end
+      )
+
+      itr.errput.to_s.should eq("")
+      itr.output.to_s.should eq("saved\n")
+    end
   end
 
 
-  describe "ensure" do
+  describe "`ensure`" do
     it "is executed after rescuing an exception" do
       itr = parse_and_interpret %q(
         @rescued = false
@@ -161,6 +185,26 @@ describe "Interpreter - ExceptionHandler" do
       itr.current_self.ivars["@ensured"].should eq(val(true))
     end
 
+    it "is executed when an exception is raised, but not rescued by handler" do
+      itr = interpret_with_mocked_output %q(
+        @rescued = false
+        @ensured = false
+
+        def foo
+          raise "an error"
+        rescue Integer
+          @rescued = true
+        ensure
+          @ensured = true
+        end
+
+        foo
+      )
+
+      itr.current_self.ivars["@rescued"].should eq(val(false))
+      itr.current_self.ivars["@ensured"].should eq(val(true))
+    end
+
     it "does not change the return value of the block" do
       itr = parse_and_interpret %q(
         @ensured = false
@@ -176,6 +220,33 @@ describe "Interpreter - ExceptionHandler" do
 
       itr.stack.pop.should eq(val(:unchanged))
       itr.current_self.ivars["@ensured"].should eq(val(true))
+    end
+
+    it "restores `self` before executing (see #59)" do
+      itr = interpret_with_mocked_output %q(
+        defmodule Foo
+          def run(&block)
+            block()
+            nil
+          ensure
+            do_ensure
+          end
+
+          def do_ensure
+            IO.puts(:saved)
+          end
+        end
+
+        Foo.run do
+          [1, 2, 3].each{ |e| raise :woops }
+        rescue
+          # the `raise` will not be rescued by `run`.
+          nil
+        end
+      )
+
+      itr.errput.to_s.should eq("")
+      itr.output.to_s.should eq("saved\n")
     end
   end
 end

@@ -32,9 +32,9 @@ module Myst
 
       NativeLib.def_instance_method(list_type, :each, :list_each)
       NativeLib.def_instance_method(list_type, :size, :list_size)
-      NativeLib.def_instance_method(list_type, :+, :list_add)
-      NativeLib.def_instance_method(list_type, :[], :list_access)
-      NativeLib.def_instance_method(list_type, :[]=, :list_access_assign)
+      NativeLib.def_instance_method(list_type, :+,    :list_add)
+      NativeLib.def_instance_method(list_type, :[],   :list_access)
+      NativeLib.def_instance_method(list_type, :[]=,  :list_access_assign)
 
       list_type
     end

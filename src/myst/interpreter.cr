@@ -55,6 +55,15 @@ module Myst
       self_stack.pop
     end
 
+    def pop_self(to_size : Int)
+      return unless to_size >= 0
+
+      count_to_pop = self_stack.size - to_size
+      if count_to_pop > 0
+        self_stack.pop(count_to_pop)
+      end
+    end
+
 
     def visit(node : Node)
       raise "Compiler bug: #{node.class.name} nodes are not yet supported."
@@ -64,7 +73,7 @@ module Myst
     def warn(message : String, node : Node)
       @warnings += 1
       unless ENV["MYST_ENV"] == "test"
-        @errput.puts("WARNING: #{message}") 
+        @errput.puts("WARNING: #{message}")
         @errput.puts("  from `#{node.name}` at #{node.location.to_s}")
       end
     end
