@@ -34,5 +34,24 @@ describe "Interpreter - Break" do
 
       itr.stack.pop.should eq(val(1))
     end
+
+    it "restores `self` after capturing" do
+      itr = parse_and_interpret %q(
+        deftype Foo
+          def run
+            [1, 2, 3].each{ |e| break 1 }
+            foo
+          end
+
+          def foo
+            :foo
+          end
+        end
+
+        %Foo{}.run
+      )
+
+      itr.stack.pop.should eq(val(:foo))
+    end
   end
 end

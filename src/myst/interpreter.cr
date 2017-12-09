@@ -56,7 +56,12 @@ module Myst
     end
 
     def pop_self(to_size : Int)
-      self_stack.pop(self_stack.size - to_size)
+      return unless to_size >= 0
+
+      count_to_pop = self_stack.size - to_size
+      if count_to_pop > 0
+        self_stack.pop(count_to_pop)
+      end
     end
 
 

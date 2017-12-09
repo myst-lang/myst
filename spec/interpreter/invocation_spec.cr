@@ -69,6 +69,19 @@ MODULE_DEFS = %q(
   end
 )
 
+TYPE_DEFS = %q(
+  deftype Foo
+    defstatic foo
+      :static_foo
+    end
+
+    def foo
+      :instance_foo
+    end
+  end
+)
+
+
 private def it_invokes(prelude, call, expected)
   itr = parse_and_interpret(prelude)
   # Running the prelude will leave the last definition on the stack. For
@@ -99,4 +112,7 @@ describe "Interpreter - Invocation" do
   it_invokes MODULE_DEFS, "Foo.foo(1)",     val(:one_arg)
   it_invokes MODULE_DEFS, "Foo.foo(1, 2)",  val(:two_args)
   it_invokes MODULE_DEFS, "Foo.bar",        val(:bar)
+
+  it_invokes TYPE_DEFS, "Foo.foo",    val(:static_foo)
+  it_invokes TYPE_DEFS, "%Foo{}.foo", val(:instance_foo)
 end
