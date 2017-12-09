@@ -19,3 +19,17 @@ describe("List#empty?") do
     assert([1, 2].empty? == false)
   end
 end
+
+describe("List#==") do
+  it("returns true when the lists are equal") do
+    assert([1, 2] == [1, 2])
+  end
+
+  it("returns true when the lists are empty") do
+    assert([] == [])
+  end
+
+  it("returns false when the lists are different lengths") do
+    assert(([1] == [1, 2]) == false)
+  end
+end

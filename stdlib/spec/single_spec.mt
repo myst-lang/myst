@@ -10,7 +10,7 @@ defmodule Spec
     def run(&block)
       block()
       IO.puts(".")
-    rescue failure : AssertionFailure
+    rescue failure
       IO.puts(failure)
       exit(1)
     end

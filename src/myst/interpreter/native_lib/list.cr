@@ -14,6 +14,18 @@ module Myst
       TInteger.new(this.elements.size.to_i64)
     end
 
+    NativeLib.method :list_eq, TList, other : Value do
+      return TBoolean.new(false)  unless other.is_a?(TList)
+      return TBoolean.new(true)   if this == other
+      return TBoolean.new(false)  if this.elements.size != other.elements.size
+
+      this.elements.zip(other.elements).each do |a, b|
+        return TBoolean.new(false) unless NativeLib.call_func_by_name(self, a, "==", [b])
+      end
+
+      TBoolean.new(true)
+    end
+
     NativeLib.method :list_add, TList, other : TList do
       TList.new(this.elements + other.elements)
     end
@@ -32,6 +44,7 @@ module Myst
 
       NativeLib.def_instance_method(list_type, :each, :list_each)
       NativeLib.def_instance_method(list_type, :size, :list_size)
+      NativeLib.def_instance_method(list_type, :==,   :list_eq)
       NativeLib.def_instance_method(list_type, :+,    :list_add)
       NativeLib.def_instance_method(list_type, :[],   :list_access)
       NativeLib.def_instance_method(list_type, :[]=,  :list_access_assign)
