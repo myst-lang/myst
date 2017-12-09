@@ -29,4 +29,47 @@ defmodule Enumerable
     end
     str
   end
+
+  # size -> integer
+  #
+  # Returns the size of the enumerable, as determined by the number of elements
+  # yielded by `each`.
+  def size
+    counter = 0
+
+    each do |e|
+      counter += 1
+    end
+
+    counter
+  end
+
+  # all?(&block) -> boolean
+  #
+  # Return true if all elements in the enumerable cause `block` to return a
+  # truthy value.
+  def all?(&block)
+    each do |e|
+      when block(e)
+        true
+      else
+        break false
+      end
+    end
+  end
+
+  # find(&block) -> element
+  #
+  # Iterate the enumerable, passing each element to `block`. Return the first
+  # element for which the block returns a truthy value.
+  def find(&block)
+    result = nil
+    each do |e|
+      when block(e)
+        result = e
+        break
+      end
+    end
+    result
+  end
 end
