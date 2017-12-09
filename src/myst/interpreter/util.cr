@@ -61,7 +61,7 @@ module Myst
 
       if value_to_s = __scopeof(value)["to_s"]?
         value_to_s = value_to_s.as(TFunctor)
-        value_str = Invocation.new(self, value_to_s, value, [] of Value, nil).invoke
+        value_str = Invocation.new(self, value_to_s, value, [] of Value, nil).invoke.as(TString).value
         error_message = "No variable or method `#{name}` for #{value_str}:#{type_name}"
       end
 
