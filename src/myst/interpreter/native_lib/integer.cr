@@ -103,6 +103,24 @@ module Myst
       end
     end
 
+    NativeLib.method :int_gt, TInteger, other : Value do
+      case other
+      when TInteger, TFloat
+        TBoolean.new(this.value > other.value)
+      else
+        raise "invalid argument for Integer#>: #{__typeof(other).name}"
+      end
+    end
+
+    NativeLib.method :int_gte, TInteger, other : Value do
+      case other
+      when TInteger, TFloat
+        TBoolean.new(this.value >= other.value)
+      else
+        raise "invalid argument for Integer#>=: #{__typeof(other).name}"
+      end
+    end
+
     def init_integer(kernel : TModule)
       integer_type = TType.new("Integer", kernel.scope)
       integer_type.instance_scope["type"] = integer_type
@@ -118,6 +136,8 @@ module Myst
       NativeLib.def_instance_method(integer_type, :negate,:int_negate)
       NativeLib.def_instance_method(integer_type, :<,     :int_lt)
       NativeLib.def_instance_method(integer_type, :<=,    :int_lte)
+      NativeLib.def_instance_method(integer_type, :>,     :int_gt)
+      NativeLib.def_instance_method(integer_type, :>=,    :int_gte)
 
       integer_type
     end
