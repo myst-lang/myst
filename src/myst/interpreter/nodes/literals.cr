@@ -1,9 +1,21 @@
 module Myst
   class Interpreter
     def visit(node : ListLiteral)
-      elements = node.elements.map do |elem|
+      elements = [] of Value
+
+      node.elements.each do |elem|
         elem.accept(self)
-        stack.pop
+        # A Splat in a List literal should have its result concatenated in
+        # place into the new List object. In other words, a Splat should be
+        # transparent to listing out the values directly in the literal.
+        if elem.is_a?(Splat)
+          # The result of a Splat _must_ be a list, so this assertion should
+          # never fail.
+          splat_result = stack.pop.as(TList)
+          elements.concat(splat_result.elements)
+        else
+          elements << stack.pop
+        end
       end
 
       stack.push(TList.new(elements))

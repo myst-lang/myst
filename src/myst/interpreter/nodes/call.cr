@@ -24,20 +24,29 @@ module Myst
           current_self
         end
 
-      func    = current_scope[node.name] if current_scope.has_key?(node.name)
-      func  ||= __scopeof(receiver)[node.name]?
-      func  ||= __typeof(receiver).ancestors.each do |anc|
-        if found = __scopeof(anc)[node.name]?
-          break found
-        end
-      end
+      func = recursive_lookup(receiver, node.name)
 
       {receiver, func}
     end
 
 
     private def visit_call(node, receiver, func : TFunctor)
-      args = node.args.map{ |a| a.accept(self); stack.pop }
+      args = [] of Value
+
+      node.args.each do |elem|
+        elem.accept(self)
+        # A Splat in a List literal should have its result concatenated in
+        # place into the arguments. In other words, a Splat should act like the
+        # elements of the result were given directly as positional arguments.
+        if elem.is_a?(Splat)
+          # The result of a Splat _must_ be a list, so this assertion should
+          # never fail.
+          splat_result = stack.pop.as(TList)
+          args.concat(splat_result.elements)
+        else
+          args << stack.pop
+        end
+      end
 
       if node.block?
         node.block.accept(self)

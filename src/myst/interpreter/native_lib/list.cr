@@ -14,6 +14,10 @@ module Myst
       TInteger.new(this.elements.size.to_i64)
     end
 
+    NativeLib.method :list_splat, TList do
+      this
+    end
+
     NativeLib.method :list_eq, TList, other : Value do
       return TBoolean.new(false)  unless other.is_a?(TList)
       return TBoolean.new(true)   if this == other
@@ -46,6 +50,7 @@ module Myst
       NativeLib.def_instance_method(list_type, :size, :list_size)
       NativeLib.def_instance_method(list_type, :==,   :list_eq)
       NativeLib.def_instance_method(list_type, :+,    :list_add)
+      NativeLib.def_instance_method(list_type, :*,    :list_splat)
       NativeLib.def_instance_method(list_type, :[],   :list_access)
       NativeLib.def_instance_method(list_type, :[]=,  :list_access_assign)
 
