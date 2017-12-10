@@ -1,5 +1,11 @@
 require "stdlib/spec.mt"
 
+describe("List#* (splat)") do
+  it("should return itself") do
+    assert(*[1, 2, 3] == [1, 2, 3])
+  end
+end
+
 describe("List#size") do
   it("should return 0 when size is 0") do
     assert([].size == 0)
