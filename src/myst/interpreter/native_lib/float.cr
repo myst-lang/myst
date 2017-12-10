@@ -73,6 +73,24 @@ module Myst
       TFloat.new(-this.value)
     end
 
+    NativeLib.method :float_lt, TFloat, other : Value do
+      case other
+      when TInteger, TFloat
+        TBoolean.new(this.value < other.value)
+      else
+        raise "invalid argument for Float#<: #{__typeof(other).name}"
+      end
+    end
+
+    NativeLib.method :float_lte, TFloat, other : Value do
+      case other
+      when TInteger, TFloat
+        TBoolean.new(this.value <= other.value)
+      else
+        raise "invalid argument for Float#<=: #{__typeof(other).name}"
+      end
+    end
+
     def init_float(kernel : TModule)
       float_type = TType.new("Float", kernel.scope)
       float_type.instance_scope["type"] = float_type
@@ -86,6 +104,8 @@ module Myst
       NativeLib.def_instance_method(float_type, :!=,    :float_not_eq)
       NativeLib.def_instance_method(float_type, :to_s,  :float_to_s)
       NativeLib.def_instance_method(float_type, :negate,:float_negate)
+      NativeLib.def_instance_method(float_type, :<,     :float_lt)
+      NativeLib.def_instance_method(float_type, :<=,    :float_lte)
 
       float_type
     end

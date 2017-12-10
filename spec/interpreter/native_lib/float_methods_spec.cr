@@ -189,4 +189,54 @@ describe "NativeLib - Float Methods" do
     it_interprets %q(1.0  != {}),       [val(true)]
     it_interprets %q(1.0  != {a: 1}),   [val(true)]
   end
+
+  describe "#<" do
+    it_interprets %q(1.0 < 1.0),      [val(false)]
+    it_interprets %q(0.0 < 1.0),      [val(true)]
+    it_interprets %q(1.0 < 0.0),      [val(false)]
+    it_interprets %q(0.0 < 0.0),      [val(false)]
+
+    # int
+    it_interprets %q(0.0 < 0),        [val(false)]
+    it_interprets %q(1.0 < 1),        [val(false)]
+    it_interprets %q(0.1 < 0),        [val(false)]
+    it_interprets %q(1.1 < 2),        [val(true)]
+    it_interprets %q(1.000001 < 2),   [val(true)]
+
+    # it should not compare to non numeric types
+    it_does_not_interpret %q(1.0 < nil),      /invalid argument/
+    it_does_not_interpret %q(1.0 < true),     /invalid argument/
+    it_does_not_interpret %q(1.0 < false),    /invalid argument/
+    it_does_not_interpret %q(1.0 < "hello"),  /invalid argument/
+    it_does_not_interpret %q(1.0 < :hi),      /invalid argument/
+    it_does_not_interpret %q(1.0 < []),       /invalid argument/
+    it_does_not_interpret %q(1.0 < [1.0, 2]), /invalid argument/
+    it_does_not_interpret %q(1.0 < {}),       /invalid argument/
+    it_does_not_interpret %q(1.0 < {a: 1}),   /invalid argument/
+  end
+
+  describe "#<=" do
+    it_interprets %q(1.0 <= 1.0),      [val(true)]
+    it_interprets %q(0.0 <= 1.0),      [val(true)]
+    it_interprets %q(1.0 <= 0.0),      [val(false)]
+    it_interprets %q(0.0 <= 0.0),      [val(true)]
+
+    # int
+    it_interprets %q(0.0 <= 0),        [val(true)]
+    it_interprets %q(1.0 <= 1),        [val(true)]
+    it_interprets %q(0.1 <= 0),        [val(false)]
+    it_interprets %q(1.1 <= 2),        [val(true)]
+    it_interprets %q(1.000001 <= 2),   [val(true)]
+
+    # it should not compare to non numeric types
+    it_does_not_interpret %q(1.0 <= nil),      /invalid argument/
+    it_does_not_interpret %q(1.0 <= true),     /invalid argument/
+    it_does_not_interpret %q(1.0 <= false),    /invalid argument/
+    it_does_not_interpret %q(1.0 <= "hello"),  /invalid argument/
+    it_does_not_interpret %q(1.0 <= :hi),      /invalid argument/
+    it_does_not_interpret %q(1.0 <= []),       /invalid argument/
+    it_does_not_interpret %q(1.0 <= [1.0, 2]), /invalid argument/
+    it_does_not_interpret %q(1.0 <= {}),       /invalid argument/
+    it_does_not_interpret %q(1.0 <= {a: 1}),   /invalid argument/
+  end
 end
