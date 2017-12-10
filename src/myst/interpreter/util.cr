@@ -55,6 +55,23 @@ module Myst
       end
     end
 
+    # Attempt to lookup the given name recursively through the ancestry of the
+    # given receiver. This is mainly used for method lookup, where the simple
+    # `lookup` method does not search deep enough for a value.
+    #
+    # The method will return `nil` if no matching entry is found.
+    def recursive_lookup(receiver, name)
+      func    = current_scope[name] if current_scope.has_key?(name)
+      func  ||= __scopeof(receiver)[name]?
+      func  ||= __typeof(receiver).ancestors.each do |anc|
+        if found = __scopeof(anc)[name]?
+          break found
+        end
+      end
+
+      func
+    end
+
     def raise_not_found(name, value)
       type_name = __typeof(value).name
       error_message = "No variable or method `#{name}` for #{type_name}"
