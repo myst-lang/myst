@@ -54,3 +54,13 @@ describe("Enumerable#max") do
     assert([].max == nil)
   end
 end
+
+describe("Enumerable#any?") do
+  it("returns true if at least one element evaluates to true for the given block") do
+    assert([1, 2, 3].any? { |number| number > 2 })
+  end
+
+  it("returns false if no elements evaluate to true for the given block") do
+    refute([1, 2, 3].any? { |number| number > 5 })
+  end
+end
