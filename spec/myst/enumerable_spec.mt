@@ -40,3 +40,17 @@ describe("Enumerable#min") do
     assert([].min == nil)
   end
 end
+
+describe("Enumerable#max") do
+  it("returns the maximum element from a list") do
+    assert([1, 3, 2].max == 3)
+  end
+
+  it("returns single element") do
+    assert([1].max == 1)
+  end
+
+  it("returns nil if the list is empty") do
+    assert([].max == nil)
+  end
+end

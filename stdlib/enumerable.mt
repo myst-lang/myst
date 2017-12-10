@@ -87,4 +87,19 @@ defmodule Enumerable
 
     value
   end
+
+  # max -> element
+  #
+  # Returns the element with the highest value as determined by >
+  def max
+    value = nil
+    
+    each do |e|
+      when value == nil || e > value
+        value = e
+      end
+    end
+
+    value
+  end
 end
