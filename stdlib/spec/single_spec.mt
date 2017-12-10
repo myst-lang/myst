@@ -22,6 +22,12 @@ defmodule Spec
       end
     end
 
+    def refute(assertion)
+      when assertion
+        raise %AssertionFailure{@name, false, assertion}
+      end
+    end
+
     # Expect the given block to raise an error matching the given value. If no
     # error, or an error with a different value, is raised, the assertion fails.
     def expect_raises(expected_error, &block)

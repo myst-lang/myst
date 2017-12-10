@@ -49,13 +49,31 @@ defmodule Enumerable
   # Return true if all elements in the enumerable cause `block` to return a
   # truthy value.
   def all?(&block)
+    result = nil
     each do |e|
       when block(e)
-        true
+        result = true
       else
-        break false
+        break result = false
       end
     end
+    result
+  end
+
+  # any?(&block) -> boolean
+  #
+  # Return true if at least one element in the enumerable evaluates to a
+  # truthy value for the given block.
+  def any?(&block)
+    result = nil
+    each do |e|
+      when block(e)
+        break result = true
+      else
+        result = false
+      end
+    end
+    result
   end
 
   # find(&block) -> element
