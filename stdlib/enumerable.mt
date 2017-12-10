@@ -72,4 +72,34 @@ defmodule Enumerable
     end
     result
   end
+
+  # min -> element
+  #
+  # Returns the element with the lowest value as determined by <
+  def min
+    value = nil
+    
+    each do |e|
+      when value == nil || e < value
+        value = e
+      end
+    end
+
+    value
+  end
+
+  # max -> element
+  #
+  # Returns the element with the highest value as determined by >
+  def max
+    value = nil
+    
+    each do |e|
+      when value == nil || e > value
+        value = e
+      end
+    end
+
+    value
+  end
 end
