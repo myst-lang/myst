@@ -227,6 +227,11 @@ module Myst
     def initialize(@elements=[] of Value)
     end
 
+    def ensure_capacity(size : Int)
+      count_to_add = size - self.elements.size
+      count_to_add.times { self.elements.push(TNil.new) }
+    end
+
     def type_name
       "List"
     end
