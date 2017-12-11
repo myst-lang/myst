@@ -35,10 +35,15 @@ module Myst
     end
 
     NativeLib.method :list_access, TList, index : TInteger do
-      this.elements[index.value]
+      if element = this.elements[index.value]?
+        element
+      else
+        TNil.new
+      end
     end
 
     NativeLib.method :list_access_assign, TList, index : TInteger, value : Value do
+      this.ensure_capacity(index.value + 1)
       this.elements[index.value] = value
     end
 
