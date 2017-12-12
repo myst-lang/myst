@@ -95,3 +95,13 @@ describe("Enumerable#to_list") do
     assert(%Fake{}.to_list == [0, 1, 2])
   end
 end
+
+describe("Enumerable#select") do
+  it("returns elements that evaluate to truthy") do
+    assert([1, 2, 3].select { |number| number == 2 } == [2])
+  end
+
+  it("returns empty list if no elements evaluate to truthy") do
+    assert([1, 2, 3].select { |number| number == 5 } == [])
+  end
+end
