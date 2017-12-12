@@ -120,4 +120,31 @@ defmodule Enumerable
 
     value
   end
+
+  # sort -> list
+  #
+  # Returns a sorted list of all elements
+  def sort
+    list = map { |e| e }
+    when size < 2
+      return list
+    end
+
+    # insertion sort
+    i = 1
+    while i < size
+      value = list[i]
+      j = i - 1
+
+      while j >= 0 && list[j] > value
+        list[j + 1] = list[j]
+        j -= 1
+      end
+
+      list[j + 1] = value
+      i += 1
+    end
+
+    list
+  end
 end
