@@ -64,3 +64,13 @@ describe("Enumerable#any?") do
     refute([1, 2, 3].any? { |number| number > 5 })
   end
 end
+
+describe("Enumerable#sort") do
+  it("sorts") do
+    assert([1, 3, 4, 2, 7, 5, 6].sort == [1, 2, 3, 4, 5, 6, 7])
+  end
+
+  it("single element") do
+    assert([1].sort == [1])
+  end
+end
