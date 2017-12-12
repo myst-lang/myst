@@ -125,7 +125,7 @@ defmodule Enumerable
   #
   # Returns a sorted list of all elements
   def sort
-    list = map { |e| e }
+    list = to_list
     when size < 2
       return list
     end
@@ -143,6 +143,19 @@ defmodule Enumerable
 
       list[j + 1] = value
       i += 1
+    end
+
+    list
+  end
+
+  # to_list -> list
+  #
+  # Returns a list containing all elements
+  def to_list
+    list = []
+
+    each do |e|
+      list += [e]
     end
 
     list

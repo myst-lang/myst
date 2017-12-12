@@ -74,3 +74,24 @@ describe("Enumerable#sort") do
     assert([1].sort == [1])
   end
 end
+
+deftype Fake
+  include Enumerable
+
+  def each(&block)
+    i = 0
+    
+    while i < 3
+      block(i)
+      i += 1
+    end 
+
+    nil
+  end
+end
+
+describe("Enumerable#to_list") do
+  it("converts to a list") do
+    assert(%Fake{}.to_list == [0, 1, 2])
+  end
+end
