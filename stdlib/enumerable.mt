@@ -91,6 +91,22 @@ defmodule Enumerable
     result
   end
 
+  # select(&block) -> list
+  #
+  # Iterate the enumerable, passing each element to `block`. Return all
+  # elements for which the block returns a truthy value.
+  def select(&block)
+    result = []
+
+    each do |e|
+      when block(e)
+        result += [e]
+      end
+    end
+
+    result
+  end
+
   # min -> element
   #
   # Returns the element with the lowest value as determined by <
