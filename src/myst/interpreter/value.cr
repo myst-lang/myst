@@ -73,6 +73,7 @@ module Myst
   class TType < ContainerType
     property scope          : Scope
     property instance_scope : Scope
+    property extended_modules = [] of TModule
 
     def initialize(@name : String, parent : Scope?=nil)
       @scope = Scope.new(parent)
@@ -89,6 +90,17 @@ module Myst
 
     def type_name
       "Type"
+    end
+
+    def extend_module(mod : TModule)
+      @extended_modules.unshift(mod)
+    end
+
+    def extended_ancestors
+      @extended_modules.reduce(Set(TModule).new) do |acc, mod|
+        acc.add(mod)
+        acc.concat(mod.ancestors)
+      end.to_a
     end
 
     def_equals_and_hash name, scope, instance_scope

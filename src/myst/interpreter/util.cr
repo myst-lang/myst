@@ -63,11 +63,20 @@ module Myst
     def recursive_lookup(receiver, name)
       func    = current_scope[name] if current_scope.has_key?(name)
       func  ||= __scopeof(receiver)[name]?
-      func  ||= __typeof(receiver).ancestors.each do |anc|
-        if found = __scopeof(anc)[name]?
-          break found
+      if receiver.is_a?(TType)
+        func ||= receiver.extended_ancestors.each do |anc|
+          if found = __scopeof(anc)[name]?
+            break found
+          end
+        end
+      else
+        func  ||= __typeof(receiver).ancestors.each do |anc|
+          if found = __scopeof(anc)[name]?
+            break found
+          end
         end
       end
+
 
       func
     end

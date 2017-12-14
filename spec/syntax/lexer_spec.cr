@@ -46,6 +46,7 @@ STATIC_TOKENS = {
   Token::Type::WHITESPACE   =>  " ",
   Token::Type::REQUIRE      =>  "require",
   Token::Type::INCLUDE      =>  "include",
+  Token::Type::EXTEND       =>  "extend",
   Token::Type::DEFMODULE    =>  "defmodule",
   Token::Type::DEFTYPE      =>  "deftype",
   Token::Type::DEFSTATIC    =>  "defstatic",

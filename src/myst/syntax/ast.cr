@@ -821,6 +821,23 @@ module Myst
     def_equals_and_hash path
   end
 
+  # An extend expression. Extends allow Type instances to inherit
+  # static methods and properties from Modules. When an Extend is
+  # encountered, the module referenced by the path must already exist.
+  #
+  #   'extend' path
+  class Extend < Node
+    property path : Node
+
+    def initialize(@path : Node); end
+
+    def accept_children(visitor)
+      path.accept(visitor)
+    end
+
+    def_equals_and_hash path
+  end
+
   # Any flow control expression. These represent expressions that usurp the
   # normal flow of execution. A flow control expression may optionally carry
   # a value to be returned at the destination.
