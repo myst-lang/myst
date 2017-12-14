@@ -105,3 +105,17 @@ describe("Enumerable#select") do
     assert([1, 2, 3].select { |number| number == 5 } == [])
   end
 end
+
+describe("Enumerable#reduce") do
+  it("reduces elements to a single value") do
+    assert([1, 2, 3].reduce { |acc, n| acc + n } == 6)
+  end
+
+  it("accepts an initial value, then reduces the collection") do
+    assert([1, 2, 3].reduce(3) { |acc, n| acc + n } == 9)
+  end
+
+  it("returns nil if no elements exist") do
+    assert([].reduce { |acc, n| acc + n } == nil)
+  end
+end
