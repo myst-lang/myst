@@ -176,4 +176,34 @@ defmodule Enumerable
 
     list
   end
+
+  # reduce -> element
+  #
+  # For every element in the enumerable, call block 
+  # with the result of the previous call and the current 
+  # element as arguments. Return a single value 
+  def reduce(&block)
+    value = nil
+    
+    each do |e|
+      when value == nil
+        value = e
+      else
+        value = block(value, e)
+      end
+    end
+
+    value
+  end
+
+  # reduce -> element
+  #
+  # Same as above but an initial value is used
+  def reduce(value, &block)    
+    each do |e|
+      value = block(value, e)
+    end
+
+    value
+  end
 end
