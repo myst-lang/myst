@@ -121,6 +121,8 @@ module Myst
         parse_anonymous_function
       when Token::Type::INCLUDE
         parse_include
+      when Token::Type::EXTEND
+        parse_extend
       when Token::Type::REQUIRE
         parse_require
       when Token::Type::RETURN, Token::Type::BREAK, Token::Type::NEXT, Token::Type::RAISE
@@ -391,6 +393,16 @@ module Myst
       end
       path = parse_expression
       return Include.new(path).at(start.location).at_end(path)
+    end
+
+    def parse_extend
+      start = expect(Token::Type::EXTEND)
+      skip_space
+      if current_token.type == Token::Type::NEWLINE
+        raise ParseError.new(current_location, "expected value for extend")
+      end
+      path = parse_expression
+      return Extend.new(path).at(start.location).at_end(path)
     end
 
     def parse_require

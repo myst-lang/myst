@@ -1205,7 +1205,34 @@ describe "Parser" do
     include Thing1, Thing2
   )
 
+  # Extend
 
+  # Extends accept any node as an argument, and are valid in any context.
+  it_parses %q(extend Thing),       Extend.new(c("Thing"))
+  it_parses %q(extend Thing.Other), Extend.new(Call.new(c("Thing"), "Other"))
+  it_parses %q(extend dynamic),     Extend.new(Call.new(nil, "dynamic"))
+  it_parses %q(extend 1 + 2),       Extend.new(Call.new(l(1), "+", [l(2)], infix: true))
+  it_parses %q(extend self),        Extend.new(Self.new)
+  it_parses %q(extend <something>), Extend.new(i(Call.new(nil, "something")))
+  it_parses %q(
+    deftype Thing
+      extend Other
+    end
+  ),                                TypeDef.new("Thing", e(Extend.new(c("Other"))))
+  # The argument for an extend must be on the same line as the keyword.
+  it_does_not_parse %q(
+    extend
+    Thing
+  ),                                /expected value for extend/
+  # The argument is still allowed to span multiple lines
+  it_parses %q(
+    extend 1 +
+           2
+  ),                                Extend.new(Call.new(l(1), "+", [l(2)], infix: true))
+  # Only one value is expected. Providing multiple values is invalid.
+  it_does_not_parse %q(
+    extend Thing1, Thing2
+  )
 
   # Require
 
