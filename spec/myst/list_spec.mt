@@ -39,3 +39,17 @@ describe("List#==") do
     assert(([1] == [1, 2]) == false)
   end
 end
+
+describe("List#-") do
+  it("returns elements not present in second list") do
+    assert([1, 2] - [1] == [2])
+  end
+
+  it("returns the first list if there are no present elements in the second list") do
+    assert([1, 2] - [3] == [1, 2])
+  end
+
+  it("returns any empty list if the lists are equal") do
+    assert([1, 2] - [1, 2] == [])
+  end
+end

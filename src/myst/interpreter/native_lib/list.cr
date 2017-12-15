@@ -47,6 +47,10 @@ module Myst
       this.elements[index.value] = value
     end
 
+    NativeLib.method :list_minus, TList, other : TList do
+      TList.new(this.elements - other.elements)
+    end
+
     def init_list(kernel : TModule)
       list_type = TType.new("List", kernel.scope)
       list_type.instance_scope["type"] = list_type
@@ -58,6 +62,7 @@ module Myst
       NativeLib.def_instance_method(list_type, :*,    :list_splat)
       NativeLib.def_instance_method(list_type, :[],   :list_access)
       NativeLib.def_instance_method(list_type, :[]=,  :list_access_assign)
+      NativeLib.def_instance_method(list_type, :-,    :list_minus)
 
       list_type
     end
