@@ -164,4 +164,12 @@ describe "Lexer" do
     assert_token_type %q(__FILE__),             Token::Type::MAGIC_CONST
     assert_token_type %q(__LINE__),             Token::Type::MAGIC_CONST
   end
+
+  it "lexes < in a string" do
+    assert_token_type %q("<"),      Token::Type::STRING
+  end
+
+  it "lexes <()>" do
+    assert_token_type %q("<()>"), Token::Type::INTERP_START
+  end
 end

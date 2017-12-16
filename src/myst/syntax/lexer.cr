@@ -375,6 +375,7 @@ module Myst
           if peek_char == '('
             break
           end
+          read_char
         when '"'
           skip_char
           if pop_brace(:double_quote)
