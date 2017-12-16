@@ -42,14 +42,54 @@ end
 
 describe("List#-") do
   it("returns elements not present in second list") do
-    assert([1, 2] - [1] == [2])
+    assert(([1, 2] - [1]) == [2])
   end
 
   it("returns the first list if there are no present elements in the second list") do
-    assert([1, 2] - [3] == [1, 2])
+    assert(([1, 2] - [3]) == [1, 2])
   end
 
   it("returns any empty list if the lists are equal") do
-    assert([1, 2] - [1, 2] == [])
+    assert(([1, 2] - [1, 2]) == [])
+  end
+end
+
+describe("List#lt") do
+  it("returns true if a list is a proper subset of the other") do
+    assert(([1, "hi"] < [1, "hi", 3]) == true)
+  end
+
+  it("returns true if a list is a proper subset of the other, unsorted") do
+    assert(([3, 1] < [1, 2, 3]) == true)
+  end
+
+  it("returns false if the lists are the same") do
+    assert(([1, 2] < [1, 2]) == false)
+  end
+
+  it("returns false if the list is not a proper subset of the other") do
+    assert(([1, 2] < [1]) == false)
+  end
+end
+
+describe("List#lte") do
+  it("returns true if a list is a subset of the other") do
+    assert(([1, "hi"] <= [1, "hi", 3]) == true)
+  end
+
+  it("returns true if a list is a subset of the other, unsorted") do
+    assert(([3, 1] < [1, 2, 3]) == true)
+  end
+
+  it("returns true if the lists contain the same elemtns") do
+    assert(([1, 2] <= [1, 2]) == true)
+  end
+
+  it("returns true if the lists contain the same elements, unsorted") do
+    assert(([3, 1, 2] <= [1, 2, 3]) == true)
+  end
+
+  it("returns false if the list is not a subset of the other") do
+    assert(([1, 2] <= [1]) == false)
   end
 end
