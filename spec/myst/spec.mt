@@ -7,6 +7,7 @@ include Spec
 require "./enumerable_spec.mt"
 require "./integer_spec.mt"
 require "./list_spec.mt"
+require "./map_spec.mt"
 require "./string_spec.mt"
 require "./unary_ops/not_spec.mt"
 require "./type_spec.mt"
