@@ -56,6 +56,59 @@ describe "NativeLib - IO Methods" do
     end
   end
 
+  describe "#print" do
+    it "with no argument, prints a null byte to the output" do
+      itr = interpret_with_mocked_output %q(
+        IO.print
+      )
+
+      itr.output.to_s.should eq("")
+    end
+
+    it "with one argument, prints the argument" do
+      itr = interpret_with_mocked_output %q(
+        IO.print(1)
+      )
+
+      itr.output.to_s.should eq("1")
+    end
+
+    it "with multiple arguments, prints each argument" do
+      itr = interpret_with_mocked_output %q(
+        IO.print(1, 2, 3)
+      )
+
+      itr.output.to_s.should eq("123")
+    end
+
+    it "calls `to_s` on each argument to determine output contents" do
+      itr = interpret_with_mocked_output %q(
+        deftype Foo
+          def to_s
+            "called to_s"
+          end
+        end
+        IO.print(%Foo{})
+      )
+
+      itr.output.to_s.should eq("called to_s")
+    end
+
+    it "raises an error if `to_s` for an object does not return a String" do
+      itr = interpret_with_mocked_output %q(
+        deftype Foo
+          def to_s
+            nil
+          end
+        end
+        IO.print(%Foo{})
+      )
+
+      itr.errput.to_s.should match(/expected String argument/)
+      itr.output.to_s.should eq("")
+    end
+  end
+
   describe "#gets" do
     it "no input" do
       itr = interpret_with_mocked_input %q(
