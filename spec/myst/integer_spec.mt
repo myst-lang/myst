@@ -66,3 +66,15 @@ describe("Integer#+") do
     expect_raises{ 1 + :hi }
   end
 end
+
+describe("Integer#times") do
+  it("calls a block as many times as integer value") do
+    calls = 0
+    3.times { calls += 1 }
+    assert(calls == 3)
+  end
+
+  it("returns the integer") do
+    assert(2.times { } == 2)
+  end
+end
