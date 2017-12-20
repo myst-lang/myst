@@ -15,6 +15,7 @@ module Myst
       kernel.scope["Map"]       = init_map(kernel)
       kernel.scope["IO"]        = init_io(kernel)
       kernel.scope["FSUtils"]   = init_file_utils(kernel)
+      kernel.scope["Time"]      = init_time(kernel)
       kernel
     end
   end
