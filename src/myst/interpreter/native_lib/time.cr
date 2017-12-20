@@ -15,6 +15,17 @@ module Myst
       instance
     end
 
+    NativeLib.method :time_subtract, Value, other : Value do
+      case __typeof(other).name
+      when "Time"
+        this_time = to_crystal_time(this.as(TInstance))
+        other_time = to_crystal_time(other.as(TInstance))
+        TFloat.new((this_time - other_time).total_seconds)
+      else
+        raise NativeLib.error("invalid argument for Time#-: #{__typeof(other).name}", callstack)
+      end
+    end
+
     NativeLib.method :time_to_s, TInstance, format : TString? do
       crystal_time = to_crystal_time(this)
 
@@ -29,8 +40,9 @@ module Myst
       time_type = TType.new("Time", kernel.scope)
       time_type.instance_scope["type"] = time_type
 
-      NativeLib.def_method(time_type, :now,  :static_time_now)
+      NativeLib.def_method(time_type, :now, :static_time_now)
       NativeLib.def_instance_method(time_type, :to_s,  :time_to_s)
+      NativeLib.def_instance_method(time_type, :-,     :time_subtract)
 
       time_type
     end
