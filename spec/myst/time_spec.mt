@@ -58,3 +58,24 @@ describe("Time#to_s") do
     assert(t.to_s("%H") == "03")
   end
 end
+
+describe("Time#-") do
+  it("gives the difference between two times in seconds") do
+    t1 = %Time{2017, 1, 2, 3, 4, 5}
+    t2 = %Time{2017, 1, 2, 3, 4, 6}
+
+    assert(t2 - t1 == 1.0)
+  end
+
+  it("gives the difference between two times in seconds, negative") do
+    t1 = %Time{2017, 1, 2, 3, 4, 5}
+    t2 = %Time{2017, 1, 2, 3, 4, 6}
+
+    assert(t1 - t2 == -1.0)
+  end
+
+  it("raises if a non Time type is passed") do
+    t1 = %Time{2017, 1, 2, 3, 4, 5}
+    expect_raises { t1 - nil }
+  end
+end
