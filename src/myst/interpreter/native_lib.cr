@@ -22,6 +22,17 @@ module Myst
       RuntimeError.new(TString.new(message), trace)
     end
 
+    # Instantiate a given type and invoke its initializer
+    def instantiate(itr, type : TType, params : Array(Value)) : TInstance
+      instance = TInstance.new(type)
+      
+      if (initializer = instance.scope["initialize"]?) && initializer.is_a?(TFunctor)
+        Invocation.new(itr, initializer, instance, params, nil).invoke
+      end
+
+      instance
+    end
+
     macro method(name, this_type, *params, &block)
       def {{name.id}}(this : Value, __args : Array(Value), block : TFunctor?) : Value
         this = this.as({{this_type}})
