@@ -3,13 +3,16 @@
 **A structured, dynamic, general-purpose language.**
 
 ```ruby
-def fib(0); 0; end
-def fib(1); 1; end
-def fib(n : Integer)
-  fib(n-1) + fib(n-2)
+deftype List
+  def contains(element)
+    each(&fn
+      ->(<element>) { break true }
+      ->(_)         { false }
+    end)
+  end
 end
 
-[5, 6, 7, 8].map{ |n| fib(n) } #=> [5, 8, 13, 21]
+[1, 2, 3].contains(2) #=> true
 ```
 
 Some of the high-level features include:
