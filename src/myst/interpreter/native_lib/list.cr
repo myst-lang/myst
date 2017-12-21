@@ -24,7 +24,7 @@ module Myst
       return TBoolean.new(false)  if this.elements.size != other.elements.size
 
       this.elements.zip(other.elements).each do |a, b|
-        return TBoolean.new(false) unless NativeLib.call_func_by_name(self, a, "==", [b])
+        return TBoolean.new(false) unless NativeLib.call_func_by_name(self, a, "==", [b]).truthy?
       end
 
       TBoolean.new(true)
