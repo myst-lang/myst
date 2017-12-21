@@ -38,6 +38,10 @@ describe("List#==") do
   it("returns false when the lists are different lengths") do
     assert(([1] == [1, 2]) == false)
   end
+
+  it("returns false when the lists are not equal") do
+    assert(([1, 2] == [1, "hi"]) == false)
+  end
 end
 
 describe("List#-") do
