@@ -109,7 +109,9 @@ Help with improving these installation instructions, making pre-built binaries, 
 
 # Get Involved
 
-So far, Myst has been a personal project, but I have no intention of keeping it that way! If you have an idea or find a bug, [file an issue for it!](https://github.com/myst-lang/myst/issues/new) If you just want to get involved in the community, [join our Discord server!](https://discord.gg/8FtMeac) Any and all help is appreciated, even if that just means trying out the language for a day.
+If you have an idea for a new feature or find a bug in Myst, _please_ [file an issue for it!](https://github.com/myst-lang/myst/issues/new). Using the language and finding bugs are the best ways to help Myst improve. Any and all help here is appreciated, even if that just means trying out the language for a day.
+
+If you just want to get involved in the community, come hang out [in our Discord server!](https://discord.gg/8FtMeac). We're a pretty small community, so there's plenty of room for anyone that would like to hang out, even if it has nothing to do with Myst!
 
 When I can, I try to label issues with [`help wanted`](https://github.com/myst-lang/myst/labels/help%20wanted) or [`good first issue`](https://github.com/myst-lang/myst/labels/good%20first%20issue). [`help wanted`](https://github.com/myst-lang/myst/labels/help%20wanted) is for issues that I'd _really_ like external input on, while [`good first issue`](https://github.com/myst-lang/myst/labels/good%20first%20issue) is for issues that can be implemented without too much knowledge of how the lexer/parser/interpreter works. On these issues, I try to explain as much as possible about what the solution looks like, including files that will need editing and/or methods that need implementing/changing. I hope that helps!
 
