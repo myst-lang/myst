@@ -13,4 +13,5 @@ describe "Interpreter - MagicConstant" do
   ), [val(3)]
   
   it_interprets %q(__FILE__), [val(File.join(Dir.current,"test_source.mt"))]
+  it_interprets %q(__DIR__),  [val(File.join(Dir.current))]
 end

@@ -161,8 +161,9 @@ describe "Lexer" do
   end
 
   it "lexes magic constants"do
-    assert_token_type %q(__FILE__),             Token::Type::MAGIC_CONST
-    assert_token_type %q(__LINE__),             Token::Type::MAGIC_CONST
+    assert_token_type %q(__FILE__),             Token::Type::MAGIC_FILE
+    assert_token_type %q(__LINE__),             Token::Type::MAGIC_LINE
+    assert_token_type %q(__DIR__),              Token::Type::MAGIC_DIR
   end
 
   it "lexes < in a string" do

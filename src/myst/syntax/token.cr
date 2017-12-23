@@ -43,7 +43,9 @@ module Myst
       IDENT         # [a-z][_a-zA-Z0-9]*
       CONST         # [A-Z][a-zA-Z0-9]*
       IVAR          # @[a-z][_a-zA-Z0-9]*
-      MAGIC_CONST   # __[A-Z][_A-Z]*__
+      MAGIC_FILE    # __FILE__
+      MAGIC_LINE    # __LINE__
+      MAGIC_DIR     # __DIR__
 
       PLUS          # +
       MINUS         # -

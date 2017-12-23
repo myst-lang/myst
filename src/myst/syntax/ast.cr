@@ -224,17 +224,10 @@ module Myst
   #   __FILE__
   # |
   #   __LINE__
+  # |
+  #   __DIR__
   class MagicConst < Node
     property type : Symbol
-
-    def self.from(name)
-      case name
-      when "__FILE__"
-        new(:file)
-      else "__LINE__"
-        new(:line)
-      end
-    end
 
     def initialize(@type : Symbol)
     end
@@ -245,6 +238,10 @@ module Myst
 
     def file
       location.try(&.file) || ""
+    end
+
+    def dir
+      location.try(&.dirname) || ""
     end
 
     def_equals_and_hash type
