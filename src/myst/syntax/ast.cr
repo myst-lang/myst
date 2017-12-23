@@ -778,7 +778,7 @@ module Myst
   class Instantiation < Node
     property  type    : Node
     property  args    : Array(Node)
-    property! block   : Block?
+    property! block   : (Block | FunctionCapture)?
 
     def initialize(@type, @args=[] of Node, @block=nil)
     end

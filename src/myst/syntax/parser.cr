@@ -724,8 +724,8 @@ module Myst
     def parse_var_or_call(receiver=nil)
       start = expect(Token::Type::IDENT, Token::Type::CONST)
       name  = start.value
-      
-      skip_space      
+
+      skip_space
       if receiver.nil? && current_token.type != Token::Type::LPAREN
         if name.starts_with?('_')
           return Underscore.new(name).at(start.location)
@@ -932,8 +932,14 @@ module Myst
       else
         loop do
           skip_space_and_newlines
-          inst.args << parse_expression
+          case current_token.type
+          when Token::Type::AMPERSAND
+            inst.block = parse_function_capture
+          else
+            inst.args << parse_expression
+          end
           skip_space_and_newlines
+
 
           # If there is no comma, this is the last argument, and a closing
           # parenthesis should be expected.
@@ -946,7 +952,15 @@ module Myst
       end
 
       skip_space
-      if inst.block = parse_optional_block
+      if inline_block = parse_optional_block
+        # If a block argument was already specified by a function capture,
+        # inline blocks are not allowed. Checking this after parsing the
+        # optional block allows for a more helpful error message.
+        if inst.block?
+          raise ParseError.new(current_location, "A block argument has already been given by a captured function. Defining an extra inline block is not allowed.")
+        end
+
+        inst.block = inline_block
         return inst.at_end(inst.block)
       end
 
