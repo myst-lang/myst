@@ -1,6 +1,7 @@
 deftype File
-  defstatic open(name : String)
-    %File{FSUtils.open(name), name}
+  defstatic open(name : String); open(name, "r"); end
+  defstatic open(name : String, mode)
+    %File{FSUtils.open(name, mode), name}
   end
 
 
@@ -22,5 +23,9 @@ deftype File
 
   def read(length : Integer)
     FSUtils.read(@fd, length)
+  end
+
+  def write(data)
+    FSUtils.write(@fd, data)
   end
 end
