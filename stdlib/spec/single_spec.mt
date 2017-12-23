@@ -9,7 +9,7 @@ defmodule Spec
 
     def run(&block)
       block()
-      IO.puts(".")
+      IO.print(".")
     rescue failure
       IO.puts(failure)
       exit(1)
