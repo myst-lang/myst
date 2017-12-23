@@ -133,7 +133,7 @@ module Myst
         parse_loop
       when Token::Type::AMPERSAND
         parse_function_capture
-      when Token::Type::MAGIC_CONST
+      when Token::Type::MAGIC_FILE, Token::Type::MAGIC_LINE, Token::Type::MAGIC_DIR
         parse_magic_constant
       else
         parse_logical_or
@@ -1039,10 +1039,16 @@ module Myst
     end
 
     def parse_magic_constant
-      start = expect(Token::Type::MAGIC_CONST)
+      token = expect(Token::Type::MAGIC_FILE, Token::Type::MAGIC_LINE, Token::Type::MAGIC_DIR)
       skip_space
-
-      return MagicConst.from(start.value).at(start.location)
+      case token.type
+      when Token::Type::MAGIC_FILE
+        MagicConst.new(:"__FILE__").at(token.location)
+      when Token::Type::MAGIC_LINE
+        MagicConst.new(:"__LINE__").at(token.location)
+      else
+        MagicConst.new(:"__DIR__").at(token.location)
+      end
     end
 
     def parse_list_literal

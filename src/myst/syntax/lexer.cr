@@ -564,8 +564,13 @@ module Myst
         read_char
       end
 
-      if @reader.buffer_value == "__FILE__" || @reader.buffer_value == "__LINE__"
-        @current_token.type = Token::Type::MAGIC_CONST
+      case @reader.buffer_value
+      when "__FILE__" 
+        @current_token.type = Token::Type::MAGIC_FILE
+      when "__LINE__"
+        @current_token.type = Token::Type::MAGIC_LINE
+      when "__DIR__"
+        @current_token.type = Token::Type::MAGIC_DIR
       end
 
       @current_token.value = @reader.buffer_value

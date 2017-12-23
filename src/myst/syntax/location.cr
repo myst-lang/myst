@@ -20,6 +20,10 @@ module Myst
       location_str
     end
 
+    def dirname : String?
+      file.try { |filename| File.dirname(filename) }
+    end
+
     def to_s(io : IO)
       io << to_s
     end
