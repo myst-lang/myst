@@ -529,19 +529,19 @@ describe "Parser" do
   it_does_not_parse %q(a.b! = 1)
   # Assigned Anonymous Functions called should be coerced to a Call
   it_parses %q(
-    foo = fn 
-            ->() { } 
+    foo = fn
+            ->() { }
           end
     foo()
   ), SimpleAssign.new(v("foo"), AnonymousFunction.new([Block.new])), Call.new(nil, "foo")
   it_parses %q(
-    foo = fn 
-            ->() { } 
+    foo = fn
+            ->() { }
           end
     bar = foo
     bar()
   ), SimpleAssign.new(v("foo"), AnonymousFunction.new([Block.new])), SimpleAssign.new(v("bar"), v("foo")), Call.new(nil, "bar")
-  
+
   # Assignments can not be made to literal values.
   it_does_not_parse %q(2 = 4),          /cannot assign to literal value/i
   it_does_not_parse %q(2.56 = 4),       /cannot assign to literal value/i
@@ -1126,6 +1126,13 @@ describe "Parser" do
   it_parses %q(
     %Thing{ } { |a,b| }
   ),                      Instantiation.new(c("Thing"), block: Block.new([p("a"), p("b")]))
+  # The block parameter can also be specified as a capture
+  it_parses %q(%Thing{&block}), Instantiation.new(c("Thing"), block: FunctionCapture.new(Call.new(nil, "block")))
+  it_parses %q(%Thing{
+    &fn
+      ->(){}
+    end
+  }),                    Instantiation.new(c("Thing"), block: FunctionCapture.new(AnonymousFunction.new([Block.new])))
 
   # Also as in a Call, trailing commas and the like are invalid
   it_does_not_parse %q(%Thing{ 1, })
