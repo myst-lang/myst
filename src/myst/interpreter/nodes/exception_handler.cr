@@ -2,6 +2,7 @@ module Myst
   class Interpreter
     def visit(node : ExceptionHandler)
       selfstack_size_at_entry = self_stack.size
+      scopestack_size_at_entry = @scope_stack.size
 
       begin
         visit(node.body)
@@ -9,7 +10,6 @@ module Myst
         # Before rescuing, restore the stack to its state from before
         # executing the body.
         pop_self(to_size: selfstack_size_at_entry)
-
 
         handled = false
         node.rescues.each do |resc|
@@ -22,22 +22,18 @@ module Myst
           else
             self.pop_scope_override
           end
-
-        end
-
-        if node.ensure?
-          visit(node.ensure)
-          stack.pop
         end
 
         raise err unless handled
-      end
+      ensure
+        self.pop_scope_override(to_size: scopestack_size_at_entry)
 
-      if node.ensure?
-        visit(node.ensure)
-        # Ensure should not change the result of the expression, so its value
-        # is immediately popped.
-        stack.pop
+        if node.ensure?
+          # Ensure should not change the result of the expression, so its
+          # value is immediately popped.
+          visit(node.ensure)
+          stack.pop
+        end
       end
     end
 

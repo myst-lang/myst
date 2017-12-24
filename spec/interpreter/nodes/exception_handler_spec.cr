@@ -146,6 +146,36 @@ describe "Interpreter - ExceptionHandler" do
       itr.errput.to_s.should eq("")
       itr.output.to_s.should eq("saved\n")
     end
+
+    it "restores scope overrides after rescuing (see #95)" do
+      itr = interpret_with_mocked_output %q(
+        def inner
+          raise "woops"
+        end
+
+        def do_run
+          inner
+        rescue "woops"
+          :rescued
+        end
+
+
+        list = []
+        [1, 2, 3].each do |num|
+          # `self` reference
+          do_run
+          # local scope reference
+          num
+          # parent scope reference
+          list
+        end
+
+        :finished
+      )
+
+      itr.errput.to_s.should eq("")
+      itr.stack.last.should eq(val(:finished))
+    end
   end
 
 
