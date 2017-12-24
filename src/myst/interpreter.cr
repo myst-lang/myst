@@ -42,6 +42,15 @@ module Myst
       @scope_stack.pop
     end
 
+    def pop_scope_override(to_size : Int)
+      return unless to_size >= 0
+
+      count_to_pop = @scope_stack.size - to_size
+      if count_to_pop > 0
+        @scope_stack.pop(count_to_pop)
+      end
+    end
+
 
     def current_self
       self_stack.last
