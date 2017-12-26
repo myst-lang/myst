@@ -52,7 +52,7 @@ def interpret_with_mocked_output(source)
 end
 
 def interpret_with_mocked_input(source, input)
-  if input 
+  if input
     io = IO::Memory.new(input)
   else
     io = IO::Memory.new
@@ -84,7 +84,7 @@ def it_does_not_interpret(node : String, message=nil, file=__FILE__, line=__LINE
   it %Q(does not interpret #{node}), file, line, end_line do
     itr = Interpreter.new
     program = parse_program(node)
-    exception = expect_raises{ itr.run(program) }
+    exception = expect_raises(Exception){ itr.run(program) }
 
     if message
       (exception.message || "").downcase.should match(message)

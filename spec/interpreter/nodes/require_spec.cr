@@ -65,7 +65,7 @@ Dir.cd(__DIR__) do
     end
 
     it "must be given a String value as a path" do
-      expect_raises do
+      expect_raises(Exception) do
         itr = parse_and_interpret %q(
           require true
         )
