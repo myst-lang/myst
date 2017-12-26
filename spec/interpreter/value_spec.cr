@@ -30,11 +30,11 @@ describe "Values" do
     # interpreter to be generated. As such, Value::from_literal cannot generate
     # them automatically from a node.
     it "does not map ListLiterals" do
-      expect_raises { Myst::Value.from_literal(ListLiteral.new).should be_a(TList) }
+      expect_raises(Exception) { Myst::Value.from_literal(ListLiteral.new).should be_a(TList) }
     end
 
     it "does not map MapLiterals" do
-      expect_raises { Myst::Value.from_literal(MapLiteral.new).should be_a(TMap) }
+      expect_raises(Exception) { Myst::Value.from_literal(MapLiteral.new).should be_a(TMap) }
     end
   end
 

@@ -10,7 +10,7 @@ describe "Interpreter - OpAssign" do
       it "cannot assign to a literal value" do
         # This is already asserted by the parser. It is simply repeated here for
         # completeness.
-        expect_raises{ parse_and_interpret %Q(false #{op} 1) }
+        expect_raises(ParseError){ parse_and_interpret %Q(false #{op} 1) }
       end
 
 
@@ -20,7 +20,7 @@ describe "Interpreter - OpAssign" do
       end
 
       it "does not allow re-assignment to constants" do
-        error = expect_raises do
+        error = expect_raises(Exception) do
           parse_and_interpret %Q(
             THING = 1
             THING #{op} 2
