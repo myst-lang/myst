@@ -5,7 +5,7 @@ module Myst
       when TInteger, TFloat
         TFloat.new(this.value + other.value)
       else
-        raise "invalid argument for Float#+: #{__typeof(other).name}"
+        __raise_runtime_error("invalid argument for Float#+: #{__typeof(other).name}")
       end
     end
 
@@ -14,7 +14,7 @@ module Myst
       when TInteger, TFloat
         TFloat.new(this.value - other.value)
       else
-        raise "invalid argument for Float#-: #{__typeof(other).name}"
+        __raise_runtime_error("invalid argument for Float#-: #{__typeof(other).name}")
       end
     end
 
@@ -23,27 +23,27 @@ module Myst
       when TInteger, TFloat
         TFloat.new(this.value * other.value)
       else
-        raise "invalid argument for Float#*: #{__typeof(other).name}"
+        __raise_runtime_error("invalid argument for Float#*: #{__typeof(other).name}")
       end
     end
 
     NativeLib.method :float_divide, TFloat, other : Value do
       case other
       when TInteger, TFloat
-        raise "Division by zero" if other.value == 0
+        __raise_runtime_error("Division by zero") if other.value == 0
         TFloat.new(this.value / other.value)
       else
-        raise "invalid argument for Float#/: #{__typeof(other).name}"
+        __raise_runtime_error("invalid argument for Float#/: #{__typeof(other).name}")
       end
     end
 
     NativeLib.method :float_modulo, TFloat, other : Value do
       case other
       when TInteger, TFloat
-        raise "Division by zero" if other.value == 0
+        __raise_runtime_error("Division by zero") if other.value == 0
         TFloat.new(this.value % other.value)
       else
-        raise "invalid argument for Float#%: #{__typeof(other).name}"
+        __raise_runtime_error("invalid argument for Float#%: #{__typeof(other).name}")
       end
     end
 
@@ -78,7 +78,7 @@ module Myst
       when TInteger, TFloat
         TBoolean.new(this.value < other.value)
       else
-        raise "invalid argument for Float#<: #{__typeof(other).name}"
+        __raise_runtime_error("invalid argument for Float#<: #{__typeof(other).name}")
       end
     end
 
@@ -87,7 +87,7 @@ module Myst
       when TInteger, TFloat
         TBoolean.new(this.value <= other.value)
       else
-        raise "invalid argument for Float#<=: #{__typeof(other).name}"
+        __raise_runtime_error("invalid argument for Float#<=: #{__typeof(other).name}")
       end
     end
 
@@ -96,7 +96,7 @@ module Myst
       when TInteger, TFloat
         TBoolean.new(this.value > other.value)
       else
-        raise "invalid argument for Float#>: #{__typeof(other).name}"
+        __raise_runtime_error("invalid argument for Float#>: #{__typeof(other).name}")
       end
     end
 
@@ -105,7 +105,7 @@ module Myst
       when TInteger, TFloat
         TBoolean.new(this.value >= other.value)
       else
-        raise "invalid argument for Float#>=: #{__typeof(other).name}"
+        __raise_runtime_error("invalid argument for Float#>=: #{__typeof(other).name}")
       end
     end
 

@@ -37,7 +37,7 @@ module Myst
       # After the invocation, restore the current value of `self` to whatever
       # it had been previously.
       @itr.pop_self if @receiver
-      result || raise "No clause matches with given arguments: #{@args.inspect}"
+      result || @itr.__raise_runtime_error("No clause matches with given arguments: #{@args.inspect}")
     rescue ex : BreakException
       if ex.caught?
         @itr.pop_self(to_size: @selfstack_size_at_entry)
@@ -63,14 +63,14 @@ module Myst
           @itr.match(Var.new(splat.name), TList.new(args))
         else
           unless args.empty?
-            raise "All parameters not matched for clause"
+            raise "unmatched_arg"
           end
         end
 
         if self.block? && clause.block_param?
           @itr.match(Var.new(clause.block_param.name), self.block)
         elsif (self.block? && !clause.block_param?) || (!self.block? && clause.block_param?)
-          raise "Unmatched block parameter"
+          raise "unmatched_block_arg"
         end
 
         return true
@@ -106,7 +106,7 @@ module Myst
     end
 
     private def do_call(_func, _receiver, _args, _block)
-      raise "Unsupported callable type #{_func.class}"
+      @itr.__raise_runtime_error("Unsupported callable type #{_func.class}")
     end
 
 

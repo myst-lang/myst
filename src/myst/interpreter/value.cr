@@ -31,7 +31,7 @@ module Myst
     end
 
     def type_name
-      raise "Compiler bug: unknown type name for value #{self}"
+      raise "Interpreter bug: unknown type name for value #{self}"
     end
   end
 
