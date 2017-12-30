@@ -1,29 +1,15 @@
 module Myst
   class Interpreter
     NativeLib.method :static_time_now, Value do
-      t = Time.now
+      seconds, nanoseconds = Crystal::System::Time.compute_utc_seconds_and_nanoseconds
+      offset = Crystal::System::Time.compute_utc_offset(seconds)
       
       instance = NativeLib.instantiate(self, this.as(TType), [
-        TInteger.new(t.year.to_i64), 
-        TInteger.new(t.month.to_i64), 
-        TInteger.new(t.day.to_i64), 
-        TInteger.new(t.hour.to_i64), 
-        TInteger.new(t.minute.to_i64), 
-        TInteger.new(t.second.to_i64)
+        TInteger.new(seconds + offset), 
+        TInteger.new(nanoseconds.to_i64)
       ] of Value)
 
       instance
-    end
-
-    NativeLib.method :time_subtract, Value, other : Value do
-      case __typeof(other).name
-      when "Time"
-        this_time = to_crystal_time(this.as(TInstance))
-        other_time = to_crystal_time(other.as(TInstance))
-        TFloat.new((this_time - other_time).total_seconds)
-      else
-        raise NativeLib.error("invalid argument for Time#-: #{__typeof(other).name}", callstack)
-      end
     end
 
     NativeLib.method :time_to_s, TInstance, format : TString? do
@@ -42,19 +28,15 @@ module Myst
 
       NativeLib.def_method(time_type, :now, :static_time_now)
       NativeLib.def_instance_method(time_type, :to_s,  :time_to_s)
-      NativeLib.def_instance_method(time_type, :-,     :time_subtract)
 
       time_type
     end
 
     private def to_crystal_time(myst_time : TInstance)
       Time.new(
-        myst_time.ivars["@year"].as(TInteger).value,
-        myst_time.ivars["@month"].as(TInteger).value,
-        myst_time.ivars["@day"].as(TInteger).value,
-        myst_time.ivars["@hour"].as(TInteger).value,
-        myst_time.ivars["@minute"].as(TInteger).value,
-        myst_time.ivars["@second"].as(TInteger).value
+        seconds: myst_time.ivars["@seconds"].as(TInteger).value,
+        nanoseconds: myst_time.ivars["@nanoseconds"].as(TInteger).value.to_i32,
+        kind: Time::Kind::Unspecified
       )
     end
   end

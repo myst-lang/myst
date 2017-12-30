@@ -1,7 +1,51 @@
 require "stdlib/spec.mt"
 
 describe("Time#initialize") do
-  it("instantiates a new time type") do
+  it("instantiates second, nanosecond") do
+    t = %Time{63618825600, 10}
+    assert(t.year == 2017)
+    assert(t.month == 1)
+    assert(t.day == 1)
+    assert(t.hour == 0)
+    assert(t.minute == 0)
+    assert(t.second == 0)
+    assert(t.nanosecond == 10)
+  end
+
+  it("instantiates year, month, day") do
+    t = %Time{2017, 1, 2}
+    assert(t.year == 2017)
+    assert(t.month == 1)
+    assert(t.day == 2)
+    assert(t.hour == 0)
+    assert(t.minute == 0)
+    assert(t.second == 0)
+    assert(t.nanosecond == 0)
+  end
+
+  it("instantiates year, month, day, hour") do
+    t = %Time{2017, 1, 2, 3}
+    assert(t.year == 2017)
+    assert(t.month == 1)
+    assert(t.day == 2)
+    assert(t.hour == 3)
+    assert(t.minute == 0)
+    assert(t.second == 0)
+    assert(t.nanosecond == 0)
+  end
+
+  it("instantiates year, month, day, hour, minute") do
+    t = %Time{2017, 1, 2, 3, 4}
+    assert(t.year == 2017)
+    assert(t.month == 1)
+    assert(t.day == 2)
+    assert(t.hour == 3)
+    assert(t.minute == 4)
+    assert(t.second == 0)
+    assert(t.nanosecond == 0)
+  end
+
+  it("instantiates year, month, day, hour, minute, second") do
     t = %Time{2017, 1, 2, 3, 4, 5}
     assert(t.year == 2017)
     assert(t.month == 1)
@@ -9,6 +53,29 @@ describe("Time#initialize") do
     assert(t.hour == 3)
     assert(t.minute == 4)
     assert(t.second == 5)
+    assert(t.nanosecond == 0)
+  end
+
+  it("instantiates year, month, day, hour, minute, second, nanosecond") do
+    t = %Time{2017, 1, 2, 3, 4, 5, 6}
+    assert(t.year == 2017)
+    assert(t.month == 1)
+    assert(t.day == 2)
+    assert(t.hour == 3)
+    assert(t.minute == 4)
+    assert(t.second == 5)
+    assert(t.nanosecond == 6)
+  end
+
+  it("raises invalid time") do
+    expect_raises { %Time{5, 10000000000} }
+    expect_raises { %Time{100000, 10, 1} }
+    expect_raises { %Time{2017, 15, 1} }
+    expect_raises { %Time{2017, 10, 40} }
+    expect_raises { %Time{2017, 10, 15, 600} }
+    expect_raises { %Time{2017, 10, 15, 12, 65} }
+    expect_raises { %Time{2017, 10, 15, 12, 59, 61} }
+    expect_raises { %Time{2017, 10, 15, 12, 59, 59, -1} }
   end
 end
 
@@ -74,8 +141,75 @@ describe("Time#-") do
     assert(t1 - t2 == -1.0)
   end
 
+  it("gives fractional seconds") do
+    t1 = %Time{2017, 1, 2, 3, 4, 5, 7}
+    t2 = %Time{2017, 1, 2, 3, 4, 6, 8}
+    assert(t2 - t1 == 1.000000001)
+  end
+
   it("raises if a non Time type is passed") do
     t1 = %Time{2017, 1, 2, 3, 4, 5}
     expect_raises { t1 - nil }
+  end
+end
+
+describe("Time#year") do
+  it("returns the year") do
+    t = %Time{2017, 1, 2, 3, 4, 5}
+    assert(t.year == 2017)
+  end
+end
+
+describe("Time#month") do
+  it("returns the month") do
+    t = %Time{2017, 1, 2, 3, 4, 5}
+    assert(t.month == 1)
+  end
+end
+
+describe("Time#day") do
+  it("returns the day") do
+    t = %Time{2017, 1, 2, 3, 4, 5}
+    assert(t.day == 2)
+  end
+end
+
+describe("Time#hour") do
+  it("returns the hour") do
+    t = %Time{2017, 1, 2, 3, 4, 5}
+    assert(t.hour == 3)
+  end
+end
+
+describe("Time#minute") do
+  it("returns the minute") do
+    t = %Time{2017, 1, 2, 3, 4, 5}
+    assert(t.minute == 4)
+  end
+end
+
+describe("Time#second") do
+  it("returns the second") do
+    t = %Time{2017, 1, 2, 3, 4, 5}
+    assert(t.second == 5)
+  end
+end
+
+describe("Time#millisecond") do
+  it("returns 0 when no nanoseconds") do
+    t = %Time{2017, 1, 2, 3, 4, 5}
+    assert(t.millisecond == 0)
+  end
+
+  it("returns the millisecond") do
+    t = %Time{2017, 1, 2, 3, 4, 5, 6000000}
+    assert(t.millisecond == 6)
+  end
+end
+
+describe("Time#nanosecond") do
+  it("returns the nanosecond") do
+    t = %Time{2017, 1, 2, 3, 4, 5, 6}
+    assert(t.nanosecond == 6)
   end
 end
