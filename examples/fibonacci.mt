@@ -4,7 +4,7 @@
 # type-safe implementation of a fibonnaci calculator.
 
 # Define the base cases for the fibonacci sequence.
-def fib(0); 1; end
+def fib(0); 0; end
 def fib(1); 1; end
 # For any other integer, use the equation a_n = a_n-1 + a_n-2. However, negative
 # integers are invalid, so only accept positive ones.
