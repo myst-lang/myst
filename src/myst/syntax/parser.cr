@@ -687,7 +687,7 @@ module Myst
         expr = parse_expression
         skip_space_and_newlines
         expect(Token::Type::RPAREN)
-        skip_space_and_newlines
+        skip_space
         return expr
       when Token::Type::SELF
         token = current_token
