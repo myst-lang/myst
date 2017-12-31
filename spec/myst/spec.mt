@@ -4,6 +4,7 @@ include Spec
 
 # TODO: add Dir globbing to automatically detect and require all `*_spec.mt`
 # files under this directory.
+require "./boolean_spec.mt"
 require "./enumerable_spec.mt"
 require "./float_spec.mt"
 require "./integer_spec.mt"
