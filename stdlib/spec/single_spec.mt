@@ -44,9 +44,14 @@ defmodule Spec
     # a specific error.
     def expect_raises(&block)
       block()
-      raise %AssertionFailure{@name, expected_error, "no error"}
+      raise %AssertionFailure{@name, "Any Error", "no error"}
+    rescue ex : AssertionFailure
+      # Rescuing an AssertionFailure implies that `block` did
+      # not raise an exception, so the exception is re-raised.
+      raise ex
     rescue
-      # If an error was raised, the assertion passes.
+      # Otherwise, the error must have come from `block`, so the
+      # assertion is successful.
     end
   end
 end
