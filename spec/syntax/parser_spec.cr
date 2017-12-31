@@ -1282,6 +1282,10 @@ describe "Parser" do
     when true
     end
   ),                                When.new(l(true))
+  it_parses %q(
+    when (true)
+    end
+  ),                                When.new(l(true))
   it_parses %q(when true; end),     When.new(l(true))
   it_parses %q(when a == 1; end),   When.new(Call.new(Call.new(nil, "a"), "==", [l(1)], infix: true))
   # Any expression can be used as a condition
@@ -1352,6 +1356,10 @@ describe "Parser" do
   # Unless is the logical inverse of When.
   it_parses %q(
     unless true
+    end
+  ),                                Unless.new(l(true))
+  it_parses %q(
+    unless (true)
     end
   ),                                Unless.new(l(true))
   it_parses %q(unless true; end),   Unless.new(l(true))
