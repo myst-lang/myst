@@ -94,8 +94,13 @@ module Myst
       __raise_runtime_error(error_message)
     end
 
+
     def __raise_runtime_error(message : String)
       raise RuntimeError.new(TString.new(message), callstack)
+    end
+
+    def __raise_runtime_error(error : RuntimeError)
+      raise error
     end
   end
 end
