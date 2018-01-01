@@ -99,6 +99,10 @@ module Myst
       raise RuntimeError.new(TString.new(message), callstack)
     end
 
+    def __raise_runtime_error(value : Value)
+      raise RuntimeError.new(value, callstack)
+    end
+
     def __raise_runtime_error(error : RuntimeError)
       raise error
     end

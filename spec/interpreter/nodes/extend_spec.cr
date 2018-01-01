@@ -19,7 +19,7 @@ TYPE_DEF = %q(
     extend Foo
 
 		def bar
-			"bar called"	
+			"bar called"
 		end
 
 	end
@@ -31,13 +31,13 @@ describe "Interpreter - Extend" do
     Baz.foo
   ),        [val(:extended)]
 
-  it_does_not_interpret %q(extend nil),      /non-module/
-  it_does_not_interpret %q(extend true),     /non-module/
-  it_does_not_interpret %q(extend false),    /non-module/
-  it_does_not_interpret %q(extend "hello"),  /non-module/
-  it_does_not_interpret %q(extend :hi),      /non-module/
-  it_does_not_interpret %q(extend [1, 2]),   /non-module/
-  it_does_not_interpret %q(extend {a: 1}),   /non-module/
+  it_does_not_interpret %q(extend nil)
+  it_does_not_interpret %q(extend true)
+  it_does_not_interpret %q(extend false)
+  it_does_not_interpret %q(extend "hello")
+  it_does_not_interpret %q(extend :hi)
+  it_does_not_interpret %q(extend [1, 2])
+  it_does_not_interpret %q(extend {a: 1})
 
   it "extends all ancestors of the extended module" do
     itr = parse_and_interpret EXT_MODULE_DEF + %q(
@@ -72,5 +72,5 @@ describe "Interpreter - Extend" do
     itr.errput.to_s.downcase.should match(/no variable or method `foo`/)
   end
 
-  it_does_not_interpret EXT_MODULE_DEF + %q(defmodule Baz; extend Foo; end), /non-type/
+  it_does_not_interpret EXT_MODULE_DEF + %q(defmodule Baz; extend Foo; end)
 end

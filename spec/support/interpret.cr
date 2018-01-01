@@ -84,7 +84,9 @@ def it_does_not_interpret(node : String, message=nil, file=__FILE__, line=__LINE
   it %Q(does not interpret #{node}), file, line, end_line do
     itr = Interpreter.new
     program = parse_program(node)
-    exception = expect_raises(Exception){ itr.run(program) }
+    exception = expect_raises(RuntimeError) do
+      itr.run(program, capture_errors: false)
+    end
 
     if message
       (exception.message || "").downcase.should match(message)

@@ -92,7 +92,7 @@ module Myst
       pattern.elements.each do |el|
         if el.is_a?(Splat)
           if past_splat
-            raise "More than one splat collector in a List pattern is not allowed."
+            __raise_runtime_error("More than one splat collector in a List pattern is not allowed.")
           else
             splat = el
             past_splat = true

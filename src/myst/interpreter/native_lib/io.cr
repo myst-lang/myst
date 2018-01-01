@@ -9,7 +9,7 @@ module Myst
           if string.is_a?(TString)
             self.output.puts(string.value)
           else
-            raise RuntimeError.new(TString.new("expected String argument. Got #{__typeof(string).name}"), self.callstack)
+            __raise_runtime_error("expected String argument. Got #{__typeof(string).name}")
           end
         end
       end
@@ -26,7 +26,7 @@ module Myst
           if string.is_a?(TString)
             self.output.print(string.value)
           else
-            raise RuntimeError.new(TString.new("expected String argument. Got #{__typeof(string).name}"), self.callstack)
+            __raise_runtime_error("expected String argument. Got #{__typeof(string).name}")
           end
         end
       end

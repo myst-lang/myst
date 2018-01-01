@@ -4,7 +4,7 @@ module Myst
       visit(node.value)
       value = stack.pop
 
-      raise RuntimeError.new(value, callstack)
+      __raise_runtime_error(value)
     end
   end
 end

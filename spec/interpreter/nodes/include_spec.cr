@@ -32,13 +32,13 @@ describe "Interpreter - Include" do
   end
 
 
-  it_does_not_interpret %q(include nil),      /non-module/
-  it_does_not_interpret %q(include true),     /non-module/
-  it_does_not_interpret %q(include false),    /non-module/
-  it_does_not_interpret %q(include "hello"),  /non-module/
-  it_does_not_interpret %q(include :hi),      /non-module/
-  it_does_not_interpret %q(include [1, 2]),   /non-module/
-  it_does_not_interpret %q(include {a: 1}),   /non-module/
+  it_does_not_interpret %q(include nil)
+  it_does_not_interpret %q(include true)
+  it_does_not_interpret %q(include false)
+  it_does_not_interpret %q(include "hello")
+  it_does_not_interpret %q(include :hi)
+  it_does_not_interpret %q(include [1, 2])
+  it_does_not_interpret %q(include {a: 1})
 
 
   it "maintains `self` when calling methods through include" do

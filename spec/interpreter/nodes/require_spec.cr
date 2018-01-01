@@ -65,11 +65,9 @@ Dir.cd(__DIR__) do
     end
 
     it "must be given a String value as a path" do
-      expect_raises(Exception) do
-        itr = parse_and_interpret %q(
-          require true
-        )
-      end
+      it_does_not_interpret %q(
+        require true
+      )
     end
 
     it "properly follows directories for nested requires" do
