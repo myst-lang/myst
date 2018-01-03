@@ -97,3 +97,11 @@ describe("List#lte") do
     assert(([1, 2] <= [1]) == false)
   end
 end
+
+describe("List#push") do
+  it("add elements to the list") do
+    assert([1,2].push(3) == [1, 2, 3])
+    assert([1,2].push("hi") == [1, 2, "hi"])
+    assert([1,2].push(nil) == [1, 2, nil])
+  end
+end
