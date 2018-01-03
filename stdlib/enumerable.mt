@@ -7,7 +7,7 @@ defmodule Enumerable
   def map(&block)
     result = []
     each do |elem|
-      result = result + [block(elem)]
+      result.push(block(elem))
     end
     result
   end
@@ -100,7 +100,7 @@ defmodule Enumerable
 
     each do |e|
       when block(e)
-        result += [e]
+        result.push(e)
       end
     end
 
@@ -171,7 +171,7 @@ defmodule Enumerable
     list = []
 
     each do |e|
-      list += [e]
+      list.push(e)
     end
 
     list

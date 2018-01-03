@@ -12,3 +12,5 @@ IO.puts(memory[n])
 IO.puts([1, 2, 3] == [1, 2, 3])
 
 IO.puts([1, 2, 3])
+
+IO.puts([1, 2, 3].push(4))
