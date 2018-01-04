@@ -104,4 +104,52 @@ describe("List#push") do
     assert([1,2].push("hi") == [1, 2, "hi"])
     assert([1,2].push(nil) == [1, 2, nil])
   end
+
+  it("returns list if no value provided") do
+    assert([1,2].push == [1, 2])
+  end
+end
+
+describe("List#pop") do
+  it("returns last element from the list") do
+    assert([1,2,3].pop == 3)
+  end
+
+  it("removes last element from the list") do
+    l = [1,2]
+    l.pop
+    assert(l == [1])
+  end
+
+  it("returns nil if no element to pop") do
+    assert([].pop == nil)
+  end
+end
+
+describe("List#unshift") do
+  it("add elements to front of the list") do
+    assert([1,2].unshift(3) == [3, 1, 2])
+    assert([1,2].unshift("hi") == ["hi", 1, 2])
+    assert([1,2].unshift(nil) == [nil, 1, 2])
+  end
+
+  it("returns nil if no value provided") do
+    assert([1,2].unshift == [1, 2])
+  end
+end
+
+describe("List#shift") do
+  it("returns first element from the list") do
+    assert([1,2,3].shift == 1)
+  end
+
+  it("removes first element from the list") do
+    l = [1,2]
+    l.shift
+    assert(l == [2])
+  end
+
+  it("returns nil if no element to unshift") do
+    assert([].shift == nil)
+  end
 end

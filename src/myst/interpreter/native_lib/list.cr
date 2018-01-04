@@ -72,26 +72,54 @@ module Myst
       end
     end
 
-    NativeLib.method :list_push, TList, value : Value do
-      this.elements.push(value)
+    NativeLib.method :list_push, TList, value : Value? do
+      if value
+        this.elements.push(value)
+      end
       this
+    end
+
+    NativeLib.method :list_pop, TList do
+      if value = this.elements.pop?
+        value
+      else
+        TNil.new
+      end
+    end
+
+    NativeLib.method :list_unshift, TList, value : Value? do
+      if value
+        this.elements.unshift(value)
+      end
+      this
+    end
+
+    NativeLib.method :list_shift, TList do
+      if value = this.elements.shift?
+        value
+      else
+        TNil.new
+      end
     end
 
     def init_list(kernel : TModule)
       list_type = TType.new("List", kernel.scope)
       list_type.instance_scope["type"] = list_type
 
-      NativeLib.def_instance_method(list_type, :each, :list_each)
-      NativeLib.def_instance_method(list_type, :size, :list_size)
-      NativeLib.def_instance_method(list_type, :==,   :list_eq)
-      NativeLib.def_instance_method(list_type, :+,    :list_add)
-      NativeLib.def_instance_method(list_type, :*,    :list_splat)
-      NativeLib.def_instance_method(list_type, :[],   :list_access)
-      NativeLib.def_instance_method(list_type, :[]=,  :list_access_assign)
-      NativeLib.def_instance_method(list_type, :-,    :list_minus)
-      NativeLib.def_instance_method(list_type, :<,    :list_proper_subset)
-      NativeLib.def_instance_method(list_type, :<=,   :list_subset)
-      NativeLib.def_instance_method(list_type, :push, :list_push)
+      NativeLib.def_instance_method(list_type, :each,    :list_each)
+      NativeLib.def_instance_method(list_type, :size,    :list_size)
+      NativeLib.def_instance_method(list_type, :==,      :list_eq)
+      NativeLib.def_instance_method(list_type, :+,       :list_add)
+      NativeLib.def_instance_method(list_type, :*,       :list_splat)
+      NativeLib.def_instance_method(list_type, :[],      :list_access)
+      NativeLib.def_instance_method(list_type, :[]=,     :list_access_assign)
+      NativeLib.def_instance_method(list_type, :-,       :list_minus)
+      NativeLib.def_instance_method(list_type, :<,       :list_proper_subset)
+      NativeLib.def_instance_method(list_type, :<=,      :list_subset)
+      NativeLib.def_instance_method(list_type, :push,    :list_push)
+      NativeLib.def_instance_method(list_type, :pop,     :list_pop)
+      NativeLib.def_instance_method(list_type, :unshift, :list_unshift)
+      NativeLib.def_instance_method(list_type, :shift,   :list_shift)
 
       list_type
     end
