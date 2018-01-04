@@ -105,3 +105,19 @@ describe("List#push") do
     assert([1,2].push(nil) == [1, 2, nil])
   end
 end
+
+describe("List#pop") do
+  it("returns last element from the list") do
+    assert([1,2,3].pop == 3)
+  end
+
+  it("removes last element from the list") do
+    l = [1,2]
+    l.pop
+    assert(l == [1])
+  end
+
+  it("returns nil if no element to pop") do
+    assert([].pop == nil)
+  end
+end

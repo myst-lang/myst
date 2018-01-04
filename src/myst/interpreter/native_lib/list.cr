@@ -77,6 +77,14 @@ module Myst
       this
     end
 
+    NativeLib.method :list_pop, TList do
+      if value = this.elements.pop?
+        value
+      else
+        TNil.new
+      end
+    end
+
     def init_list(kernel : TModule)
       list_type = TType.new("List", kernel.scope)
       list_type.instance_scope["type"] = list_type
@@ -92,6 +100,7 @@ module Myst
       NativeLib.def_instance_method(list_type, :<,    :list_proper_subset)
       NativeLib.def_instance_method(list_type, :<=,   :list_subset)
       NativeLib.def_instance_method(list_type, :push, :list_push)
+      NativeLib.def_instance_method(list_type, :pop, :list_pop)
 
       list_type
     end
