@@ -103,6 +103,8 @@ describe("List#push") do
     assert([1,2].push(3) == [1, 2, 3])
     assert([1,2].push("hi") == [1, 2, "hi"])
     assert([1,2].push(nil) == [1, 2, nil])
+    assert([1,2].push(*[3,4]) == [1, 2, 3, 4])
+    assert([1,2].push([3,4]) == [1, 2, [3, 4]])
   end
 
   it("returns list if no value provided") do
@@ -131,6 +133,8 @@ describe("List#unshift") do
     assert([1,2].unshift(3) == [3, 1, 2])
     assert([1,2].unshift("hi") == ["hi", 1, 2])
     assert([1,2].unshift(nil) == [nil, 1, 2])
+    assert([1,2].unshift(*[3,4]) == [3, 4, 1, 2])
+    assert([1,2].unshift([3,4]) == [[3, 4], 1, 2]) 
   end
 
   it("returns nil if no value provided") do

@@ -72,9 +72,9 @@ module Myst
       end
     end
 
-    NativeLib.method :list_push, TList, value : Value? do
-      if value
-        this.elements.push(value)
+    NativeLib.method :list_push, TList do
+      unless __args.size.zero?
+        __args.each { |arg| this.elements.push(arg) }
       end
       this
     end
@@ -87,9 +87,9 @@ module Myst
       end
     end
 
-    NativeLib.method :list_unshift, TList, value : Value? do
-      if value
-        this.elements.unshift(value)
+    NativeLib.method :list_unshift, TList do
+      unless __args.size.zero?
+        __args.reverse_each { |arg| this.elements.unshift(arg) }
       end
       this
     end
