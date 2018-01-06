@@ -1079,10 +1079,12 @@ module Myst
       loop do
         list.elements << parse_expression
         skip_space_and_newlines
+
         if accept(Token::Type::COMMA)
           skip_space_and_newlines
           next
         end
+
         if finish = accept(Token::Type::RBRACE)
           return list.at_end(finish.location)
         end
@@ -1198,13 +1200,23 @@ module Myst
       when Call
         # Only bare calls can be used as bindings in a pattern.
         if node.receiver? || node.block? || !node.args.empty?
-          raise "Calls are not allowed in patterns."
+          raise ParseError.new(node.location.not_nil!, "Calls are not allowed in patterns.")
         else
           push_local_var(node.name)
           return Var.new(node.name).at(node)
         end
       when ListLiteral
         node.elements = node.elements.map{ |e| to_pattern(e).as(Node) }
+        has_splat = false
+        node.elements.each do |el|
+          if el.is_a?(Splat)
+            if has_splat
+              raise ParseError.new(el.location.not_nil!, "List patterns may only contain a single Splat.")
+            else
+              has_splat = true
+            end
+          end
+        end
       when MapLiteral
         node.entries = node.entries.map{ |e| MapLiteral::Entry.new(e.key, to_pattern(e.value).as(Node)) }
       when Splat

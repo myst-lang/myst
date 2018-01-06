@@ -90,13 +90,12 @@ module Myst
 
       past_splat = false
       pattern.elements.each do |el|
+        # Checking for more than one Splat in the parameter List is done by
+        # the parser. Because of that guarantee, this code does not need to
+        # check for multiple Splats.
         if el.is_a?(Splat)
-          if past_splat
-            __raise_runtime_error("More than one splat collector in a List pattern is not allowed.")
-          else
-            splat = el
-            past_splat = true
-          end
+          splat = el
+          past_splat = true
         elsif past_splat
           right.unshift(el)
         else

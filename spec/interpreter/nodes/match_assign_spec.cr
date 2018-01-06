@@ -100,10 +100,6 @@ describe "Interpreter - MatchAssign" do
   # another List, rather than being flattened into a single List.
   it_interprets_with_assignments %q([1, *list]  =: [1, [2, 3]]),  { "list"  => val([[2, 3]]) }
 
-  # Multiple splats in a pattern are invalid
-  it_does_not_interpret %q([*a, *b]       =: [1, 2])
-  it_does_not_interpret %q([1, *a, 2, *b] =: [1, 2])
-
 
   # Matching a Const that refers to a TType will check the type of the value.
   it_interprets %q(List     =: [1, 2])
