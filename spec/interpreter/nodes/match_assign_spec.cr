@@ -2,6 +2,26 @@ require "../../spec_helper.cr"
 require "../../support/nodes.cr"
 require "../../support/interpret.cr"
 
+private def it_matches(match, file=__FILE__, line=__LINE__, end_line=__END_LINE__)
+  it %Q(matches `#{match}`) do
+    itr = Interpreter.new
+    program = parse_program(match)
+    result = itr.run(program)
+  end
+end
+
+private def it_does_not_match(match, file=__FILE__, line=__LINE__, end_line=__END_LINE__)
+  it %Q(does not match `#{match}`) do
+    itr = Interpreter.new(errput: IO::Memory.new)
+    program = parse_program(match)
+
+    expect_raises(MatchError) do
+      itr.run(program, capture_errors: false)
+    end
+  end
+end
+
+
 describe "Interpreter - MatchAssign" do
   # Assignments should leave the assigned value on the stack
   it_interprets %q(a =: 1),           [val(1)]
@@ -12,17 +32,17 @@ describe "Interpreter - MatchAssign" do
   it_interprets %q(THING = nil; THING =: nil),     [val(nil)]
 
   # A match with the same object should always succeed.
-  it_interprets %q(nil    =: nil)
-  it_interprets %q(true   =: true)
-  it_interprets %q(false  =: false)
-  it_interprets %q(1      =: 1)
-  it_interprets %q(1.0    =: 1.0)
-  it_interprets %q("hi"   =: "hi")
-  it_interprets %q(:hello =: :hello)
-  it_interprets %q([]     =: [])
-  it_interprets %q([1, 2] =: [1, 2])
-  it_interprets %q({}     =: {})
-  it_interprets %q({a: 1} =: {a: 1})
+  it_matches %q(nil    =: nil)
+  it_matches %q(true   =: true)
+  it_matches %q(false  =: false)
+  it_matches %q(1      =: 1)
+  it_matches %q(1.0    =: 1.0)
+  it_matches %q("hi"   =: "hi")
+  it_matches %q(:hello =: :hello)
+  it_matches %q([]     =: [])
+  it_matches %q([1, 2] =: [1, 2])
+  it_matches %q({}     =: {})
+  it_matches %q({a: 1} =: {a: 1})
 
   # Matches between different classes (other than Integer and Float), can never
   # match successfully.
@@ -30,7 +50,7 @@ describe "Interpreter - MatchAssign" do
   distinct_types.each_with_index do |a, i|
     distinct_types.each_with_index do |b, j|
       next if i == j
-      it_does_not_interpret "#{a} =: #{b}", /match/
+      it_does_not_match "#{a} =: #{b}", /match/
     end
   end
 
@@ -39,8 +59,8 @@ describe "Interpreter - MatchAssign" do
   it_interprets %q(1    =: 1.0)
   it_interprets %q(1.0  =: 1)
 
-  it_does_not_interpret %q(1    =: 1.1),  /match/
-  it_does_not_interpret %q(1.1  =: 1),    /match/
+  it_does_not_match %q(1    =: 1.1),  /match/
+  it_does_not_match %q(1.1  =: 1),    /match/
 
 
   # Assignments at any level should either create or re-assign the variable
@@ -81,8 +101,8 @@ describe "Interpreter - MatchAssign" do
   it_interprets_with_assignments %q([1, *list]  =: [1, [2, 3]]),  { "list"  => val([[2, 3]]) }
 
   # Multiple splats in a pattern are invalid
-  it_does_not_interpret %q([*a, *b]       =: [1, 2]),   /splat collector/
-  it_does_not_interpret %q([1, *a, 2, *b] =: [1, 2]),   /splat collector/
+  it_does_not_interpret %q([*a, *b]       =: [1, 2])
+  it_does_not_interpret %q([1, *a, 2, *b] =: [1, 2])
 
 
   # Matching a Const that refers to a TType will check the type of the value.
@@ -92,9 +112,9 @@ describe "Interpreter - MatchAssign" do
   it_interprets %q(String   =: "hello")
 
   # If the value is _not_ an instance of the pattern type, the match fails.
-  it_does_not_interpret %q(String   =: :hello)
-  it_does_not_interpret %q(Integer  =: 1.0)
-  it_does_not_interpret %q(Boolean  =: nil)
+  it_does_not_match %q(String   =: :hello)
+  it_does_not_match %q(Integer  =: 1.0)
+  it_does_not_match %q(Boolean  =: nil)
 
   # When a Const refers to anything other than a TType, the match will act like
   # a normal value match.
@@ -103,7 +123,7 @@ describe "Interpreter - MatchAssign" do
     A =: 10
   )
 
-  it_does_not_interpret %q(
+  it_does_not_match %q(
     A = false
     A =: true
   ), /match/
@@ -121,7 +141,7 @@ describe "Interpreter - MatchAssign" do
     int_type = 1.type
     <int_type> =: 5
   )
-  it_does_not_interpret %q(
+  it_does_not_match %q(
     float_type = 1.5.type
     <float_type> =: 1
   ),  /match/

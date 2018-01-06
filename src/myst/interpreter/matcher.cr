@@ -1,11 +1,7 @@
+require "./exceptions.cr"
+
 module Myst
   class Interpreter
-    class MatchError < Exception
-      def initialize
-        @message = "match failure"
-      end
-    end
-
     def match(pattern : Node, value : Value)
       case pattern
       when ListLiteral
@@ -28,7 +24,7 @@ module Myst
         # literal values
         match_value(pattern, value)
       else
-        raise MatchError.new
+        __raise_runtime_error(MatchError.new(callstack))
       end
     end
 
@@ -47,11 +43,11 @@ module Myst
           left == right
         end
 
-      success || raise MatchError.new
+      success || __raise_runtime_error(MatchError.new(callstack))
     end
 
     private def match_list(pattern : ListLiteral, value : Value)
-      raise MatchError.new unless value.is_a?(TList)
+      __raise_runtime_error(MatchError.new(callstack)) unless value.is_a?(TList)
 
       left, splat, right = chunk_list_pattern(pattern)
 
@@ -62,13 +58,13 @@ module Myst
         match(splat.value, TList.new(value_elements))
       else
         unless value_elements.empty?
-          raise MatchError.new
+          __raise_runtime_error(MatchError.new(callstack))
         end
       end
     end
 
     private def match_map(pattern : MapLiteral, value : Value)
-      raise MatchError.new unless value.is_a?(TMap)
+      __raise_runtime_error(MatchError.new(callstack)) unless value.is_a?(TMap)
 
       pattern.entries.each do |entry|
         visit(entry.key)
@@ -77,7 +73,7 @@ module Myst
         if right_value = value.entries[pattern_key]?
           match(entry.value, right_value)
         else
-          raise MatchError.new
+          __raise_runtime_error(MatchError.new(callstack))
         end
       end
     end
@@ -96,7 +92,7 @@ module Myst
       pattern.elements.each do |el|
         if el.is_a?(Splat)
           if past_splat
-            raise "More than one splat collector in a List pattern is not allowed."
+            __raise_runtime_error("More than one splat collector in a List pattern is not allowed.")
           else
             splat = el
             past_splat = true

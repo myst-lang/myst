@@ -12,7 +12,7 @@ module Myst
       # The path for a require must be a String, otherwise, the require cannot
       # be successful.
       unless path.is_a?(TString)
-        raise "Path for `require` must be a String. Got #{path}"
+        __raise_runtime_error("Path for `require` must be a String. Got #{path}")
       end
 
       path_str = path.value
@@ -24,7 +24,7 @@ module Myst
         if loc = node.location
           File.dirname(loc.file)
         else
-          raise "Location information is not available for #{node.inspect}"
+          __raise_runtime_error("Location information is not available for #{node.inspect}")
         end
 
       full_path = resolve_path(path_str, working_dir)
@@ -79,19 +79,25 @@ module Myst
     # The result of this method will always be a String to use directly in
     # a `File.read`.
     private def resolve_path(path : String, working_dir) : String
+      valid = false
       # Relative paths should be considered as-is. Absolute and bare paths
       # should consider all variants based on the current `load_dirs` that
       # are available.
       if is_relative?(path)
         path = File.expand_path(path, dir: working_dir)
-        validate_path(path)
+        valid = validate_path(path)
       else
         load_dirs.find do |dir|
           expanded_path = File.expand_path(path, dir: dir)
-          if validate_path(expanded_path)
+          if valid = validate_path(expanded_path)
             path = expanded_path
+            break
           end
         end
+      end
+
+      unless valid
+        __raise_runtime_error("failed to require '#{path}': file either doesn't exist or is not readable")
       end
 
       return path

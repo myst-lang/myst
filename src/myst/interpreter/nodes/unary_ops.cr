@@ -36,7 +36,7 @@ module Myst
 
       # The result of a Splat operation is always expected to be a List
       unless result.is_a?(TList)
-        raise RuntimeError.new(TString.new("Expected a List value from splat"), callstack)
+        __raise_runtime_error("Expected a List value from splat")
       end
 
       stack.push(result)

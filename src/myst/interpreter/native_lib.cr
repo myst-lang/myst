@@ -17,15 +17,10 @@ module Myst
       Invocation.new(itr, func, receiver, args, nil).invoke
     end
 
-    # Return a RuntimeError with the given string as the value.
-    def error(message : String, trace : Callstack)
-      RuntimeError.new(TString.new(message), trace)
-    end
-
     # Instantiate a given type and invoke its initializer
     def instantiate(itr, type : TType, params : Array(Value)) : TInstance
       instance = TInstance.new(type)
-      
+
       if (initializer = instance.scope["initialize"]?) && initializer.is_a?(TFunctor)
         Invocation.new(itr, initializer, instance, params, nil).invoke
       end

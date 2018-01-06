@@ -17,8 +17,12 @@ module Myst
       @values[key]? || @parent.try(&.[key]?)
     end
 
+    # A non-nilable variant of `[]?`. While this method may raise an exception,
+    # it is not considered a "public" exception (it is not meant to be
+    # reachable by userland code). Any instance where the exception propogates
+    # outside of the interpreter should be considered a bug.
     def [](key : String) : Value
-      self[key]? || raise IndexError.new("No entry `#{key}` for `#{self.inspect}`")
+      self[key]? || raise IndexError.new("Interpeter Bug: Unmanaged, failed attempt to access `#{key}` from scope: #{self.inspect}")
     end
 
     def []=(key : String, value : Value) : Value

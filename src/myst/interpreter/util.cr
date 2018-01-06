@@ -13,7 +13,7 @@ module Myst
       when Value
         @kernel.scope[value.type_name].as(TType)
       else
-        raise "Can't resolve type of #{value}"
+        __raise_runtime_error("Can't resolve type of #{value}")
       end
     end
 
@@ -38,7 +38,7 @@ module Myst
       if  {{value}}.is_a?(TInteger) || {{value}}.is_a?(TFloat) ||
           {{value}}.is_a?(TNil) || {{value}}.is_a?(TBoolean) ||
           {{value}}.is_a?(TString)
-        raise {{operation || "Operation disallowed on primitive types"}}
+        __raise_runtime_error({{operation || "Operation disallowed on primitive types"}})
       end
     end
 
@@ -77,9 +77,9 @@ module Myst
         end
       end
 
-
       func
     end
+
 
     def raise_not_found(name, value)
       type_name = __typeof(value).name
@@ -91,7 +91,25 @@ module Myst
         error_message = "No variable or method `#{name}` for #{value_str}:#{type_name}"
       end
 
-      raise RuntimeError.new(TString.new(error_message), callstack)
+      __raise_runtime_error(error_message)
+    end
+
+
+    # Raise a RuntimeError from the current location. Execution is immediataly
+    # halted and the interpreter will panic up until a rescuer is found.
+    #
+    # Multiple overloads of this function are provided for simplicity at the
+    # call site.
+    def __raise_runtime_error(message : String)
+      raise RuntimeError.new(TString.new(message), callstack)
+    end
+
+    def __raise_runtime_error(value : Value)
+      raise RuntimeError.new(value, callstack)
+    end
+
+    def __raise_runtime_error(error : RuntimeError)
+      raise error
     end
   end
 end

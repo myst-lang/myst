@@ -13,7 +13,7 @@ module Myst
 
       # Only Function values can be captured. Any other value is an error.
       unless value.is_a?(TFunctor)
-        raise RuntimeError.new(TString.new("Expected a function to capture"), callstack)
+        __raise_runtime_error("Expected a function to capture")
       end
 
       @stack.push(value)

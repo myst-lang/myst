@@ -5,7 +5,7 @@ module Myst
       when TString
         TString.new(this.value + other.value)
       else
-        raise "invalid argument for String#+: #{__typeof(other).name}"
+        __raise_runtime_error("invalid argument for String#+: #{__typeof(other).name}")
       end
     end
 
@@ -15,7 +15,7 @@ module Myst
         # String multiplication repeats `this` `arg` times.
         TString.new(this.value * other.value)
       else
-        raise "invalid argument for String#*: #{__typeof(other).name}"
+        __raise_runtime_error("invalid argument for String#*: #{__typeof(other).name}")
       end
     end
 

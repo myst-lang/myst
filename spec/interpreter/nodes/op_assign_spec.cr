@@ -20,14 +20,10 @@ describe "Interpreter - OpAssign" do
       end
 
       it "does not allow re-assignment to constants" do
-        error = expect_raises(Exception) do
-          parse_and_interpret %Q(
-            THING = 1
-            THING #{op} 2
-          )
-        end
-
-        (error.message || "").downcase.should match(/re-assignment/)
+        it_does_not_interpret %Q(
+          THING = 1
+          THING #{op} 2
+        )
       end
     end
   end

@@ -2,7 +2,7 @@ require "../spec_helper.cr"
 require "../support/nodes.cr"
 require "../support/interpret.cr"
 
-macro it_matches(pattern, value, setup=nil)
+private macro it_matches(pattern, value, setup=nil)
   it %q(matches `{{pattern}}` and `{{value}}`) do
     itr = Interpreter.new
     result = itr.match({{pattern}}, {{value}})
@@ -11,9 +11,9 @@ macro it_matches(pattern, value, setup=nil)
   end
 end
 
-macro it_does_not_match(pattern, value)
+private macro it_does_not_match(pattern, value)
   it %q(does not match `{{pattern}}` and `{{value}}`) do
-    expect_raises(Interpreter::MatchError) do
+    expect_raises(MatchError) do
       itr = Interpreter.new
       result = itr.match({{pattern}}, {{value}})
     end
@@ -116,7 +116,7 @@ describe "Interpreter - #match" do
     itr = Interpreter.new
     itr.current_scope.assign("a", val(1))
 
-    expect_raises(Interpreter::MatchError) do
+    expect_raises(MatchError) do
       itr.match(i(v("a")), val(2))
     end
     # The value of `a` should not have changed from the match.

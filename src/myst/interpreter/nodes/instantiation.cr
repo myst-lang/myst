@@ -5,7 +5,7 @@ module Myst
       type = stack.pop
 
       unless type.is_a?(TType)
-        raise "#{type} is not an instantiable type (not a TType)."
+        __raise_runtime_error("#{type} is not an instantiable type (not a TType).")
       end
 
       instance = TInstance.new(type)

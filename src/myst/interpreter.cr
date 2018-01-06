@@ -75,7 +75,7 @@ module Myst
 
 
     def visit(node : Node)
-      raise "Compiler bug: #{node.class.name} nodes are not yet supported."
+      raise "Interpreter bug: #{node.class.name} nodes are not yet supported."
     end
 
 
@@ -101,10 +101,14 @@ module Myst
       end
     end
 
-    def run(program)
+    def run(program, capture_errors=true)
       visit(program)
     rescue err : RuntimeError
-      put_error(err)
+      if capture_errors
+        put_error(err)
+      else
+        raise err
+      end
     end
   end
 end
