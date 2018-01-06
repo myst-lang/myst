@@ -225,6 +225,7 @@ describe "Parser" do
   it_parses %q([]),             ListLiteral.new
   it_parses %q([call]),         l([Call.new(nil, "call")])
   it_parses %q([1, 2, 3]),      l([1, 2, 3])
+  it_parses %q([1 , 2, 3]),     l([1, 2, 3])
   it_parses %q([  1, 3    ]),   l([1, 3])
   it_parses %q(
     [
@@ -560,10 +561,15 @@ describe "Parser" do
   it_parses %q(:hi =: "hi"),        MatchAssign.new(l(:hi), l("hi"))
   it_parses %q(true =: false),      MatchAssign.new(l(true), l(false))
   it_parses %q([1, 2] =: [1, 2]),   MatchAssign.new(l([1, 2]), l([1, 2]))
-  it_parses %q({a: 2} =: {a: 2}),   MatchAssign.new(l({:a => 2}),l({:a => 2}))
+  it_parses %q({a: 2} =: {a: 2}),   MatchAssign.new(l({:a => 2}), l({:a => 2}))
   # Splats in list literals act as Splat collectors (as in Params).
   it_parses %q([1, *_, 3] =: list), MatchAssign.new(l([1, Splat.new(u("_")), 3]), Call.new(nil, "list"))
   it_parses %q([1, *a, 3] =: list), MatchAssign.new(l([1, Splat.new(v("a")), 3]), Call.new(nil, "list"))
+  # Only one Splat is allowed in a List pattern.
+  it_does_not_parse %q([*a, *b]       =: [1, 2])
+  it_does_not_parse %q([1, *a, 2, *b] =: [1, 2])
+  # Multiple Splats can be used if they are in different List patterns.
+  it_parses %q([[*a, 2], [3, *d]] =: list), MatchAssign.new(l([[Splat.new(v("a")), 2], [3, Splat.new(v("d"))]]), Call.new(nil, "list"))
   # Vars, Consts, and Underscores can also be used on either side.
   it_parses %q(a =: 5),             MatchAssign.new(v("a"), l(5))
   it_parses %q(Thing =: 10),        MatchAssign.new(c("Thing"), l(10))
