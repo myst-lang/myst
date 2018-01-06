@@ -32,6 +32,32 @@ describe("List#==") do
   it("returns false when the lists are not equal") do
     refute([1, 2] == [1, "hi"])
   end
+
+  it("returns false when the same elements are in different orders") do
+    refute([1, 2, 3] == [1, 3, 2])
+  end
+end
+
+describe("List#!=") do
+  it("returns false when the lists are equal") do
+    refute([1, 2] != [1, 2])
+  end
+
+  it("returns false when the lists are empty") do
+    refute([] != [])
+  end
+
+  it("returns true when the lists are different lengths") do
+    assert([1] != [1, 2])
+  end
+
+  it("returns true when the lists are not equal") do
+    assert([1, 2] != [1, "hi"])
+  end
+
+  it("returns true when the same elements are in different orders") do
+    assert([1, 2, 3] != [1, 3, 2])
+  end
 end
 
 
@@ -256,7 +282,7 @@ describe("List#unshift") do
     assert([1,2].unshift("hi") == ["hi", 1, 2])
     assert([1,2].unshift(nil) == [nil, 1, 2])
     assert([1,2].unshift(*[3,4]) == [3, 4, 1, 2])
-    assert([1,2].unshift([3,4]) == [[3, 4], 1, 2]) 
+    assert([1,2].unshift([3,4]) == [[3, 4], 1, 2])
   end
 
   it("returns nil if no value provided") do
