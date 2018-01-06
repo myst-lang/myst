@@ -95,6 +95,11 @@ module Myst
     end
 
 
+    # Raise a RuntimeError from the current location. Execution is immediataly
+    # halted and the interpreter will panic up until a rescuer is found.
+    #
+    # Multiple overloads of this function are provided for simplicity at the
+    # call site.
     def __raise_runtime_error(message : String)
       raise RuntimeError.new(TString.new(message), callstack)
     end
