@@ -15,7 +15,7 @@ module Myst
       when NilLiteral
         TNil.new
       else
-        raise "#{literal.class} cannot be converted to a Value."
+        raise "Interpreter Bug: Attempting to create a Value from a #{literal.class}, which is not a valid Literal type."
       end
     end
 
