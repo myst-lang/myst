@@ -19,6 +19,16 @@ OptionParser.parse! do |opts|
     exit
   end
 
+  opts.on("-v", "Display the version of the Myst interpreter.") do
+    puts Myst.version
+    exit
+  end
+
+  opts.on("-vv", "Display more version information.") do
+    puts Myst.verbose_version
+    exit
+  end
+
   opts.on("--ast", "Display the parsed AST for the input file. Code will not be executed if set.") do
     show_ast = true
     dry_run = true
