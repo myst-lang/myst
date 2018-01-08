@@ -1177,6 +1177,7 @@ describe "Parser" do
   it_parses %q(func()(1, 2)()),           Call.new(nil, Call.new(nil, Call.new(nil, "func"), [l(1), l(2)]))
   it_parses %q(callbacks[:first]()),      Call.new(nil, Call.new(Call.new(nil, "callbacks"), "[]", [l(:first)]))
   it_parses %q((fn ->() { } end)()),      Call.new(nil, AnonymousFunction.new([Block.new]))
+  it_parses %q(<get_func>()),             Call.new(nil, i(Call.new(nil, "get_func")))
 
 
 
