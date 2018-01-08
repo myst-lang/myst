@@ -31,7 +31,7 @@ module Myst
         splat_method = splat_method.as(TFunctor)
         result = Invocation.new(self, splat_method, value, [] of Value, nil).invoke
       else
-        raise_not_found("* (splat)", value)
+        __raise_not_found("* (splat)", value)
       end
 
       # The result of a Splat operation is always expected to be a List

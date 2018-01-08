@@ -51,7 +51,7 @@ module Myst
         value
       else
         @callstack.push(node)
-        raise_not_found(node.name, current_self)
+        __raise_not_found(node.name, current_self)
       end
     end
 
@@ -81,13 +81,12 @@ module Myst
     end
 
 
-    def raise_not_found(name, value)
+    def __raise_not_found(name, value : Value?)
       type_name = __typeof(value).name
       error_message = "No variable or method `#{name}` for #{type_name}"
 
       if value_to_s = __scopeof(value)["to_s"]?
-        value_to_s = value_to_s.as(TFunctor)
-        value_str = Invocation.new(self, value_to_s, value, [] of Value, nil).invoke.as(TString).value
+        value_str = NativeLib.call_func_by_name(self, value, "to_s", [] of Value).as(TString).value
         error_message = "No variable or method `#{name}` for #{value_str}:#{type_name}"
       end
 

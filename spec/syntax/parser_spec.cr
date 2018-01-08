@@ -825,9 +825,8 @@ describe "Parser" do
   ),                Def.new("foo"), Def.new("foo")
 
   # References to variables defined as parameters should be considered Vars,
-  # not Calls. To maintain consistency in the call syntax, this does not apply
-  # to the block parameter
-  it_parses %q(def foo(a); a; end),           Def.new("foo", [p("a")], e(v("a")))
+  # not Calls. This also applies to the block parameter.
+  it_parses %q(def foo(a); a; end),             Def.new("foo", [p("a")], e(v("a")))
   it_parses %q(def foo(&block); block; end),  Def.new("foo", block_param: p("block", block: true), body: e(Call.new(nil, "block")))
 
   # The Vars defined within the Def should be removed after the Def finishes.
@@ -1168,6 +1167,16 @@ describe "Parser" do
   test_calls_with_receiver("method do; end.",   Call.new(nil, "method", block: Block.new))
   test_calls_with_receiver("@var.",             iv("var"))
   test_calls_with_receiver("%Thing{}.",         Instantiation.new(c("Thing")))
+
+  # Any value can be coerced into a Call by suffixing it with parentheses.
+  it_parses %q(a = 1; a()),               SimpleAssign.new(v("a"), l(1)), Call.new(nil, "a")
+  it_parses %q(@a()),                     Call.new(nil, iv("a"))
+  it_parses %q((1 + 2)(1, 2)),            Call.new(nil, Call.new(l(1), "+", [l(2)], infix: true), [l(1), l(2)])
+  it_parses %q((func = &capture)()),      Call.new(nil, SimpleAssign.new(v("func"), FunctionCapture.new(Call.new(nil, "capture"))))
+  it_parses %q((get_func || @default)()), Call.new(nil, Or.new(Call.new(nil, "get_func"), iv("default")))
+  it_parses %q(func()(1, 2)()),           Call.new(nil, Call.new(nil, Call.new(nil, "func"), [l(1), l(2)]))
+  it_parses %q(callbacks[:first]()),      Call.new(nil, Call.new(Call.new(nil, "callbacks"), "[]", [l(:first)]))
+  it_parses %q((fn ->() { } end)()),      Call.new(nil, AnonymousFunction.new([Block.new]))
 
 
 
