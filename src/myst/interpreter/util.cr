@@ -60,8 +60,8 @@ module Myst
     # `lookup` method does not search deep enough for a value.
     #
     # The method will return `nil` if no matching entry is found.
-    def recursive_lookup(receiver, name)
-      func    = current_scope[name] if current_scope.has_key?(name)
+    def recursive_lookup(receiver, name, check_current = true)
+      func    = current_scope[name] if check_current && current_scope.has_key?(name)
       func  ||= __scopeof(receiver)[name]?
       if receiver.is_a?(TType)
         func ||= receiver.extended_ancestors.each do |anc|
