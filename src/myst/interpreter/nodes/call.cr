@@ -16,16 +16,15 @@ module Myst
     private def lookup_call(node : Call) : Tuple(Value, Value?)
       # If the Call has a receiver, lookup the Call on that receiver, otherwise
       # search the current scope.
-      receiver =
+      receiver, check_current =
         if node.receiver?
           node.receiver.accept(self)
-          stack.pop
+          {stack.pop, false}
         else
-          current_self
+          {current_self, true}
         end
-
-      func = recursive_lookup(receiver, node.name)
-
+      
+      func = recursive_lookup(receiver, node.name, check_current)
       {receiver, func}
     end
 

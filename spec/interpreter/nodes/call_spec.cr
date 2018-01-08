@@ -240,4 +240,18 @@ describe "Interpreter - Call" do
     def foo; a; end
     foo
   ),              [val(1)]
+
+  # Naming method same as method/variable in root scope
+  # Calling method explicity on receiver should not invoke root scope method/variable
+  it_interprets %q(
+    bar = 1
+
+    deftype Foo
+      def bar
+        "bar"
+      end
+    end
+
+    %Foo{}.bar
+  ),                [val("bar")]
 end
