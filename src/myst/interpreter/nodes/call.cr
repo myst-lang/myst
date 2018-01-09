@@ -7,7 +7,12 @@ module Myst
       if func
         visit_call(node, receiver, func)
       else
-        raise_not_found(node.name, receiver)
+        if (name = node.name).is_a?(String)
+          __raise_not_found(name, receiver)
+        else
+          # Should be unreachable
+          raise "Interpreter bug: "
+        end
       end
       @callstack.pop
     end
@@ -17,14 +22,30 @@ module Myst
       # If the Call has a receiver, lookup the Call on that receiver, otherwise
       # search the current scope.
       receiver, check_current =
-        if node.receiver?
+        case node.receiver?
+        when Node
           node.receiver.accept(self)
           {stack.pop, false}
         else
           {current_self, true}
         end
-      
-      func = recursive_lookup(receiver, node.name, check_current)
+
+      # TODO: Crystal 0.24.1 sometimes has an issue with reducing the types
+      # of local variables inside of `case...when` expressions. Until, this
+      # gets resolved, the explicit type casts on `name` and `raise` in the
+      # `else` case are necessary :/
+      func =
+        case (name = node.name)
+        when String
+          recursive_lookup(receiver, name.as(String), check_current)
+        when Node
+          node.name.as(Node).accept(self)
+          stack.pop
+        else
+          # Should be unreachable
+          raise "Interpreter bug: `name` of Call node must be a String or a Node, but got #{node.name.class}"
+        end
+
       {receiver, func}
     end
 

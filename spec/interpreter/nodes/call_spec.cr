@@ -254,4 +254,52 @@ describe "Interpreter - Call" do
 
     %Foo{}.bar
   ),                [val("bar")]
+
+
+  # Any expression can be used as the "name" of a Call.
+  it_interprets %q(
+    a = fn ->() { :called } end
+    a()
+  ),  [val(:called)]
+
+  it_interprets %q(
+    @a = fn ->() { :called } end
+    @a()
+  ),  [val(:called)]
+
+  it_interprets %q(
+    def foo
+      :called
+    end
+
+    (@func = &foo)()
+  ),  [val(:called)]
+
+  it_interprets %q(
+    def get_func
+      fn ->() { :called } end
+    end
+
+    (get_func || @default)()
+  ),  [val(:called)]
+
+  it_interprets %q(
+    def foo(last)
+      when last
+        return :called
+      else
+        return &foo
+      end
+    end
+
+    foo(false)(false)(true)
+  ),  [val(:called)]
+
+  it_interprets %q(
+    callbacks = {
+      first: fn ->() { :called } end
+    }
+
+    callbacks[:first]()
+  ),  [val(:called)]
 end

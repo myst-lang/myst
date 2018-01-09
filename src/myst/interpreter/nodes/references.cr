@@ -24,7 +24,7 @@ module Myst
         stack.push(value)
       else
         @callstack.push(node)
-        raise_not_found(node.name, current_self)
+        __raise_not_found(node.name, current_self)
       end
     end
 

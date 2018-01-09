@@ -588,7 +588,7 @@ module Myst
   end
 
   # A method call. Calls are the building block of functionality. Any
-  # operation not expressed by a distinct node is considered a call. For
+  # operation not expressed by a distinct node is considered a Call. For
   # example, `a + b` is a call to the method `+` on `a` with `b` as an
   # argument, `obj.member` is a call to the method `member` on `obj`, etc.
   # Additionally, any identifier that is not known to be a local variable
@@ -598,13 +598,19 @@ module Myst
   # |
   #   [ receiver '.' ] name '(' [ arg [ ',' arg ]* ] ')' [ block ]
   # |
+  #   expression '(' [ arg [ ',' arg ]* ] ')' [ block ]
+  # |
   #   arg operator arg
+  #
+  # Any expression can be forced into a Call by adding parentheses as a
+  # suffix. Complex expressions will require parentheses around the expression
+  # to avoid ambiguity. This is the third form shown above.
   #
   # The last form is for infix operations, such as `a + b` shown above, where
   # `operator` would be the `+`.
   class Call < Node
     property! receiver    : Node?
-    property  name        : String
+    property  name        : String | Node
     property  args        : Array(Node)
     property! block       : (Block | FunctionCapture)?
     property? infix       : Bool

@@ -607,8 +607,12 @@ module Myst
           #
           # This also applies to access notation calls. They are rewritten from
           # `a[b] = c` to a Call on `a` to the method `[]=` with the arguments
-          # `b, c`, this could also be written as `a.[]=(b, c)
-          target.name += "="
+          # `b, c`, this could also be written as `a.[]=(b, c).
+          #
+          # `to_lhs` should guarantee that `target.name` is a String, but
+          # Crystal has no way of knowing that, so the long-form assignment is
+          # necessary.
+          target.name = target.name.as(String) + "="
           target.args << value
           return target
         else
@@ -655,9 +659,9 @@ module Myst
       when accept(Token::Type::POINT)
         skip_space_and_newlines
         return parse_postfix(parse_var_or_call(receiver))
-      when accept(Token::Type::LBRACE)
+      when start = accept(Token::Type::LBRACE)
         skip_space_and_newlines
-        call = Call.new(receiver, "[]")
+        call = Call.new(receiver, "[]").at(start.location)
 
         loop do
           skip_space_and_newlines
@@ -670,6 +674,45 @@ module Myst
             finish = expect(Token::Type::RBRACE)
             call.at_end(finish.location)
             break
+          end
+        end
+
+        return parse_postfix(call)
+      # While `parse_var_or_call` can distinguish Calls for string identifiers,
+      # its isolated scope (just the current token) means it cannot be
+      # responsible for parsing Calls from arbitrary expressions. However,
+      # since these are just postfix expressions, those can be handled here.
+      when start = accept(Token::Type::LPAREN)
+        skip_space_and_newlines
+        call = Call.new(nil, receiver).at(start.location)
+
+        if finish = accept(Token::Type::RPAREN)
+          call.at_end(finish.location)
+        else
+          loop do
+            skip_space_and_newlines
+            case current_token.type
+            when Token::Type::AMPERSAND
+              call.block = parse_function_capture
+            else
+              call.args << parse_expression
+            end
+            skip_space_and_newlines
+
+            if accept(Token::Type::COMMA)
+              # Function captures must be given as the last argument in a Call.
+              # If a comma was encountered after the block has been set, then
+              # the capture was not the last argument, and thus invalid.
+              if call.block?
+                raise ParseError.new(current_location, "Function captures as block arguments must be given as the last argument for a Call.")
+              end
+            else
+              # If there is no comma, this is the last argument, and a closing
+              # parenthesis should be expected.
+              finish = expect(Token::Type::RPAREN)
+              call.at_end(finish.location)
+              break
+            end
           end
         end
 
@@ -1151,7 +1194,7 @@ module Myst
     # Methods to convert node types based on some context.
     ###
 
-    # Convert the given node to one that is suitable for the left-hand-side of
+    # Convert the given node to one that is suitable for the left-hand side of
     # an *Assign node.
     private def to_lhs(node)
       case node
@@ -1166,17 +1209,23 @@ module Myst
       when IVar
         return node
       when Call
+        name = node.name
+        # Dynamic call expressions cannot be used on the left-hand side.
         # Method names with modifiers (e.g., `foo?`) are not allowed on the
         # left-hand-side of an assignment
-        if modified_ident?(node.name)
+        if name.is_a?(Node)
+          raise ParseError.new(current_location, "Dynamic call expressions cannot be used on the left-hand side.")
+        end
+
+        if modified_ident?(name)
           raise ParseError.new(current_location, "Method names with modifiers (`?` and `!`) are not allowed as targets for assignment")
         end
         # If no explicit receiver was set on the Call, consider it a Var.
         if node.receiver? || node.block? || !node.args.empty?
           return node
         else
-          push_local_var(node.name)
-          return Var.new(node.name).at(node)
+          push_local_var(name)
+          return Var.new(name).at(node)
         end
       when Literal
         raise ParseError.new(current_location, "Cannot assign to literal value.")
@@ -1198,12 +1247,15 @@ module Myst
       when Const
         return node
       when Call
-        # Only bare calls can be used as bindings in a pattern.
-        if node.receiver? || node.block? || !node.args.empty?
+        # Only bare calls with identifier names can be used as bindings in a
+        # pattern.
+        if node.name.is_a?(Node)
+          raise ParseError.new(node.location.not_nil!, "Expression calls are not allowed in patterns.")
+        elsif node.receiver? || node.block? || !node.args.empty?
           raise ParseError.new(node.location.not_nil!, "Calls are not allowed in patterns.")
         else
-          push_local_var(node.name)
-          return Var.new(node.name).at(node)
+          push_local_var(node.name.as(String))
+          return Var.new(node.name.as(String)).at(node)
         end
       when ListLiteral
         node.elements = node.elements.map{ |e| to_pattern(e).as(Node) }
