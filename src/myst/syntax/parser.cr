@@ -260,9 +260,7 @@ module Myst
         param.block = true
         name = expect(Token::Type::IDENT)
         param.name = name.value
-        # Named parameters should be treated as Vars (not Calls) within the Def
-        # body. However, for a call syntax that is consistent with normal calls,
-        # the block parameter is excluded from this.
+        push_local_var(name.value)
         return param.at(start.location).at_end(name.location)
       when name = accept(Token::Type::IDENT)
         param.name = name.value

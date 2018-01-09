@@ -112,7 +112,7 @@ defmodule Enumerable
   # Returns the element with the lowest value as determined by <
   def min
     value = nil
-    
+
     each do |e|
       when value == nil || e < value
         value = e
@@ -127,7 +127,7 @@ defmodule Enumerable
   # Returns the element with the highest value as determined by >
   def max
     value = nil
-    
+
     each do |e|
       when value == nil || e > value
         value = e
@@ -179,12 +179,12 @@ defmodule Enumerable
 
   # reduce -> element
   #
-  # For every element in the enumerable, call block 
-  # with the result of the previous call and the current 
-  # element as arguments. Return a single value 
+  # For every element in the enumerable, call block
+  # with the result of the previous call and the current
+  # element as arguments. Return a single value
   def reduce(&block)
     value = nil
-    
+
     each do |e|
       when value == nil
         value = e
@@ -199,7 +199,7 @@ defmodule Enumerable
   # reduce -> element
   #
   # Same as above but an initial value is used
-  def reduce(value, &block)    
+  def reduce(value, &block)
     each do |e|
       value = block(value, e)
     end

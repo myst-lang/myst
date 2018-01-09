@@ -23,14 +23,27 @@ describe "Interpreter - Block" do
   it "creates a new functor for each block" do
     itr = parse_and_interpret %q(
       def foo(&block)
-        block
+        block()
       end
 
       foo{ 1 }
       foo{ 2 }
     )
 
-    itr.stack.pop.should eq(val(2))
+    itr.stack.last.should eq(val(2))
+  end
+
+  it "is added as a variable in the local scope" do
+    # Without the parentheses, this should just return the block functor.
+    itr = parse_and_interpret %q(
+      def foo(&block)
+        block
+      end
+
+      foo{ }
+    )
+
+    itr.stack.last.class.should eq(TFunctor)
   end
 
   it "creates a closure of the environment it is defined in" do
@@ -48,6 +61,6 @@ describe "Interpreter - Block" do
       x
     )
 
-    itr.stack.pop.should eq(val(6))
+    itr.stack.last.should eq(val(6))
   end
 end

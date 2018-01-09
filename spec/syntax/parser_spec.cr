@@ -827,7 +827,9 @@ describe "Parser" do
   # References to variables defined as parameters should be considered Vars,
   # not Calls. This also applies to the block parameter.
   it_parses %q(def foo(a); a; end),             Def.new("foo", [p("a")], e(v("a")))
-  it_parses %q(def foo(&block); block; end),  Def.new("foo", block_param: p("block", block: true), body: e(Call.new(nil, "block")))
+  it_parses %q(def foo(&block); block; end),    Def.new("foo", block_param: p("block", block: true), body: e(v("block")))
+  # The block can be forced into a Call with parentheses, like any other local variable.
+  it_parses %q(def foo(&block); block(); end),  Def.new("foo", block_param: p("block", block: true), body: e(Call.new(nil, "block")))
 
   # The Vars defined within the Def should be removed after the Def finishes.
   it_parses %q(def foo(a); end; a), Def.new("foo", [p("a")]), Call.new(nil, "a")
