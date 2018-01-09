@@ -21,10 +21,10 @@ defmodule Enumerable
     first = true
     each do |e|
       when first
-        str = str + e.to_s
+        str += e.to_s
         first = false
       else
-        str = str + delimiter + e.to_s
+        str += "<(delimiter)><(e)>"
       end
     end
     str
@@ -54,7 +54,8 @@ defmodule Enumerable
       when block(e)
         result = true
       else
-        break result = false
+        result = false
+        break
       end
     end
     result
@@ -68,7 +69,8 @@ defmodule Enumerable
     result = nil
     each do |e|
       when block(e)
-        break result = true
+        result = true
+        break
       else
         result = false
       end
@@ -109,7 +111,7 @@ defmodule Enumerable
 
   # min -> element
   #
-  # Returns the element with the lowest value as determined by <
+  # Returns the element with the lowest value as determined by <.
   def min
     value = nil
 
@@ -124,7 +126,7 @@ defmodule Enumerable
 
   # max -> element
   #
-  # Returns the element with the highest value as determined by >
+  # Returns the element with the highest value as determined by >.
   def max
     value = nil
 
@@ -139,7 +141,7 @@ defmodule Enumerable
 
   # sort -> list
   #
-  # Returns a sorted list of all elements
+  # Returns a sorted list of all elements.
   def sort
     list = to_list
     when size < 2
@@ -166,7 +168,7 @@ defmodule Enumerable
 
   # to_list -> list
   #
-  # Returns a list containing all elements
+  # Returns a list containing all elements.
   def to_list
     list = []
 
@@ -181,7 +183,7 @@ defmodule Enumerable
   #
   # For every element in the enumerable, call block
   # with the result of the previous call and the current
-  # element as arguments. Return a single value
+  # element as arguments. Returns a single value.
   def reduce(&block)
     value = nil
 
@@ -198,7 +200,7 @@ defmodule Enumerable
 
   # reduce -> element
   #
-  # Same as above but an initial value is used
+  # Same as above but an initial value is used.
   def reduce(value, &block)
     each do |e|
       value = block(value, e)

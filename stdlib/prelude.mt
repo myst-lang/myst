@@ -11,9 +11,9 @@
 # will use constantly.
 
 require "./enumerable.mt"
-require "./list.mt"
 require "./file.mt"
-require "./string.mt"
-require "./map.mt"
 require "./integer.mt"
+require "./list.mt"
+require "./map.mt"
+require "./string.mt"
 require "./time.mt"
