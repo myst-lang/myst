@@ -10,6 +10,8 @@ module Myst
     def initialize
       @history = IO::Memory.new
       @interpreter = Interpreter.new
+      prelude_require = Require.new(StringLiteral.new("stdlib/prelude.mt")).at(Location.new(__DIR__))
+      @interpreter.run(prelude_require)
     end
 
     def process(level, prompt, prev_input = "")
@@ -46,29 +48,9 @@ module Myst
       Readline.readline(prompt, true)
     end
 
-    private def stack_value(primitive : TPrimitive)
-      primitive.value
-    end
-
-    private def stack_value(container : ContainerType)
-      container.to_s
-    end
-
-    private def stack_value(string : TString)
-      "\"#{string.value}\""
-    end
-    
-    private def stack_value(list : TList)
-      list.elements.map do |element|
-        if element.responds_to?(:value)
-          element.value
-        else
-          element.to_s
-        end
-      end
-    end
-
     private def stack_value(value : Value)
+      NativeLib.call_func_by_name(@interpreter, value, "to_s", [] of Value).as(TString).value
+    rescue
       value.to_s
     end
   end
