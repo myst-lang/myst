@@ -4,9 +4,9 @@ deftype Integer
   # Call block as many times as the value of this integer.
   def times(&block)
     i = 0
-    
+
     while i < self
-      block
+      block()
       i += 1
     end
 
