@@ -1,51 +1,61 @@
 require "readline"
 
 module Myst
-  class Repl
+  class ReplIO < IO
+    PROMPT = "myst> "
+  
+    def initialize(@input = "")
+      @pos = 0
+      @ask = true
+    end
+  
+    def read(slice : Bytes)
+      retrieve if @ask
+      @ask = false
+  
+      count = slice.size
+      count = Math.min(count, @input.to_slice.size)
+      slice.copy_from(@input.to_slice.to_unsafe + @pos, count)
+      @pos += count
+      count
+    end
+  
+    def write(slice : Bytes)
+    end
+  
+    private def retrieve
+      if line = Readline.readline(PROMPT, true)
+        @pos = 0
+        @input =  "#{line};\0"
+      else
+        @input
+      end
+    end
+  
+    private def ask_for_input?
+      @input.size == @pos && @ask
+    end
+  end
 
+  class Repl
     def self.start
       new.start
     end
 
     def initialize
-      @history = IO::Memory.new
       @interpreter = Interpreter.new
       prelude_require = Require.new(StringLiteral.new("stdlib/prelude.mt")).at(Location.new(__DIR__))
       @interpreter.run(prelude_require)
     end
 
-    def process(level, prompt, prev_input = "")
-      loop do
-        if input = wait_for_input(prompt)
-          new_input = "#{prev_input}\n#{input}"
-          parser = Parser.new(IO::Memory.new(new_input), "")
-
-          begin
-            program = parser.parse
-            @interpreter.run(program)
-
-            STDOUT.print "=> "
-            STDOUT.flush
-            STDOUT.puts stack_value(@interpreter.stack.pop)
-            return unless level == 0                          
-          rescue ex 
-            if ex.message.to_s.includes?("EOF")
-              process(level + 1, "myst-r *> ", new_input)
-            else
-              STDOUT.puts ex.message
-            end
-            return unless level == 0                          
-          end
-        end
-      end
-    end
-
     def start
-      process(0, "myst-r > ")
-    end
-
-    private def wait_for_input(prompt)
-      Readline.readline(prompt, true)
+      loop do
+        program = Parser.new(ReplIO.new, "").parse
+        @interpreter.run(program)
+        STDOUT.puts stack_value(@interpreter.stack.pop)
+      rescue ex
+        STDOUT.puts ex
+      end
     end
 
     private def stack_value(value : Value)
