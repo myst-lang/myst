@@ -11,6 +11,13 @@ source_file = ""
 show_ast = false
 dry_run = false
 
+command = ARGV.first?
+
+case command
+when "repl"
+  Repl.start
+end
+
 OptionParser.parse! do |opts|
   opts.banner = "Usage: myst [filename] [options]"
 
@@ -43,7 +50,6 @@ OptionParser.parse! do |opts|
     end
   end
 end
-
 
 if source_file.empty?
   STDERR.puts("No source file given.")
