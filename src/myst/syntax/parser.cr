@@ -8,11 +8,7 @@ module Myst
     end
 
 		def self.for_content(content)
-			# Creates a temporary file with the content specified by the user
-			evalfile = Tempfile.open("evalfile", ".mt") do |file|
-				file.print content
-			end
-			new(File.open(evalfile.path), evalfile.path)
+      new(IO::Memory.new(content), "")
 		end
 
     def initialize(source : IO, source_file : String)
