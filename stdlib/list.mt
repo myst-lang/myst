@@ -11,7 +11,7 @@ deftype List
 
   # empty? -> bool
   #
-  # Return `true` if the List contains 0 characters. Return `false` otherwise.
+  # Return `true` if the List contains 0 elements. Return `false` otherwise.
   def empty?
     size == 0
   end
