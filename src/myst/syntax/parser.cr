@@ -1,5 +1,4 @@
 require "./ast.cr"
-require "tempfile"
 
 module Myst
   class Parser < Lexer
