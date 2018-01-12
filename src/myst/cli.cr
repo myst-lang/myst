@@ -44,14 +44,13 @@ class Cli
           unless eval
             source_file = before_dash.shift
           else
-						source_file = before_dash.select do |i|
-							if(File.file? i) 
-								STDERR.puts ("Do not specify files with the eval switch")
-								exit 1
-							end
-
-							(!i.starts_with? "--")
-						end.join "\n"
+            source_file = before_dash.select do |i|
+                            if(File.file? i) 
+                              STDERR.puts ("Do not specify files with the eval switch")
+                              exit 1
+                            end
+                            (!i.starts_with? "--")
+            end.join "\n"
           end
         end
       end
@@ -65,10 +64,11 @@ class Cli
     # Parse the program into an AST
     begin
       program = unless eval
-									Parser.for_file(source_file).parse
-								else
-									Parser.for_content(source_file).parse
-								end
+        Parser.for_file(source_file).parse
+      else
+        Parser.for_content(source_file).parse
+    end
+
     rescue e
       STDERR.puts(e.message)
       exit 1
