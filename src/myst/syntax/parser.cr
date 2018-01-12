@@ -7,9 +7,9 @@ module Myst
       new(File.open(source_file), source_file)
     end
 
-		def self.for_content(content)
+  def self.for_content(content)
       new(IO::Memory.new(content), "")
-		end
+  end
 
     def initialize(source : IO, source_file : String)
       super(source, source_file)
