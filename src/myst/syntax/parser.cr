@@ -7,13 +7,13 @@ module Myst
       new(File.open(source_file), source_file)
     end
 
-		def self.for_content(content)
-			# Creates a temporary file with the content specified by the user
-			evalfile = Tempfile.open("evalfile", ".mt") do |file|
-				file.print content
-			end
-			new(File.open(evalfile.path), evalfile.path)
-		end
+  def self.for_content(content)
+    # Creates a temporary file with the content specified by the user
+    evalfile = Tempfile.open("evalfile", ".mt") do |file|
+      file.print content
+    end
+    new(File.open(evalfile.path), evalfile.path)
+  end
 
     def initialize(source : IO, source_file : String)
       super(source, source_file)
