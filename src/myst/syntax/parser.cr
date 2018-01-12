@@ -7,7 +7,7 @@ module Myst
     end
 
   def self.for_content(content)
-      new(IO::Memory.new(content), "")
+      new(IO::Memory.new(content), "eval_input")
   end
 
     def initialize(source : IO, source_file : String)
