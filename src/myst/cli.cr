@@ -45,11 +45,11 @@ class Cli
             source_file = before_dash.shift
           else
             source_file = before_dash.select do |i|
-                            if(File.file? i) 
-                              STDERR.puts ("Do not specify files with the eval switch")
-                              exit 1
-                            end
-                            (!i.starts_with? "--")
+              if (File.file? i)
+                STDERR.puts ("Do not specify files with the eval switch")
+                exit 1
+              end
+              !i.starts_with? "--"
             end.join "\n"
           end
         end
@@ -57,7 +57,7 @@ class Cli
     end
 
     if source_file.empty?
-      STDERR.puts("No source file given.")
+      STDERR.puts("No#{!eval ? " source file" : "thing to evaluate"} given.")
       exit 1
     end
 
@@ -67,8 +67,7 @@ class Cli
         Parser.for_file(source_file).parse
       else
         Parser.for_content(source_file).parse
-    end
-
+      end
     rescue e
       STDERR.puts(e.message)
       exit 1
