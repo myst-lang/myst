@@ -2474,8 +2474,29 @@ describe "Parser" do
     fn
       ->(1, :hi) { true || false }
     end
-  ),                        AnonymousFunction.new([Block.new([p(nil, l(1)), p(nil, l(:hi))], e(Or.new(l(true), l(false))))])
+  ),                          AnonymousFunction.new([Block.new([p(nil, l(1)), p(nil, l(:hi))], e(Or.new(l(true), l(false))))])
 
+  # Exception handling is not allowed with {... } syntax, but only with do... end
+  it_does_not_parse %q(
+    fn
+      ->() {
+        raise :error
+        rescue
+          :rescued
+      }
+    end
+  )
+
+  # Expection handling in anonymous functions with do... end syntax is allowed
+  it_parses %q(
+    fn
+      ->() do
+        raise :error
+        rescue
+          :rescue
+        end
+    end
+  ),                        AnonymousFunction.new([Block.new(body: ExceptionHandler.new(Raise.new(l(:error)), [Rescue.new]))])
 
   # The bodies of each clause may contain multiple expressions
   it_parses %q(
