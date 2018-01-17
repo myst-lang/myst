@@ -2496,7 +2496,7 @@ describe "Parser" do
           :rescue
         end
     end
-  ),                        AnonymousFunction.new([Block.new(body: ExceptionHandler.new(Raise.new(l(:error)), [Rescue.new]))])
+  ),                        AnonymousFunction.new([Block.new(body: ExceptionHandler.new(Raise.new(l(:error)), [Rescue.new(l(:rescue))]))])
 
   # The bodies of each clause may contain multiple expressions
   it_parses %q(
