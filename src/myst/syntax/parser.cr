@@ -680,10 +680,11 @@ module Myst
         end
 
         return parse_postfix(call)
-        # While `parse_var_or_call` can distinguish Calls for string identifiers,
-        # its isolated scope (just the current token) means it cannot be
-        # responsible for parsing Calls from arbitrary expressions. However,
-        # since these are just postfix expressions, those can be handled here.
+      
+      # While `parse_var_or_call` can distinguish Calls for string identifiers,
+      # its isolated scope (just the current token) means it cannot be
+      # responsible for parsing Calls from arbitrary expressions. However,
+      # since these are just postfix expressions, those can be handled here.
       when start = accept(Token::Type::LPAREN)
         skip_space_and_newlines
         call = Call.new(nil, receiver).at(start.location)
