@@ -2481,7 +2481,7 @@ describe "Parser" do
     fn
       ->() {
         raise :error
-        rescue
+      rescue
           :rescued
       }
     end
@@ -2492,11 +2492,21 @@ describe "Parser" do
     fn
       ->() do
         raise :error
-        rescue
-          :rescue
-        end
+      rescue
+        :rescue
+      end
+
+      ->(n : Integer) do
+        :success
+      end
+
+      ->(3) { :got_3 }
     end
-  ),                        AnonymousFunction.new([Block.new(body: ExceptionHandler.new(Raise.new(l(:error)), [Rescue.new(l(:rescue))]))])
+  ), AnonymousFunction.new([
+       Block.new(body: ExceptionHandler.new(Raise.new(l(:error)), [Rescue.new(l(:rescue))])),
+       Block.new([p("n", restriction: c("Integer"))], l(:success)),
+       Block.new([p(nil, l(3))], l(:got_3))
+     ])
 
   # The bodies of each clause may contain multiple expressions
   it_parses %q(
