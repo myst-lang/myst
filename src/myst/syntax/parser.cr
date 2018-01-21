@@ -6,9 +6,9 @@ module Myst
       new(File.open(source_file), source_file)
     end
 
-  def self.for_content(content)
+    def self.for_content(content)
       new(IO::Memory.new(content), "eval_input")
-  end
+    end
 
     def initialize(source : IO, source_file : String)
       super(source, source_file)
@@ -16,8 +16,6 @@ module Myst
       @local_vars = [Set(String).new]
       read_token
     end
-
-
 
     ###
     # Movement
@@ -32,7 +30,7 @@ module Myst
     end
 
     def skip_space_and_newlines
-      skip_tokens(Token::Type.whitespace+[Token::Type::NEWLINE])
+      skip_tokens(Token::Type.whitespace + [Token::Type::NEWLINE])
     end
 
     private def skip_tokens(allowed)
@@ -41,7 +39,6 @@ module Myst
       end
       @current_token
     end
-
 
     def accept(*types : Token::Type)
       if types.includes?(@current_token.type)
@@ -203,7 +200,7 @@ module Myst
 
     # If a Def has parameters, they must be parenthesized. If the token after
     # the opening parenthesis is a closing one, then there are no parameters.
-    def parse_param_list(into target : Def, require_parens=false)
+    def parse_param_list(into target : Def, require_parens = false)
       if (require_parens ? expect(Token::Type::LPAREN) : accept(Token::Type::LPAREN))
         skip_space_and_newlines
 
@@ -245,7 +242,7 @@ module Myst
       end
     end
 
-    def parse_param(allow_splat=true)
+    def parse_param(allow_splat = true)
       param = Param.new
 
       case
@@ -321,15 +318,19 @@ module Myst
         closing_brace =
           case
           when accept(Token::Type::DO)
+            skip_space_and_newlines
+            block.body = parse_exception_handler
+
             Token::Type::END
           when accept(Token::Type::LCURLY)
+            skip_space_and_newlines
+            block.body = parse_code_block(Token::Type::RCURLY)
+
             Token::Type::RCURLY
           else
             raise ParseError.new(current_location, "Expected `{` or `do` to start a block body. Got #{current_token.type}.")
           end
 
-        skip_space_and_newlines
-        block.body = parse_code_block(closing_brace)
         skip_space_and_newlines
         expect(closing_brace)
 
@@ -564,7 +565,7 @@ module Myst
     # Arithmetic is left-associative. `1 - 1 - 1` _must_ be parsed as
     # `((1 - 1) - 1)` to follow mathematic precedence and give the right result
     # of `-2`, rather than `(1 - (1 - 1))`, which would yield `0`.
-    def parse_additive(left=nil)
+    def parse_additive(left = nil)
       left ||= parse_multiplicative
       skip_space
 
@@ -578,7 +579,7 @@ module Myst
       return left
     end
 
-    def parse_multiplicative(left=nil)
+    def parse_multiplicative(left = nil)
       left ||= parse_assign
       skip_space
 
@@ -652,7 +653,7 @@ module Myst
       end
     end
 
-    def parse_postfix(receiver=nil)
+    def parse_postfix(receiver = nil)
       receiver ||= parse_primary
       skip_space
 
@@ -679,6 +680,7 @@ module Myst
         end
 
         return parse_postfix(call)
+      
       # While `parse_var_or_call` can distinguish Calls for string identifiers,
       # its isolated scope (just the current token) means it cannot be
       # responsible for parsing Calls from arbitrary expressions. However,
@@ -765,9 +767,9 @@ module Myst
       return ValueInterpolation.new(value).at(start.location).at_end(finish.location)
     end
 
-    def parse_var_or_call(receiver=nil)
+    def parse_var_or_call(receiver = nil)
       start = expect(Token::Type::IDENT, Token::Type::CONST)
-      name  = start.value
+      name = start.value
 
       skip_space
       if receiver.nil? && current_token.type != Token::Type::LPAREN
@@ -953,7 +955,6 @@ module Myst
       return handler_needed ? handler : body
     end
 
-
     def parse_instantiation
       start = expect(Token::Type::MODULO)
       type =
@@ -983,7 +984,6 @@ module Myst
             inst.args << parse_expression
           end
           skip_space_and_newlines
-
 
           # If there is no comma, this is the last argument, and a closing
           # parenthesis should be expected.
@@ -1041,7 +1041,6 @@ module Myst
         raise ParseError.new(current_location, "Expected a literal value. Got #{current_token.inspect} instead")
       end
     end
-
 
     record StringPiece,
       node : Node,
@@ -1178,7 +1177,6 @@ module Myst
       return key
     end
 
-
     def parse_function_capture
       start = expect(Token::Type::AMPERSAND)
       skip_space
@@ -1259,7 +1257,7 @@ module Myst
           return Var.new(node.name.as(String)).at(node)
         end
       when ListLiteral
-        node.elements = node.elements.map{ |e| to_pattern(e).as(Node) }
+        node.elements = node.elements.map { |e| to_pattern(e).as(Node) }
         has_splat = false
         node.elements.each do |el|
           if el.is_a?(Splat)
@@ -1271,7 +1269,7 @@ module Myst
           end
         end
       when MapLiteral
-        node.entries = node.entries.map{ |e| MapLiteral::Entry.new(e.key, to_pattern(e.value).as(Node)) }
+        node.entries = node.entries.map { |e| MapLiteral::Entry.new(e.key, to_pattern(e.value).as(Node)) }
       when Splat
         node.value = to_pattern(node.value)
       end
