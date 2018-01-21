@@ -1,9 +1,9 @@
 module Myst
   class Interpreter    
-    NativeLib.method :random_rand, TModule, max : TInteger? = nil do
+    NativeLib.method :random_rand, TModule, max : Value? = nil do
       if max.is_a? TInteger 
         TInteger.new(rand(max.value))
-      elsif !max
+      else
         TFloat.new(rand())
       end
     end
