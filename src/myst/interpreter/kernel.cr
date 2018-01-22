@@ -16,6 +16,7 @@ module Myst
       kernel.scope["IO"]        = init_io(kernel)
       kernel.scope["FSUtils"]   = init_file_utils(kernel)
       kernel.scope["Time"]      = init_time(kernel)
+      kernel.scope["Random"]    = init_random(kernel)
       kernel
     end
   end
