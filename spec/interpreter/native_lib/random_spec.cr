@@ -29,6 +29,18 @@ describe "NativeLib - Random methods" do
 
       itr.output.to_s.split("\n").each { |line| (500...1000).should contain line.to_i64 unless line.empty? }      
     end
+
+    it "Returns a float when a max float is specified" do
+      itr = interpret_with_mocked_output %q(
+        i = 0
+        while i < 32            
+          IO.puts(Random.rand(500.0) + 500.0)
+          i += 1
+        end
+      )
+
+      itr.output.to_s.split("\n").each { |line| (500.0...1000.0).should contain line.to_f64 unless line.empty? }      
+    end
     
     it "Returns something" do
       itr = interpret_with_mocked_output %q(

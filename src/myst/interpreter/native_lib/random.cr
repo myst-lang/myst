@@ -3,6 +3,8 @@ module Myst
     NativeLib.method :random_rand, TModule, max : Value? = nil do
       if max.is_a? TInteger 
         TInteger.new(rand(max.value))
+      elsif max.is_a? TFloat
+        TFloat.new(rand(max.value))
       else
         TFloat.new(rand())
       end
