@@ -30,20 +30,6 @@ describe "Interpreter - AnonymousFunction" do
     itr.stack.last.should eq(val(:called_foo))
   end
 
-  it "captures the value of `self` as part of the closure" do
-    itr = parse_and_interpret %q(
-      @sum = 0
-      func = fn
-        ->(a) { @sum += a }
-      end
-
-      func(6)
-      @sum
-    )
-
-    itr.stack.last.should eq(val(6))
-  end
-
   it "allows clauses of various arities" do
     itr = parse_and_interpret %q(
       fn
