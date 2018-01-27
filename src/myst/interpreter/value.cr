@@ -286,8 +286,9 @@ module Myst
     property  clauses         : Array(Callable)
     property  lexical_scope   : Scope
     property? closure         : Bool
+    property!  closed_self     : Value?
 
-    def initialize(@clauses=[] of Callable, @lexical_scope : Scope=Scope.new, @closure : Bool=false)
+    def initialize(@clauses=[] of Callable, @lexical_scope : Scope=Scope.new, @closure : Bool=false, @closed_self : Value?=nil)
     end
 
     def add_clause(definition : Callable)

@@ -7,4 +7,5 @@
 
 # The myst executable
 /myst
-/bytecode_generator
+# DWARF file from compiling on macOS
+/myst.dwarf

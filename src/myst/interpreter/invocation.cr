@@ -21,9 +21,15 @@ module Myst
 
     def invoke
       @selfstack_size_at_entry = @itr.self_stack.size
-      # If the invocation has a receiver, use it as the current value of `self`
-      # for the duration of the Invocation.
-      @itr.push_self(@receiver.not_nil!) if @receiver
+      case
+      when @receiver
+        # If the invocation has a receiver, use it as the current value of `self`
+        # for the duration of the Invocation.
+        @itr.push_self(@receiver.not_nil!)
+      when @func.closure?
+        # If the invoked functor is a closure, use the closed value of `self`.
+        @itr.push_self(@func.closed_self)
+      end
 
       result = @func.clauses.each do |clause|
         @itr.push_scope_override(@func.new_scope)
@@ -36,7 +42,7 @@ module Myst
 
       # After the invocation, restore the current value of `self` to whatever
       # it had been previously.
-      @itr.pop_self if @receiver
+      @itr.pop_self(to_size: @selfstack_size_at_entry)
       result || @itr.__raise_runtime_error("No clause matches with given arguments: #{@args.inspect}")
     rescue ex : BreakException
       if ex.caught?

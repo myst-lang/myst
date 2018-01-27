@@ -115,4 +115,28 @@ describe "Interpreter - Invocation" do
 
   it_invokes TYPE_DEFS, "Foo.foo",    val(:static_foo)
   it_invokes TYPE_DEFS, "%Foo{}.foo", val(:instance_foo)
+
+
+  it "restores the value of `self` after executing with a receiver" do
+    itr = Interpreter.new
+    original_self = itr.current_self
+
+    parse_and_interpret %q(
+      "hello, world".size
+    ), interpreter: itr
+
+    itr.current_self.should eq(original_self)
+  end
+
+  it "restores the value of `self` after executing a closure" do
+    itr = Interpreter.new
+    original_self = itr.current_self
+
+    parse_and_interpret %q(
+      @sum = 0
+      [1, 2, 3].each{ |e| @sum += e }
+    ), interpreter: itr
+
+    itr.current_self.should eq(original_self)
+  end
 end

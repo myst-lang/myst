@@ -63,4 +63,14 @@ describe "Interpreter - Block" do
 
     itr.stack.last.should eq(val(6))
   end
+
+  it "captures the value of `self` as part of the closure" do
+    itr = parse_and_interpret %q(
+      @sum = 0
+      [1, 2, 3].each{ |e| @sum += e }
+      @sum
+    )
+
+    itr.stack.last.should eq(val(6))
+  end
 end
