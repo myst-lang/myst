@@ -21,15 +21,11 @@ module Myst
 
     def invoke
       @selfstack_size_at_entry = @itr.self_stack.size
-      case
-      when @receiver
-        # If the invocation has a receiver, use it as the current value of `self`
-        # for the duration of the Invocation.
-        @itr.push_self(@receiver.not_nil!)
-      when @func.closure?
-        # If the invoked functor is a closure, use the closed value of `self`.
-        @itr.push_self(@func.closed_self)
-      end
+      # If the invocation has a receiver, use it as the current value of `self`
+      # for the duration of the Invocation.
+      @itr.push_self(@receiver.not_nil!) if @receiver
+      # If the invoked functor is a closure, use the closed value of `self`.
+      @itr.push_self(@func.closed_self) if @func.closure?
 
       result = @func.clauses.each do |clause|
         @itr.push_scope_override(@func.new_scope)
