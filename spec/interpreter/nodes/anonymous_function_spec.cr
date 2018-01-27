@@ -16,13 +16,32 @@ describe "Interpreter - AnonymousFunction" do
 
   it "acts like a closure" do
     itr = parse_and_interpret %q(
-      fn
-        ->(a) { a + 1 }
+      def foo
+        :called_foo
       end
+
+      func = fn
+        ->() { foo }
+      end
+
+      func()
     )
 
-    functor = itr.stack.pop.as(TFunctor)
-    functor.closure?.should eq(true)
+    itr.stack.last.should eq(val(:called_foo))
+  end
+
+  it "captures the value of `self` as part of the closure" do
+    itr = parse_and_interpret %q(
+      @sum = 0
+      func = fn
+        ->(a) { @sum += a }
+      end
+
+      func(6)
+      @sum
+    )
+
+    itr.stack.last.should eq(val(6))
   end
 
   it "allows clauses of various arities" do

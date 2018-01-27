@@ -27,7 +27,7 @@ module Myst
           scope.assign(node.name, functor)
         end
       else
-        functor = TFunctor.new([] of Callable, scope, closure: true)
+        functor = TFunctor.new([] of Callable, scope, closure: true, closed_self: current_self)
       end
 
       functor.add_clause(TFunctorDef.new(node))
