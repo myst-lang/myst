@@ -7,4 +7,4 @@ authors:
 
 targets:
   myst:
-    main: src/myst.cr
+    main: src/myst_cli.cr
