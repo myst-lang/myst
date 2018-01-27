@@ -1,9 +1,9 @@
 module Myst
   VERSION_MAJOR = 0
-  VERSION_MINOR = 3
+  VERSION_MINOR = 4
   VERSION_PATCH = 0
   VERSION_EXTRA = ""
-  RELEASE_DATE = "2017-12-28"
+  RELEASE_DATE = "2018-01-27"
 
   def Myst.version
     String.build do |str|
