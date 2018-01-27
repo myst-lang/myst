@@ -7,18 +7,16 @@ defmodule Spec
   # made within an `it` block fails. The failure contains the Spec object that
   # failed, the value that was expected, and the value that was received.
   deftype AssertionFailure
-    def initialize(name : String, expected, got)
-      @name     = name
+    def initialize(expected, got)
       @expected = expected
       @got      = got
     end
 
-    def name;     @name;      end
     def expected; @expected;  end
     def got;      @got;       end
 
     def to_s
-      "Assertion failed: <(@name)>.\n" +
+      "Assertion failed.\n" +
       "    Expected: <(@expected)>\n" +
       "         Got: <(@got)>\n"
     end

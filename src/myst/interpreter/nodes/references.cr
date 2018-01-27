@@ -20,7 +20,7 @@ module Myst
     end
 
     def visit(node : Const)
-      if value = current_scope[node.name]? || __typeof(current_self).scope[node.name]
+      if value = (current_scope[node.name]? || __typeof(current_self).scope[node.name]? || recursive_lookup(current_self, node.name))
         stack.push(value)
       else
         @callstack.push(node)

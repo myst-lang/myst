@@ -1,3 +1,4 @@
+require "./spec/dsl.mt"
 require "./spec/errors.mt"
 require "./spec/single_spec.mt"
 
