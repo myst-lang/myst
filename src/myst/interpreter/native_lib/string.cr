@@ -91,15 +91,23 @@ module Myst
     end
 
     NativeLib.method :string_at, TString, index : TInteger, length : TInteger? do
-      begin
-        unless(length)
-          TString.new(this.value[index.value].to_s)
-        else # Length is provided - a range is requested
-          TString.new(this.value[index.value, length.value])
+      idx = index.value      
+
+      result = 
+        if length.is_a? TInteger
+          # Explicitly check that `String#[start, count]` will not fail.
+          if idx < this.value.size && length.value > idx
+            TString.new(this.value[idx, length.value])
+          end
+        else
+          # Use nil-checking to assert that `index.value` is valid.
+          if char = this.value[index.value]?
+            TString.new(char.to_s)
+          end
         end
-      rescue 
-        TNil.new
-      end
+
+      # If none of the above conditions are met, default to `TNil`.
+      result ||= TNil.new
     end    
 
     NativeLib.method :string_reverse, TString do

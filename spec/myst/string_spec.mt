@@ -156,12 +156,17 @@ end
 describe("String#downcase") do
   it("Returns a lowercased version of itself") do
     assert("HELLO".downcase == "hello")
+    assert("Bobby Fischer".downcase == "bobby fischer")
+    assert("".upcase == "")
+    assert("snake_case".downcase == "snake_case")
   end
 end
 
 describe("String#upcase") do
   it("Returns a uppercased version of itself") do
     assert("hello".upcase == "HELLO")
+    assert("HeLLo AgAIn".upcase == "HELLO AGAIN")
+    assert("SCREAMING AM I".upcase == "SCREAMING AM I")
   end
 end
 
@@ -198,33 +203,54 @@ end
 
 describe("String#includes") do
   it("Returns true if the string contains given string") do
-    assert("Bob fish? yeah".includes?("fish?") == true)
-    assert("Chess is awesome".includes?("Poker") == false)
+    assert("Bob fish? yeah".includes?("fish?"))
+    refute("Chess is awesome".includes?("Fried liver"))
   end
 end
 
 describe("String#[]") do
-  it("Returns the char at the given index. A negative index is counted from the end of the string. \
+  str = "Hello"
+
+  it("returns the char at the given index. A negative index is counted from the end of the string. \
     Returns nil if the index falls outside of the string") do
 
-    str = "Hello"
-
-    assert(str[0] + str[-1] == "Ho")
-    assert(str[10] == nil)
+    assert(str[0] + str[-1] == "Ho")    
   end
 
-  it("Returns the substring containing length of characters from start. A negative index is counted from the end of the string. \
-    Returns nil if the index falls outside of the string") do
-
-    str = "Hello"
+  it("returns the substring containing length of characters from start. A negative index is counted from the end of the string. \
+    Returns nil if the index falls outside of the string") do    
         
     assert(str[0, 3] == "Hel")
     assert(str[-2, 2] + str[2] == "lol") 
   end
+
+  it("returns the element at the given index") do
+   assert("12"[0] == "1") 
+ end   
+
+ it("returns nil for an out-of-bounds access") do    
+   assert("D:"[3] == nil) 
+   assert(str[10] == nil)
+ end 
+
+ describe("with a negative index") do 
+   it("is 1-based, counting from the end") do 
+     assert("Bob"[-1] == "b")
+   end
+
+   it("returns the nth element from the end of the string") do      
+     assert("123"[-2] == "2") 
+   end 
+
+   it("returns nil for out-of-bounds access") do 
+     str = "yeah, that'd be cool"
+     assert(str[-str.size - 2] == nil)
+   end 
+ end 
 end
 
 describe("String#reverse") do 
-  it("Returns a new string with characters in reverse order") do     
+  it("Returns a new string with characters in reverse order") do
     assert("bob".reverse == "bob") # Oh wait, palindromes are bad test-cases i guess
     assert("Myst".reverse == "tsyM")
     assert("Fish".reverse == "hsiF")
@@ -235,7 +261,7 @@ describe("String#each_char") do
   it("Iterates through each char, passing it to the given block") do
     list = []
 
-    "Fish".each_char { |char| list.push(char)}
+    "Fish".each_char { |char| list.push(char) }
 
     assert(list == ["F", "i", "s", "h"])
   end
