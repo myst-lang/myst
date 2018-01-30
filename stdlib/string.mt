@@ -7,4 +7,8 @@ deftype String
   def empty?
     size == 0
   end
+
+  def each_char(&block)
+    chars.each { |char| block(char)}
+  end
 end
