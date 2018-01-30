@@ -6,12 +6,12 @@ module Myst
     # Instead `for_file` and `for_content` should be used
     # Many of these parameters would be rarely used
     # All having default values, i don't really think the amount of parameters is a problem
-    def initialize(source : IO = IO::Memory.new, source_name : String = "eval_input", with_stdlib? : Bool = true,
-                   use_stdios? : Bool = false, product : Bool = true)            
+    def initialize(source : IO = IO::Memory.new, *, source_name : String = "eval_input", with_stdlib? : Bool = true,
+                   use_stdios? : Bool = false, product? : Bool = true)            
 
       # Just telling warn() we're not in test mode (test  declaration in
       # spec/spec_helper.cr)
-      ENV["MYST_ENV"] = product ? "prod" : "test"
+      ENV["MYST_ENV"] = product? ? "prod" : "test"
 
 
       @source = source
@@ -30,27 +30,27 @@ module Myst
       @program = uninitialized Expressions # The main program
 
       # Parse the program into an AST
-      # This can throw an error
+      # This can throw an error (ParseError)
       @program = Parser.new(@source, source_name).parse
 
     end  
 
-    def self.for_file(source_file : String, with_stdlib : Bool = true, use_stdios? : Bool = false, product : Bool = true)
-      new(File.open(source_file), source_file, with_stdlib, use_stdios?, product)
+    def self.for_file(source_file : String, *, with_stdlib? : Bool = true, use_stdios? : Bool = false, product? : Bool = true)
+      new(File.open(source_file), source_name: source_file, with_stdlib?: with_stdlib?, use_stdios?: use_stdios?, product?: product?)
     end
 
-    def self.run(source_file : String, with_stdlib : Bool = true, use_stdios? : Bool = false, product : Bool = true)
-      vm = self.for_file(source_file, with_stdlib, use_stdios?, product)
+    def self.run(source_file : String, *, with_stdlib? : Bool = true, use_stdios? : Bool = false, product? : Bool = true)
+      vm = self.for_file(source_file, with_stdlib?: with_stdlib?, use_stdios?: use_stdios?, product?: product?)
       vm.run
       vm
     end
 
-    def self.for_content(string_source : String, with_stdlib : Bool = true, use_stdios? : Bool = false, product : Bool = true)
-      new(IO::Memory.new(string_source), "eval_input", with_stdlib, use_stdios?, product)
+    def self.for_content(string_source : String, *, with_stdlib? : Bool = true, use_stdios? : Bool = false, product? : Bool = true)
+      new(IO::Memory.new(string_source), source_name: "eval_input", with_stdlib?: with_stdlib?, use_stdios?: use_stdios?, product?: product?)
     end
 
-    def self.eval(string_source : String, with_stdlib : Bool = true, use_stdios? : Bool = false, product : Bool = true)
-      vm = self.for_content(string_source, with_stdlib, use_stdios?, product)
+    def self.eval(string_source : String, *, with_stdlib? : Bool = true, use_stdios? : Bool = false, product? : Bool = true)
+      vm = self.for_content(string_source, with_stdlib?: with_stdlib?, use_stdios?: use_stdios?, product?: product?)
       vm.run
       vm
     end    
@@ -71,29 +71,31 @@ module Myst
       @interpreter.run(Parser.for_content(program).parse)
     end
 
-    # Runs file(s)
-    def run(*files)
-      files.each do |file|
-        @interpreter.run(case 
-                         when file.is_a? String
-                           Parser.for_file(file).parse
-                         when file.is_a? File
-                           Parser.new(file, file.path).parse
+    # Runs file(s) and IO(s) 
+    def run(*programs)
+      programs.each do |program|
+        @interpreter.run(case  program
+                         when .is_a? String
+                           Parser.for_file(program)
+                         when .is_a? File
+                           Parser.new(program, program.path)
+                         when .is_a? IO 
+                           Parser.new(program, "eval_input") 
                          else
-                           STDERR.puts "Failed running #{file}, `#run` takes either a File or a filepath as argument"
+                           STDERR.puts "Failed running #{program}, `#run` takes either a File, IO or a filepath as argument" 
                            exit 1
-                         end)
+                         end.parse)
       end
     end
 
-    def require(*files)
-      run(*files)
+    def require(*programs) # files and other IOs
+      run(*programs)
     end
 
-    def reset!
+    def reset!(with_stdlib? : Bool = @with_stdlib)
       @interpreter = Interpreter.new
-      use_stdios = @use_stdios
-      if @with_stdlib
+      itself.use_stdios = @use_stdios.not_nil!
+      if (@with_stdlib = with_stdlib?)
         prelude_require = Require.new(StringLiteral.new("stdlib/prelude.mt")).at(Location.new(__DIR__))
         @interpreter.run(prelude_require)      
       end
@@ -136,7 +138,7 @@ module Myst
         else # Might not be a good idea?
           Parser.for_content(program.to_s).parse
         end
-    end
+    end    
 
     {% for itr_io in %w(output input errput) %}
       def {{itr_io.id}}

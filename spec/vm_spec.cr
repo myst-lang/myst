@@ -82,16 +82,18 @@ describe "VM -" do
 
     it "Has a method telling if its using stdios or not" do
       vm = VM.new
-      vm.use_stdios?.should eq false
+      vm.use_stdios?.should be_false
       vm.use_stdios!
-      vm.use_stdios?.should eq true
-    end
+      vm.use_stdios?.should be_true
+    end    
   end
 
   describe "Running myst code:" do
     it "Works" do
       vm = VM.new
-      vm.require "spec/support/requirable/foo_defs.mt" # has `foo(a, b); a + b; end`
+
+      # defines `foo(a, b); a + b; end`
+      vm.require "spec/support/requirable/foo_defs.mt"
       vm.eval "IO.print(foo(1, 2))"
 
       vm.output.to_s.should eq "3"
@@ -133,6 +135,61 @@ describe "VM -" do
       output = IO::Memory.new
       vm.print_ast output
       output.to_s.should eq "Expressions\nCall\nConst\nStringLiteral|Hello world!\n"
+    end
+
+    describe "#run(*programs)" do
+      it "takes files, filepaths or IOs; and (attempts to) run them" do
+        file = File.open "spec/support/requirable/foo_defs.mt"
+        vm = VM.new
+
+        vm.run IO::Memory.new(%q<i = 0; 3.times { IO.print(i); i += 1 }>)        
+        vm.run file
+        vm.eval %q<IO.puts(foo(1, 2))>
+
+        vm.output.to_s.should eq "0123\n"        
+      end
+
+      it "throws a ParseError when invalid code is attempted to be runned" do        
+        vm = VM.new
+        expect_raises ParseError do
+          vm.run IO::Memory.new %q<Hello there>
+        end
+
+        expect_raises ParseError do
+          vm.run "spec/support/requirable/invalid_code.mt"
+        end
+
+        expect_raises ParseError do
+          vm.run File.open "spec/support/requirable/invalid_code.mt"
+        end
+      end
+    end
+  end
+
+  describe "#reset!" do
+    it "resets all IOs, and the interpreter" do
+      vm = VM.new
+
+      vm.eval %q<IO.puts("I will be gone")>
+      vm.eval %q<def to_bob(); {<:thing>: :fish}; end>
+
+      vm.output.to_s.empty?.should be_false
+      vm.reset!
+      vm.output.to_s.empty?.should be_true
+      
+      vm.eval "IO.puts(to_bob()[:fish])"
+      vm.errput.to_s.includes?("No variable or method `to_bob` for Kernel").should be_true
+    end
+
+    it "takes a parameter that decides wether to use the stdlib or not" do
+      vm = VM.new
+      vm.eval %q<3.times { IO.puts(Random.rand()) }>
+      vm.errput.to_s.empty?.should be_true
+
+      vm.reset! false
+
+      vm.eval %q<3.times { IO.puts(Random.rand()) }>
+      vm.errput.to_s.includes?("No variable or method `times`").should be_true      
     end
   end
 end
