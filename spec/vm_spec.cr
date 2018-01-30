@@ -148,6 +148,21 @@ describe "VM -" do
 
         vm.output.to_s.should eq "0123\n"        
       end
+
+      it "throws a ParseError when invalid code is attempted to be runned" do        
+        vm = VM.new
+        expect_raises ParseError do
+          vm.run IO::Memory.new %q<Hello there>
+        end
+
+        expect_raises ParseError do
+          vm.run "spec/support/requirable/invalid_code.mt"
+        end
+
+        expect_raises ParseError do
+          vm.run File.open "spec/support/requirable/invalid_code.mt"
+        end
+      end
     end
   end
 
