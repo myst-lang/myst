@@ -795,7 +795,7 @@ module Myst
     end
 
     def accept_children(visitor)
-      block.accept(visitor)
+      body.accept(visitor)
     end
 
     def_equals_and_hash name, body
