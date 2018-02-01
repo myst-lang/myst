@@ -145,3 +145,183 @@ describe("String#to_s") do
     assert("\tone\ttwo".to_s == "\tone\ttwo")
   end
 end
+
+describe("String#chars") do
+  it("Returns a List with chars in a string") do
+    assert("abc".chars == ["a", "b", "c"])
+    assert("yay".chars == ["y", "a", "y"])
+  end
+end
+
+describe("String#downcase") do  
+  it("returns a lowercased version of itself") do
+    assert("HELLO".downcase == "hello")
+  end
+
+  it("downcases all characters when the original string is mixed case") do
+    assert("hElLo".downcase == "hello")
+  end
+
+  it("returns the same string when all characters are already downcased") do
+    assert("hello".downcase == "hello")
+  end
+
+  it("returns an empty string when the original string is empty") do
+    assert("".downcase == "")
+  end
+
+  it("preserves white space in string") do
+    assert("Bobby Fischer".downcase == "bobby fischer")
+  end
+
+  it("preserves special characters in the string") do
+    assert("\n\t∊ℤ(0, 300]^&*<>#$%\r\n".downcase == "\n\t∊ℤ(0, 300]^&*<>#$%\r\n")
+  end
+end
+
+
+describe("String#upcase") do  
+  it("returns a uppercased version of itself") do
+    assert("hello".upcase == "HELLO")
+  end
+
+  it("upcases all characters when the original string is mixed case") do
+    assert("hElLO".upcase == "HELLO")
+  end
+
+  it("returns the same string when all characters are already upcased") do
+    assert("hello".upcase == "HELLO")
+  end
+
+  it("returns an empty string when the original string is empty") do
+    assert("".upcase == "")
+  end
+
+  it("preserves white space in string") do
+    assert("Garry Kasparov".upcase == "GARRY KASPAROV")
+  end
+
+  it("preserves special characters in the string") do
+    assert("\n\t∊ℤ(0, 300]^&*<>#$%\r\n".upcase == "\n\t∊ℤ(0, 300]^&*<>#$%\r\n")
+  end
+end
+
+describe("String#chomp") do
+  it("Returns self with a newline at the end removed when no argument is provided") do
+    assert("Bob likes to fish\n".chomp == "Bob likes to fish")
+  end
+
+  it("Returns self with specified string removed from the end") do
+    assert("Fish does not like to be fish".chomp(" fish") == "Fish does not like to be")
+  end
+end
+
+describe("String#strip") do
+  it("Returns a new string with all leading and trailing whitespace removed") do
+    assert("   Hello \t".strip == "Hello")
+
+    # Very much whitespace
+    assert((("  \t   \n    " * 7) + "Find me if you can" + ("\n" * 28)).strip == "Find me if you can")    
+  end
+
+  it("returns the same string if there is no whitespace to be removed") do
+    assert("Yeah".strip == "Yeah")
+    assert("Ok?".strip == "Ok?")
+  end
+end
+
+describe("String#lstrip") do
+  it("returns a new string with all leading whitespace removed") do
+    assert("\t\tBye tabs".lstrip == "Bye tabs")    
+  end
+
+  it("preserves trailing whitespace") do
+    assert("   Hello \t".lstrip == "Hello \t")
+  end  
+
+  it("if there is no leading whitespace to be removed, the same string is returned") do
+    assert("Hello\n".lstrip == "Hello\n")
+    assert("Hello".lstrip == "Hello")
+  end    
+end
+
+describe("String#rstrip") do
+  it("returns a new string with all trailing whitespace removed") do
+    assert("Nah\n\n\n".rstrip == "Nah")    
+  end
+
+  it("preserves leading whitespace") do  
+    assert("   Hello \t".rstrip == "   Hello")
+  end
+
+  it("if there is no trailing whitespace to be removed, the same string is returned") do
+    assert("1. d4!!, d5 2. c4!!, dxc4 3. e3!!, b5??".rstrip == "1. d4!!, d5 2. c4!!, dxc4 3. e3!!, b5??")
+    assert("\n\t¯\_(ツ)_/¯" == "\n\t¯\_(ツ)_/¯")
+  end
+end
+
+describe("String#includes") do
+  it("Returns true if the string contains given string") do
+    assert("Bob fish? yeah".includes?("fish?"))
+    refute("Chess is awesome".includes?("Fried liver"))
+  end
+end
+
+describe("String#[]") do
+  str = "Hello"
+
+  it("returns the char at the given index. A negative index is counted from the end of the string. \
+    Returns nil if the index falls outside of the string") do
+
+    assert(str[0] + str[-1] == "Ho")    
+  end
+
+  it("returns the substring containing length of characters from start. A negative index is counted from the end of the string. \
+    Returns nil if the index falls outside of the string") do    
+        
+    assert(str[0, 3] == "Hel")
+    assert(str[-2, 2] + str[2] == "lol") 
+  end
+
+  it("returns the element at the given index") do
+   assert("12"[0] == "1") 
+ end   
+
+ it("returns nil for an out-of-bounds access") do    
+   assert("D:"[3] == nil) 
+   assert(str[10] == nil)
+ end 
+
+ describe("with a negative index") do 
+   it("is 1-based, counting from the end") do 
+     assert("Bob"[-1] == "b")
+   end
+
+   it("returns the nth element from the end of the string") do      
+     assert("123"[-2] == "2") 
+   end 
+
+   it("returns nil for out-of-bounds access") do 
+     str = "yeah, that'd be cool"
+     assert(str[-str.size - 2] == nil)
+   end 
+ end 
+end
+
+describe("String#reverse") do 
+  it("Returns a new string with characters in reverse order") do
+    assert("bob".reverse == "bob") # Oh wait, palindromes are bad test-cases i guess
+    assert("Myst".reverse == "tsyM")
+    assert("Fish".reverse == "hsiF")
+  end
+end
+
+describe("String#each_char") do
+  it("Iterates through each char, passing it to the given block") do
+    list = []
+
+    "Fish".each_char { |char| list.push(char) }
+
+    assert(list == ["F", "i", "s", "h"])
+  end
+end

@@ -36,11 +36,11 @@ module Myst
           {{params[index].var}} = __args[{{index}}]?.as({{params[index].type}})
         {% end %}
 
-        result = begin
+        %result = begin
           {{block.body}}
         end
 
-        result.as(Value)
+        %result.as(Value)
       end
     end
 
