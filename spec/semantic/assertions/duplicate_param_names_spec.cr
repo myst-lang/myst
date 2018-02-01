@@ -31,9 +31,42 @@ describe "Semantic Assertions - Duplicate Param Names" do
     ), /parameter `a` is bound more than once/
   end
 
-  it "passes when a name is repeated inside a ValueInterpolation" do
+  it "fails when a name is duplicated more than once" do
+    expect_semantic_failure %q(
+      def foo(a, a, a, a); end
+    ), /parameter `a` is bound more than once/
+  end
+
+  it "fails on the first instance of a duplicate" do
+    expect_semantic_failure %q(
+      def foo(a, b, a, b); end
+    ), /parameter `a` is bound more than once/
+  end
+
+  it "passes when a name is used in an interpolation" do
     analyze %q(
       def foo(a, <a>); end
     )
+  end
+
+
+  describe "suggested resolution" do
+    it "replaces duplicates with ValueInterpolations" do
+      expect_semantic_failure %q(
+        def foo(a, a); end
+      ), /def foo\(a, \<a\>\)/
+    end
+
+    it "replaces multiple duplicates with ValueInterpolations" do
+      expect_semantic_failure %q(
+        def foo(a, a, a, a); end
+      ), /def foo\(a, \<a\>, \<a\>, \<a\>\)/
+    end
+
+    it "only replaces duplicates" do
+      expect_semantic_failure %q(
+        def foo(a, b, c, a); end
+      ), /def foo\(a, b, c, \<a\>\)/
+    end
   end
 end

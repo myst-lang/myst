@@ -17,21 +17,6 @@ module Myst
         # visitor through any node properties of the current node.
         node.accept_children(self)
       end
-
-      # `warn` will emit a semantic warning to the console, but allow analysis
-      # to continue.
-      def warn(message : String)
-        @errput.puts(message)
-      end
-
-      # `fail` emits a semantic error to the console, then immediately halts
-      # analysis.
-      def fail(message : String)
-        warn(message)
-        unless capture_failures?
-          raise Error.new
-        end
-      end
     end
   end
 end

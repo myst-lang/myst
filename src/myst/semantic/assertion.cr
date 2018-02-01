@@ -4,8 +4,8 @@ module Myst
       abstract def run
 
       # Raise a Semantic::Error with the given message.
-      def fail!(message : String)
-        raise Error.new(message)
+      def fail!(location : Location, message : String)
+        raise Error.new(location, message)
       end
     end
   end

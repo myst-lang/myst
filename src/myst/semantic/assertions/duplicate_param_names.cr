@@ -1,24 +1,50 @@
 module Myst
   module Semantic
     class DuplicateParamNamesAssertion < Assertion
-      property owner  : Node
-      property params : Array(Param)
+      property def_node  : Def
       property names_in_params = {} of String => Array(Node)
 
-      def initialize(@owner : Node, @params : Array(Param))
-      end
+      def initialize(@def_node : Def); end
 
       def run
-        params.each{ |param| visit_param(param) }
+        def_node.params.each{ |param| visit_param(param) }
 
         names_in_params.each do |name, nodes|
           if nodes.size > 1
-            fail! <<-FAIL_MESSAGE
+            original_str      = Myst::Printer.new(String::Builder.new).print(def_node).to_s
+            resolved_str  = create_resolved_str(nodes)
+
+            fail! def_node.location.not_nil!, <<-FAIL_MESSAGE
             Parameter `#{name}` is bound more than once in this definition. Use the value
             interpolation syntax (`< >`) to use `#{name}` as a pattern to match against.
+
+            original:   #{original_str}
+            resolved:   #{resolved_str}
             FAIL_MESSAGE
           end
         end
+      end
+
+      private def create_resolved_str(nodes : Array(Node))
+        printer = Myst::Printer.new(String::Builder.new)
+        nodes[1..-1].each do |node|
+          new_node = node.dup
+
+          case new_node
+          when Param
+            # If `new_node` is a Param, the name of the param has matched.
+            # The replacement for this is moving the name into a
+            # ValueInterpolation used as the pattern of the Param.
+            new_node.pattern = ValueInterpolation.new(Var.new(new_node.name))
+            new_node.name = nil
+          when Var
+            new_node = ValueInterpolation.new(new_node)
+          end
+
+          printer.replace(node, new_node)
+        end
+
+        printer.print(def_node).to_s
       end
 
       private def visit_param(param : Param)
