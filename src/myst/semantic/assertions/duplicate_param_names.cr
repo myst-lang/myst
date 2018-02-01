@@ -1,6 +1,6 @@
 module Myst
   module Semantic
-    class ParamNamesAssertion < Assertion
+    class DuplicateParamNamesAssertion < Assertion
       property owner  : Node
       property params : Array(Param)
       property names_in_params = {} of String => Array(Node)
@@ -8,16 +8,15 @@ module Myst
       def initialize(@owner : Node, @params : Array(Param))
       end
 
-      def message : String
-        "Duplicate parameter name given"
-      end
-
       def run
         params.each{ |param| visit_param(param) }
 
         names_in_params.each do |name, nodes|
           if nodes.size > 1
-            raise Error.new("Parameter `#{name}` specified more than once.")
+            fail! <<-FAIL_MESSAGE
+            Parameter `#{name}` is bound more than once in this definition. Use the value
+            interpolation syntax (`< >`) to use `#{name}` as a pattern to match against.
+            FAIL_MESSAGE
           end
         end
       end

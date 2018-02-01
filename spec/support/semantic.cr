@@ -16,3 +16,12 @@ def analyze(node : String, visitor = Semantic::Visitor.new, mock_output = true, 
   program = parse_program(node)
   analyze(program, visitor, mock_output: mock_output, capture_failures: capture_failures)
 end
+
+
+def expect_semantic_failure(source : String, failure_message : String | Regex)
+  error = expect_raises Semantic::Error do
+    analyze(source)
+  end
+
+  (error.message || "").downcase.should match(failure_message)
+end
