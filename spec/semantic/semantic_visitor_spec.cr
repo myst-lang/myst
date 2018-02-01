@@ -27,7 +27,7 @@ describe "Semantic - Visitor" do
 
   describe "#warn" do
     it "outputs the given message to the errput" do
-      visitor = SemanticVisitor.new(errput: IO::Memory.new)
+      visitor = Semantic::Visitor.new(errput: IO::Memory.new)
       visitor.warn("some warning")
 
       visitor.errput.to_s.should eq("some warning\n")
@@ -37,19 +37,19 @@ describe "Semantic - Visitor" do
 
   describe "#fail" do
     it "outputs the given message to the errput" do
-      visitor = SemanticVisitor.new(errput: IO::Memory.new)
+      visitor = Semantic::Visitor.new(errput: IO::Memory.new)
       begin
         visitor.fail("some warning")
-      rescue SemanticError
+      rescue Semantic::Error
       end
 
       visitor.errput.to_s.should eq("some warning\n")
     end
 
-    it "always raises a SemanticError" do
-      visitor = SemanticVisitor.new(errput: IO::Memory.new)
+    it "always raises a Semantic::Error" do
+      visitor = Semantic::Visitor.new(errput: IO::Memory.new)
 
-      expect_raises(SemanticError) do
+      expect_raises(Semantic::Error) do
         visitor.fail("some warning")
       end
     end

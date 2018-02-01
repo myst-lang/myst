@@ -666,9 +666,9 @@ module Myst
     end
 
     def accept_children(visitor)
-      pattern.try(&.accept(visitor))
-      restriction.try(&.accept(visitor))
-      guard.try(&.accept(visitor))
+      pattern?.try(&.accept(visitor))
+      restriction?.try(&.accept(visitor))
+      guard?.try(&.accept(visitor))
     end
 
     def_equals_and_hash pattern?, name?, restriction?, guard?, splat?, block?
@@ -885,7 +885,7 @@ module Myst
     def initialize(@value=nil); end
 
     def accept_children(visitor)
-      value.try(&.accept(visitor))
+      value?.try(&.accept(visitor))
     end
 
     def_equals_and_hash value?

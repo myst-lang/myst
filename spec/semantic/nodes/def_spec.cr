@@ -14,7 +14,7 @@ describe "Semantic - Def" do
   end
 
   it "fails when a parameter name is given twice" do
-    expect_raises SemanticError do
+    expect_raises Semantic::Error do
       analyze %q(
         def foo(a, a); end
       )
