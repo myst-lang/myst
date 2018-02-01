@@ -20,4 +20,26 @@ describe "Semantic - Def" do
       )
     end
   end
+
+  it "fails when a parameter name is duplicated under a pattern" do
+    expect_raises Semantic::Error do
+      analyze %q(
+        def foo([a, a]); end
+      )
+    end
+  end
+
+  it "fails when a parameter name is duplicated under different patterns" do
+    expect_raises Semantic::Error do
+      analyze %q(
+        def foo([a, 2, 3], a); end
+      )
+    end
+  end
+
+  it "does not fail when a name is repeated inside a ValueInterpolation" do
+    analyze %q(
+      def foo(a, <a>); end
+    )
+  end
 end
