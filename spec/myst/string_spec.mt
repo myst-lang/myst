@@ -153,20 +153,56 @@ describe("String#chars") do
   end
 end
 
-describe("String#downcase") do
-  it("Returns a lowercased version of itself") do
+describe("String#downcase") do  
+  it("returns a lowercased version of itself") do
     assert("HELLO".downcase == "hello")
+  end
+
+  it("downcases all characters when the original string is mixed case") do
+    assert("hElLo".downcase == "hello")
+  end
+
+  it("returns the same string when all characters are already downcased") do
+    assert("hello".downcase == "hello")
+  end
+
+  it("returns an empty string when the original string is empty") do
+    assert("".downcase == "")
+  end
+
+  it("preserves white space in string") do
     assert("Bobby Fischer".downcase == "bobby fischer")
-    assert("".upcase == "")
-    assert("snake_case".downcase == "snake_case")
+  end
+
+  it("preserves special characters in the string") do
+    assert("\n\t∊ℤ(0, 300]^&*<>#$%\r\n".downcase == "\n\t∊ℤ(0, 300]^&*<>#$%\r\n")
   end
 end
 
-describe("String#upcase") do
-  it("Returns a uppercased version of itself") do
+
+describe("String#upcase") do  
+  it("returns a uppercased version of itself") do
     assert("hello".upcase == "HELLO")
-    assert("HeLLo AgAIn".upcase == "HELLO AGAIN")
-    assert("SCREAMING AM I".upcase == "SCREAMING AM I")
+  end
+
+  it("upcases all characters when the original string is mixed case") do
+    assert("hElLO".upcase == "HELLO")
+  end
+
+  it("returns the same string when all characters are already upcased") do
+    assert("hello".upcase == "HELLO")
+  end
+
+  it("returns an empty string when the original string is empty") do
+    assert("".upcase == "")
+  end
+
+  it("preserves white space in string") do
+    assert("Garry Kasparov".upcase == "GARRY KASPAROV")
+  end
+
+  it("preserves special characters in the string") do
+    assert("\n\t∊ℤ(0, 300]^&*<>#$%\r\n".upcase == "\n\t∊ℤ(0, 300]^&*<>#$%\r\n")
   end
 end
 
@@ -183,21 +219,44 @@ end
 describe("String#strip") do
   it("Returns a new string with all leading and trailing whitespace removed") do
     assert("   Hello \t".strip == "Hello")
-    assert((("  \t   \n    " * 7) + "Find me if you can" + ("\n" * 28)).strip == "Find me if you can")
+
+    # Very much whitespace
+    assert((("  \t   \n    " * 7) + "Find me if you can" + ("\n" * 28)).strip == "Find me if you can")    
+  end
+
+  it("returns the same string if there is no whitespace to be removed") do
+    assert("Yeah".strip == "Yeah")
+    assert("Ok?".strip == "Ok?")
   end
 end
 
 describe("String#lstrip") do
-  it("Returns a new string with all leading whitespace removed") do
-    assert("   Hello \t".lstrip == "Hello \t")
-    assert("\t\tBye tabs".lstrip == "Bye tabs")
+  it("returns a new string with all leading whitespace removed") do
+    assert("\t\tBye tabs".lstrip == "Bye tabs")    
   end
+
+  it("preserves trailing whitespace") do
+    assert("   Hello \t".lstrip == "Hello \t")
+  end  
+
+  it("if there is no leading whitespace to be removed, the same string is returned") do
+    assert("Hello\n".lstrip == "Hello\n")
+    assert("Hello".lstrip == "Hello")
+  end    
 end
 
 describe("String#rstrip") do
-  it("Returns a new string with all trailing whitespace removed") do
+  it("returns a new string with all trailing whitespace removed") do
+    assert("Nah\n\n\n".rstrip == "Nah")    
+  end
+
+  it("preserves leading whitespace") do  
     assert("   Hello \t".rstrip == "   Hello")
-    assert(" Nah\n\n\n".rstrip == " Nah")
+  end
+
+  it("if there is no trailing whitespace to be removed, the same string is returned") do
+    assert("1. d4!!, d5 2. c4!!, dxc4 3. e3!!, b5??".rstrip == "1. d4!!, d5 2. c4!!, dxc4 3. e3!!, b5??")
+    assert("\n\t¯\_(ツ)_/¯" == "\n\t¯\_(ツ)_/¯")
   end
 end
 
