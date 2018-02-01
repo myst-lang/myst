@@ -1,11 +1,13 @@
 require "./semantic/*"
+require "./semantic/nodes/*"
 
 module Myst
   class SemanticVisitor
-    property output : IO
-    property errput : IO
+    property  output : IO
+    property  errput : IO
+    property? capture_failures : Bool
 
-    def initialize(@output : IO = STDOUT, @errput : IO = STDERR)
+    def initialize(@output : IO = STDOUT, @errput : IO = STDERR, @capture_failures=false)
     end
 
     def visit(node : Node)
@@ -26,7 +28,9 @@ module Myst
     # analysis.
     def fail(message : String)
       warn(message)
-      raise SemanticError.new
+      unless capture_failures?
+        raise SemanticError.new
+      end
     end
   end
 end
