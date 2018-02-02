@@ -35,10 +35,15 @@ module Myst
       visit(pattern)
       left = stack.pop
       success =
-        if left.is_a?(TType) && !right.is_a?(TType)
-          # For types, check that `right` is either an instance of that type, or
-          # the type itself.
-          left == __typeof(right)
+        if left.is_a?(TType) || left.is_a?(TModule)
+          # For TType values, check extended_ancestors of the value type.
+          # For all other values, check ancestors of the value type.
+          if right.is_a?(TType)
+            right == left || right.extended_ancestors.includes?(left)
+          else
+            type_of_right = __typeof(right)
+            type_of_right == left || type_of_right.ancestors.includes?(left)
+          end
         else
           left == right
         end

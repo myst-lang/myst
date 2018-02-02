@@ -128,4 +128,64 @@ describe "Interpreter - #match" do
   it_matches c("List"),     TList.new
   it_matches c("String"),   val("hello world")
   it_matches c("Nil"),      val(nil)
+
+
+  # When matching a Type, all ancestors of the value type are considered.
+  describe "type pattern" do
+    it "matches included modules of the value type" do
+      # deftype Bar
+      #   include Foo
+      # end
+      itr = Interpreter.new
+      mod_foo   = TModule.new("Foo")
+      type_bar  = TType.new("Bar")
+      type_bar.insert_ancestor(mod_foo)
+
+      itr.current_scope.assign("Foo", mod_foo)
+      itr.match(c("Foo"), TInstance.new(type_bar))
+    end
+
+    it "matches ancestors of included modules of the value type" do
+      # defmodule Bar; include Foo; end
+      # deftype Baz; include Bar; end
+      itr = Interpreter.new
+      mod_foo   = TModule.new("Foo")
+      mod_bar   = TModule.new("Bar")
+      type_baz  = TType.new("Baz")
+      mod_bar.insert_ancestor(mod_foo)
+      type_baz.insert_ancestor(mod_bar)
+
+      itr.current_scope.assign("Foo", mod_foo)
+      itr.match(c("Foo"), TInstance.new(type_baz))
+    end
+
+    it "matches distant ancestors of the value type" do
+      # deftype Baz
+      #   include Foo
+      #   include Bar
+      # end
+      itr = Interpreter.new
+      mod_foo   = TModule.new("Foo")
+      mod_bar   = TModule.new("Bar")
+      type_baz  = TType.new("Baz")
+      type_baz.insert_ancestor(mod_foo)
+      type_baz.insert_ancestor(mod_bar)
+
+      itr.current_scope.assign("Foo", mod_foo)
+      itr.match(c("Foo"), TInstance.new(type_baz))
+    end
+
+    it "matches extended modules when the value is a TType" do
+      # deftype Foo
+      #   extend Bar
+      # end
+      itr = Interpreter.new
+      mod_foo   = TModule.new("Foo")
+      type_bar  = TType.new("Bar")
+      type_bar.extend_module(mod_foo)
+
+      itr.current_scope.assign("Foo", mod_foo)
+      itr.match(c("Foo"), type_bar)
+    end
+  end
 end
