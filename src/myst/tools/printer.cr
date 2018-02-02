@@ -1,8 +1,18 @@
 module Myst
   class Printer
     property output : IO
+    # `replacements` is a Hash containing mappings from Node instances
+    # to other Nodes that should be used in their place when recursing through
+    # a program tree. This is useful for performing code rewrites
+    # programmatically without having to modify the original program.
+    property replacements : Hash(UInt64, Node)
 
     def initialize(@output : IO=STDOUT)
+      @replacements = {} of UInt64 => Node
+    end
+
+    def replace(node : Node, new_node : Node)
+      replacements[node.object_id] = new_node
     end
 
     def print(node)
@@ -10,49 +20,54 @@ module Myst
     end
 
 
-    ##
-    # For simplicity with searching, the ordering of nodes here should match
-    # the ordering of nodes defined in `src/myst/syntax/ast.cr`. Tangential
-    # visits (requiring more context than just a node) should all be appended
-    # at the end of this file.
+    macro make_visitor(node_type)
+      def visit(node : {{node_type}}, io : IO)
+        if replacement = replacements[node.object_id]?
+          visit(replacement, io)
+          return
+        end
+
+        {{ yield }}
+      end
+    end
 
 
-    def visit(node : Nop, io : IO)
+    make_visitor Nop do
       # Nothing
     end
 
-    def visit(node : Expressions, io : IO)
+    make_visitor Expressions do
       expr_strs = node.children.map do |n|
         String.build{ |str| visit(n, str) }
       end
       io << expr_strs.join("\n")
     end
 
-    def visit(node : NilLiteral, io : IO)
+    make_visitor NilLiteral do
       io << "nil"
     end
 
-    def visit(node : BooleanLiteral, io : IO)
+    make_visitor BooleanLiteral do
       io << node.value
     end
 
-    def visit(node : IntegerLiteral, io : IO)
+    make_visitor IntegerLiteral do
       io << node.value
     end
 
-    def visit(node : FloatLiteral, io : IO)
+    make_visitor FloatLiteral do
       io << node.value
     end
 
-    def visit(node : StringLiteral, io : IO)
+    make_visitor StringLiteral do
       io << "\"#{node.value}\""
     end
 
-    def visit(node : SymbolLiteral, io : IO)
+    make_visitor SymbolLiteral do
       io << ":#{node.value}"
     end
 
-    def visit(node : ListLiteral, io : IO)
+    make_visitor ListLiteral do
       io << "["
       element_strs =
         node.elements.map do |e|
@@ -67,12 +82,13 @@ module Myst
       io << "]"
     end
 
-    def visit(node : MapLiteral, io : IO)
+    make_visitor MapLiteral do
       io << "{"
       entry_strs =
         node.entries.map do |e|
           String.build do |str|
-            if (k = e.key).is_a?(SymbolLiteral)
+            k = e.key
+            if k.is_a?(SymbolLiteral)
               str << k.value
             else
               visit(k, str)
@@ -88,66 +104,66 @@ module Myst
     end
 
 
-    def visit(node : Var, io : IO)
+    make_visitor Var do
       io << node.name
     end
 
-    def visit(node : Const, io : IO)
+    make_visitor Const do
       io << node.name
     end
 
-    def visit(node : Underscore, io : IO)
+    make_visitor Underscore do
       io << node.name
     end
 
-    def visit(node : IVar, io : IO)
+    make_visitor IVar do
       io << node.name
     end
 
-    def visit(node : ValueInterpolation, io : IO)
+    make_visitor ValueInterpolation do
       io << "<"
       visit(node.value, io)
       io << ">"
     end
 
 
-    def visit(node : SimpleAssign, io : IO)
+    make_visitor SimpleAssign do
       visit(node.target, io)
       io << " = "
       visit(node.value, io)
     end
 
 
-    def visit(node : Or, io : IO)
+    make_visitor Or do
       visit(node.left, io)
       io << " || "
       visit(node.right, io)
     end
 
-    def visit(node : And, io : IO)
+    make_visitor And do
       visit(node.left, io)
       io << " && "
       visit(node.right, io)
     end
 
 
-    def visit(node : Splat, io : IO)
+    make_visitor Splat do
       io << "*"
       visit(node.value, io)
     end
 
-    def visit(node : Not, io : IO)
+    make_visitor Not do
       io << "!"
       visit(node.value, io)
     end
 
-    def visit(node : Negation, io : IO)
+    make_visitor Negation do
       io << "-"
       visit(node.value, io)
     end
 
 
-    def visit(node : Call, io : IO)
+    make_visitor Call do
       if node.infix?
         visit(node.receiver, io)
         io << " #{node.name} "
@@ -198,7 +214,7 @@ module Myst
     end
 
 
-    def visit(node : Param, io : IO)
+    make_visitor Param do
       # Splats and blocks are special cases
       if node.splat?
         io << "*"
@@ -233,7 +249,7 @@ module Myst
     end
 
 
-    def visit(node : Def, io : IO)
+    make_visitor Def do
       io << (node.static? ? "defstatic" : "def")
       io << " "
 
@@ -253,15 +269,12 @@ module Myst
         io << param_strs.join(", ")
         io << ")"
       end
-
-      io << "\n"
-      io << "end"
     end
 
 
 
     # Catch all for unimplemented nodes
-    def visit(node, io)
+    make_visitor Node do
       STDERR.puts "Attempting to print unknown node type: #{node.class.name}"
     end
   end

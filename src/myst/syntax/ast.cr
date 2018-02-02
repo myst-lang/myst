@@ -149,6 +149,10 @@ module Myst
     def initialize(@components=[] of Node)
     end
 
+    def accept_children(visitor)
+      components.each(&.accept(visitor))
+    end
+
     def_equals_and_hash components
   end
 
@@ -251,6 +255,10 @@ module Myst
     property value : Node
 
     def initialize(@value : Node)
+    end
+
+    def accept_children(visitor)
+      value.accept(visitor)
     end
 
     def_equals_and_hash value
@@ -620,6 +628,9 @@ module Myst
 
     def accept_children(visitor)
       receiver?.try(&.accept(visitor))
+      if name_node = name.as?(Node)
+        name_node.accept(visitor)
+      end
       args.each(&.accept(visitor))
       block?.try(&.accept(visitor))
     end
@@ -655,9 +666,9 @@ module Myst
     end
 
     def accept_children(visitor)
-      pattern.try(&.accept(visitor))
-      restriction.try(&.accept(visitor))
-      guard.try(&.accept(visitor))
+      pattern?.try(&.accept(visitor))
+      restriction?.try(&.accept(visitor))
+      guard?.try(&.accept(visitor))
     end
 
     def_equals_and_hash pattern?, name?, restriction?, guard?, splat?, block?
@@ -685,6 +696,12 @@ module Myst
     property? static        : Bool
 
     def initialize(@name, @params = [] of Param, @body=Nop.new, @block_param=nil, @splat_index=nil, @static=false)
+    end
+
+    def accept_children(visitor)
+      params.each(&.accept(visitor))
+      block_param?.try(&.accept(visitor))
+      body.accept(visitor)
     end
 
     def_equals_and_hash name, params, block_param?, body, splat_index?, static?
@@ -737,6 +754,10 @@ module Myst
     def initialize(@clauses = [] of Block)
     end
 
+    def accept_children(visitor)
+      clauses.each(&.accept(visitor))
+    end
+
     def_equals_and_hash clauses
   end
 
@@ -773,6 +794,10 @@ module Myst
     def initialize(@name, @body=Nop.new)
     end
 
+    def accept_children(visitor)
+      body.accept(visitor)
+    end
+
     def_equals_and_hash name, body
   end
 
@@ -789,6 +814,12 @@ module Myst
     def initialize(@type, @args=[] of Node, @block=nil)
     end
 
+    def accept_children(visitor)
+      type.accept(visitor)
+      args.each(&.accept(visitor))
+      block?.try(&.accept(visitor))
+    end
+
     def_equals_and_hash type, args, block?
   end
 
@@ -803,6 +834,10 @@ module Myst
     property path : Node
 
     def initialize(@path : Node); end
+
+    def accept_children(visitor)
+      path.accept(visitor)
+    end
 
     def_equals_and_hash path
   end
@@ -850,7 +885,7 @@ module Myst
     def initialize(@value=nil); end
 
     def accept_children(visitor)
-      value.try(&.accept(visitor))
+      value?.try(&.accept(visitor))
     end
 
     def_equals_and_hash value?
@@ -901,6 +936,11 @@ module Myst
     def initialize(@body : Node=Nop.new, @param : Param? = nil)
     end
 
+    def accept_children(visitor)
+      param?.try(&.accept(visitor))
+      body.accept(visitor)
+    end
+
     def_equals_and_hash param?, body
   end
 
@@ -930,6 +970,13 @@ module Myst
       else
         body.end_location
       end
+    end
+
+    def accept_children(visitor)
+      body.accept(visitor)
+      rescues.each(&.accept(visitor))
+      @else.try(&.accept(visitor))
+      @ensure.try(&.accept(visitor))
     end
 
     def_equals_and_hash body, rescues, else?, ensure?
