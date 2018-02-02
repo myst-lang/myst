@@ -9,9 +9,12 @@ module Myst
 
       def message
         <<-MESSAGE
+
         Semantic Error at #{@location}:
 
         #{@message}
+
+
         MESSAGE
       end
 
