@@ -10,10 +10,8 @@ module Myst
       @callstack = nil
     end
 
-    # For some reason, simply setting `@callstack` to nil kept showing the
-    # backtrace. This ensures that the returned backtrace will always be empty.
-    def backtrace?
-      [] of String
+    def inspect_with_backtrace(io : IO)
+      io << message
     end
   end
 

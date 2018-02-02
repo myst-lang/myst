@@ -4,6 +4,7 @@ module Myst
       property location : Location
 
       def initialize(@location : Location, @message : String)
+        @callstack = nil
       end
 
       def message
@@ -12,6 +13,10 @@ module Myst
 
         #{@message}
         MESSAGE
+      end
+
+      def inspect_with_backtrace(io : IO)
+        io << message
       end
     end
   end
