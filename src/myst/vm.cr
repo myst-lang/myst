@@ -13,9 +13,7 @@ module Myst
       # Just telling warn() we're not in test mode (test  declaration in
       # spec/spec_helper.cr)
       ENV["MYST_ENV"] = product? ? "prod" : "test"
-
-
-      @source = source
+      
       @interpreter = Interpreter.new
       @semantic_visitor = Semantic::Visitor.new
 
@@ -31,7 +29,7 @@ module Myst
       @program = uninitialized Expressions
       # Parse the program into an AST
       # This can throw an error (ParseError)
-      @program = Parser.new(@source, source_name).parse
+      @program = Parser.new(source, source_name).parse
     end
 
     def self.for_file(source_file : String, *, with_stdlib? : Bool = true, use_stdios? : Bool = false, product? : Bool = true)
@@ -93,7 +91,7 @@ module Myst
       end
     end
 
-    # Runs the `@source` io
+    # Runs the `@program` property
     def run
       # Interpret the program
       run(@program.not_nil!)
