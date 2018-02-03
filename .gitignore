@@ -5,6 +5,8 @@
 /bin/
 /.shards/
 
+# Crystal generated docs
+/docs/
 # The myst executable
 /myst
 # DWARF file from compiling on macOS
