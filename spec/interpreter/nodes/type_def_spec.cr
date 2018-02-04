@@ -3,8 +3,8 @@ require "../../support/nodes.cr"
 require "../../support/interpret.cr"
 
 
-private def it_interprets_the_type(source, &block : Myst::TType, Myst::Interpreter ->)
-  it "interprets `#{source}`" do
+private def it_interprets_the_type(source, file=__FILE__, line=__LINE__, end_line=__END_LINE__, &block : Myst::TType, Myst::Interpreter ->)
+  it "interprets `#{source}`", file, line, end_line do
     itr = parse_and_interpret(source)
     _type = itr.stack.pop.as(TType)
     block.call(_type, itr)
@@ -123,5 +123,109 @@ describe "Interpreter - TypeDef" do
 
       static_method
     end
+  )
+
+
+
+  # Type can provide a supertype to inherit from, which makes all methods
+  # and properties from the supertype available to the type itself (similar to
+  # composition with `extend` and `include`, but combined into one expression).
+  it_interprets_the_type %q(
+    deftype Foo
+      defstatic static_inherited
+        :static_inherited
+      end
+
+      def instance_inherited
+        :instance_inherited
+      end
+    end
+
+    deftype Bar : Foo
+    end
+  ) do |typ, itr|
+    itr.recursive_lookup(typ, "static_inherited").should be_a(TFunctor)
+    itr.recursive_lookup(TInstance.new(typ), "instance_inherited").should be_a(TFunctor)
+  end
+
+  # Type paths can also be given as supertypes and act the same way.
+  it_interprets_the_type %q(
+    deftype Foo
+      deftype Bar
+        defstatic static_inherited
+          :static_inherited
+        end
+
+        def instance_inherited
+          :instance_inherited
+        end
+      end
+    end
+
+    deftype Baz : Foo.Bar
+    end
+  ) do |typ, itr|
+    itr.recursive_lookup(typ, "static_inherited").should be_a(TFunctor)
+    itr.recursive_lookup(TInstance.new(typ), "instance_inherited").should be_a(TFunctor)
+  end
+
+  # Finally, the supertype can be given as an interpolation that resolves to
+  # a TType value.
+  it_interprets_the_type %q(
+    deftype Foo
+      defstatic static_inherited
+        :static_inherited
+      end
+
+      def instance_inherited
+        :instance_inherited
+      end
+    end
+
+    type_to_inherit_from = Foo
+
+    deftype Baz : <type_to_inherit_from>
+    end
+  ) do |typ, itr|
+    itr.recursive_lookup(typ, "static_inherited").should be_a(TFunctor)
+    itr.recursive_lookup(TInstance.new(typ), "instance_inherited").should be_a(TFunctor)
+  end
+
+  # Inheritance is transitive (A < B < C implies A < C).
+  it_interprets_the_type %q(
+    deftype Foo
+      def instance_inherited
+        :instance_inherited
+      end
+    end
+
+    deftype Bar : Foo
+    end
+
+    deftype Baz : Bar
+    end
+  ) do |typ, itr|
+    itr.recursive_lookup(TInstance.new(typ), "instance_inherited").should be_a(TFunctor)
+  end
+
+  # The supertype definition _must_ resolve to a TType.
+  it_does_not_interpret %q(
+    deftype Foo : <nil>
+    end
+  )
+  it_does_not_interpret %q(
+    Bar = "Hello"
+    deftype Foo : Bar
+    end
+  )
+
+  # Inheritance can only be specified on the first definition of a type.
+  # Re-opening the type and specifying inheritance will cause an error.
+  it_does_not_interpret %q(
+    deftype Foo; end
+    deftype Bar : Foo; end
+    # This definition will fail, because Bar already exists. Even though the
+    # supertype is the same, it will still fail.
+    deftype Bar : Foo; end
   )
 end

@@ -43,8 +43,8 @@ module Myst
     # least recent (the last `include` will be first in this list).
     property included_modules = [] of TModule
 
-    def ancestors : Array(TModule)
-      @included_modules.reduce(Set(TModule).new) do |acc, mod|
+    def ancestors : Array(ContainerType)
+      @included_modules.reduce(Set(ContainerType).new) do |acc, mod|
         acc.add(mod)
         acc.concat(mod.ancestors)
       end.to_a
@@ -71,11 +71,12 @@ module Myst
   end
 
   class TType < ContainerType
-    property scope          : Scope
-    property instance_scope : Scope
-    property extended_modules = [] of TModule
+    property  scope          : Scope
+    property  instance_scope : Scope
+    property! supertype      : TType?
+    property  extended_modules = [] of TModule
 
-    def initialize(@name : String, parent : Scope?=nil)
+    def initialize(@name : String, parent : Scope?=nil, @supertype : TType? = nil)
       @scope = Scope.new(parent)
       @instance_scope = Scope.new(parent)
       # TODO: revist this when base object for TType is in place
@@ -96,11 +97,32 @@ module Myst
       @extended_modules.unshift(mod)
     end
 
-    def extended_ancestors
-      @extended_modules.reduce(Set(TModule).new) do |acc, mod|
+    def ancestors : Array(ContainerType)
+      modules = @included_modules.reduce(Set(ContainerType).new) do |acc, mod|
         acc.add(mod)
         acc.concat(mod.ancestors)
-      end.to_a
+      end
+
+      if supertype?
+        modules.add(supertype)
+        modules.concat(supertype.ancestors)
+      end
+
+      modules.to_a
+    end
+
+    def extended_ancestors : Array(ContainerType)
+      modules = @extended_modules.reduce(Set(ContainerType).new) do |acc, mod|
+        acc.add(mod)
+        acc.concat(mod.ancestors)
+      end
+
+      if supertype?
+        modules.add(supertype)
+        modules.concat(supertype.extended_ancestors)
+      end
+
+      modules.to_a
     end
 
     def_equals_and_hash name, scope, instance_scope
@@ -114,7 +136,7 @@ module Myst
       @scope = Scope.new(@type.instance_scope)
     end
 
-    def ancestors
+    def ancestors : Array(ContainerType)
       @type.ancestors
     end
 

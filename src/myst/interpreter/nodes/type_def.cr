@@ -5,8 +5,23 @@ module Myst
       # use it. Otherwise, create a new type in the current scope.
       if current_scope.has_key?(node.name)
         type = current_scope[node.name].as(TType)
+        if node.supertype?
+          __raise_runtime_error("Specifying a supertype when re-opening an existing type is not allowed.")
+        end
       else
-        type = TType.new(node.name, current_scope)
+        supertype =
+          if node.supertype?
+            visit(node.supertype)
+            typ = stack.pop
+            unless typ.is_a?(TType)
+              __raise_runtime_error("Supertype of #{node.name} must be a Type object, but resolved to a #{typ.type_name}")
+            end
+            typ
+          else
+            nil
+          end
+
+        type = TType.new(node.name, current_scope, supertype: supertype)
         current_scope.assign(node.name, type)
       end
 
