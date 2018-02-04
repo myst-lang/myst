@@ -784,14 +784,15 @@ module Myst
   # A type definition. TypeDefs are similar to ModuleDefs, but define a data
   # type that can be instantiated similar to how Literals create primitives.
   #
-  #   'deftype' const
+  #   'deftype' const : const
   #     body
   #   'end'
   class TypeDef < Node
-    property name       : String
-    property body       : Node
+    property  name       : String
+    property  body       : Node
+    property! supertype  : Call | Const | ValueInterpolation | Nil
 
-    def initialize(@name, @body=Nop.new)
+    def initialize(@name, @body=Nop.new, @supertype=nil)
     end
 
     def accept_children(visitor)

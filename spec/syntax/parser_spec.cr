@@ -1025,6 +1025,43 @@ describe "Parser" do
   ),                TypeDef.new("Thing", body: e(TypeDef.new("Part")))
 
 
+  # Inheritance
+
+  # Types can inherit from other types using a syntax similar to type restrictions
+  it_parses %q(deftype Foo : Bar; end),             TypeDef.new("Foo", supertype: c("Bar"))
+  # The supertype can be a namespaced name
+  it_parses %q(deftype Foo : Bar.Baz; end),         TypeDef.new("Foo", supertype: Call.new(c("Bar"), "Baz"))
+  it_parses %q(deftype Foo : Bar.Baz.Foo; end),     TypeDef.new("Foo", supertype: Call.new(Call.new(c("Bar"), "Baz"), "Foo"))
+  # Type supertype can also be interpolated
+  it_parses %q(deftype Foo : <get_supertype>; end), TypeDef.new("Foo", supertype: i(Call.new(nil, "get_supertype")))
+  # If a colon is given, a type name is required
+  it_does_not_parse %q(deftype Foo : ; end)
+  it_does_not_parse %q(
+    deftype Foo :
+    end
+  )
+  # The separating colon must be padded with a space to avoid confusion with a Symbol.
+  it_does_not_parse %q(
+    deftype Foo:Bar; end
+  )
+  # The supertype name must be given on the same line as the type
+  it_does_not_parse %q(
+    deftype Foo :
+      Bar
+    end
+  )
+  it_does_not_parse %q(
+    deftype Foo
+      : Bar
+    end
+  )
+  # Type paths must be given with no spaces
+  it_does_not_parse %q(deftype Foo : Bar . Baz; end)
+  # Inheritance is only valid on type definitions
+  it_does_not_parse %q(defmodule Foo : Bar; end)
+
+
+
   # Type methods
 
   it_parses %q(
