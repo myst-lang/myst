@@ -145,6 +145,10 @@ module Myst
       static = (start.type == Token::Type::DEFSTATIC)
       skip_space
       name = parse_def_name
+      if is_local_var?(name)
+        raise ParseError.new(current_location, "Function name `#{name}` collides with existing local variable. Clauses defined with `def` cannot be applied to variables.\n")
+      end
+
       method_def = Def.new(name, static: static).at(start.location)
       push_var_scope
 
@@ -680,7 +684,7 @@ module Myst
         end
 
         return parse_postfix(call)
-      
+
       # While `parse_var_or_call` can distinguish Calls for string identifiers,
       # its isolated scope (just the current token) means it cannot be
       # responsible for parsing Calls from arbitrary expressions. However,

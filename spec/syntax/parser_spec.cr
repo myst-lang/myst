@@ -766,6 +766,16 @@ describe "Parser" do
   it_parses %q(def foo_!; end), Def.new("foo_!")
   it_parses %q(def foo_?; end), Def.new("foo_?")
 
+  # Identifiers that already exist as local variables cannot be used as function names.
+  it_does_not_parse %q(foo = 1; def foo; end), /collides/
+  # Variables outside of the current scope do not count as collisions
+  it_parses %q(
+    foo = 1
+    defmodule Bar
+      def foo; end
+    end
+  )
+
   # `=` can also be appended to any non-modified identifier.
   it_parses %q(def foo=;    end), Def.new("foo=")
   it_parses %q(def foo_=(); end), Def.new("foo_=")
@@ -2639,7 +2649,7 @@ describe "Parser" do
       rescue
       end
     end
-  ),                AnonymousFunction.new([Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new]))])  
+  ),                AnonymousFunction.new([Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new]))])
   # The trailing clauses may contain any valid Expressions node.
   it_parses %q(
     fn ->() do
@@ -2650,7 +2660,7 @@ describe "Parser" do
     end
   ),                AnonymousFunction.new([Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(e(Call.new(l(1), "+", [l(2)], infix: true), SimpleAssign.new(v("a"), l(1))))]))])
   it_parses %q(
-  fn 
+  fn
     ->() do rescue; a; end
   end
   ),                AnonymousFunction.new([Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(e(Call.new(nil, "a")))]))])
@@ -2703,7 +2713,7 @@ describe "Parser" do
       rescue a : Integer
       end
     end
-  ),                AnonymousFunction.new([Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p("a", restriction: c("Integer")))]))])  
+  ),                AnonymousFunction.new([Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p("a", restriction: c("Integer")))]))])
   it_does_not_parse %q(
     fn ->() do
       rescue a : 123
