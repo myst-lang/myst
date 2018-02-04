@@ -1,0 +1,12 @@
+# See https://github.com/samueleaton/sentry/blob/master/.sentry.example.yml
+# for more information about configuration options.
+
+# By default, this file configures sentry to run the native specs for Myst
+# every time any of the source files changes.
+display_name: myst specs
+info: true
+build: crystal spec
+run: # nothing to do
+watch:
+  - ./src/myst/**/*.cr
+  - ./spec/**/*.cr
