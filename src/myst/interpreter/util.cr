@@ -20,10 +20,12 @@ module Myst
     # Resolve the Scope for `value`. For primitives, this returns the instance
     # scope of the Type for that value. For Instances, Types, and Modules, this
     # just returns `.scope` for that value.
-    def __scopeof(value : Value) : Scope
+    def __scopeof(value : Value, prefer_instance_scope = false) : Scope
       case value
       when TInstance
         value.scope
+      when TType
+        prefer_instance_scope ? value.instance_scope : value.scope
       when ContainerType
         value.scope
       else
@@ -63,7 +65,8 @@ module Myst
     def recursive_lookup(receiver, name, check_current = true)
       func    = current_scope[name] if check_current && current_scope.has_key?(name)
       func  ||= __scopeof(receiver)[name]?
-      if receiver.is_a?(TType)
+      case receiver
+      when TType
         func ||= receiver.extended_ancestors.each do |anc|
           if found = __scopeof(anc)[name]?
             break found
@@ -71,7 +74,7 @@ module Myst
         end
       else
         func  ||= __typeof(receiver).ancestors.each do |anc|
-          if found = __scopeof(anc)[name]?
+          if found = __scopeof(anc, prefer_instance_scope: true)[name]?
             break found
           end
         end

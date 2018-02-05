@@ -377,17 +377,43 @@ module Myst
       skip_space
       name = expect(Token::Type::CONST).value
       skip_space
+      # Type definitions can optionally provide a supertype to inherit from.
+      supertype =
+        if accept(Token::Type::COLON)
+          skip_space
+          parse_type_path
+        end
+      skip_space
       expect_delimiter
       skip_space_and_newlines
 
       if finish = accept(Token::Type::END)
-        return TypeDef.new(name, Nop.new).at(start.location).at_end(finish.location)
+        return TypeDef.new(name, Nop.new, supertype: supertype).at(start.location).at_end(finish.location)
       else
         push_var_scope
         body = parse_code_block(Token::Type::END)
         finish = expect(Token::Type::END)
         pop_var_scope
-        return TypeDef.new(name, body).at(start.location).at_end(finish.location)
+        return TypeDef.new(name, body, supertype: supertype).at(start.location).at_end(finish.location)
+      end
+    end
+
+    def parse_type_path
+      case current_token.type
+      when Token::Type::CONST
+        token = current_token
+        read_token
+        path = Const.new(token.value).at(token.location)
+        while accept(Token::Type::POINT)
+          next_path_part = expect(Token::Type::CONST)
+          path = Call.new(path, next_path_part.value).at(path.location).at_end(next_path_part.location)
+        end
+
+        path
+      when Token::Type::LESS
+        parse_value_interpolation
+      else
+        raise ParseError.new(current_location, "Expected supertype after colon in type definition")
       end
     end
 

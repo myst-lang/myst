@@ -15,14 +15,14 @@ EXT_MODULE_DEF = %q(
 )
 
 TYPE_DEF = %q(
-	deftype Baz
+  deftype Baz
     extend Foo
 
-		def bar
-			"bar called"
-		end
+    def bar
+      "bar called"
+    end
 
-	end
+  end
 )
 
 describe "Interpreter - Extend" do
