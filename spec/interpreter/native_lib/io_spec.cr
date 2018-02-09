@@ -2,7 +2,7 @@ require "../../spec_helper.cr"
 require "../../support/interpret.cr"
 
 
-describe "NativeLib - IO Methods" do
+describe "NativeLib - STDIO" do
   describe "#puts" do
     it "with no argument, prints a newline to the output" do
       itr = interpret_with_mocked_output %q(
@@ -120,7 +120,7 @@ describe "NativeLib - IO Methods" do
 
     it "a string from the IO" do
       itr = interpret_with_mocked_input %q(
-        IO.gets               
+        IO.gets
       ), "hello, world"
 
       itr.stack.pop.should eq(val("hello, world"))
@@ -129,7 +129,7 @@ describe "NativeLib - IO Methods" do
     it "multiple inputs from the IO" do
       itr = interpret_with_mocked_input %q(
         IO.gets
-        IO.gets         
+        IO.gets
       ), "hello, world\nhello, again\n"
 
       itr.stack.pop.should eq(val("hello, again"))
