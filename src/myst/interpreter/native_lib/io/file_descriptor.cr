@@ -1,11 +1,5 @@
 module Myst
   class Interpreter
-    @fd_pool = {
-      0 => STDIN,
-      1 => STDOUT,
-      2 => STDERR
-    } of Int32 => IO::FileDescriptor
-
     NativeLib.method :io_fd_init, TInstance, fd : TInteger do
       id = fd.value.to_i32
       @fd_pool[id] ||= IO::FileDescriptor.new(id)

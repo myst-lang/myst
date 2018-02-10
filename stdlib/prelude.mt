@@ -13,6 +13,7 @@
 require "./enumerable.mt"
 require "./file.mt"
 require "./integer.mt"
+require "./io.mt"
 require "./list.mt"
 require "./map.mt"
 require "./string.mt"

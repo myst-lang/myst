@@ -79,22 +79,4 @@ describe "Interpreter - Self" do
 
     itr.stack.last.should eq(val(2))
   end
-
-  it "as an argument, is not affected by Call receivers" do
-    itr = interpret_with_mocked_output %q(
-      deftype Foo
-        def put_self
-          IO.puts(self)
-        end
-
-        def to_s
-          "hello"
-        end
-      end
-
-      %Foo{}.put_self
-    )
-
-    itr.output.to_s.should eq("hello\n")
-  end
 end

@@ -12,7 +12,7 @@ x = 1
 # later on.
 x = 1
 v = 1 =: x
-IO.puts(v) #=> 1
+STDOUT.puts(v) #=> 1
 
 # Variables can also be assigned with pattern-matching assignment. Using an
 # identifier on the left-hand-side of a match expression will assign the
@@ -28,33 +28,33 @@ x =: list[2]
 # successfully (both are the value `1`), then `b` is bound to `"hello"`, and
 # `c` is bound to `false`.
 [1, b, c] =: [1, "hello", false]
-IO.puts(b) #=> "hello"
-IO.puts(c) #=> false
+STDOUT.puts(b) #=> "hello"
+STDOUT.puts(c) #=> false
 
 # Nested values are also supported in pattern matching.
 [1, b, ["nested", c], map] =: [1, 2, ["nested", "lists"], {a: 1, b: 2}]
-IO.puts(c) #=> "lists"
-IO.puts(map) #=> {a: 1, b: 2}
+STDOUT.puts(c) #=> "lists"
+STDOUT.puts(map) #=> {a: 1, b: 2}
 
 # Pattern matching is performed left-to-right. Normally, this is not important,
 # but combined with variable re-use and value interpolation, this makes pattern
 # matchinde extremely powerful when enforcing structures.
 [a, <(a*3)>] =: ["hi", "hihihi"]
-IO.puts(a) #=> "hi"
+STDOUT.puts(a) #=> "hi"
 
 # Pattern matching for lists also allows for splat collectors, similar to how
 # they are used in function parameters. Only one splat collector is allowed in
 # a List pattern.
 [head, *tail] =: [1, 2, 3]
-IO.puts(tail) #=> [2, 3]
+STDOUT.puts(tail) #=> [2, 3]
 # A splat collector matches successfully when 0 or more elements remain to be
 # matched. If there are no elements, the collector will become an empty List.
 [a, b, c, *rest] =: [1, 2, 3]
-IO.puts(rest) #=> []
+STDOUT.puts(rest) #=> []
 # Splat collectors may be used anywhere in the List pattern.
 [first, *_, last] =: [1, 2, 3, 4]
-IO.puts(first) #=> 1
-IO.puts(last) #=> 4
+STDOUT.puts(first) #=> 1
+STDOUT.puts(last) #=> 4
 
 
 
@@ -64,17 +64,17 @@ IO.puts(last) #=> 4
 # be ignored by the match.
 map = {a: 1, b: 2, c: 3}
 {a: a, b: b} =: map
-IO.puts(a) #=> 1
-IO.puts(b) #=> 2
+STDOUT.puts(a) #=> 1
+STDOUT.puts(b) #=> 2
 
 # Like Lists, the entries of a Map pattern may be any other valid pattern.
 {a: a, b: <(a*2)>, c: <(a*3)>} =: map
-IO.puts(a) #=> 1
+STDOUT.puts(a) #=> 1
 
 
 # Patterns may also just be simple types. This can be useful as for quickly
 # ensuring the type of a value
 a = "hello"
 when String =: a #=> match succeeds
-  IO.puts("a was a string")
+  STDOUT.puts("a was a string")
 end

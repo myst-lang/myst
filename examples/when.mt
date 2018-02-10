@@ -14,15 +14,15 @@
 # effect as the  traditional `if...else if` construct, but with a consistent
 # syntax that makes parsing multiple chained conditions easier on the eyes.
 when true
-  IO.puts("this will always run")
+  STDOUT.puts("this will always run")
 when false
-  IO.puts("this will never run")
+  STDOUT.puts("this will never run")
 end
 
 when false
-  IO.puts("this will never run")
+  STDOUT.puts("this will never run")
 when true
-  IO.puts("this will always run")
+  STDOUT.puts("this will always run")
 end
 
 
@@ -34,7 +34,7 @@ when false
 when false
   # somthing else
 else
-  IO.puts("this will always run")
+  STDOUT.puts("this will always run")
 end
 
 
@@ -42,9 +42,9 @@ end
 # the block when the condition is _false_), `unless` may replace `when`. This
 # is valid at any point in a `when` chain.
 when false
-  IO.puts("this will never run")
+  STDOUT.puts("this will never run")
 unless false
-  IO.puts("runs when condition is falsey")
+  STDOUT.puts("runs when condition is falsey")
 end
 
 

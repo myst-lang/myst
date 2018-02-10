@@ -18,7 +18,7 @@ y = 2
 # Functions are called by specifying a name and passing arguments in
 # parentheses. If the function is to be called with no arguments, the
 # parentheses may be omitted.
-IO.puts(add(4, add(x, y))) #=> 7
+STDOUT.puts(add(4, add(x, y))) #=> 7
 
 
 # Functions implicitly close over the scope that they are defined in. For
@@ -33,4 +33,4 @@ module Container
   end
 end
 
-IO.puts(Container.return_some_value()) #=> 10
+STDOUT.puts(Container.return_some_value()) #=> 10

@@ -9,13 +9,18 @@ module Myst
     property callstack : Callstack
     property kernel : TModule
 
-    property input : IO
-    property output : IO
-    property errput : IO
-
     property warnings : Int32
 
-    def initialize(@input : IO = STDIN, @output : IO = STDOUT, @errput : IO = STDERR)
+    getter fd_pool = {} of Int32 => IO
+
+
+    def initialize(input : IO = STDIN, output : IO = STDOUT, errput : IO = STDERR)
+      fd_pool.merge!({
+        0 => input,
+        1 => output,
+        2 => errput
+      })
+
       @stack = [] of Value
       @scope_stack = [] of Scope
       @callstack = Callstack.new
@@ -23,6 +28,19 @@ module Myst
       @self_stack = [@kernel] of Value
       @warnings = 0
     end
+
+    # input, output, and errput properties. These delegate to the entries in
+    # `fd_pool`, allowing them to be overridden either from the language
+    # itself, or from Crystal-land (e.g., for specs or through `Myst::VM`).
+    {% for stream, fd in {input: 0, output: 1, errput: 2} %}
+      def {{stream.id}}
+        fd_pool[{{fd}}]
+      end
+
+      def {{stream.id}}=(other)
+        fd_pool[{{fd}}] = other
+      end
+    {% end %}
 
 
     def current_scope
@@ -82,8 +100,8 @@ module Myst
     def warn(message : String, node : Node)
       @warnings += 1
       unless ENV["MYST_ENV"] == "test"
-        @errput.puts("WARNING: #{message}")
-        @errput.puts("  from `#{node.name}` at #{node.location.to_s}")
+        errput.puts("WARNING: #{message}")
+        errput.puts("  from `#{node.name}` at #{node.location.to_s}")
       end
     end
 
@@ -91,12 +109,12 @@ module Myst
     def put_error(error : RuntimeError)
       value_to_s = __scopeof(error.value)["to_s"].as(TFunctor)
       result = Invocation.new(self, value_to_s, error.value, [] of Value, nil).invoke
-      @errput.puts("Uncaught Exception: " + result.as(TString).value)
+      errput.puts("Uncaught Exception: " + result.as(TString).value)
       error.trace.reverse_each do |frame|
         if frame.responds_to?(:name)
-          @errput.puts "  from `#{frame.name}` at #{frame.location}"
+          errput.puts "  from `#{frame.name}` at #{frame.location}"
         else
-          @errput.puts "  at #{frame.location}"
+          errput.puts "  at #{frame.location}"
         end
       end
     end

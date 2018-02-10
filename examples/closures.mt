@@ -10,4 +10,4 @@ foo{ a = a + 1 }
 
 # As a result, executing the block changes the value of `a` _outside_ of the
 # block, meaning it's value is now 2.
-IO.puts(a) #=> 2
+STDOUT.puts(a) #=> 2

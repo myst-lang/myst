@@ -13,14 +13,14 @@
 #   hello
 #   world
 "hello world".split().each() do |word|
-  IO.puts(word)
+  STDOUT.puts(word)
 end
 
 # Blocks can also take multiple arguments. A simple example is when iterating
 # a Map, where the provided block takes two arguments, the key and the value.
 {a: 1, b: "hello", c: 5}.each() do |key, value|
-  IO.puts(key)
-  IO.puts(value)
+  STDOUT.puts(key)
+  STDOUT.puts(value)
 end
 
 
@@ -31,7 +31,7 @@ x = 0
 [0, 1, 2, 3].each() do |elem|
   x = x + 1
 end
-IO.puts(x) #=> 4
+STDOUT.puts(x) #=> 4
 
 
 # Defining a function that accepts a block is done by adding an extra parameter
@@ -45,5 +45,5 @@ def pairs(element1, element2, element3, &block)
 end
 
 pairs(1, 2, 3) do |elem1, elem2|
-  IO.puts("Pair: " + elem1.to_s() + ", " + elem2.to_s())
+  STDOUT.puts("Pair: " + elem1.to_s() + ", " + elem2.to_s())
 end

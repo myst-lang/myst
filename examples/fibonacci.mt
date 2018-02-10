@@ -23,9 +23,9 @@ def fib(arg)
 end
 
 
-IO.puts(fib(1))        #=> 1
-IO.puts(fib(6))        #=> 8
-IO.puts(fib("hello"))  #=> "hello is not a valid argument for fibonnaci!"
+STDOUT.puts(fib(1))        #=> 1
+STDOUT.puts(fib(6))        #=> 8
+STDOUT.puts(fib("hello"))  #=> "hello is not a valid argument for fibonnaci!"
 
 
 

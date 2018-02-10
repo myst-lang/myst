@@ -8,7 +8,7 @@ map = {
 
 map["hello"] = 5
 
-IO.puts(map[:a] + map[:"string symbol"])
+STDOUT.puts(map[:a] + map[:"string symbol"])
 
 def func(a, b)
   a + b
@@ -25,6 +25,6 @@ interpolant = {
   <:what>: :no # don't do this
 }
 
-IO.puts(interpolant[7])
-IO.puts(interpolant[:what])
-IO.puts(interpolant[[1,2,3]])
+STDOUT.puts(interpolant[7])
+STDOUT.puts(interpolant[:what])
+STDOUT.puts(interpolant[[1,2,3]])

@@ -41,6 +41,7 @@ describe "Interpreter - ExceptionHandler" do
       end
     end
 
+
     describe "with an argument" do
       it "is only executed when the exception matches the argument" do
         itr = interpret_with_mocked_output %q(
@@ -58,8 +59,8 @@ describe "Interpreter - ExceptionHandler" do
         )
 
         itr.current_self.ivars.has_key?("@rescued_string").should be_true
-        itr.current_self.ivars.has_key?("@rescued_float").should be_false
-        itr.current_self.ivars.has_key?("@rescued_other").should be_false
+        itr.current_self.ivars.has_key?("@rescued_float").should  be_false
+        itr.current_self.ivars.has_key?("@rescued_other").should  be_false
       end
 
       it "performs type restriction when given" do
@@ -134,7 +135,7 @@ describe "Interpreter - ExceptionHandler" do
           end
 
           def do_rescue
-            IO.puts(:saved)
+            :saved
           end
         end
 
@@ -143,8 +144,8 @@ describe "Interpreter - ExceptionHandler" do
         end
       )
 
-      itr.errput.to_s.should eq("")
-      itr.output.to_s.should eq("saved\n")
+      itr.errput.to_s.should  eq("")
+      itr.stack.last.should   eq(val(:saved))
     end
 
     it "restores scope overrides after rescuing (see #95)" do
@@ -173,11 +174,10 @@ describe "Interpreter - ExceptionHandler" do
         :finished
       )
 
-      itr.errput.to_s.should eq("")
-      itr.stack.last.should eq(val(:finished))
+      itr.errput.to_s.should  eq("")
+      itr.stack.last.should   eq(val(:finished))
     end
   end
-
 
   describe "`ensure`" do
     it "is executed after rescuing an exception" do
@@ -253,9 +253,10 @@ describe "Interpreter - ExceptionHandler" do
     end
 
     it "restores `self` before executing (see #59)" do
-      itr = interpret_with_mocked_output %q(
+      itr = parse_and_interpret %q(
         defmodule Foo
           def run(&block)
+            @ensured = false
             block()
             nil
           ensure
@@ -263,7 +264,11 @@ describe "Interpreter - ExceptionHandler" do
           end
 
           def do_ensure
-            IO.puts(:saved)
+            @ensured = true
+          end
+
+          def ensured?
+            @ensured
           end
         end
 
@@ -273,10 +278,11 @@ describe "Interpreter - ExceptionHandler" do
           # the `raise` will not be rescued by `run`.
           nil
         end
+
+        Foo.ensured?
       )
 
-      itr.errput.to_s.should eq("")
-      itr.output.to_s.should eq("saved\n")
+      itr.stack.last.should eq(val(true))
     end
   end
 end

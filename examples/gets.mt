@@ -1,2 +1,2 @@
 string = IO.gets()
-IO.puts("You wrote: "+string)
+STDOUT.puts("You wrote: "+string)

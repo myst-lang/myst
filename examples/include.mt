@@ -24,8 +24,8 @@ module Foo
   include Nested.Baz
 end
 
-IO.puts(Foo.bar(1, 2)) #=> 3
-IO.puts(Foo.baz(2, 1)) #=> 1
+STDOUT.puts(Foo.bar(1, 2)) #=> 3
+STDOUT.puts(Foo.baz(2, 1)) #=> 1
 
 
 # Includes work on any scope, including the top level. The following will make
@@ -33,4 +33,4 @@ IO.puts(Foo.baz(2, 1)) #=> 1
 # this case, that means the `Baz` module can be referenced without the need to
 # prefix it with `Nested.`.
 include Nested
-IO.puts(Baz.baz(5, 1)) #=> 4
+STDOUT.puts(Baz.baz(5, 1)) #=> 4
