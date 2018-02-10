@@ -8,10 +8,10 @@
 # List.
 def splats(*args)
   i = 0
-  IO.puts("args to `splats`:")
+  STDOUT.puts("args to `splats`:")
   args.each() do |arg|
     i = i + 1
-    IO.puts("  Arg " + i.to_s() + ": " + arg.to_s())
+    STDOUT.puts("  Arg " + i.to_s() + ": " + arg.to_s())
   end
 end
 
@@ -44,10 +44,10 @@ def h_and_t(head, *_, tail)
 end
 
 
-IO.puts(head_of("a", "b", "c", "d"))  #=> a
-IO.puts(head_of("a"))                 #=> a
-IO.puts(tail_of("a", "b", "c", "d"))  #=> d
-IO.puts(tail_of("a"))                 #=> a
-IO.puts(h_and_t("a", "b", "c", "d"))  #=> [a, d]
-IO.puts(h_and_t("a", "b"))            #=> [a, b]
+STDOUT.puts(head_of("a", "b", "c", "d"))  #=> a
+STDOUT.puts(head_of("a"))                 #=> a
+STDOUT.puts(tail_of("a", "b", "c", "d"))  #=> d
+STDOUT.puts(tail_of("a"))                 #=> a
+STDOUT.puts(h_and_t("a", "b", "c", "d"))  #=> [a, d]
+STDOUT.puts(h_and_t("a", "b"))            #=> [a, b]
 

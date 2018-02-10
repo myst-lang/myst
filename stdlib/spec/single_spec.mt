@@ -9,9 +9,9 @@ defmodule Spec
 
     def run(&block)
       block()
-      IO.print(".")
+      STDOUT.print(".")
     rescue failure
-      IO.puts(failure)
+      STDOUT.puts(failure)
       exit(1)
     end
   end

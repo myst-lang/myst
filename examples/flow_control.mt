@@ -15,11 +15,11 @@ def add_if_not_nil(element)
   list = list + [element]
 end
 
-IO.puts(add_if_not_nil(1))   #=> [1]
-IO.puts(add_if_not_nil(nil)) #=> nil
+STDOUT.puts(add_if_not_nil(1))   #=> [1]
+STDOUT.puts(add_if_not_nil(nil)) #=> nil
 # Because of the early return when called with `nil`, `list` should only
 # contain the `1` that was added first.
-IO.puts(list) #=> [1]
+STDOUT.puts(list) #=> [1]
 
 # `break` will return from the function the block was passed to. If a value is
 # given to the `break`, it will be used as the return value from the function.
@@ -32,10 +32,10 @@ result = [1, 2, nil, 4, 5].each() do |elem|
   i = i + 1
 end
 
-IO.puts(result) #=> :err
+STDOUT.puts(result) #=> :err
 # Because `break` caused `each` to exit before iterating all of the elements,
 # `i` was only incremented twice.
-IO.puts("Iterations: " + i.to_s()) #=> 2
+STDOUT.puts("Iterations: " + i.to_s()) #=> 2
 
 
 # `next` will return from the current call to the block, with an optional value
@@ -48,7 +48,7 @@ IO.puts("Iterations: " + i.to_s()) #=> 2
     next
   end
 
-  IO.puts(elem)
+  STDOUT.puts(elem)
 end
 
 

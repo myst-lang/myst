@@ -1,56 +1,32 @@
 module Myst
   class Interpreter
-    NativeLib.method :io_puts, Value do
-      if __args.size == 0
-        self.output.puts
-      else
-        __args.each do |arg|
-          string = NativeLib.call_func_by_name(self, arg, "to_s", [] of Value)
-          if string.is_a?(TString)
-            self.output.puts(string.value)
-          else
-            __raise_runtime_error("expected String argument. Got #{__typeof(string).name}")
-          end
-        end
-      end
-
-      TNil.new
+    NativeLib.method :io_read, Value, size : TInteger do
+      __raise_runtime_error("`IO#read` must be implemented by inheriting types.")
     end
 
-    NativeLib.method :io_print, Value do
-      if __args.size == 0
-        self.output.print("")
-      else
-        __args.each do |arg|
-          string = NativeLib.call_func_by_name(self, arg, "to_s", [] of Value)
-          if string.is_a?(TString)
-            self.output.print(string.value)
-          else
-            __raise_runtime_error("expected String argument. Got #{__typeof(string).name}")
-          end
-        end
-      end
-
-      TNil.new
+    NativeLib.method :io_write, Value, content : Value do
+      __raise_runtime_error("`IO#write` must be implemented by inheriting types.")
     end
 
-    NativeLib.method :io_gets, Value do
-      input = self.input.gets
-      if input
-        TString.new(input)
-      else
-        TNil.new
-      end
+    private def make_io_fd(type : TType, id : Int)
+      fd = TInstance.new(type)
+      fd.ivars["fd"] = TInteger.new(id.to_i64)
+      fd
     end
 
     def init_io(kernel : TModule)
-      io_module = TModule.new("IO", kernel.scope)
+      io_type = TType.new("IO", kernel.scope)
 
-      NativeLib.def_method(io_module, :puts, :io_puts)
-      NativeLib.def_method(io_module, :print, :io_print)
-      NativeLib.def_method(io_module, :gets, :io_gets)
+      NativeLib.def_instance_method(io_type, :read, :io_read)
+      NativeLib.def_instance_method(io_type, :write, :io_write)
 
-      io_module
+      fd_type = init_file_descriptor(kernel, io_type)
+
+      kernel.scope["STDIN"]   = make_io_fd(fd_type, 0)
+      kernel.scope["STDOUT"]  = make_io_fd(fd_type, 1)
+      kernel.scope["STDERR"]  = make_io_fd(fd_type, 2)
+
+      io_type
     end
   end
 end

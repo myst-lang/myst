@@ -1,2 +1,2 @@
-string = IO.gets()
-IO.puts("You wrote: "+string)
+string = STDIN.gets
+STDOUT.puts("You wrote: <(string)>")

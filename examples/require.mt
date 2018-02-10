@@ -18,7 +18,7 @@ require "./modules.mt"
 
 # The `modules` file loaded above defines a `SampleIO` module, which is now
 # available in the current scope.
-SampleIO.puts("calling required module method")
+SampleSTDOUT.puts("calling required module method")
 
 
 # Requiring a file inside of a module will import the contents into that scope.

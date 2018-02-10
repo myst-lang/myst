@@ -13,7 +13,7 @@ module SampleIO
   end
 
   def puts(data)
-    IO.puts(data)
+    STDOUT.puts(data)
   end
 
   module Nested
@@ -28,6 +28,6 @@ end
 # This example "reads" 10 characters from the IO, then outputs them to the
 # standard output.
 text = SampleIO.read(10)
-SampleIO.puts(text)
+SampleSTDOUT.puts(text)
 
 SampleIO.Nested.test(text*2)

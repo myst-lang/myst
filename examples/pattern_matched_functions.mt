@@ -60,12 +60,12 @@ end
 # The first call here matches the first definition and immediately returns 1.
 # The second follows suit with the second definition. The remaining calls all
 # fallback to the third definition to calculate their result.
-IO.puts(fib(0)) #=> 1
-IO.puts(fib(1)) #=> 1
-IO.puts(fib(2)) #=> 2
-IO.puts(fib(5)) #=> 8
-IO.puts(fib())  #=> 0
-IO.puts(fib("hi")) #=> `hi` is not an integer.
+STDOUT.puts(fib(0)) #=> 1
+STDOUT.puts(fib(1)) #=> 1
+STDOUT.puts(fib(2)) #=> 2
+STDOUT.puts(fib(5)) #=> 8
+STDOUT.puts(fib())  #=> 0
+STDOUT.puts(fib("hi")) #=> `hi` is not an integer.
 
 
 # Pattern matching in functions is exactly the same as pattern-matching
@@ -73,10 +73,10 @@ IO.puts(fib("hi")) #=> `hi` is not an integer.
 # will work as expected, even value interpolation!
 value = 10
 def match(<(value*2)> =: val)
-  IO.puts("matched " + val.to_s())
+  STDOUT.puts("matched " + val.to_s())
 end
 def match(failed_match)
-  IO.puts("failed to match " + failed_match.to_s())
+  STDOUT.puts("failed to match " + failed_match.to_s())
 end
 
 match(20)   #=> matched 20
