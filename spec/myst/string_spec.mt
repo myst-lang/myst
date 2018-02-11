@@ -153,7 +153,7 @@ describe("String#chars") do
   end
 end
 
-describe("String#downcase") do  
+describe("String#downcase") do
   it("returns a lowercased version of itself") do
     assert("HELLO".downcase == "hello")
   end
@@ -180,7 +180,7 @@ describe("String#downcase") do
 end
 
 
-describe("String#upcase") do  
+describe("String#upcase") do
   it("returns a uppercased version of itself") do
     assert("hello".upcase == "HELLO")
   end
@@ -221,7 +221,7 @@ describe("String#strip") do
     assert("   Hello \t".strip == "Hello")
 
     # Very much whitespace
-    assert((("  \t   \n    " * 7) + "Find me if you can" + ("\n" * 28)).strip == "Find me if you can")    
+    assert((("  \t   \n    " * 7) + "Find me if you can" + ("\n" * 28)).strip == "Find me if you can")
   end
 
   it("returns the same string if there is no whitespace to be removed") do
@@ -232,25 +232,25 @@ end
 
 describe("String#lstrip") do
   it("returns a new string with all leading whitespace removed") do
-    assert("\t\tBye tabs".lstrip == "Bye tabs")    
+    assert("\t\tBye tabs".lstrip == "Bye tabs")
   end
 
   it("preserves trailing whitespace") do
     assert("   Hello \t".lstrip == "Hello \t")
-  end  
+  end
 
   it("if there is no leading whitespace to be removed, the same string is returned") do
     assert("Hello\n".lstrip == "Hello\n")
     assert("Hello".lstrip == "Hello")
-  end    
+  end
 end
 
 describe("String#rstrip") do
   it("returns a new string with all trailing whitespace removed") do
-    assert("Nah\n\n\n".rstrip == "Nah")    
+    assert("Nah\n\n\n".rstrip == "Nah")
   end
 
-  it("preserves leading whitespace") do  
+  it("preserves leading whitespace") do
     assert("   Hello \t".rstrip == "   Hello")
   end
 
@@ -270,45 +270,47 @@ end
 describe("String#[]") do
   str = "Hello"
 
-  it("returns the char at the given index. A negative index is counted from the end of the string. \
-    Returns nil if the index falls outside of the string") do
+  describe("with a positive index") do
+    it("returns the char at the given index") do
+      assert(str[0] == "H")
+    end
 
-    assert(str[0] + str[-1] == "Ho")    
+    it("returns nil for an out-of-bounds access") do
+      assert(str[10] == nil)
+    end
   end
 
-  it("returns the substring containing length of characters from start. A negative index is counted from the end of the string. \
-    Returns nil if the index falls outside of the string") do    
-        
-    assert(str[0, 3] == "Hel")
-    assert(str[-2, 2] + str[2] == "lol") 
+  describe("with a negative index") do
+    it("is 1-based, counting from the end") do
+      assert("Bob"[-1] == "b")
+    end
+
+    it("returns the nth element from the end of the string") do
+      assert("123"[-2] == "2")
+    end
+
+    it("returns nil for out-of-bounds access") do
+      assert(str[-str.size - 2] == nil)
+    end
   end
 
-  it("returns the element at the given index") do
-   assert("12"[0] == "1") 
- end   
+  describe("with a second length argument") do
+    it("returns the substring containing `length` characters after the given index") do
+      assert(str[0, 3] == "Hel")
+      assert(str[-2, 2] == "lo")
+    end
 
- it("returns nil for an out-of-bounds access") do    
-   assert("D:"[3] == nil) 
-   assert(str[10] == nil)
- end 
+    it("returns the remainder of the string if `length` goes past the end of the string") do
+      assert(str[0, 100] == "Hello")
+    end
 
- describe("with a negative index") do 
-   it("is 1-based, counting from the end") do 
-     assert("Bob"[-1] == "b")
-   end
-
-   it("returns the nth element from the end of the string") do      
-     assert("123"[-2] == "2") 
-   end 
-
-   it("returns nil for out-of-bounds access") do 
-     str = "yeah, that'd be cool"
-     assert(str[-str.size - 2] == nil)
-   end 
- end 
+    it("returns an empty string if `length` is negative") do
+      assert(str[0, -1] == "")
+    end
+  end
 end
 
-describe("String#reverse") do 
+describe("String#reverse") do
   it("Returns a new string with characters in reverse order") do
     assert("bob".reverse == "bob") # Oh wait, palindromes are bad test-cases i guess
     assert("Myst".reverse == "tsyM")

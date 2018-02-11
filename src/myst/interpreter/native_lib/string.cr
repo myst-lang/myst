@@ -77,11 +77,11 @@ module Myst
     NativeLib.method :string_strip, TString do
       TString.new(this.value.strip)
     end
-    
+
     NativeLib.method :string_rstrip, TString do
       TString.new(this.value.rstrip)
     end
-    
+
     NativeLib.method :string_lstrip, TString do
       TString.new(this.value.lstrip)
     end
@@ -91,13 +91,16 @@ module Myst
     end
 
     NativeLib.method :string_at, TString, index : TInteger, length : TInteger? do
-      idx = index.value      
+      idx = index.value
 
-      result = 
-        if length.is_a? TInteger
+      result =
+        case length
+        when TInteger
           # Explicitly check that `String#[start, count]` will not fail.
-          if idx < this.value.size && length.value > idx
+          if idx < this.value.size && length.value >= 0
             TString.new(this.value[idx, length.value])
+          else
+            TString.new("")
           end
         else
           # Use nil-checking to assert that `index.value` is valid.
@@ -106,9 +109,8 @@ module Myst
           end
         end
 
-      # If none of the above conditions are met, default to `TNil`.
-      result ||= TNil.new
-    end    
+      result || TNil.new
+    end
 
     NativeLib.method :string_reverse, TString do
       TString.new(this.value.reverse)
