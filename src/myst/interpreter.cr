@@ -127,6 +127,20 @@ module Myst
       else
         raise err
       end
+    rescue ex
+      errput.puts("Interpreter Error: #{ex.message}")
+      errput.puts
+      errput.puts("Myst backtrace: ")
+      callstack.reverse_each do |frame|
+        if frame.responds_to?(:name)
+          errput.puts "  from `#{frame.name}` at #{frame.location}"
+        else
+          errput.puts "  at #{frame.location}"
+        end
+      end
+      errput.puts
+      errput.puts("Native backtrace: ")
+      errput.puts(ex.inspect_with_backtrace)
     end
   end
 end

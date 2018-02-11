@@ -121,6 +121,7 @@ describe("IO#print") do
   end
 end
 
+
 describe("IO#gets") do
   it("reads characters from the IO until a newline character is found") do
     io = %MockIO{"hello\nworld"}
