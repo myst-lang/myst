@@ -7,6 +7,7 @@ include Spec.DSL
 # files under this directory.
 require "./boolean_spec.mt"
 require "./enumerable_spec.mt"
+require "./file_spec.mt"
 require "./float_spec.mt"
 require "./integer_spec.mt"
 require "./io_spec.mt"

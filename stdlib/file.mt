@@ -5,4 +5,6 @@ deftype File
   defstatic open(name : String, mode)
     %File{name, mode}
   end
+
+  def mode; @mode; end
 end

@@ -4,16 +4,23 @@ module Myst
       file = File.open(name.value, mode.value)
       @fd_pool[file.fd] = file
 
-      this.ivars["fd"] = TInteger.new(file.fd.to_i64)
+      this.ivars["@fd"] = TInteger.new(file.fd.to_i64)
+      this.ivars["@mode"] = mode
       this
     end
 
     NativeLib.method :file_close, TInstance do
-      fd = this.ivars["fd"].as(TInteger)
+      fd = this.ivars["@fd"].as(TInteger)
       file = @fd_pool[fd.value]
       file.close
       @fd_pool.delete(fd.value)
       TNil.new
+    end
+
+    NativeLib.method :file_size, TInstance do
+      fd = this.ivars["@fd"].as(TInteger)
+      file = @fd_pool[fd.value].as(File)
+      TInteger.new(file.size.to_i64)
     end
 
 
@@ -23,6 +30,7 @@ module Myst
 
       NativeLib.def_instance_method(file_type, :initialize, :file_init)
       NativeLib.def_instance_method(file_type, :close,      :file_close)
+      NativeLib.def_instance_method(file_type, :size,       :file_size)
       file_type
     end
   end

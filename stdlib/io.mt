@@ -39,14 +39,20 @@ deftype IO
   def gets
     buffer = ""
     last_char = ""
+
     while last_char != "\n"
       buffer += last_char
       last_char = read(1)
 
       when last_char == "" || last_char == "\0"
-        return buffer
+        # raise/rescue is a work around for the currently-broken explicit
+        # returns, mentioned in https://github.com/myst-lang/myst/issues/155.
+        raise buffer
       end
     end
+
+    buffer
+  rescue buffer
     buffer
   end
 end
