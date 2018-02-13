@@ -26,6 +26,8 @@ module Myst
       kernel.scope["STDOUT"]  = make_io_fd(fd_type, 1)
       kernel.scope["STDERR"]  = make_io_fd(fd_type, 2)
 
+      file_type = init_file(kernel, fd_type)
+
       io_type
     end
   end

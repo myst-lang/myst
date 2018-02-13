@@ -178,14 +178,14 @@ describe "VM -" do
       vm.errput.to_s.includes?("No variable or method `to_bob` for Kernel").should be_true
     end
 
-    it "takes a parameter that decides wether to use the stdlib or not" do
+    it "takes a parameter that decides whether to use the stdlib or not" do
       vm = VM.new
-      vm.eval %q<3.times { STDOUT.write("hi") }>
+      vm.eval %q<3.times{ STDOUT.write("hi") }>
       vm.errput.to_s.empty?.should be_true
 
       vm.reset! false
 
-      vm.eval %q<3.times { STDOUT.write("hi") }>
+      vm.eval %q<3.times{ STDOUT.write("hi") }>
       vm.errput.to_s.includes?("No variable or method `times`").should be_true
     end
   end
