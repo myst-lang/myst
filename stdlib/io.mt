@@ -43,7 +43,9 @@ deftype IO
       buffer += last_char
       last_char = read(1)
 
-      when last_char == ""; break; end
+      when last_char == "" || last_char == "\0"
+        return buffer
+      end
     end
     buffer
   end
