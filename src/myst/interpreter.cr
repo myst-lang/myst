@@ -6,6 +6,7 @@ module Myst
   class Interpreter
     property stack : Array(Value)
     property self_stack : Array(Value)
+    property scope_stack : Array(Scope)
     property callstack : Callstack
     property kernel : TModule
 

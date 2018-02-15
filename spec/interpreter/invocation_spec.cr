@@ -126,6 +126,7 @@ describe "Interpreter - Invocation" do
     ), interpreter: itr
 
     itr.current_self.should eq(original_self)
+    itr.self_stack.size.should eq(1)
   end
 
   it "restores the value of `self` after executing a closure" do
@@ -137,6 +138,35 @@ describe "Interpreter - Invocation" do
       [1, 2, 3].each{ |e| @sum += e }
     ), interpreter: itr
 
+    itr.self_stack.size.should eq(1)
+    itr.current_self.should eq(original_self)
+  end
+
+
+  it "pops all scope overrides after an explicit return (see #155)" do
+    itr = Interpreter.new
+    original_self = itr.current_self
+
+    # Old behavior:
+    # The explicit return in `bar` would cause a call to it to skip popping
+    # the scope override for it from the `scope_stack`. So, when execution of
+    # `foo` is resumed after calling `bar`, the lookup of `b` fails, as the
+    # `current_scope` is still the local scope override of `bar`, which has no
+    # entry with the name `b`.
+    parse_and_interpret %q(
+      def bar(a)
+        return a
+      end
+
+      def foo(a, b)
+        bar(a)
+        b
+      end
+
+      foo(1, 3)
+    ), interpreter: itr, capture_errors: false
+
+    itr.self_stack.size.should eq(1)
     itr.current_self.should eq(original_self)
   end
 end

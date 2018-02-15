@@ -45,8 +45,8 @@ end
 
 # Parse and run the given program, returning the interpreter that ran the
 # program to be used for making assertions.
-def parse_and_interpret(source, interpreter=Interpreter.new)
+def parse_and_interpret(source, interpreter=Interpreter.new, capture_errors=true)
   program = parse_program(source)
-  interpreter.run(program)
+  interpreter.run(program, capture_errors: capture_errors)
   interpreter
 end
