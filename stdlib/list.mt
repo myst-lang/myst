@@ -9,6 +9,26 @@ deftype List
     "[" + join(",") + "]"
   end
 
+  def first
+    self[0]
+  end
+
+  def first?
+    first
+  rescue
+    nil
+  end
+
+  def last
+    self[self.size - 1]
+  end
+
+  def last?    
+    last
+  rescue
+    nil
+  end
+
   # empty? -> bool
   #
   # Return `true` if the List contains 0 elements. Return `false` otherwise.
