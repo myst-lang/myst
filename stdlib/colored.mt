@@ -32,8 +32,8 @@ defmodule Color
   ANSI_CYAN   = "\e[0;36m"
   ANSI_WHITE  = "\e[0;37m"
 
-  def colored(string, sym)
+  def colored(string, sym : Symbol)
     color = ansi_from_symbol(sym) 
-    "<(color)><(string.to_s)><(ANSI_RESET)>"
+    "<(color)><(string)><(ANSI_RESET)>"
   end
 end
