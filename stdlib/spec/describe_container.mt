@@ -6,9 +6,9 @@ defmodule Spec
 
     def name; @name; end
 
-    def get_path(current : String)
-      when !describe_stack.empty?
-        return describe_stack.pop.get_path("<(@name)> <(current)>")
+    def get_path(current : String, stack_index)
+      when !describe_stack.empty? && next_describe = describe_stack[stack_index]
+        return describe_stack[stack_index].get_path("<(@name)> <(current)>", stack_index - 1)
       else
         "<(@name)> <(current)>"
       end
