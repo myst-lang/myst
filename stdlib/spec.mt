@@ -1,6 +1,8 @@
 require "./spec/dsl.mt"
 require "./spec/errors.mt"
 require "./spec/single_spec.mt"
+require "./spec/describe_container.mt"
+require "./colored.mt"
 
 # Spec
 #
@@ -24,6 +26,8 @@ require "./spec/single_spec.mt"
 # Calls). This should be addressed before too long, since it's a fairly common
 # use case, but a basic Spec library does not require it.
 defmodule Spec
+  describe_stack = []
+
   def it(name, &block)
     spec = %SingleSpec{name}
     spec.run{ block() }
@@ -39,6 +43,8 @@ defmodule Spec
 
 
   def describe(name, &block)
+    describe_stack.push(%DescribeContainer{name})
     block()
+    describe_stack.pop
   end
 end

@@ -397,6 +397,11 @@ module Myst
         when "\\n"  then '\n'
         when "\\\"" then '"'
         when "\\t"  then '\t'
+        when "\\e"  then '\e'
+        when "\\r"  then '\r'
+        when "\\f"  then '\f'
+        when "\\v"  then '\v'
+        when "\\b"  then '\b'
         when "\\0"  then '\0'
         end
       end

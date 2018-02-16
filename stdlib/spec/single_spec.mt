@@ -9,9 +9,11 @@ defmodule Spec
 
     def run(&block)
       block()
-      STDOUT.print(".")
+      STDOUT.print(Color.colored(".", :green))
     rescue failure
-      STDOUT.puts(failure)
+      STDOUT.puts("\n")
+      STDOUT.puts(Color.colored("  <(describe_stack.pop.get_path(@name))>", :red))
+      STDOUT.puts(Color.colored("    <(failure)>", :red))
       exit(1)
     end
   end
