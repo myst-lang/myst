@@ -129,6 +129,7 @@ module Myst
         raise err
       end
     rescue ex
+      raise ex unless capture_errors
       errput.puts("Interpreter Error: #{ex.message}")
       errput.puts
       errput.puts("Myst backtrace: ")

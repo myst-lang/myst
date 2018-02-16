@@ -153,7 +153,7 @@ describe "Interpreter - Invocation" do
     # `foo` is resumed after calling `bar`, the lookup of `b` fails, as the
     # `current_scope` is still the local scope override of `bar`, which has no
     # entry with the name `b`.
-    parse_and_interpret %q(
+    parse_and_interpret! %q(
       def bar(a)
         return a
       end
@@ -164,7 +164,7 @@ describe "Interpreter - Invocation" do
       end
 
       foo(1, 3)
-    ), interpreter: itr, capture_errors: false
+    ), interpreter: itr
 
     itr.self_stack.size.should eq(1)
     itr.current_self.should eq(original_self)
