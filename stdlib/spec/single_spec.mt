@@ -14,6 +14,7 @@ defmodule Spec
       STDOUT.puts("\n")
       STDOUT.puts(Color.colored("  <(describe_stack.pop.get_path(@name))>", :red))
       STDOUT.puts(Color.colored("    <(failure)>", :red))
+      STDOUT.puts
       exit(1)
     end
   end

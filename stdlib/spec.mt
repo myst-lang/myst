@@ -4,6 +4,8 @@ require "./spec/single_spec.mt"
 require "./spec/describe_container.mt"
 require "./colored.mt"
 
+include Spec
+
 # Spec
 #
 # A simple library for writing specs around Myst code. Specs are written using
@@ -27,6 +29,7 @@ require "./colored.mt"
 # use case, but a basic Spec library does not require it.
 defmodule Spec
   describe_stack = []
+  include DSL
 
   def it(name, &block)
     spec = %SingleSpec{name}
