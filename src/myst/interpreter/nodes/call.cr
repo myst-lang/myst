@@ -3,7 +3,6 @@ module Myst
     def visit(node : Call)
       receiver, func = lookup_call(node)
 
-      @callstack.push(node)
       if func
         visit_call(node, receiver, func)
       else
@@ -14,7 +13,6 @@ module Myst
           raise "Interpreter bug: "
         end
       end
-      @callstack.pop
     end
 
 
@@ -73,7 +71,10 @@ module Myst
         block = stack.pop.as(TFunctor)
       end
 
+      original_callstack_size = @callstack.size
+      @callstack.push(node.location, func.name)
       result = Invocation.new(self, func, receiver, args, block).invoke
+      pop_callstack(to_size: original_callstack_size)
       stack.push(result)
     end
 

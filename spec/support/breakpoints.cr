@@ -36,5 +36,5 @@ macro add_breakpoint(itr, name)
     %result.is_a?(Myst::Value) ? %result : TNil.new.as(Myst::Value)
   end
 
-  {{itr}}.kernel.scope[{{name}}] = TFunctor.new([%handler] of Callable)
+  {{itr}}.kernel.scope[{{name}}] = TFunctor.new({{name}}, [%handler] of Callable)
 end
