@@ -3,6 +3,7 @@ module Myst
     def visit(node : ExceptionHandler)
       selfstack_size_at_entry = self_stack.size
       scopestack_size_at_entry = @scope_stack.size
+      callstack_size_at_entry = @callstack.size
 
       begin
         visit(node.body)
@@ -15,6 +16,7 @@ module Myst
         node.rescues.each do |resc|
           self.push_scope_override
           if !resc.param? || rescue_matches?(resc.param, err.value)
+            @callstack.push(resc.location, "rescue")
             visit(resc.body)
             self.pop_scope_override
             handled = true
@@ -24,11 +26,20 @@ module Myst
           end
         end
 
-        raise err unless handled
+        if handled
+          self.pop_callstack(to_size: callstack_size_at_entry)
+        else
+          raise err
+        end
       ensure
+        # `pop_callstack` is purposefully not done in this `ensure` block to
+        # avoid popping `raise` and `rescue` entries that have not yet been
+        # handled.
+        self.pop_self(to_size: selfstack_size_at_entry)
         self.pop_scope_override(to_size: scopestack_size_at_entry)
 
         if node.ensure?
+          @callstack.push(node.ensure.location, "ensure")
           # Ensure should not change the result of the expression, so its
           # value is immediately popped.
           visit(node.ensure)

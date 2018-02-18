@@ -16,6 +16,7 @@ module Myst
     property! block     : TFunctor?
     @selfstack_size_at_entry  : Int32 = -1
     @scopestack_size_at_entry : Int32 = -1
+    @callstack_size_at_entry  : Int32 = -1
 
     def initialize(@itr : Interpreter, @func : TFunctor, @receiver : Value?, @args : Array(Value), @block : TFunctor?)
     end
@@ -23,6 +24,7 @@ module Myst
     def invoke
       @selfstack_size_at_entry = @itr.self_stack.size
       @scopestack_size_at_entry = @itr.scope_stack.size
+      @callstack_size_at_entry = @itr.callstack.size
       # If the invocation has a receiver, use it as the current value of `self`
       # for the duration of the Invocation.
       @itr.push_self(@receiver.not_nil!) if @receiver
@@ -38,6 +40,8 @@ module Myst
         break res if res
       end
 
+      @itr.pop_callstack(to_size: @callstack_size_at_entry)
+
       result || @itr.__raise_runtime_error("No clause matches with given arguments: #{@args.inspect}")
     rescue ex : BreakException
       if ex.caught?
@@ -51,10 +55,12 @@ module Myst
       # `next` in the context of a call is equivalent to `return`.
       return @itr.stack.pop
     ensure
-      # puts @itr.scope_stack.size
+      # After the invocation, no matter what happened, restore the state of the
+      # interpreter stacks to whatever they had been before the invocation.
+      #
+      # The callstack is _not_ restored here, since the error information it
+      # contains needs to persist beyond the invocation.
       @itr.pop_scope_override(to_size: @scopestack_size_at_entry)
-      # After the invocation, no matter what happened, restore the current
-      # value of `self` to whatever it had been before the invocation.
       @itr.pop_self(to_size: @selfstack_size_at_entry)
     end
 

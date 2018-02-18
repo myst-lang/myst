@@ -52,7 +52,6 @@ module Myst
       if value = current_scope[node.name]?
         value
       else
-        @callstack.push(node)
         __raise_not_found(node.name, current_self)
       end
     end

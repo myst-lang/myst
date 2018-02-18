@@ -23,7 +23,6 @@ module Myst
       if value = (current_scope[node.name]? || __typeof(current_self).scope[node.name]? || recursive_lookup(current_self, node.name))
         stack.push(value)
       else
-        @callstack.push(node)
         __raise_not_found(node.name, current_self)
       end
     end

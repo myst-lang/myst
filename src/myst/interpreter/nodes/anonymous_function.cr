@@ -14,7 +14,7 @@ module Myst
           current_scope
         end
 
-      functor = TFunctor.new([] of Callable, scope, closure: true, closed_self: current_self)
+      functor = TFunctor.new("anonymous function", [] of Callable, scope, closure: true, closed_self: current_self)
 
       node.clauses.each do |clause|
         functor.add_clause(TFunctorDef.new(clause))

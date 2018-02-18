@@ -570,7 +570,7 @@ module Myst
       end
 
       case @reader.buffer_value
-      when "__FILE__" 
+      when "__FILE__"
         @current_token.type = Token::Type::MAGIC_FILE
       when "__LINE__"
         @current_token.type = Token::Type::MAGIC_LINE

@@ -81,7 +81,7 @@ module Myst
       @instance_scope = Scope.new(parent)
       # TODO: revist this when base object for TType is in place
       # Currently this prevents to_s from being overriden on Types
-      @scope["to_s"] = TFunctor.new([
+      @scope["to_s"] = TFunctor.new("to_s", [
         ->ttype_to_s(Value, Array(Value), TFunctor?)] of Callable)
     end
 
@@ -305,12 +305,13 @@ module Myst
   # A Functor is a container for multiple functor definitions, which can either
   # be language-level or native.
   class TFunctor < Value
+    property  name            : String
     property  clauses         : Array(Callable)
     property  lexical_scope   : Scope
     property? closure         : Bool
-    property!  closed_self     : Value?
+    property! closed_self     : Value?
 
-    def initialize(@clauses=[] of Callable, @lexical_scope : Scope=Scope.new, @closure : Bool=false, @closed_self : Value?=nil)
+    def initialize(@name : String, @clauses=[] of Callable, @lexical_scope : Scope=Scope.new, @closure : Bool=false, @closed_self : Value?=nil)
     end
 
     def add_clause(definition : Callable)
@@ -325,6 +326,6 @@ module Myst
       closure? ? ClosureScope.new(@lexical_scope) : Scope.new(@lexical_scope)
     end
 
-    def_equals_and_hash clauses, lexical_scope
+    def_equals_and_hash name, clauses, lexical_scope
   end
 end

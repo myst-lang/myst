@@ -450,14 +450,14 @@ module Myst
     def parse_flow_control
       node =
         case
-        when accept(Token::Type::RETURN)
-          Return.new
-        when accept(Token::Type::BREAK)
-          Break.new
-        when accept(Token::Type::NEXT)
-          Next.new
-        when accept(Token::Type::RAISE)
-          Raise.new
+        when token = accept(Token::Type::RETURN)
+          Return.new.at(token.location)
+        when token = accept(Token::Type::BREAK)
+          Break.new.at(token.location)
+        when token = accept(Token::Type::NEXT)
+          Next.new.at(token.location)
+        when token = accept(Token::Type::RAISE)
+          Raise.new.at(token.location)
         else
           raise ParseError.new(current_location, "Expected one of return, break, or next, got #{current_token.inspect}")
         end

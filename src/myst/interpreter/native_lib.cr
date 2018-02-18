@@ -45,13 +45,13 @@ module Myst
     end
 
     macro def_method(type, name, impl_name)
-      {{type}}.scope["{{name.id}}"] = TFunctor.new([
+      {{type}}.scope["{{name.id}}"] = TFunctor.new("{{name.id}}", [
         ->{{impl_name.id}}(Value, Array(Value), TFunctor?).as(Callable)
       ] of Callable)
     end
 
     macro def_instance_method(type, name, impl_name)
-      {{type}}.instance_scope["{{name.id}}"] = TFunctor.new([
+      {{type}}.instance_scope["{{name.id}}"] = TFunctor.new("{{name.id}}", [
         ->{{impl_name.id}}(Value, Array(Value), TFunctor?).as(Callable)
       ] of Callable)
     end

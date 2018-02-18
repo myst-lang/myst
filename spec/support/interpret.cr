@@ -46,9 +46,11 @@ def it_interprets_with_assignments(node : String, assignments : Hash(String, Mys
   end
 end
 
-def interpret_with_mocked_output(source)
-  itr = Interpreter.new(output: IO::Memory.new, input: IO::Memory.new, errput: IO::Memory.new)
-  parse_and_interpret(source, itr)
+def interpret_with_mocked_output(source, interpreter=Interpreter.new)
+  interpreter.output  = IO::Memory.new
+  interpreter.input   = IO::Memory.new
+  interpreter.errput  = IO::Memory.new
+  parse_and_interpret(source, interpreter)
 end
 
 def interpret_with_mocked_input(source, input)

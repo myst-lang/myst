@@ -71,6 +71,16 @@ module Myst
     end
 
 
+    def pop_callstack(to_size : Int)
+      return unless to_size >= 0
+
+      count_to_pop = @callstack.size - to_size
+      if count_to_pop > 0
+        @callstack.pop(count_to_pop)
+      end
+    end
+
+
     def current_self
       self_stack.last
     end
@@ -111,13 +121,7 @@ module Myst
       value_to_s = __scopeof(error.value)["to_s"].as(TFunctor)
       result = Invocation.new(self, value_to_s, error.value, [] of Value, nil).invoke
       errput.puts("Uncaught Exception: " + result.as(TString).value)
-      error.trace.reverse_each do |frame|
-        if frame.responds_to?(:name)
-          errput.puts "  from `#{frame.name}` at #{frame.location}"
-        else
-          errput.puts "  at #{frame.location}"
-        end
-      end
+      errput.puts(error.trace)
     end
 
     def run(program, capture_errors=true)
@@ -129,16 +133,11 @@ module Myst
         raise err
       end
     rescue ex
+      raise ex unless capture_errors
       errput.puts("Interpreter Error: #{ex.message}")
       errput.puts
       errput.puts("Myst backtrace: ")
-      callstack.reverse_each do |frame|
-        if frame.responds_to?(:name)
-          errput.puts "  from `#{frame.name}` at #{frame.location}"
-        else
-          errput.puts "  at #{frame.location}"
-        end
-      end
+      errput.puts(callstack)
       errput.puts
       errput.puts("Native backtrace: ")
       errput.puts(ex.inspect_with_backtrace)

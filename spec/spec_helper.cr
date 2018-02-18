@@ -50,3 +50,8 @@ def parse_and_interpret(source, interpreter=Interpreter.new, capture_errors=true
   interpreter.run(program, capture_errors: capture_errors)
   interpreter
 end
+
+# Same as `parse_and_interpret`, but force errors to propogate out.
+def parse_and_interpret!(source, interpreter=Interpreter.new)
+  parse_and_interpret(source, interpreter, capture_errors: false)
+end
