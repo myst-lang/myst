@@ -1117,7 +1117,7 @@ describe "Parser" do
 
 
 
-  # Type initialization
+  # Type instantiation
 
   # Instances of types are created with a percent characeter and brace syntax
   # akin to blocks.
@@ -1151,7 +1151,7 @@ describe "Parser" do
     {}
   )
 
-  # The type can be either a Const or an interpolation. Any interpolation is
+  # The type can be either a Const, a Path or an interpolation. Any interpolation is
   # valid, and may span multiple lines.
   it_parses %q(%<thing>{}),             Instantiation.new(i(Call.new(nil, "thing")))
   it_parses %q(%<@type>{}),             Instantiation.new(i(iv("type")))
@@ -1162,6 +1162,14 @@ describe "Parser" do
       type
     )>{}
   ),                                    Instantiation.new(i(Call.new(nil, "type")))
+  it_parses %q(%IO.FileDescriptor{}),   Instantiation.new(Call.new(c("IO"), "FileDescriptor"))
+  it_parses %q(%A.B.C.D{}),             Instantiation.new(Call.new(Call.new(Call.new(c("A"), "B"), "C"), "D"))
+  # Type paths must only contain constants
+  it_does_not_parse %q(%A.b{})
+  it_does_not_parse %q(%a.B{})
+  it_does_not_parse %q(%A.b.C{})
+  it_does_not_parse %q(%A.B.c{})
+  it_does_not_parse %q(%a.b{})
 
   # Any other node is invalid as a type specification.
   it_does_not_parse %q(%nil{})

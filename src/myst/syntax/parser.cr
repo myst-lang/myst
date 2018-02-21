@@ -987,15 +987,7 @@ module Myst
 
     def parse_instantiation
       start = expect(Token::Type::MODULO)
-      type =
-        case current_token.type
-        when Token::Type::CONST
-          token = current_token
-          read_token
-          Const.new(token.value).at(token.location)
-        else
-          parse_value_interpolation
-        end
+      type = parse_type_path
 
       inst = Instantiation.new(type).at(start.location)
       skip_space
