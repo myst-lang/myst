@@ -10,7 +10,7 @@ module Myst
 
     private def make_io_fd(type : TType, id : Int)
       fd = TInstance.new(type)
-      fd.ivars["fd"] = id.to_i64
+      fd.ivars["@fd"] = id.to_i64
       fd
     end
 
