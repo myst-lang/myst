@@ -18,7 +18,7 @@ module Myst
       this
     end
 
-    NativeLib.method :list_eq, TList, other : Value do
+    NativeLib.method :list_eq, TList, other : MTValue do
       return TBoolean.new(false)  unless other.is_a?(TList)
       return TBoolean.new(true)   if this == other
       return TBoolean.new(false)  if this.elements.size != other.elements.size
@@ -30,7 +30,7 @@ module Myst
       TBoolean.new(true)
     end
 
-    NativeLib.method :list_not_eq, TList, other : Value do
+    NativeLib.method :list_not_eq, TList, other : MTValue do
       return TBoolean.new(true)   unless other.is_a?(TList)
       return TBoolean.new(false)  if this == other
       return TBoolean.new(true)   if this.elements.size != other.elements.size
@@ -54,7 +54,7 @@ module Myst
       end
     end
 
-    NativeLib.method :list_access_assign, TList, index : TInteger, value : Value do
+    NativeLib.method :list_access_assign, TList, index : TInteger, value : MTValue do
       this.ensure_capacity(index.value + 1)
       this.elements[index.value] = value
     end

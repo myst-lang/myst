@@ -48,7 +48,7 @@ module Myst
       end
     end
 
-    private def rescue_matches?(param : Param, arg : Value)
+    private def rescue_matches?(param : Param, arg : MTValue)
       self.match(param.pattern, arg)        if param.pattern?
       self.match(Var.new(param.name), arg)  if param.name?
       self.match(param.restriction, arg)    if param.restriction?

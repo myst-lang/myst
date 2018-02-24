@@ -18,7 +18,7 @@ module Myst
       TMap.new(this.entries.merge(other.entries))
     end
 
-    NativeLib.method :map_eq, TMap, other : Value do
+    NativeLib.method :map_eq, TMap, other : MTValue do
       return TBoolean.new(false)  unless other.is_a?(TMap)
       return TBoolean.new(true)   if this == other
       return TBoolean.new(false)  if this.entries.size != other.entries.size
@@ -35,7 +35,7 @@ module Myst
       TBoolean.new(true)
     end
 
-    NativeLib.method :map_not_eq, TMap, other : Value do
+    NativeLib.method :map_not_eq, TMap, other : MTValue do
       return TBoolean.new(true)   unless other.is_a?(TMap)
       return TBoolean.new(false)  if this == other
       return TBoolean.new(true)   if this.entries.size != other.entries.size
@@ -52,11 +52,11 @@ module Myst
       TBoolean.new(true)
     end
 
-    NativeLib.method :map_access, TMap, index : Value do
+    NativeLib.method :map_access, TMap, index : MTValue do
       this.entries[index]? || TNil.new
     end
 
-    NativeLib.method :map_access_assign, TMap, index : Value, value : Value do
+    NativeLib.method :map_access_assign, TMap, index : MTValue, value : MTValue do
       this.entries[index] = value
     end
 

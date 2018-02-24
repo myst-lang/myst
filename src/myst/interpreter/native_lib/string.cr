@@ -1,6 +1,6 @@
 module Myst
   class Interpreter
-    NativeLib.method :string_add, TString, other : Value do
+    NativeLib.method :string_add, TString, other : MTValue do
       case other
       when TString
         TString.new(this.value + other.value)
@@ -9,7 +9,7 @@ module Myst
       end
     end
 
-    NativeLib.method :string_multiply, TString, other : Value do
+    NativeLib.method :string_multiply, TString, other : MTValue do
       case other
       when TInteger
         # String multiplication repeats `this` `arg` times.
@@ -23,7 +23,7 @@ module Myst
       this.as(TString)
     end
 
-    NativeLib.method :string_eq, TString, other : Value do
+    NativeLib.method :string_eq, TString, other : MTValue do
       case other
       when TString
         TBoolean.new(this.value == other.value)
@@ -32,7 +32,7 @@ module Myst
       end
     end
 
-    NativeLib.method :string_not_eq, TString, other : Value do
+    NativeLib.method :string_not_eq, TString, other : MTValue do
       case other
       when TString
         TBoolean.new(this.value != other.value)
@@ -50,7 +50,7 @@ module Myst
           delim_arg.value
         end
 
-      TList.new(this.value.split(delimiter).map{ |s| TString.new(s).as(Value) })
+      TList.new(this.value.split(delimiter).map{ |s| TString.new(s).as(MTValue) })
     end
 
     NativeLib.method :string_size, TString do
@@ -58,7 +58,7 @@ module Myst
     end
 
     NativeLib.method :string_chars, TString do
-      TList.new(this.value.chars.map { |c| TString.new(c.to_s).as Value })
+      TList.new(this.value.chars.map { |c| TString.new(c.to_s).as MTValue })
     end
 
     NativeLib.method :string_downcase, TString do

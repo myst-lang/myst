@@ -4,8 +4,8 @@ require "./interpreter/native_lib"
 
 module Myst
   class Interpreter
-    property stack : Array(Value)
-    property self_stack : Array(Value)
+    property stack : Array(MTValue)
+    property self_stack : Array(MTValue)
     property scope_stack : Array(Scope)
     property callstack : Callstack
     property kernel : TModule
@@ -22,11 +22,11 @@ module Myst
         2 => errput
       })
 
-      @stack = [] of Value
+      @stack = [] of MTValue
       @scope_stack = [] of Scope
       @callstack = Callstack.new
       @kernel = create_kernel
-      @self_stack = [@kernel] of Value
+      @self_stack = [@kernel] of MTValue
       @warnings = 0
     end
 
@@ -85,7 +85,7 @@ module Myst
       self_stack.last
     end
 
-    def push_self(new_self : Value)
+    def push_self(new_self : MTValue)
       self_stack.push(new_self)
     end
 
@@ -119,7 +119,7 @@ module Myst
 
     def put_error(error : RuntimeError)
       value_to_s = __scopeof(error.value)["to_s"].as(TFunctor)
-      result = Invocation.new(self, value_to_s, error.value, [] of Value, nil).invoke
+      result = Invocation.new(self, value_to_s, error.value, [] of MTValue, nil).invoke
       errput.puts("Uncaught Exception: " + result.as(TString).value)
       errput.puts(error.trace)
     end

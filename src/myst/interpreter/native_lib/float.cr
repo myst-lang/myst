@@ -1,6 +1,6 @@
 module Myst
   class Interpreter
-    NativeLib.method :float_add, TFloat, other : Value do
+    NativeLib.method :float_add, TFloat, other : MTValue do
       case other
       when TInteger, TFloat
         TFloat.new(this.value + other.value)
@@ -9,7 +9,7 @@ module Myst
       end
     end
 
-    NativeLib.method :float_subtract, TFloat, other : Value do
+    NativeLib.method :float_subtract, TFloat, other : MTValue do
       case other
       when TInteger, TFloat
         TFloat.new(this.value - other.value)
@@ -18,7 +18,7 @@ module Myst
       end
     end
 
-    NativeLib.method :float_multiply, TFloat, other : Value do
+    NativeLib.method :float_multiply, TFloat, other : MTValue do
       case other
       when TInteger, TFloat
         TFloat.new(this.value * other.value)
@@ -27,7 +27,7 @@ module Myst
       end
     end
 
-    NativeLib.method :float_divide, TFloat, other : Value do
+    NativeLib.method :float_divide, TFloat, other : MTValue do
       case other
       when TInteger, TFloat
         __raise_runtime_error("Division by zero") if other.value == 0
@@ -37,7 +37,7 @@ module Myst
       end
     end
 
-    NativeLib.method :float_modulo, TFloat, other : Value do
+    NativeLib.method :float_modulo, TFloat, other : MTValue do
       case other
       when TInteger, TFloat
         __raise_runtime_error("Division by zero") if other.value == 0
@@ -51,7 +51,7 @@ module Myst
       TString.new(this.value.to_s)
     end
 
-    NativeLib.method :float_eq, TFloat, other : Value do
+    NativeLib.method :float_eq, TFloat, other : MTValue do
       case other
       when TFloat, TInteger
         TBoolean.new(this.value == other.value)
@@ -60,7 +60,7 @@ module Myst
       end
     end
 
-    NativeLib.method :float_not_eq, TFloat, other : Value do
+    NativeLib.method :float_not_eq, TFloat, other : MTValue do
       case other
       when TFloat, TInteger
         TBoolean.new(this.value != other.value)
@@ -73,7 +73,7 @@ module Myst
       TFloat.new(-this.value)
     end
 
-    NativeLib.method :float_lt, TFloat, other : Value do
+    NativeLib.method :float_lt, TFloat, other : MTValue do
       case other
       when TInteger, TFloat
         TBoolean.new(this.value < other.value)
@@ -82,7 +82,7 @@ module Myst
       end
     end
 
-    NativeLib.method :float_lte, TFloat, other : Value do
+    NativeLib.method :float_lte, TFloat, other : MTValue do
       case other
       when TInteger, TFloat
         TBoolean.new(this.value <= other.value)
@@ -91,7 +91,7 @@ module Myst
       end
     end
 
-    NativeLib.method :float_gt, TFloat, other : Value do
+    NativeLib.method :float_gt, TFloat, other : MTValue do
       case other
       when TInteger, TFloat
         TBoolean.new(this.value > other.value)
@@ -100,7 +100,7 @@ module Myst
       end
     end
 
-    NativeLib.method :float_gte, TFloat, other : Value do
+    NativeLib.method :float_gte, TFloat, other : MTValue do
       case other
       when TInteger, TFloat
         TBoolean.new(this.value >= other.value)

@@ -1,13 +1,13 @@
 module Myst
   class Interpreter
-    NativeLib.method :static_time_now, Value do
+    NativeLib.method :static_time_now, MTValue do
       seconds, nanoseconds = Crystal::System::Time.compute_utc_seconds_and_nanoseconds
       offset = Crystal::System::Time.compute_utc_offset(seconds)
-      
+
       instance = NativeLib.instantiate(self, this.as(TType), [
-        TInteger.new(seconds + offset), 
+        TInteger.new(seconds + offset),
         TInteger.new(nanoseconds.to_i64)
-      ] of Value)
+      ] of MTValue)
 
       instance
     end

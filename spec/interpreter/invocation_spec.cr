@@ -88,7 +88,7 @@ private def it_invokes(prelude, call, expected)
   # clarity in the tests, the stack is cleared of any existing values before
   # making any assertions.
   itr.stack.clear
-  it_interprets(call, [expected] of Myst::Value, itr)
+  it_interprets(call, [expected] of MTValue, itr)
 end
 
 describe "Interpreter - Invocation" do

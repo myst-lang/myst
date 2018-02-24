@@ -4,13 +4,13 @@ module Myst
     # types, these are _always_ looked up in the Kernel. For Instances, the
     # type is looked up from the type reference on the instance itself. For
     # Types and Modules, the value itself is returned.
-    def __typeof(value : Value)
+    def __typeof(value : MTValue)
       case value
       when ContainerType
         value
       when TInstance
         value.type
-      when Value
+      when MTValue
         @kernel.scope[value.type_name].as(TType)
       else
         __raise_runtime_error("Can't resolve type of #{value}")
@@ -20,7 +20,7 @@ module Myst
     # Resolve the Scope for `value`. For primitives, this returns the instance
     # scope of the Type for that value. For Instances, Types, and Modules, this
     # just returns `.scope` for that value.
-    def __scopeof(value : Value, prefer_instance_scope = false) : Scope
+    def __scopeof(value : MTValue, prefer_instance_scope = false) : Scope
       case value
       when TInstance
         value.scope
@@ -83,12 +83,12 @@ module Myst
     end
 
 
-    def __raise_not_found(name, value : Value?)
+    def __raise_not_found(name, value : MTValue?)
       type_name = __typeof(value).name
       error_message = "No variable or method `#{name}` for #{type_name}"
 
       if value_to_s = __scopeof(value)["to_s"]?
-        value_str = NativeLib.call_func_by_name(self, value, "to_s", [] of Value).as(TString).value
+        value_str = NativeLib.call_func_by_name(self, value, "to_s", [] of MTValue).as(TString).value
         error_message = "No variable or method `#{name}` for #{value_str}:#{type_name}"
       end
 
@@ -105,7 +105,7 @@ module Myst
       raise RuntimeError.new(TString.new(message), callstack)
     end
 
-    def __raise_runtime_error(value : Value)
+    def __raise_runtime_error(value : MTValue)
       raise RuntimeError.new(value, callstack)
     end
 

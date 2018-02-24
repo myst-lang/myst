@@ -11,14 +11,14 @@ module Myst
   struct Invocation
     property  itr       : Interpreter
     property  func      : TFunctor
-    property! receiver  : Value?
-    property  args      : Array(Value)
+    property! receiver  : MTValue?
+    property  args      : Array(MTValue)
     property! block     : TFunctor?
     @selfstack_size_at_entry  : Int32 = -1
     @scopestack_size_at_entry : Int32 = -1
     @callstack_size_at_entry  : Int32 = -1
 
-    def initialize(@itr : Interpreter, @func : TFunctor, @receiver : Value?, @args : Array(Value), @block : TFunctor?)
+    def initialize(@itr : Interpreter, @func : TFunctor, @receiver : MTValue?, @args : Array(MTValue), @block : TFunctor?)
     end
 
     def invoke
@@ -113,7 +113,7 @@ module Myst
       return @itr.stack.pop
     end
 
-    private def do_call(func : TNativeDef, receiver : Value, args : Array(Value), block : TFunctor?)
+    private def do_call(func : TNativeDef, receiver : MTValue, args : Array(MTValue), block : TFunctor?)
       func.call(receiver, args, block)
     end
 

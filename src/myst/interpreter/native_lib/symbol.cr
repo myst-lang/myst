@@ -4,7 +4,7 @@ module Myst
       TString.new(this.name)
     end
 
-    NativeLib.method :symbol_eq, TSymbol, other : Value do
+    NativeLib.method :symbol_eq, TSymbol, other : MTValue do
       case other
       when TSymbol
         TBoolean.new(this.value == other.value)
@@ -13,7 +13,7 @@ module Myst
       end
     end
 
-    NativeLib.method :symbol_not_eq, TSymbol, other : Value do
+    NativeLib.method :symbol_not_eq, TSymbol, other : MTValue do
       case other
       when TSymbol
         TBoolean.new(this.value != other.value)

@@ -4,7 +4,7 @@ module Myst
       TString.new("")
     end
 
-    NativeLib.method :nil_eq, TNil, other : Value do
+    NativeLib.method :nil_eq, TNil, other : MTValue do
       case other
       when TNil
         TBoolean.new(true)
@@ -13,7 +13,7 @@ module Myst
       end
     end
 
-    NativeLib.method :nil_not_eq, TNil, other : Value do
+    NativeLib.method :nil_not_eq, TNil, other : MTValue do
       case other
       when TNil
         TBoolean.new(false)

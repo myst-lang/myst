@@ -16,7 +16,7 @@ module Myst
     end
 
 
-    private def lookup_call(node : Call) : Tuple(Value, Value?)
+    private def lookup_call(node : Call) : Tuple(MTValue, MTValue?)
       # If the Call has a receiver, lookup the Call on that receiver, otherwise
       # search the current scope.
       receiver, check_current =
@@ -49,7 +49,7 @@ module Myst
 
 
     private def visit_call(node, receiver, func : TFunctor)
-      args = [] of Value
+      args = [] of MTValue
 
       node.args.each do |elem|
         elem.accept(self)
@@ -78,7 +78,7 @@ module Myst
       stack.push(result)
     end
 
-    private def visit_call(_node, _receiver, value : Value)
+    private def visit_call(_node, _receiver, value : MTValue)
       stack.push(value)
     end
   end

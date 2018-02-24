@@ -4,7 +4,7 @@ module Myst
       TString.new(this.value ? "true" : "false")
     end
 
-    NativeLib.method :bool_eq, TBoolean, other : Value do
+    NativeLib.method :bool_eq, TBoolean, other : MTValue do
       case other
       when TBoolean
         TBoolean.new(this.value == other.value)
@@ -13,7 +13,7 @@ module Myst
       end
     end
 
-    NativeLib.method :bool_not_eq, TBoolean, other : Value do
+    NativeLib.method :bool_not_eq, TBoolean, other : MTValue do
       case other
       when TBoolean
         TBoolean.new(this.value != other.value)

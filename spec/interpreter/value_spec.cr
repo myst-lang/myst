@@ -3,38 +3,38 @@ require "../spec_helper.cr"
 describe "Values" do
   describe "::from_literal" do
     it "maps NilLiteral to TNil" do
-      Myst::Value.from_literal(NilLiteral.new).should be_a(TNil)
+      MTValue.from_literal(NilLiteral.new).should be_a(TNil)
     end
 
     it "maps BooleanLiteral to TBoolean" do
-      Myst::Value.from_literal(BooleanLiteral.new(false)).should be_a(TBoolean)
+      MTValue.from_literal(BooleanLiteral.new(false)).should be_a(TBoolean)
     end
 
     it "maps IntegerLiteral to TInteger" do
-      Myst::Value.from_literal(IntegerLiteral.new("0")).should be_a(TInteger)
+      MTValue.from_literal(IntegerLiteral.new("0")).should be_a(TInteger)
     end
 
     it "maps FloatLiteral to TFloat" do
-      Myst::Value.from_literal(FloatLiteral.new("0.0")).should be_a(TFloat)
+      MTValue.from_literal(FloatLiteral.new("0.0")).should be_a(TFloat)
     end
 
     it "maps StringLiteral to TString" do
-      Myst::Value.from_literal(StringLiteral.new("hello")).should be_a(TString)
+      MTValue.from_literal(StringLiteral.new("hello")).should be_a(TString)
     end
 
     it "maps SymbolLiteral to TSymbol" do
-      Myst::Value.from_literal(SymbolLiteral.new("hi")).should be_a(TSymbol)
+      MTValue.from_literal(SymbolLiteral.new("hi")).should be_a(TSymbol)
     end
 
     # Container values like List and Map require some effort from the
     # interpreter to be generated. As such, Value::from_literal cannot generate
     # them automatically from a node.
     it "does not map ListLiterals" do
-      expect_raises(Exception) { Myst::Value.from_literal(ListLiteral.new).should be_a(TList) }
+      expect_raises(Exception) { MTValue.from_literal(ListLiteral.new).should be_a(TList) }
     end
 
     it "does not map MapLiterals" do
-      expect_raises(Exception) { Myst::Value.from_literal(MapLiteral.new).should be_a(TMap) }
+      expect_raises(Exception) { MTValue.from_literal(MapLiteral.new).should be_a(TMap) }
     end
   end
 
@@ -239,7 +239,7 @@ hi
     end
 
     it "can be created with initial elements" do
-      TList.new([TNil.new, TNil.new] of Myst::Value)
+      TList.new([TNil.new, TNil.new] of MTValue)
     end
 
     it "can contain any mixture of Values" do
@@ -247,7 +247,7 @@ hi
     end
 
     it "can contain other lists within itself" do
-      TList.new([TList.new, TList.new] of Myst::Value)
+      TList.new([TList.new, TList.new] of MTValue)
     end
 
     it "can dynamically adjust its size" do
@@ -260,8 +260,8 @@ hi
 
     it "is always truthy" do
       TList.new.truthy?.should                                        eq(true)
-      TList.new([TNil.new] of Myst::Value).truthy?.should             eq(true)
-      TList.new([TBoolean.new(false)] of Myst::Value).truthy?.should  eq(true)
+      TList.new([TNil.new] of MTValue).truthy?.should             eq(true)
+      TList.new([TBoolean.new(false)] of MTValue).truthy?.should  eq(true)
       TList.new([TInteger.new(1_i64), TNil.new]).truthy?.should       eq(true)
     end
   end
@@ -273,7 +273,7 @@ hi
     end
 
     it "can be created with initial elements" do
-      TMap.new({ TNil.new => TNil.new } of Myst::Value => Myst::Value)
+      TMap.new({ TNil.new => TNil.new } of MTValue => MTValue)
     end
 
     it "can contain any mixture of Values" do
@@ -281,7 +281,7 @@ hi
     end
 
     it "can contain other maps within itself" do
-      TMap.new({ TMap.new => TMap.new } of Myst::Value => Myst::Value)
+      TMap.new({ TMap.new => TMap.new } of MTValue => MTValue)
     end
 
     it "can dynamically adjust its size" do
@@ -294,8 +294,8 @@ hi
 
     it "is always truthy" do
       TMap.new.truthy?.should eq(true)
-      TMap.new({ TNil.new => TNil.new } of Myst::Value => Myst::Value).truthy?.should eq(true)
-      TMap.new({ TSymbol.new("") => TInteger.new(1_i64) } of Myst::Value => Myst::Value).truthy?.should eq(true)
+      TMap.new({ TNil.new => TNil.new } of MTValue => MTValue).truthy?.should eq(true)
+      TMap.new({ TSymbol.new("") => TInteger.new(1_i64) } of MTValue => MTValue).truthy?.should eq(true)
     end
   end
 end

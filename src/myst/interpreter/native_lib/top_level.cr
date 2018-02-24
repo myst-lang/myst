@@ -1,6 +1,6 @@
 module Myst
   class Interpreter
-    NativeLib.method :mt_exit, Value, status : TInteger? do
+    NativeLib.method :mt_exit, MTValue, status : TInteger? do
       real_status =
         if status.is_a?(TInteger)
           status.value
@@ -11,8 +11,8 @@ module Myst
       exit(real_status.to_i32)
     end
 
-    NativeLib.method :mt_sleep, Value, time : TInteger | TFloat? = nil do
-      
+    NativeLib.method :mt_sleep, MTValue, time : TInteger | TFloat? = nil do
+
       if time.is_a? TInteger || time.is_a? TFloat
         sleep(time.value)
       else

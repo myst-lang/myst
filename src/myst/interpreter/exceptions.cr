@@ -14,10 +14,10 @@ module Myst
 
   # The containing error type for any error raised within the language.
   class RuntimeError < Exception
-    property  value : Value
+    property  value : MTValue
     property  trace : Callstack
 
-    def initialize(@value : Value, @trace : Callstack)
+    def initialize(@value : MTValue, @trace : Callstack)
     end
   end
 

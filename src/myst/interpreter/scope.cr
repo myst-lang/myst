@@ -3,17 +3,17 @@ require "./value.cr"
 module Myst
   class Scope
     property parent : Scope?
-    property values : Hash(String, Value)
+    property values : Hash(String, MTValue)
 
     def initialize(@parent : Scope? = nil)
-      @values = {} of String => Value
+      @values = {} of String => MTValue
     end
 
     # The shorthand access notations (`[]?`, `[]`, `[]=`) will all fall back to
     # the parent scope if the value does not exist in this scope.
     #
     # The longhand `has_key?` and `assign` only operate on this scope.
-    def []?(key : String) : Value?
+    def []?(key : String) : MTValue?
       @values[key]? || @parent.try(&.[key]?)
     end
 
@@ -21,11 +21,11 @@ module Myst
     # it is not considered a "public" exception (it is not meant to be
     # reachable by userland code). Any instance where the exception propogates
     # outside of the interpreter should be considered a bug.
-    def [](key : String) : Value
+    def [](key : String) : MTValue
       self[key]? || raise IndexError.new("Interpeter Bug: Unmanaged, failed attempt to access `#{key}` from scope: #{self.inspect}")
     end
 
-    def []=(key : String, value : Value) : Value
+    def []=(key : String, value : MTValue) : MTValue
       scope = self
       while scope
         if scope.has_key?(key)
@@ -43,7 +43,7 @@ module Myst
       !!@values[key]?
     end
 
-    def assign(key : String, value : Value)
+    def assign(key : String, value : MTValue)
       @values[key] = value
     end
 
