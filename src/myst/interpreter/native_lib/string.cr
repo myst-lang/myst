@@ -1,119 +1,111 @@
 module Myst
   class Interpreter
-    NativeLib.method :string_add, TString, other : MTValue do
+    NativeLib.method :string_add, String, other : MTValue do
       case other
-      when TString
-        TString.new(this.value + other.value)
+      when String
+        this + other
       else
         __raise_runtime_error("invalid argument for String#+: #{__typeof(other).name}")
       end
     end
 
-    NativeLib.method :string_multiply, TString, other : MTValue do
+    NativeLib.method :string_multiply, String, other : MTValue do
       case other
-      when TInteger
+      when Int64
         # String multiplication repeats `this` `arg` times.
-        TString.new(this.value * other.value)
+        this * other
       else
         __raise_runtime_error("invalid argument for String#*: #{__typeof(other).name}")
       end
     end
 
-    NativeLib.method :string_to_s, TString do
-      this.as(TString)
+    NativeLib.method :string_to_s, String do
+      this
     end
 
-    NativeLib.method :string_eq, TString, other : MTValue do
-      case other
-      when TString
-        TBoolean.new(this.value == other.value)
-      else
-        TBoolean.new(false)
-      end
+    NativeLib.method :string_eq, String, other : MTValue do
+      this == other
     end
 
-    NativeLib.method :string_not_eq, TString, other : MTValue do
-      case other
-      when TString
-        TBoolean.new(this.value != other.value)
-      else
-        TBoolean.new(true)
-      end
+    NativeLib.method :string_not_eq, String, other : MTValue do
+      this != other
     end
 
-    NativeLib.method :string_split, TString do
+    NativeLib.method :string_split, String do
       delimiter =
-        case delim_arg = __args[0]?
+        case delim = __args[0]?
         when nil
           " "
-        when TString
-          delim_arg.value
+        when String
+          delim
+        else
+          __raise_runtime_error("Delimiter for String#split must be a String value (got #{__typeof(delim).name}")
         end
 
-      TList.new(this.value.split(delimiter).map{ |s| TString.new(s).as(MTValue) })
+      TList.new(this.split(delimiter).map(&.as(MTValue)))
     end
 
-    NativeLib.method :string_size, TString do
-      TInteger.new(this.value.size.to_i64)
+    NativeLib.method :string_size, String do
+      this.size.to_i64
     end
 
-    NativeLib.method :string_chars, TString do
-      TList.new(this.value.chars.map { |c| TString.new(c.to_s).as MTValue })
+    NativeLib.method :string_chars, String do
+      TList.new(this.chars.map { |c| c.to_s.as(MTValue) })
     end
 
-    NativeLib.method :string_downcase, TString do
-      TString.new(this.value.downcase)
+    NativeLib.method :string_downcase, String do
+      this.downcase
     end
 
-    NativeLib.method :string_upcase, TString do
-      TString.new(this.value.upcase)
+    NativeLib.method :string_upcase, String do
+      this.upcase
     end
 
-    NativeLib.method :string_chomp, TString, other : TString? do
-      other && return TString.new(this.value.chomp(other.value))
-      TString.new(this.value.chomp)
+    NativeLib.method :string_chomp, String, other : String? do
+      other && return this.chomp(other)
+      this.chomp
     end
 
-    NativeLib.method :string_strip, TString do
-      TString.new(this.value.strip)
+    NativeLib.method :string_strip, String do
+      this.strip
     end
 
-    NativeLib.method :string_rstrip, TString do
-      TString.new(this.value.rstrip)
+    NativeLib.method :string_rstrip, String do
+      this.rstrip
     end
 
-    NativeLib.method :string_lstrip, TString do
-      TString.new(this.value.lstrip)
+    NativeLib.method :string_lstrip, String do
+      this.lstrip
     end
 
-    NativeLib.method :string_includes?, TString, other : TString do
-      TBoolean.new(this.value.includes?(other.value))
+    NativeLib.method :string_includes?, String, other : String do
+      this.includes?(other)
     end
 
-    NativeLib.method :string_at, TString, index : TInteger, length : TInteger? do
-      idx = index.value
+    NativeLib.method :string_at, String, index : Int64, length : Int64? do
+      idx = index
 
       result =
         case length
-        when TInteger
+        when Int64
           # Explicitly check that `String#[start, count]` will not fail.
-          if idx < this.value.size && length.value >= 0
-            TString.new(this.value[idx, length.value])
+          if idx < this.size && length >= 0
+            this[idx, length]
           else
-            TString.new("")
+            ""
           end
         else
-          # Use nil-checking to assert that `index.value` is valid.
-          if char = this.value[index.value]?
-            TString.new(char.to_s)
+          # Use nil-checking to assert that `index` is valid.
+          if char = this[index]?
+            char.to_s
           end
         end
 
       result || TNil.new
     end
 
-    NativeLib.method :string_reverse, TString do
-      TString.new(this.value.reverse)
+    NativeLib.method :string_reverse, String do
+      this.reverse
     end
 
     def init_string(kernel : TModule)

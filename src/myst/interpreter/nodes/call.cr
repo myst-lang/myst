@@ -3,8 +3,13 @@ module Myst
     def visit(node : Call)
       receiver, func = lookup_call(node)
 
-      if func
+      case func
+      when TFunctor
         visit_call(node, receiver, func)
+      when MTValue
+        # If `func` is _not_ a functor, it must just be a value from a variable
+        # that didn't get parsed as a Var/Const/etc, so it can
+        stack.push(func)
       else
         if (name = node.name).is_a?(String)
           __raise_not_found(name, receiver)
@@ -76,10 +81,6 @@ module Myst
       result = Invocation.new(self, func, receiver, args, block).invoke
       pop_callstack(to_size: original_callstack_size)
       stack.push(result)
-    end
-
-    private def visit_call(_node, _receiver, value : MTValue)
-      stack.push(value)
     end
   end
 end

@@ -38,7 +38,7 @@ module Myst
       strs = node.components.map do |piece|
         case piece
         when StringLiteral
-          MTValue.from_literal(piece).as(TString)
+          Interpreter.__value_from_literal(piece)
         else
           visit(piece)
           expr_result = stack.pop
@@ -49,16 +49,16 @@ module Myst
             expr_result,
             [] of MTValue,
             nil
-          ).invoke.as(TString)
+          ).invoke.as(String)
         end
       end
 
-      full_str = strs.map(&.value).join
-      stack.push(TString.new(full_str))
+      full_str = strs.join
+      stack.push(full_str)
     end
 
     def visit(node : Literal)
-      stack.push(MTValue.from_literal(node))
+      stack.push(Interpreter.__value_from_literal(node))
     end
   end
 end

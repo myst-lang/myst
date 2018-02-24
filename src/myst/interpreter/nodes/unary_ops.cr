@@ -17,7 +17,7 @@ module Myst
           not_method = not_method.as(TFunctor)
           Invocation.new(self, not_method, value, [] of MTValue , nil).invoke
         else
-          TBoolean.new(!value.truthy?)
+          !value.truthy?
         end
 
       stack.push(result)

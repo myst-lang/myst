@@ -12,7 +12,7 @@ module Myst
       # reference to it will initialize it to `nil`. Because of that, a
       # reference to an instance variable will never fail to lookup (even when
       # spelled incorrectly).
-      unless ivar = current_self.ivars[node.name]?
+      if (ivar = current_self.ivars[node.name]?).nil?
         ivar = current_self.ivars.assign(node.name, TNil.new)
       end
 
@@ -20,7 +20,14 @@ module Myst
     end
 
     def visit(node : Const)
-      if value = (current_scope[node.name]? || __typeof(current_self).scope[node.name]? || recursive_lookup(current_self, node.name))
+      value = current_scope[node.name]?
+      if value.nil?
+        value = __typeof(current_self).scope[node.name]?
+      end
+      if value.nil?
+        value = recursive_lookup(current_self, node.name)
+      end
+      if !value.nil?
         stack.push(value)
       else
         __raise_not_found(node.name, current_self)

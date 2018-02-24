@@ -99,10 +99,10 @@ end
 
 # val(node)
 #
-# Run `MTValue.from_literal` on the given node and return the result. If `node`
+# Run `__value_from_literal` on the given node and return the result. If `node`
 # is not already a Node, it will be run through `l` first.
 def val(node : Node)
-  MTValue.from_literal(node).as(MTValue)
+  Interpreter.__value_from_literal(node).as(MTValue)
 end
 
 def val(node : Array(T)) forall T

@@ -1,26 +1,26 @@
 module Myst
   class Interpreter
-    NativeLib.method :file_init, TInstance, name : TString, mode : TString do
-      file = File.open(name.value, mode.value)
+    NativeLib.method :file_init, TInstance, name : String, mode : String do
+      file = File.open(name, mode)
       @fd_pool[file.fd] = file
 
-      this.ivars["@fd"] = TInteger.new(file.fd.to_i64)
+      this.ivars["@fd"] = file.fd.to_i64
       this.ivars["@mode"] = mode
       this
     end
 
     NativeLib.method :file_close, TInstance do
-      fd = this.ivars["@fd"].as(TInteger)
-      file = @fd_pool[fd.value]
+      fd = this.ivars["@fd"].as(Int64)
+      file = @fd_pool[fd]
       file.close
-      @fd_pool.delete(fd.value)
+      @fd_pool.delete(fd)
       TNil.new
     end
 
     NativeLib.method :file_size, TInstance do
-      fd = this.ivars["@fd"].as(TInteger)
-      file = @fd_pool[fd.value].as(File)
-      TInteger.new(file.size.to_i64)
+      fd = this.ivars["@fd"].as(Int64)
+      file = @fd_pool[fd].as(File)
+      file.size.to_i64
     end
 
 

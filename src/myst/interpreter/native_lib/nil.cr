@@ -1,24 +1,24 @@
 module Myst
   class Interpreter
     NativeLib.method :nil_to_s, TNil do
-      TString.new("")
+      ""
     end
 
     NativeLib.method :nil_eq, TNil, other : MTValue do
       case other
       when TNil
-        TBoolean.new(true)
+        true
       else
-        TBoolean.new(false)
+        false
       end
     end
 
     NativeLib.method :nil_not_eq, TNil, other : MTValue do
       case other
       when TNil
-        TBoolean.new(false)
+        false
       else
-        TBoolean.new(true)
+        true
       end
     end
 

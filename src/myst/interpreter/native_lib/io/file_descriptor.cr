@@ -1,26 +1,26 @@
 module Myst
   class Interpreter
-    NativeLib.method :io_fd_init, TInstance, fd : TInteger do
-      id = fd.value.to_i32
+    NativeLib.method :io_fd_init, TInstance, fd : Int64 do
+      id = fd.to_i32
       @fd_pool[id] ||= IO::FileDescriptor.new(id)
 
-      this.ivars["fd"] = fd
+      this.ivars["fd"] = fd.to_i64
     end
 
-    NativeLib.method :io_fd_read, TInstance, size : TInteger do
-      fd_id = this.ivars["fd"].as(TInteger).value.to_i32
+    NativeLib.method :io_fd_read, TInstance, size : Int64 do
+      fd_id = this.ivars["fd"].as(Int64).to_i32
       fd = @fd_pool[fd_id]
 
-      slice = Slice(UInt8).new(size.value)
+      slice = Slice(UInt8).new(size)
       fd.read(slice)
-      TString.new(String.new(slice))
+      String.new(slice)
     end
 
-    NativeLib.method :io_fd_write, TInstance, content : TString do
-      fd_id = this.ivars["fd"].as(TInteger).value.to_i32
+    NativeLib.method :io_fd_write, TInstance, content : String do
+      fd_id = this.ivars["fd"].as(Int64).to_i32
       fd = @fd_pool[fd_id]
 
-      fd.write(content.value.to_slice)
+      fd.write(content.to_slice)
       TNil.new
     end
 

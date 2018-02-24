@@ -120,7 +120,7 @@ module Myst
     def put_error(error : RuntimeError)
       value_to_s = __scopeof(error.value)["to_s"].as(TFunctor)
       result = Invocation.new(self, value_to_s, error.value, [] of MTValue, nil).invoke
-      errput.puts("Uncaught Exception: " + result.as(TString).value)
+      errput.puts("Uncaught Exception: " + result.as(String))
       errput.puts(error.trace)
     end
 

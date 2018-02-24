@@ -19,7 +19,7 @@ require "../spec_helper.cr"
 #
 #   itr = Interpreter.new
 #   add_breakpoint(itr, "breakpoint") do |this, args, block|
-#     args[0].should be_a(TInteger)
+#     args[0].should be_a(Int64)
 #   end
 #
 #   parse_and_interpret %q(

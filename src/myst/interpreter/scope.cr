@@ -14,7 +14,11 @@ module Myst
     #
     # The longhand `has_key?` and `assign` only operate on this scope.
     def []?(key : String) : MTValue?
-      @values[key]? || @parent.try(&.[key]?)
+      found = @values[key]?
+      if found.nil?
+        found = @parent.try(&.[key]?)
+      end
+      found
     end
 
     # A non-nilable variant of `[]?`. While this method may raise an exception,
@@ -22,7 +26,11 @@ module Myst
     # reachable by userland code). Any instance where the exception propogates
     # outside of the interpreter should be considered a bug.
     def [](key : String) : MTValue
-      self[key]? || raise IndexError.new("Interpeter Bug: Unmanaged, failed attempt to access `#{key}` from scope: #{self.inspect}")
+      found = self[key]?
+      if found.nil?
+        raise IndexError.new("Interpeter Bug: Unmanaged, failed attempt to access `#{key}` from scope: #{self.inspect}")
+      end
+      found
     end
 
     def []=(key : String, value : MTValue) : MTValue
@@ -40,7 +48,7 @@ module Myst
 
 
     def has_key?(key : String)
-      !!@values[key]?
+      @values.has_key?(key)
     end
 
     def assign(key : String, value : MTValue)

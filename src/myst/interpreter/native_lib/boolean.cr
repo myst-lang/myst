@@ -1,25 +1,15 @@
 module Myst
   class Interpreter
-    NativeLib.method :bool_to_s, TBoolean do
-      TString.new(this.value ? "true" : "false")
+    NativeLib.method :bool_to_s, Bool do
+      this.to_s
     end
 
-    NativeLib.method :bool_eq, TBoolean, other : MTValue do
-      case other
-      when TBoolean
-        TBoolean.new(this.value == other.value)
-      else
-        TBoolean.new(false)
-      end
+    NativeLib.method :bool_eq, Bool, other : MTValue do
+      this == other
     end
 
-    NativeLib.method :bool_not_eq, TBoolean, other : MTValue do
-      case other
-      when TBoolean
-        TBoolean.new(this.value != other.value)
-      else
-        TBoolean.new(true)
-      end
+    NativeLib.method :bool_not_eq, Bool, other : MTValue do
+      this != other
     end
 
     def init_boolean(kernel : TModule)

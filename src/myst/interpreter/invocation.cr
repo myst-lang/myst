@@ -37,12 +37,16 @@ module Myst
           res = do_call(clause, @receiver, @args, @block)
         end
         @itr.pop_scope_override
-        break res if res
+        break res unless res.nil?
       end
 
       @itr.pop_callstack(to_size: @callstack_size_at_entry)
 
-      result || @itr.__raise_runtime_error("No clause matches with given arguments: #{@args.inspect}")
+      if result.nil?
+        @itr.__raise_runtime_error("No clause matches with given arguments: #{@args.inspect}")
+      else
+        result
+      end
     rescue ex : BreakException
       if ex.caught?
         return @itr.stack.pop

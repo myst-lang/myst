@@ -11,7 +11,7 @@ module Myst
     end
 
     NativeLib.method :list_size, TList do
-      TInteger.new(this.elements.size.to_i64)
+      this.elements.size.to_i64
     end
 
     NativeLib.method :list_splat, TList do
@@ -19,44 +19,44 @@ module Myst
     end
 
     NativeLib.method :list_eq, TList, other : MTValue do
-      return TBoolean.new(false)  unless other.is_a?(TList)
-      return TBoolean.new(true)   if this == other
-      return TBoolean.new(false)  if this.elements.size != other.elements.size
+      return false  unless other.is_a?(TList)
+      return true   if this == other
+      return false  if this.elements.size != other.elements.size
 
       this.elements.zip(other.elements).each do |a, b|
-        return TBoolean.new(false) unless NativeLib.call_func_by_name(self, a, "==", [b]).truthy?
+        return false unless NativeLib.call_func_by_name(self, a, "==", [b]).truthy?
       end
 
-      TBoolean.new(true)
+      true
     end
 
     NativeLib.method :list_not_eq, TList, other : MTValue do
-      return TBoolean.new(true)   unless other.is_a?(TList)
-      return TBoolean.new(false)  if this == other
-      return TBoolean.new(true)   if this.elements.size != other.elements.size
+      return true   unless other.is_a?(TList)
+      return false  if this == other
+      return true   if this.elements.size != other.elements.size
 
       this.elements.zip(other.elements).each do |a, b|
-        return TBoolean.new(true) if NativeLib.call_func_by_name(self, a, "==", [b]).truthy?
+        return true if NativeLib.call_func_by_name(self, a, "==", [b]).truthy?
       end
 
-      TBoolean.new(false)
+      false
     end
 
     NativeLib.method :list_add, TList, other : TList do
       TList.new(this.elements + other.elements)
     end
 
-    NativeLib.method :list_access, TList, index : TInteger do
-      if element = this.elements[index.value]?
+    NativeLib.method :list_access, TList, index : Int64 do
+      if element = this.elements[index]?
         element
       else
         TNil.new
       end
     end
 
-    NativeLib.method :list_access_assign, TList, index : TInteger, value : MTValue do
-      this.ensure_capacity(index.value + 1)
-      this.elements[index.value] = value
+    NativeLib.method :list_access_assign, TList, index : Int64, value : MTValue do
+      this.ensure_capacity(index + 1)
+      this.elements[index] = value
     end
 
     NativeLib.method :list_minus, TList, other : TList do
@@ -64,23 +64,23 @@ module Myst
     end
 
     NativeLib.method :list_proper_subset, TList, other : TList do
-      return TBoolean.new(false)  unless other.is_a?(TList)
-      return TBoolean.new(false)  if this == other
+      return false  unless other.is_a?(TList)
+      return false  if this == other
 
       if (this.elements - other.elements).empty?
-        TBoolean.new(true)
+        true
       else
-        TBoolean.new(false)
+        false
       end
     end
 
     NativeLib.method :list_subset, TList, other : TList do
-      return TBoolean.new(false)  unless other.is_a?(TList)
+      return false  unless other.is_a?(TList)
 
       if (this.elements - other.elements).empty?
-        TBoolean.new(true)
+        true
       else
-        TBoolean.new(false)
+        false
       end
     end
 

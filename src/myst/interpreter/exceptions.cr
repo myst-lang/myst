@@ -25,8 +25,8 @@ module Myst
   # to better show the intent of the raised errors, and ensure consistency
   # between them.
   class MatchError < RuntimeError
-    def initialize(@trace : Callstack, message : String = "match failure")
-      @value = TString.new(message)
+    def initialize(@trace : Callstack, @message : String = "match failure")
+      @value = message
     end
   end
 end

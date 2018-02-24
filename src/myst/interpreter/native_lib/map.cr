@@ -11,7 +11,7 @@ module Myst
     end
 
     NativeLib.method :map_size, TMap do
-      TInteger.new(this.entries.size.to_i64)
+      this.entries.size.to_i64
     end
 
     NativeLib.method :map_add, TMap, other : TMap do
@@ -19,37 +19,37 @@ module Myst
     end
 
     NativeLib.method :map_eq, TMap, other : MTValue do
-      return TBoolean.new(false)  unless other.is_a?(TMap)
-      return TBoolean.new(true)   if this == other
-      return TBoolean.new(false)  if this.entries.size != other.entries.size
+      return false  unless other.is_a?(TMap)
+      return true   if this == other
+      return false  if this.entries.size != other.entries.size
 
       # At this point, `this` and `other` must have the same number of keys,
       # meaning that if `other` contains all of the keys that `this` does, it
       # also cannot contain any extra keys, so it's only necessary to iterate
       # one of the two maps' keys.
       this.entries.keys.zip(other.entries.keys).each do |a_key, b_key|
-        return TBoolean.new(false) unless NativeLib.call_func_by_name(self, a_key, "==", [b_key]).truthy?
-        return TBoolean.new(false) unless NativeLib.call_func_by_name(self, this.entries[a_key], "==", [other.entries[b_key]]).truthy?
+        return false unless NativeLib.call_func_by_name(self, a_key, "==", [b_key]).truthy?
+        return false unless NativeLib.call_func_by_name(self, this.entries[a_key], "==", [other.entries[b_key]]).truthy?
       end
 
-      TBoolean.new(true)
+      true
     end
 
     NativeLib.method :map_not_eq, TMap, other : MTValue do
-      return TBoolean.new(true)   unless other.is_a?(TMap)
-      return TBoolean.new(false)  if this == other
-      return TBoolean.new(true)   if this.entries.size != other.entries.size
+      return true   unless other.is_a?(TMap)
+      return false  if this == other
+      return true   if this.entries.size != other.entries.size
 
       # At this point, `this` and `other` must have the same number of keys,
       # meaning that if `other` contains all of the keys that `this` does, it
       # also cannot contain any extra keys, so it's only necessary to iterate
       # one of the two maps' keys.
       this.entries.keys.zip(other.entries.keys).each do |a_key, b_key|
-        return TBoolean.new(true) if NativeLib.call_func_by_name(self, a_key, "==", [b_key]).truthy?
-        return TBoolean.new(true) if NativeLib.call_func_by_name(self, this.entries[a_key], "==", [other.entries[b_key]]).truthy?
+        return true if NativeLib.call_func_by_name(self, a_key, "==", [b_key]).truthy?
+        return true if NativeLib.call_func_by_name(self, this.entries[a_key], "==", [other.entries[b_key]]).truthy?
       end
 
-      TBoolean.new(true)
+      true
     end
 
     NativeLib.method :map_access, TMap, index : MTValue do
@@ -61,23 +61,23 @@ module Myst
     end
 
     NativeLib.method :map_proper_subset, TMap, other : TMap do
-      return TBoolean.new(false)  unless other.is_a?(TMap)
-      return TBoolean.new(false)  if this.entries.keys == other.entries.keys
+      return false  unless other.is_a?(TMap)
+      return false  if this.entries.keys == other.entries.keys
 
       if (this.entries.keys - other.entries.keys).empty?
-        TBoolean.new(true)
+        true
       else
-        TBoolean.new(false)
+        false
       end
     end
 
     NativeLib.method :map_subset, TMap, other : TMap do
-      return TBoolean.new(false)  unless other.is_a?(TMap)
+      return false  unless other.is_a?(TMap)
 
       if (this.entries.keys - other.entries.keys).empty?
-        TBoolean.new(true)
+        true
       else
-        TBoolean.new(false)
+        false
       end
     end
 

@@ -5,20 +5,20 @@ module Myst
       offset = Crystal::System::Time.compute_utc_offset(seconds)
 
       instance = NativeLib.instantiate(self, this.as(TType), [
-        TInteger.new(seconds + offset),
-        TInteger.new(nanoseconds.to_i64)
+        seconds + offset,
+        nanoseconds.to_i64
       ] of MTValue)
 
       instance
     end
 
-    NativeLib.method :time_to_s, TInstance, format : TString? do
+    NativeLib.method :time_to_s, TInstance, format : String? do
       crystal_time = to_crystal_time(this)
 
       if format
-       TString.new(crystal_time.to_s(format.value))
+       crystal_time.to_s(format)
       else
-       TString.new(crystal_time.to_s)
+       crystal_time.to_s
       end
     end
 
@@ -34,8 +34,8 @@ module Myst
 
     private def to_crystal_time(myst_time : TInstance)
       Time.new(
-        seconds: myst_time.ivars["@seconds"].as(TInteger).value,
-        nanoseconds: myst_time.ivars["@nanoseconds"].as(TInteger).value.to_i32,
+        seconds: myst_time.ivars["@seconds"].as(Int64),
+        nanoseconds: myst_time.ivars["@nanoseconds"].as(Int64).to_i32,
         kind: Time::Kind::Unspecified
       )
     end

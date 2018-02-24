@@ -1,24 +1,24 @@
 module Myst
   class Interpreter
     NativeLib.method :symbol_to_s, TSymbol do
-      TString.new(this.name)
+      this.name
     end
 
     NativeLib.method :symbol_eq, TSymbol, other : MTValue do
       case other
       when TSymbol
-        TBoolean.new(this.value == other.value)
+        this == other
       else
-        TBoolean.new(false)
+        false
       end
     end
 
     NativeLib.method :symbol_not_eq, TSymbol, other : MTValue do
       case other
       when TSymbol
-        TBoolean.new(this.value != other.value)
+        this != other
       else
-        TBoolean.new(true)
+        true
       end
     end
 

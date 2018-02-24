@@ -29,7 +29,7 @@ module Myst
     end
 
     def has_key?(key : String)
-      !!@values[key]? || closed_scope.has_key?(key)
+      @values.has_key?(key) || closed_scope.has_key?(key)
     end
 
     def assign(key : String, value : MTValue)

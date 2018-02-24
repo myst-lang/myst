@@ -1,12 +1,12 @@
 module Myst
   class Interpreter
     NativeLib.method :random_rand, TModule, max : MTValue? = nil do
-      if max.is_a? TInteger
-        TInteger.new(rand(max.value))
-      elsif max.is_a? TFloat
-        TFloat.new(rand(max.value))
+      if max.is_a? Int64
+        rand(max)
+      elsif max.is_a? Float64
+        rand(max)
       else
-        TFloat.new(rand())
+        rand()
       end
     end
 
