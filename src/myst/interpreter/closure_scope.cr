@@ -9,7 +9,7 @@ module Myst
     property closed_scope : Scope
 
     def initialize(@closed_scope : Scope, @parent : Scope? = nil)
-      @values = {} of String => Value
+      @values = {} of String => MTValue
     end
 
     def []?(key : String)
@@ -20,7 +20,7 @@ module Myst
       end
     end
 
-    def []=(key : String, value : Value)
+    def []=(key : String, value : MTValue)
       if closed_scope.has_key?(key)
         closed_scope.assign(key, value)
       else
@@ -29,10 +29,10 @@ module Myst
     end
 
     def has_key?(key : String)
-      !!@values[key]? || closed_scope.has_key?(key)
+      @values.has_key?(key) || closed_scope.has_key?(key)
     end
 
-    def assign(key : String, value : Value)
+    def assign(key : String, value : MTValue)
       if closed_scope.has_key?(key)
         closed_scope.assign(key, value)
       else

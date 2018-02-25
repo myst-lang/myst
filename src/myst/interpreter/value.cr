@@ -1,30 +1,42 @@
 module Myst
-  abstract class Value
-    def Value.from_literal(literal : Node)
-      case literal
-      when IntegerLiteral
-        TInteger.new(literal.value.to_i64)
-      when FloatLiteral
-        TFloat.new(literal.value.to_f64)
-      when StringLiteral
-        TString.new(literal.value)
-      when SymbolLiteral
-        TSymbol.new(literal.value)
-      when BooleanLiteral
-        TBoolean.new(literal.value)
-      when NilLiteral
-        TNil.new
-      else
-        raise "Interpreter Bug: Attempting to create a Value from a #{literal.class}, which is not a valid Literal type."
-      end
-    end
+  alias MTValue = Int64 | Float64 | Bool | String | MutableValue
+
+  # Define a few methods on the primitive types to allow the interpreter to
+  # treat them like any other value.
+  struct ::Int64
+    def type_name; "Integer"; end
+    def truthy?; true; end
+
+    def ivars; raise "Primitive values cannot have instance variables"; end
+  end
+
+  struct ::Float64
+    def type_name; "Float"; end
+    def truthy?; true; end
+
+    def ivars; raise "Primitive values cannot have instance variables"; end
+  end
+
+  struct ::Bool
+    def type_name; "Boolean"; end
+    def truthy?; self; end
+
+    def ivars; raise "Primitive values cannot have instance variables"; end
+  end
+
+  class ::String
+    def type_name; "String"; end
+    def truthy?; true; end
+
+    def ivars; raise "Primitive values cannot have instance variables"; end
+  end
 
 
+  abstract class MutableValue
     # Instance variables are properties tied to the instance of an object.
     # For consistency between native (Integer, String, etc.) and language-
     # level types (IO, File, etc.), all values have an `ivars` property.
     property ivars : Scope = Scope.new
-
 
     def truthy?
       true
@@ -35,7 +47,7 @@ module Myst
     end
   end
 
-  abstract class ContainerType < Value
+  abstract class ContainerType < MutableValue
     property name           : String = ""
     # Ancestors are the modules that have been included inside of a Type. For
     # example, if a module includes Enumerable, then the ancestors for that
@@ -82,11 +94,11 @@ module Myst
       # TODO: revist this when base object for TType is in place
       # Currently this prevents to_s from being overriden on Types
       @scope["to_s"] = TFunctor.new("to_s", [
-        ->ttype_to_s(Value, Array(Value), TFunctor?)] of Callable)
+        ->ttype_to_s(MTValue, Array(MTValue), TFunctor?)] of Callable)
     end
 
     def ttype_to_s(_a, _b, _c)
-      TString.new(@name).as(Value)
+      @name.as(MTValue)
     end
 
     def type_name
@@ -128,7 +140,7 @@ module Myst
     def_equals_and_hash name, scope, instance_scope
   end
 
-  class TInstance < Value
+  class TInstance < MutableValue
     property type       : TType
     property scope      : Scope
 
@@ -147,21 +159,7 @@ module Myst
     def_equals_and_hash type, scope
   end
 
-
-  # Primitives are immutable objects
-  abstract class TPrimitive(T) < Value
-    property value : T
-
-    def initialize(@value : T); end
-
-    def to_s
-      value.to_s
-    end
-
-    def_equals_and_hash value
-  end
-
-  class TNil < Value
+  class TNil < MutableValue
     # All instances of Nil in a program refer to the same object.
     NIL_OBJECT = TNil.allocate
 
@@ -184,58 +182,9 @@ module Myst
     def_equals_and_hash
   end
 
-  class TBoolean < TPrimitive(Bool)
-    def to_s
-      @value ? "true" : "false"
-    end
-
-    def truthy?
-      @value
-    end
-
-    def type_name
-      "Boolean"
-    end
-  end
-
-  class TInteger < TPrimitive(Int64)
-    def ==(other : TFloat)
-      self.value == other.value
-    end
-
-    def type_name
-      "Integer"
-    end
-  end
-
-  class TFloat < TPrimitive(Float64)
-    def ==(other : TInteger)
-      self.value == other.value
-    end
-
-    def type_name
-      "Float"
-    end
-  end
-
-  class TString < TPrimitive(String)
-    def type_name
-      "String"
-    end
-  end
-
-  class TSymbol < TPrimitive(UInt64)
+  class TSymbol < MutableValue
     SYMBOLS = {} of String => TSymbol
     @@next_id = 0_u64
-
-    property name : String
-
-    def initialize(@value : UInt64, @name : String)
-    end
-
-    def type_name
-      "Symbol"
-    end
 
     def self.new(name)
       # TODO: Revert to the following once Crystal 0.24.0 is released. This
@@ -252,13 +201,30 @@ module Myst
         SYMBOLS[name] = instance
       end
     end
+
+
+    property value : UInt64
+    property name : String
+
+    def initialize(@value : UInt64, @name : String)
+    end
+
+    def to_s
+      value.to_s
+    end
+
+    def type_name
+      "Symbol"
+    end
+
+    def_equals_and_hash value
   end
 
 
-  class TList < Value
-    property elements : Array(Value)
+  class TList < MutableValue
+    property elements : Array(MTValue)
 
-    def initialize(@elements=[] of Value)
+    def initialize(@elements=[] of MTValue)
     end
 
     def ensure_capacity(size : Int)
@@ -273,10 +239,10 @@ module Myst
     def_equals_and_hash elements
   end
 
-  class TMap < Value
-    property entries : Hash(Value, Value)
+  class TMap < MutableValue
+    property entries : Hash(MTValue, MTValue)
 
-    def initialize(@entries={} of Value => Value)
+    def initialize(@entries={} of MTValue => MTValue)
     end
 
     def type_name
@@ -287,7 +253,7 @@ module Myst
   end
 
 
-  class TFunctorDef < Value
+  class TFunctorDef < MutableValue
     property  definition : Def
 
     delegate params, block_param, block_param?, body, splat_index?, splat_index, to: definition
@@ -298,20 +264,20 @@ module Myst
     def_equals_and_hash definition
   end
 
-  alias TNativeDef = Value, Array(Value), TFunctor? -> Value
+  alias TNativeDef = MTValue, Array(MTValue), TFunctor? -> MTValue
   alias Callable = TFunctorDef | TNativeDef
 
 
   # A Functor is a container for multiple functor definitions, which can either
   # be language-level or native.
-  class TFunctor < Value
+  class TFunctor < MutableValue
     property  name            : String
     property  clauses         : Array(Callable)
     property  lexical_scope   : Scope
     property? closure         : Bool
-    property! closed_self     : Value?
+    property! closed_self     : MTValue?
 
-    def initialize(@name : String, @clauses=[] of Callable, @lexical_scope : Scope=Scope.new, @closure : Bool=false, @closed_self : Value?=nil)
+    def initialize(@name : String, @clauses=[] of Callable, @lexical_scope : Scope=Scope.new, @closure : Bool=false, @closed_self : MTValue?=nil)
     end
 
     def add_clause(definition : Callable)

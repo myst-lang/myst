@@ -2,7 +2,7 @@ require "./exceptions.cr"
 
 module Myst
   class Interpreter
-    def match(pattern : Node, value : Value)
+    def match(pattern : Node, value : MTValue)
       case pattern
       when ListLiteral
         match_list(pattern, value)
@@ -31,7 +31,7 @@ module Myst
     # For simplicity and efficiency, the equality of values according to a
     # match operation is determined by the native equality of the values, not
     # by any override of `==`.
-    private def match_value(pattern : Node, right : Value)
+    private def match_value(pattern : Node, right : MTValue)
       visit(pattern)
       left = stack.pop
       success =
@@ -51,7 +51,7 @@ module Myst
       success || __raise_runtime_error(MatchError.new(callstack))
     end
 
-    private def match_list(pattern : ListLiteral, value : Value)
+    private def match_list(pattern : ListLiteral, value : MTValue)
       __raise_runtime_error(MatchError.new(callstack)) unless value.is_a?(TList)
 
       left, splat, right = chunk_list_pattern(pattern)
@@ -68,7 +68,7 @@ module Myst
       end
     end
 
-    private def match_map(pattern : MapLiteral, value : Value)
+    private def match_map(pattern : MapLiteral, value : MTValue)
       __raise_runtime_error(MatchError.new(callstack)) unless value.is_a?(TMap)
 
       pattern.entries.each do |entry|

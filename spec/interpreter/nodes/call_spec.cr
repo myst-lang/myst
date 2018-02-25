@@ -95,7 +95,7 @@ describe "Interpreter - Call" do
     # Operators can also be defined statically to do some type algebra.
     it_interprets %Q(
       deftype Foo
-        defstatic #{op}(other : Foo)
+        defstatic #{op}(other)
           :called_op_on_type
         end
       end

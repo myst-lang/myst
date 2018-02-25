@@ -4,7 +4,7 @@ module Myst
       visit(node.value)
       value = stack.pop()
       negate = self.__scopeof(value)["negate"].as(TFunctor)
-      result = Invocation.new(self, negate, value, [] of Value, nil).invoke
+      result = Invocation.new(self, negate, value, [] of MTValue, nil).invoke
       stack.push(result)
     end
 
@@ -15,9 +15,9 @@ module Myst
       result =
         if not_method = self.__scopeof(value)["!"]?
           not_method = not_method.as(TFunctor)
-          Invocation.new(self, not_method, value, [] of Value , nil).invoke
+          Invocation.new(self, not_method, value, [] of MTValue , nil).invoke
         else
-          TBoolean.new(!value.truthy?)
+          !value.truthy?
         end
 
       stack.push(result)
@@ -29,7 +29,7 @@ module Myst
 
       if splat_method = recursive_lookup(value, "*").as?(TFunctor)
         splat_method = splat_method.as(TFunctor)
-        result = Invocation.new(self, splat_method, value, [] of Value, nil).invoke
+        result = Invocation.new(self, splat_method, value, [] of MTValue, nil).invoke
       else
         __raise_not_found("* (splat)", value)
       end

@@ -9,7 +9,7 @@ describe "Interpreter - Scope" do
       scope["b"]
     end
 
-    scope["b"]?.should be(nil)
+    scope["b"]?.should eq(nil)
   end
 
   describe "#[]" do
@@ -71,7 +71,7 @@ describe "Interpreter - Scope" do
       scope = Scope.new
       scope["a"] = TNil.new
       scope["Thing"] = TType.new("Thing")
-      scope["x"] = TInteger.new(100_i64)
+      scope["x"] = 100_i64
 
       scope.values.size.should eq(3)
 

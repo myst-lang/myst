@@ -82,13 +82,13 @@ TYPE_DEFS = %q(
 )
 
 
-private def it_invokes(prelude, call, expected)
+private def it_invokes(prelude, call, expected, file=__FILE__, line=__LINE__, end_line=__END_LINE__)
   itr = parse_and_interpret(prelude)
   # Running the prelude will leave the last definition on the stack. For
   # clarity in the tests, the stack is cleared of any existing values before
   # making any assertions.
   itr.stack.clear
-  it_interprets(call, [expected] of Myst::Value, itr)
+  it_interprets(call, [expected] of MTValue, itr, file: file, line: line, end_line: end_line)
 end
 
 describe "Interpreter - Invocation" do

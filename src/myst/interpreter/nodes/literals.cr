@@ -1,7 +1,7 @@
 module Myst
   class Interpreter
     def visit(node : ListLiteral)
-      elements = [] of Value
+      elements = [] of MTValue
 
       node.elements.each do |elem|
         elem.accept(self)
@@ -22,7 +22,7 @@ module Myst
     end
 
     def visit(node : MapLiteral)
-      entries = node.entries.reduce(Hash(Value, Value).new) do |map, entry|
+      entries = node.entries.reduce(Hash(MTValue, MTValue).new) do |map, entry|
         entry.key.accept(self)
         key = stack.pop
         entry.value.accept(self)
@@ -38,7 +38,7 @@ module Myst
       strs = node.components.map do |piece|
         case piece
         when StringLiteral
-          Value.from_literal(piece).as(TString)
+          Interpreter.__value_from_literal(piece)
         else
           visit(piece)
           expr_result = stack.pop
@@ -47,18 +47,18 @@ module Myst
             self,
             value_to_s,
             expr_result,
-            [] of Value,
+            [] of MTValue,
             nil
-          ).invoke.as(TString)
+          ).invoke.as(String)
         end
       end
 
-      full_str = strs.map(&.value).join
-      stack.push(TString.new(full_str))
+      full_str = strs.join
+      stack.push(full_str)
     end
 
     def visit(node : Literal)
-      stack.push(Value.from_literal(node))
+      stack.push(Interpreter.__value_from_literal(node))
     end
   end
 end

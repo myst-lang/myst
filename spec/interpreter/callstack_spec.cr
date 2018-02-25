@@ -81,8 +81,7 @@ describe "Interpreter - Callstack" do
     it "removes the last entry from the callstack" do
       itr = Interpreter.new
       add_breakpoint(itr, "breakpoint") do
-        expected_stack_size = __args[0].as(TInteger).value
-        itr.callstack.size.should eq(expected_stack_size)
+        itr.callstack.size.should eq(__args[0])
       end
 
       parse_and_interpret! %q(
@@ -100,8 +99,7 @@ describe "Interpreter - Callstack" do
       it "removes the last entry from the callstack" do
         itr = Interpreter.new
         add_breakpoint(itr, "breakpoint") do
-          expected_stack_size = __args[0].as(TInteger).value
-          itr.callstack.size.should eq(expected_stack_size)
+          itr.callstack.size.should eq(__args[0])
         end
 
         parse_and_interpret! %q(
@@ -121,8 +119,7 @@ describe "Interpreter - Callstack" do
     it "removes the `block` from the callstack" do
       itr = Interpreter.new
       add_breakpoint(itr, "breakpoint") do
-        expected_stack_size = __args[0].as(TInteger).value
-        itr.callstack.size.should eq(expected_stack_size)
+        itr.callstack.size.should eq(__args[0])
       end
 
       parse_and_interpret! %q(
@@ -137,8 +134,7 @@ describe "Interpreter - Callstack" do
     it "removes the `next` from the callstack" do
       itr = Interpreter.new
       add_breakpoint(itr, "breakpoint") do
-        expected_stack_size = __args[0].as(TInteger).value
-        itr.callstack.size.should eq(expected_stack_size)
+        itr.callstack.size.should eq(__args[0])
       end
 
       parse_and_interpret! %q(

@@ -11,11 +11,11 @@ module Myst
 
       # The path for a require must be a String, otherwise, the require cannot
       # be successful.
-      unless path.is_a?(TString)
+      unless path.is_a?(String)
         __raise_runtime_error("Path for `require` must be a String. Got #{path}")
       end
 
-      path_str = path.value
+      path_str = path
 
 
       # The working directory for the require is always the directory of the
@@ -30,7 +30,7 @@ module Myst
       full_path = resolve_path(path_str, working_dir)
       # If the file has already been loaded, return false.
       if @loaded_files[full_path]?
-        stack.push(TBoolean.new(false))
+        stack.push(false)
         return
       end
 
@@ -43,7 +43,7 @@ module Myst
       # the stack. Instead, the return value of a `require` should be either
       # `true` or `false`, so it must be replaced.
       @stack.pop
-      @stack.push(TBoolean.new(true))
+      @stack.push(true)
     end
 
 

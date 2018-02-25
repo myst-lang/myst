@@ -11,14 +11,14 @@ module Myst
   struct Invocation
     property  itr       : Interpreter
     property  func      : TFunctor
-    property! receiver  : Value?
-    property  args      : Array(Value)
+    property! receiver  : MTValue?
+    property  args      : Array(MTValue)
     property! block     : TFunctor?
     @selfstack_size_at_entry  : Int32 = -1
     @scopestack_size_at_entry : Int32 = -1
     @callstack_size_at_entry  : Int32 = -1
 
-    def initialize(@itr : Interpreter, @func : TFunctor, @receiver : Value?, @args : Array(Value), @block : TFunctor?)
+    def initialize(@itr : Interpreter, @func : TFunctor, @receiver : MTValue?, @args : Array(MTValue), @block : TFunctor?)
     end
 
     def invoke
@@ -37,12 +37,16 @@ module Myst
           res = do_call(clause, @receiver, @args, @block)
         end
         @itr.pop_scope_override
-        break res if res
+        break res unless res.nil?
       end
 
       @itr.pop_callstack(to_size: @callstack_size_at_entry)
 
-      result || @itr.__raise_runtime_error("No clause matches with given arguments: #{@args.inspect}")
+      if result.nil?
+        @itr.__raise_runtime_error("No clause matches with given arguments: #{@args.inspect}")
+      else
+        result
+      end
     rescue ex : BreakException
       if ex.caught?
         return @itr.stack.pop
@@ -113,7 +117,7 @@ module Myst
       return @itr.stack.pop
     end
 
-    private def do_call(func : TNativeDef, receiver : Value, args : Array(Value), block : TFunctor?)
+    private def do_call(func : TNativeDef, receiver : MTValue, args : Array(MTValue), block : TFunctor?)
       func.call(receiver, args, block)
     end
 

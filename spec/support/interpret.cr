@@ -1,7 +1,7 @@
 require "../spec_helper.cr"
 require "./nodes.cr"
 
-def it_interprets(node : String, expected_stack : Array(Myst::Value), itr=Interpreter.new, file=__FILE__, line=__LINE__, end_line=__END_LINE__)
+def it_interprets(node : String, expected_stack : Array(MTValue), itr=Interpreter.new, file=__FILE__, line=__LINE__, end_line=__END_LINE__)
   it %Q(interprets #{node}), file, line, end_line do
     program = parse_program(node)
     itr.run(program)
@@ -31,11 +31,11 @@ def it_interprets(node : String, file=__FILE__, line=__LINE__, end_line=__END_LI
 end
 
 def it_interprets(node : String, file=__FILE__, line=__LINE__, end_line=__END_LINE__)
-  it_interprets(node, [] of Myst::Value, Interpreter.new, file, line, end_line)
+  it_interprets(node, [] of MTValue, Interpreter.new, file, line, end_line)
 end
 
 
-def it_interprets_with_assignments(node : String, assignments : Hash(String, Myst::Value), itr=Interpreter.new, file=__FILE__, line=__LINE__, end_line=__END_LINE__)
+def it_interprets_with_assignments(node : String, assignments : Hash(String, MTValue), itr=Interpreter.new, file=__FILE__, line=__LINE__, end_line=__END_LINE__)
   it %Q(interprets #{node}), file, line, end_line do
     program = parse_program(node)
     itr.run(program)
@@ -99,21 +99,21 @@ end
 
 # val(node)
 #
-# Run `Value.from_literal` on the given node and return the result. If `node`
+# Run `__value_from_literal` on the given node and return the result. If `node`
 # is not already a Node, it will be run through `l` first.
 def val(node : Node)
-  Myst::Value.from_literal(node).as(Myst::Value)
+  Interpreter.__value_from_literal(node).as(MTValue)
 end
 
 def val(node : Array(T)) forall T
-  TList.new(node.map{ |n| val(n) }).as(Myst::Value)
+  TList.new(node.map{ |n| val(n) }).as(MTValue)
 end
 
 def val(node : Hash(K, V)) forall K, V
   node.reduce(TMap.new) do |map, (k, v)|
     map.entries[val(k)] = val(v)
     map
-  end.as(Myst::Value)
+  end.as(MTValue)
 end
 
 def val(node); val(l(node)); end

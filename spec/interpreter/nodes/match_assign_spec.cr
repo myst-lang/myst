@@ -3,7 +3,7 @@ require "../../support/nodes.cr"
 require "../../support/interpret.cr"
 
 private def it_matches(match, file=__FILE__, line=__LINE__, end_line=__END_LINE__)
-  it %Q(matches `#{match}`) do
+  it %Q(matches `#{match}`), file, line, end_line do
     itr = Interpreter.new
     program = parse_program(match)
     result = itr.run(program)
@@ -11,7 +11,7 @@ private def it_matches(match, file=__FILE__, line=__LINE__, end_line=__END_LINE_
 end
 
 private def it_does_not_match(match, file=__FILE__, line=__LINE__, end_line=__END_LINE__)
-  it %Q(does not match `#{match}`) do
+  it %Q(does not match `#{match}`), file, line, end_line do
     itr = Interpreter.new(errput: IO::Memory.new)
     program = parse_program(match)
 
@@ -50,7 +50,7 @@ describe "Interpreter - MatchAssign" do
   distinct_types.each_with_index do |a, i|
     distinct_types.each_with_index do |b, j|
       next if i == j
-      it_does_not_match "#{a} =: #{b}", /match/
+      it_does_not_match "#{a} =: #{b}"
     end
   end
 
@@ -59,8 +59,8 @@ describe "Interpreter - MatchAssign" do
   it_interprets %q(1    =: 1.0)
   it_interprets %q(1.0  =: 1)
 
-  it_does_not_match %q(1    =: 1.1),  /match/
-  it_does_not_match %q(1.1  =: 1),    /match/
+  it_does_not_match %q(1    =: 1.1)
+  it_does_not_match %q(1.1  =: 1)
 
 
   # Assignments at any level should either create or re-assign the variable
@@ -122,7 +122,7 @@ describe "Interpreter - MatchAssign" do
   it_does_not_match %q(
     A = false
     A =: true
-  ), /match/
+  )
 
   # Both styles of matching with Consts works through interpolation.
   it_interprets %q(<String>   =: "hello")
@@ -140,5 +140,5 @@ describe "Interpreter - MatchAssign" do
   it_does_not_match %q(
     float_type = 1.5.type
     <float_type> =: 1
-  ),  /match/
+  )
 end

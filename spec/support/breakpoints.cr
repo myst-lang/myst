@@ -19,7 +19,7 @@ require "../spec_helper.cr"
 #
 #   itr = Interpreter.new
 #   add_breakpoint(itr, "breakpoint") do |this, args, block|
-#     args[0].should be_a(TInteger)
+#     args[0].should be_a(Int64)
 #   end
 #
 #   parse_and_interpret %q(
@@ -28,12 +28,12 @@ require "../spec_helper.cr"
 #     end
 #   ), interpreter: itr
 macro add_breakpoint(itr, name)
-  %handler = ->(this : Myst::Value, __args : Array(Myst::Value), block : TFunctor?) do
+  %handler = ->(this : MTValue, __args : Array(MTValue), block : TFunctor?) do
     %result = begin
       {{ yield }}
     end
 
-    %result.is_a?(Myst::Value) ? %result : TNil.new.as(Myst::Value)
+    %result.is_a?(MTValue) ? %result : TNil.new.as(MTValue)
   end
 
   {{itr}}.kernel.scope[{{name}}] = TFunctor.new({{name}}, [%handler] of Callable)

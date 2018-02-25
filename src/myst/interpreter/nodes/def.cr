@@ -7,7 +7,7 @@ module Myst
           type.scope
         when {TType, false}
           type.instance_scope
-        when {Value, true}
+        when {MTValue, true}
           # Any other kind of value is not allowed to define static methods.
           __raise_runtime_error("Cannot define static method on #{__typeof(current_self).name}")
         else

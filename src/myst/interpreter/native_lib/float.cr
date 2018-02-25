@@ -1,109 +1,99 @@
 module Myst
   class Interpreter
-    NativeLib.method :float_add, TFloat, other : Value do
+    NativeLib.method :float_add, Float64, other : MTValue do
       case other
-      when TInteger, TFloat
-        TFloat.new(this.value + other.value)
+      when Int64, Float64
+        this + other
       else
         __raise_runtime_error("invalid argument for Float#+: #{__typeof(other).name}")
       end
     end
 
-    NativeLib.method :float_subtract, TFloat, other : Value do
+    NativeLib.method :float_subtract, Float64, other : MTValue do
       case other
-      when TInteger, TFloat
-        TFloat.new(this.value - other.value)
+      when Int64, Float64
+        this - other
       else
         __raise_runtime_error("invalid argument for Float#-: #{__typeof(other).name}")
       end
     end
 
-    NativeLib.method :float_multiply, TFloat, other : Value do
+    NativeLib.method :float_multiply, Float64, other : MTValue do
       case other
-      when TInteger, TFloat
-        TFloat.new(this.value * other.value)
+      when Int64, Float64
+        this * other
       else
         __raise_runtime_error("invalid argument for Float#*: #{__typeof(other).name}")
       end
     end
 
-    NativeLib.method :float_divide, TFloat, other : Value do
+    NativeLib.method :float_divide, Float64, other : MTValue do
       case other
-      when TInteger, TFloat
-        __raise_runtime_error("Division by zero") if other.value == 0
-        TFloat.new(this.value / other.value)
+      when Int64, Float64
+        __raise_runtime_error("Division by zero") if other == 0
+        this / other
       else
         __raise_runtime_error("invalid argument for Float#/: #{__typeof(other).name}")
       end
     end
 
-    NativeLib.method :float_modulo, TFloat, other : Value do
+    NativeLib.method :float_modulo, Float64, other : MTValue do
       case other
-      when TInteger, TFloat
-        __raise_runtime_error("Division by zero") if other.value == 0
-        TFloat.new(this.value % other.value)
+      when Int64, Float64
+        __raise_runtime_error("Division by zero") if other == 0
+        this % other
       else
         __raise_runtime_error("invalid argument for Float#%: #{__typeof(other).name}")
       end
     end
 
-    NativeLib.method :float_to_s, TFloat do
-      TString.new(this.value.to_s)
+    NativeLib.method :float_to_s, Float64 do
+      this.to_s
     end
 
-    NativeLib.method :float_eq, TFloat, other : Value do
+    NativeLib.method :float_eq, Float64, other : MTValue do
+      this == other
+    end
+
+    NativeLib.method :float_not_eq, Float64, other : MTValue do
+      this != other
+    end
+
+    NativeLib.method :float_negate, Float64 do
+      -this
+    end
+
+    NativeLib.method :float_lt, Float64, other : MTValue do
       case other
-      when TFloat, TInteger
-        TBoolean.new(this.value == other.value)
-      else
-        TBoolean.new(false)
-      end
-    end
-
-    NativeLib.method :float_not_eq, TFloat, other : Value do
-      case other
-      when TFloat, TInteger
-        TBoolean.new(this.value != other.value)
-      else
-        TBoolean.new(true)
-      end
-    end
-
-    NativeLib.method :float_negate, TFloat do
-      TFloat.new(-this.value)
-    end
-
-    NativeLib.method :float_lt, TFloat, other : Value do
-      case other
-      when TInteger, TFloat
-        TBoolean.new(this.value < other.value)
+      when Int64, Float64
+        this < other
       else
         __raise_runtime_error("invalid argument for Float#<: #{__typeof(other).name}")
       end
     end
 
-    NativeLib.method :float_lte, TFloat, other : Value do
+    NativeLib.method :float_lte, Float64, other : MTValue do
       case other
-      when TInteger, TFloat
-        TBoolean.new(this.value <= other.value)
+      when Int64, Float64
+        this <= other
       else
         __raise_runtime_error("invalid argument for Float#<=: #{__typeof(other).name}")
       end
     end
 
-    NativeLib.method :float_gt, TFloat, other : Value do
+    NativeLib.method :float_gt, Float64, other : MTValue do
       case other
-      when TInteger, TFloat
-        TBoolean.new(this.value > other.value)
+      when Int64, Float64
+        this > other
       else
         __raise_runtime_error("invalid argument for Float#>: #{__typeof(other).name}")
       end
     end
 
-    NativeLib.method :float_gte, TFloat, other : Value do
+    NativeLib.method :float_gte, Float64, other : MTValue do
       case other
-      when TInteger, TFloat
-        TBoolean.new(this.value >= other.value)
+      when Int64, Float64
+        this >= other
       else
         __raise_runtime_error("invalid argument for Float#>=: #{__typeof(other).name}")
       end

@@ -1,16 +1,16 @@
 module Myst
   class Interpreter
-    NativeLib.method :io_read, Value, size : TInteger do
+    NativeLib.method :io_read, MTValue, size : Int64 do
       __raise_runtime_error("`IO#read` must be implemented by inheriting types.")
     end
 
-    NativeLib.method :io_write, Value, content : Value do
+    NativeLib.method :io_write, MTValue, content : MTValue do
       __raise_runtime_error("`IO#write` must be implemented by inheriting types.")
     end
 
     private def make_io_fd(type : TType, id : Int)
       fd = TInstance.new(type)
-      fd.ivars["fd"] = TInteger.new(id.to_i64)
+      fd.ivars["fd"] = id.to_i64
       fd
     end
 
