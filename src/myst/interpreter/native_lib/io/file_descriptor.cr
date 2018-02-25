@@ -4,11 +4,11 @@ module Myst
       id = fd.to_i32
       @fd_pool[id] ||= IO::FileDescriptor.new(id)
 
-      this.ivars["fd"] = fd.to_i64
+      this.ivars["@fd"] = fd.to_i64
     end
 
     NativeLib.method :io_fd_read, TInstance, size : Int64 do
-      fd_id = this.ivars["fd"].as(Int64).to_i32
+      fd_id = this.ivars["@fd"].as(Int64).to_i32
       fd = @fd_pool[fd_id]
 
       slice = Slice(UInt8).new(size)
@@ -17,7 +17,7 @@ module Myst
     end
 
     NativeLib.method :io_fd_write, TInstance, content : String do
-      fd_id = this.ivars["fd"].as(Int64).to_i32
+      fd_id = this.ivars["@fd"].as(Int64).to_i32
       fd = @fd_pool[fd_id]
 
       fd.write(content.to_slice)

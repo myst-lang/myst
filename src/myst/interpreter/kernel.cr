@@ -13,7 +13,9 @@ module Myst
       kernel.scope["Symbol"]    = init_symbol(kernel)
       kernel.scope["List"]      = init_list(kernel)
       kernel.scope["Map"]       = init_map(kernel)
-      kernel.scope["IO"]        = init_io(kernel)
+      io_type = init_io(kernel)
+      kernel.scope["IO"]        = io_type
+      kernel.scope["TCPSocket"] = init_tcp_socket(kernel, io_type)
       kernel.scope["Time"]      = init_time(kernel)
       kernel.scope["Random"]    = init_random(kernel)
       kernel
