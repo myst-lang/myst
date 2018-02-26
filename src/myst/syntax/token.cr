@@ -101,7 +101,7 @@ module Myst
 
 
       def self.whitespace
-        [ COMMENT, WHITESPACE, UNKNOWN ]
+        [ WHITESPACE, UNKNOWN ]
       end
 
       def whitespace?

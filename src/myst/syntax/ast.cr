@@ -1,7 +1,8 @@
 module Myst
   abstract class Node
-    property location      : Location?
-    property end_location  : Location?
+    property  location      : Location?
+    property  end_location  : Location?
+    property! doc : Doc?
 
     def at(@location : Location)
       self
@@ -24,6 +25,8 @@ module Myst
 
     def at(node : Nil);     self; end
     def at_end(node : Nil); self; end
+
+    def doc(@doc : Doc?); self; end
 
     def accept(visitor)
       visitor.visit(self)

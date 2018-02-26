@@ -25,12 +25,20 @@ module Myst
 
     # Skip through whitespace tokens, but only if the current token is already
     # a whitespace token.
-    def skip_space
-      skip_tokens(Token::Type.whitespace)
+    def skip_space(include_comments : Bool = true)
+      if include_comments
+        skip_tokens(Token::Type.whitespace + [Token::Type::COMMENT])
+      else
+        skip_tokens(Token::Type.whitespace)
+      end
     end
 
-    def skip_space_and_newlines
-      skip_tokens(Token::Type.whitespace + [Token::Type::NEWLINE])
+    def skip_space_and_newlines(include_comments : Bool = true)
+      if include_comments
+        skip_tokens(Token::Type.whitespace + [Token::Type::NEWLINE, Token::Type::COMMENT])
+      else
+        skip_tokens(Token::Type.whitespace + [Token::Type::NEWLINE])
+      end
     end
 
     private def skip_tokens(allowed)
@@ -77,11 +85,11 @@ module Myst
     # input and will only end when an EOF is encountered.
     def parse
       program = Expressions.new
-      skip_space_and_newlines
+      skip_space_and_newlines(include_comments: false)
       until accept(Token::Type::EOF)
-        program.children << parse_expression
+        program.children << parse_expression(allow_docs: true)
         expect_delimiter_or_eof
-        skip_space_and_newlines
+        skip_space_and_newlines(include_comments: false)
       end
 
       program
@@ -91,52 +99,81 @@ module Myst
     # For example, the body of a method definition.
     def parse_code_block(*terminators)
       block = nil
-      skip_space_and_newlines
+      skip_space_and_newlines(include_comments: false)
       until terminators.includes?(current_token.type)
         block ||= Expressions.new
-        block.children << parse_expression
+        block.children << parse_expression(allow_docs: true)
         # In a code block, the last expression does not require a delimiter.
         # For example, `call{ a = 1; a + 2 } is valid, even though `a + 2` is
         # not followed by a delimiter. So, if the next significant token is a
         # terminator, stop expecting expressions/delimiters.
-        skip_space
+        skip_space(include_comments: false)
         break if terminators.includes?(current_token.type)
         expect_delimiter_or_eof
-        skip_space_and_newlines
+        skip_space_and_newlines(include_comments: false)
       end
 
       # If there were no expressions in the block, return a Nop instead.
       block || Nop.new
     end
 
-    def parse_expression
-      case current_token.type
-      when Token::Type::DEF, Token::Type::DEFSTATIC
-        parse_def
-      when Token::Type::DEFMODULE
-        parse_module_def
-      when Token::Type::DEFTYPE
-        parse_type_def
-      when Token::Type::FN
-        parse_anonymous_function
-      when Token::Type::MATCH
-        parse_match
-      when Token::Type::INCLUDE
-        parse_include
-      when Token::Type::EXTEND
-        parse_extend
-      when Token::Type::REQUIRE
-        parse_require
-      when Token::Type::WHEN, Token::Type::UNLESS
-        parse_conditional
-      when Token::Type::WHILE, Token::Type::UNTIL
-        parse_loop
-      when Token::Type::AMPERSAND
-        parse_function_capture
-      when Token::Type::MAGIC_FILE, Token::Type::MAGIC_LINE, Token::Type::MAGIC_DIR
-        parse_magic_constant
-      else
-        parse_logical_or
+    def parse_expression(allow_docs : Bool = false)
+      doc = allow_docs ? parse_optional_doc : nil
+
+      expr_node =
+        case current_token.type
+        when Token::Type::DEF, Token::Type::DEFSTATIC
+          parse_def
+        when Token::Type::DEFMODULE
+          parse_module_def
+        when Token::Type::DEFTYPE
+          parse_type_def
+        when Token::Type::FN
+          parse_anonymous_function
+        when Token::Type::MATCH
+          parse_match
+        when Token::Type::INCLUDE
+          parse_include
+        when Token::Type::EXTEND
+          parse_extend
+        when Token::Type::REQUIRE
+          parse_require
+        when Token::Type::WHEN, Token::Type::UNLESS
+          parse_conditional
+        when Token::Type::WHILE, Token::Type::UNTIL
+          parse_loop
+        when Token::Type::AMPERSAND
+          parse_function_capture
+        when Token::Type::MAGIC_FILE, Token::Type::MAGIC_LINE, Token::Type::MAGIC_DIR
+          parse_magic_constant
+        else
+          parse_logical_or
+        end
+
+      expr_node.doc(doc)
+    end
+
+    def parse_optional_doc
+      doc = IO::Memory.new
+      skip_space_and_newlines(include_comments: false)
+      while comment = accept(Token::Type::COMMENT)
+        doc << comment.value.lstrip("# ") << "\n"
+        skip_space(include_comments: false)
+        # One newline is expected to get to the next line of content in the
+        # source program. However, a _second_ newline indicates a new comment
+        # block, so the existing parsed doc is cleared and the new block is
+        # used.
+        expect(Token::Type::NEWLINE)
+        skip_space(include_comments: false)
+        if accept(Token::Type::NEWLINE)
+          doc.clear
+          skip_space_and_newlines(include_comments: false)
+        end
+      end
+
+      skip_space(include_comments: false)
+      unless doc.empty?
+        Doc.new(doc.to_s)
       end
     end
 
@@ -416,7 +453,6 @@ module Myst
           break
         end
       end
-
 
       return match
     end
