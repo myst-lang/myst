@@ -117,6 +117,30 @@ module Myst
       block || Nop.new
     end
 
+    def parse_optional_doc
+      doc = IO::Memory.new
+      skip_space_and_newlines(include_comments: false)
+      while comment = accept(Token::Type::COMMENT)
+        doc << comment.value.strip("#\t ") << "\n"
+        skip_space(include_comments: false)
+        # One newline is expected to get to the next line of content in the
+        # source program. However, a _second_ newline indicates a new comment
+        # block, so the existing parsed doc is cleared and the new block is
+        # used.
+        expect(Token::Type::NEWLINE)
+        skip_space(include_comments: false)
+        if accept(Token::Type::NEWLINE)
+          doc.clear
+          skip_space_and_newlines(include_comments: false)
+        end
+      end
+
+      skip_space(include_comments: false)
+      unless doc.empty?
+        Doc.new(doc.to_s)
+      end
+    end
+
     def parse_expression(allow_docs : Bool = false)
       doc = allow_docs ? parse_optional_doc : nil
 

@@ -26,6 +26,24 @@ private def it_does_not_parse(source, message=nil, file=__FILE__, line=__LINE__,
   end
 end
 
+private def it_documents(source, expected_doc : String, file=__FILE__, line=__LINE__, end_line=__END_LINE__)
+  it_documents(source, Doc.new(expected_doc), file, line, end_line)
+end
+
+private def it_documents(source, expected_doc : Doc?, file=__FILE__, line=__LINE__, end_line=__END_LINE__)
+  it %Q(parses documentation for `#{source}`), file, line, end_line do
+    result = parse_program(source)
+    if (doc = result.children.first.doc?)
+      doc.should eq(expected_doc)
+    else
+      if expected_doc
+        fail("Expected documentation of #{expected_doc}, but the parsed node had none.")
+      end
+    end
+  end
+end
+
+
 
 private def test_calls_with_receiver(receiver_source, receiver_node)
   it_parses %Q(#{receiver_source}call),             Call.new(receiver_node, "call")
@@ -3224,9 +3242,6 @@ describe "Parser" do
 
 
 
-
-
-
   # Match
 
   # Match expressions are a syntax sugar around creating and invoking an
@@ -3975,4 +3990,83 @@ describe "Parser" do
       end
     end
   )
+
+
+
+  # Doc Comments
+
+  # Nodes can be documented with "doc comments" - comments which appear on the
+  # lines immediately preceding the node.
+  it_documents %q(
+    # This is a doc comment.
+    def foo; end
+  ),                            "This is a doc comment.\n"
+  # Doc comments can span multiple lines, and those newlines will be preserved.
+  it_documents %q(
+    # This is a multi-
+    # line doc comment.
+    def foo; end
+  ),                            "This is a multi-\nline doc comment.\n"
+  it_documents %q(
+    # Documenting a Type.
+    deftype Foo; end
+  ),                            "Documenting a Type.\n"
+  it_documents %q(
+    # Documenting a Module.
+    defmodule Bar; end
+  ),                            "Documenting a Module.\n"
+
+  # A blank line between comment lines removes all previous comment lines from
+  # the current documentation set.
+  it_documents %q(
+    # not included.
+
+    # included.
+    def foo; end
+  ),                            "included.\n"
+  it_documents %q(
+    # not included
+
+    def foo; end
+  ),                            nil
+
+  # Multi-line doc comments can included padding lines, so long as they continue
+  # the comment chain with a leading hash.
+  it_documents %q(
+    # included.
+    #
+    # continued with padding.
+    def foo; end
+  ),                            "included.\n\ncontinued with padding.\n"
+
+  # For now, only *Def nodes fully implement doc comments, but the parser will
+  # allow any expression-level node to be documented in this style.
+  it_documents %q(
+    # Documenting addition.
+    1 + 1
+  ),                            "Documenting addition.\n"
+
+  # All padding whitespace and hashes from each line are stripped.
+  it_documents %q(
+    ##### Too many hashes.
+    # Even with different numbers.
+    def foo; end
+  ),                            "Too many hashes.\nEven with different numbers.\n"
+  it_documents %q(
+    #     Spaces, too.
+    #  who would do that though?
+    def foo; end
+  ),                            "Spaces, too.\nwho would do that though?\n"
+  it_documents %Q(
+    #\t\t \tEven tab characters.
+    def foo; end
+  ),                            "Even tab characters.\n"
+  it_documents %Q(
+    # Padding on the right is removed, too.\t  \t \t
+    def foo; end
+  ),                            "Padding on the right is removed, too.\n"
+  it_documents %Q(
+    # And trailing hashes. ###
+    def foo; end
+  ),                            "And trailing hashes.\n"
 end
