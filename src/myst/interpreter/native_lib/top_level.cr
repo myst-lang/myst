@@ -1,5 +1,9 @@
 module Myst
   class Interpreter
+    NativeLib.method :mt_doc, MTValue, value : MTValue do
+      self.__docs_for(value)
+    end
+
     NativeLib.method :mt_exit, MTValue, status : Int64? do
       real_status = status.is_a?(Int64) ? status : 0
 
@@ -16,8 +20,10 @@ module Myst
       TNil.new
     end
 
+
     def init_top_level
-      NativeLib.def_method(@kernel, :exit, :mt_exit)
+      NativeLib.def_method(@kernel, :doc,   :mt_doc)
+      NativeLib.def_method(@kernel, :exit,  :mt_exit)
       NativeLib.def_method(@kernel, :sleep, :mt_sleep)
     end
   end

@@ -72,6 +72,18 @@ module Myst
     end
 
 
+    # Return the String representation of the documentation for the given value.
+    # If the value has no documentation (e.g., for an Integer or Boolean) return nil.
+    def __docs_for(value : MTValue) : MTValue
+      case value
+      when MutableValue
+        value.doc?.try(&.content) || TNil.new
+      else
+        TNil.new
+      end
+    end
+
+
     # Lookup a value under the given name in the current scope or one of its
     # ancestors. If the value is not found, a `No variable or method`
     # RuntimeError will be raised.

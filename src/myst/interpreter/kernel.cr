@@ -13,6 +13,7 @@ module Myst
       @kernel.scope["Symbol"]     = init_symbol
       @kernel.scope["List"]       = init_list
       @kernel.scope["Map"]        = init_map
+      @kernel.scope["Functor"]    = init_functor
       io_type = init_io
       @kernel.scope["IO"]         = io_type
       @kernel.scope["TCPSocket"]  = init_tcp_socket(io_type)

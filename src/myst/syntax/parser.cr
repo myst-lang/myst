@@ -25,20 +25,12 @@ module Myst
 
     # Skip through whitespace tokens, but only if the current token is already
     # a whitespace token.
-    def skip_space(include_comments : Bool = true)
-      if include_comments
-        skip_tokens(Token::Type.whitespace + [Token::Type::COMMENT])
-      else
-        skip_tokens(Token::Type.whitespace)
-      end
+    def skip_space
+      skip_tokens(Token::Type.whitespace)
     end
 
-    def skip_space_and_newlines(include_comments : Bool = true)
-      if include_comments
-        skip_tokens(Token::Type.whitespace + [Token::Type::NEWLINE, Token::Type::COMMENT])
-      else
-        skip_tokens(Token::Type.whitespace + [Token::Type::NEWLINE])
-      end
+    def skip_space_and_newlines
+      skip_tokens(Token::Type.whitespace + [Token::Type::NEWLINE])
     end
 
     private def skip_tokens(allowed)
@@ -85,11 +77,11 @@ module Myst
     # input and will only end when an EOF is encountered.
     def parse
       program = Expressions.new
-      skip_space_and_newlines(include_comments: false)
+      skip_space_and_newlines
       until accept(Token::Type::EOF)
-        program.children << parse_expression(allow_docs: true)
+        program.children << parse_expression
         expect_delimiter_or_eof
-        skip_space_and_newlines(include_comments: false)
+        skip_space_and_newlines
       end
 
       program
@@ -99,50 +91,26 @@ module Myst
     # For example, the body of a method definition.
     def parse_code_block(*terminators)
       block = nil
-      skip_space_and_newlines(include_comments: false)
+      skip_space_and_newlines
       until terminators.includes?(current_token.type)
         block ||= Expressions.new
-        block.children << parse_expression(allow_docs: true)
+        block.children << parse_expression
         # In a code block, the last expression does not require a delimiter.
         # For example, `call{ a = 1; a + 2 } is valid, even though `a + 2` is
         # not followed by a delimiter. So, if the next significant token is a
         # terminator, stop expecting expressions/delimiters.
-        skip_space(include_comments: false)
+        skip_space
         break if terminators.includes?(current_token.type)
         expect_delimiter_or_eof
-        skip_space_and_newlines(include_comments: false)
+        skip_space_and_newlines
       end
 
       # If there were no expressions in the block, return a Nop instead.
       block || Nop.new
     end
 
-    def parse_optional_doc
-      doc = IO::Memory.new
-      skip_space_and_newlines(include_comments: false)
-      while comment = accept(Token::Type::COMMENT)
-        doc << comment.value.strip("#\t ") << "\n"
-        skip_space(include_comments: false)
-        # One newline is expected to get to the next line of content in the
-        # source program. However, a _second_ newline indicates a new comment
-        # block, so the existing parsed doc is cleared and the new block is
-        # used.
-        expect(Token::Type::NEWLINE)
-        skip_space(include_comments: false)
-        if accept(Token::Type::NEWLINE)
-          doc.clear
-          skip_space_and_newlines(include_comments: false)
-        end
-      end
-
-      skip_space(include_comments: false)
-      unless doc.empty?
-        Doc.new(doc.to_s)
-      end
-    end
-
-    def parse_expression(allow_docs : Bool = false)
-      doc = allow_docs ? parse_optional_doc : nil
+    def parse_expression
+      doc = current_token.doc
 
       expr_node =
         case current_token.type
@@ -174,31 +142,8 @@ module Myst
           parse_logical_or
         end
 
-      expr_node.doc(doc)
-    end
-
-    def parse_optional_doc
-      doc = IO::Memory.new
-      skip_space_and_newlines(include_comments: false)
-      while comment = accept(Token::Type::COMMENT)
-        doc << comment.value.lstrip("# ") << "\n"
-        skip_space(include_comments: false)
-        # One newline is expected to get to the next line of content in the
-        # source program. However, a _second_ newline indicates a new comment
-        # block, so the existing parsed doc is cleared and the new block is
-        # used.
-        expect(Token::Type::NEWLINE)
-        skip_space(include_comments: false)
-        if accept(Token::Type::NEWLINE)
-          doc.clear
-          skip_space_and_newlines(include_comments: false)
-        end
-      end
-
-      skip_space(include_comments: false)
-      unless doc.empty?
-        Doc.new(doc.to_s)
-      end
+      expr_node.doc = doc
+      expr_node
     end
 
     def parse_def

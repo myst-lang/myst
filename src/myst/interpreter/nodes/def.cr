@@ -24,10 +24,13 @@ module Myst
           functor = scope[node.name].as(TFunctor)
         else
           functor = TFunctor.new(node.name, [] of Callable, scope, closure: false)
+          # Docs for a Def are only applied if the Def is the first clause of the functor.
+          functor.doc = node.doc?
           scope.assign(node.name, functor)
         end
       else
         functor = TFunctor.new("block", [] of Callable, scope, closure: true, closed_self: current_self)
+        functor.doc = node.doc?
       end
 
       functor.add_clause(TFunctorDef.new(node))

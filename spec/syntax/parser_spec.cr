@@ -43,6 +43,12 @@ private def it_documents(source, expected_doc : Doc?, file=__FILE__, line=__LINE
   end
 end
 
+private def it_documents(source, file=__FILE__, line=__LINE__, end_line=__END_LINE__, &block : Node ->)
+  it %Q(parses documentation for `#{source}`), file, line, end_line do
+    block.call(parse_program(source).children.first)
+  end
+end
+
 
 
 private def test_calls_with_receiver(receiver_source, receiver_node)
@@ -4000,35 +4006,21 @@ describe "Parser" do
   it_documents %q(
     # This is a doc comment.
     def foo; end
-  ),                            "This is a doc comment.\n"
+  ),                            "This is a doc comment."
   # Doc comments can span multiple lines, and those newlines will be preserved.
   it_documents %q(
     # This is a multi-
     # line doc comment.
     def foo; end
-  ),                            "This is a multi-\nline doc comment.\n"
+  ),                            "This is a multi-\nline doc comment."
   it_documents %q(
     # Documenting a Type.
     deftype Foo; end
-  ),                            "Documenting a Type.\n"
+  ),                            "Documenting a Type."
   it_documents %q(
     # Documenting a Module.
     defmodule Bar; end
-  ),                            "Documenting a Module.\n"
-
-  # A blank line between comment lines removes all previous comment lines from
-  # the current documentation set.
-  it_documents %q(
-    # not included.
-
-    # included.
-    def foo; end
-  ),                            "included.\n"
-  it_documents %q(
-    # not included
-
-    def foo; end
-  ),                            nil
+  ),                            "Documenting a Module."
 
   # Multi-line doc comments can included padding lines, so long as they continue
   # the comment chain with a leading hash.
@@ -4037,36 +4029,88 @@ describe "Parser" do
     #
     # continued with padding.
     def foo; end
-  ),                            "included.\n\ncontinued with padding.\n"
+  ),                            "included.\n\ncontinued with padding."
 
   # For now, only *Def nodes fully implement doc comments, but the parser will
   # allow any expression-level node to be documented in this style.
   it_documents %q(
     # Documenting addition.
     1 + 1
-  ),                            "Documenting addition.\n"
+  ),                            "Documenting addition."
 
-  # All padding whitespace and hashes from each line are stripped.
+  # All padding whitespace and hashes from each line (after the first "# ") is preserved.
   it_documents %q(
     ##### Too many hashes.
     # Even with different numbers.
     def foo; end
-  ),                            "Too many hashes.\nEven with different numbers.\n"
+  ),                            "#### Too many hashes.\nEven with different numbers."
   it_documents %q(
     #     Spaces, too.
     #  who would do that though?
     def foo; end
-  ),                            "Spaces, too.\nwho would do that though?\n"
+  ),                            "    Spaces, too.\n who would do that though?"
   it_documents %Q(
     #\t\t \tEven tab characters.
     def foo; end
-  ),                            "Even tab characters.\n"
+  ),                            "\t\t \tEven tab characters."
   it_documents %Q(
-    # Padding on the right is removed, too.\t  \t \t
+    # Padding on the right is preserved, too.\t  \t \t
     def foo; end
-  ),                            "Padding on the right is removed, too.\n"
+  ),                            "Padding on the right is preserved, too.\t  \t \t"
   it_documents %Q(
     # And trailing hashes. ###
     def foo; end
-  ),                            "And trailing hashes.\n"
+  ),                            "And trailing hashes. ###"
+
+  # Functions within a module/type can also be documented
+  it_documents %q(
+    defmodule Foo
+      # Docs inside module.
+      def foo; end
+    end
+  ) do |module_def|
+    func_def = module_def.as(ModuleDef).body.as(Expressions).children.first
+    func_def.doc.content.should eq("Docs inside module.")
+  end
+  it_documents %q(
+    deftype Foo
+      # Docs inside type.
+      def foo; end
+    end
+  ) do |type_def|
+    func_def = type_def.as(TypeDef).body.as(Expressions).children.first
+    func_def.doc.content.should eq("Docs inside type.")
+  end
+  it_documents %q(
+    deftype Foo
+      # Docs inside type.
+      defstatic foo; end
+    end
+  ) do |type_def|
+    func_def = type_def.as(TypeDef).body.as(Expressions).children.first
+    func_def.doc.content.should eq("Docs inside type.")
+  end
+
+  # Same goes for definitions inside of blocks
+  it_documents %q(
+    foo do |e|
+      # Docs inside type.
+      def foo; end
+    end
+  ) do |call|
+    block = call.as(Call).block.as(Block)
+    func_def = block.body.as(Expressions).children.first
+    func_def.doc.content.should eq("Docs inside type.")
+  end
+
+  it_documents %q(
+    # this is not a doc
+    when a == b
+      def foo; end
+    end
+  ) do |when_node|
+    when_node = when_node.as(When)
+    func_def  = when_node.body.as(Expressions).children.first
+    func_def.doc?.should eq(nil)
+  end
 end

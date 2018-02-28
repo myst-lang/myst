@@ -22,6 +22,7 @@ module Myst
           end
 
         type = __make_type(node.name, current_scope, supertype)
+        type.doc = node.doc?
         current_scope.assign(node.name, type)
       end
 

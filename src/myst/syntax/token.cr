@@ -101,11 +101,11 @@ module Myst
 
 
       def self.whitespace
-        [ WHITESPACE, UNKNOWN ]
+        [ WHITESPACE, UNKNOWN, COMMENT ]
       end
 
       def whitespace?
-        self.whitespace.includes?(self)
+        self.class.whitespace.includes?(self)
       end
 
       def self.keywords
@@ -214,9 +214,10 @@ module Myst
     property value    : String?
     property raw      : String
     property location : Location
+    property doc      : Doc?
 
 
-    def initialize(@type=Type::UNKNOWN, @value=nil, @raw="", *, @location)
+    def initialize(@type=Type::UNKNOWN, @value=nil, @raw="", *, @location, @doc=nil)
     end
 
 

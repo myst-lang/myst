@@ -23,6 +23,8 @@ module Myst
     property tokens : Array(Token)
     # List of currently-unmatched braces in the source.
     property brace_stack : Array(Char)
+    # Buffer for holding doc comment contents
+    property doc_buffer : IO::Memory
 
 
     enum Context
@@ -55,6 +57,7 @@ module Myst
 
       @brace_stack = [] of Char
       @context_stack = [Context::NORMAL]
+      @doc_buffer = IO::Memory.new
     end
 
     def lex_all
@@ -288,6 +291,7 @@ module Myst
         read_char
       when '#'
         @current_token.type = Token::Type::COMMENT
+        read_char
         consume_comment
       when '"'
         skip_char
@@ -431,9 +435,24 @@ module Myst
       @reader.buffer.clear
       @reader.buffer << current_char
 
+      attach_docs_to_token
+
       @tokens << @current_token
       @current_token
     end
+
+    def attach_docs_to_token
+      if (Token::Type.whitespace + [Token::Type::NEWLINE]).includes?(@current_token.type)
+        return nil
+      end
+
+      unless @doc_buffer.empty?
+        @current_token.doc = Doc.new(@doc_buffer.to_s.chomp)
+      end
+
+      @doc_buffer.clear
+    end
+
 
     # Attempt to lex the current buffer as a keyword. If one is found, the
     # token type will be set appropriately. If not, the token type will not
@@ -443,8 +462,6 @@ module Myst
         @current_token.type = kw_type
       end
     end
-
-
 
     def consume_numeric
       has_decimal = false
@@ -475,7 +492,6 @@ module Myst
       @current_token.value = @reader.buffer_value.tr("_", "")
       @current_token.type = has_decimal ? Token::Type::FLOAT : Token::Type::INTEGER
     end
-
 
     def consume_symbol_or_colon
       # Read the starting colon
@@ -519,7 +535,14 @@ module Myst
     end
 
     def consume_comment
-      until ['\n', '\0'].includes?(read_char); end
+      # Exclude the first space on each comment line from the doc buffer.
+      unless current_char == ' '
+        @doc_buffer << current_char
+      end
+
+      until ['\n', '\0'].includes?(current_char)
+        @doc_buffer << read_char
+      end
     end
 
     def consume_whitespace

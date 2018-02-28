@@ -26,8 +26,6 @@ module Myst
     def at(node : Nil);     self; end
     def at_end(node : Nil); self; end
 
-    def doc(@doc : Doc?); self; end
-
     def accept(visitor)
       visitor.visit(self)
     end
