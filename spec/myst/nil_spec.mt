@@ -3,50 +3,50 @@ require "stdlib/spec.mt"
 
 describe("Nil#==") do
   it("returns true only if the operand is nil") do
-    assert(nil == nil)
+    assert(nil == nil).is_true
   end
 
   it("returns false if the operand is not exactly nil") do
-    refute(nil  == true)
-    refute(nil  == false)
-    refute(nil  == 0)
-    refute(nil  == 1)
-    refute(nil  == 0.0)
-    refute(nil  == 1.0)
-    refute(nil  == "hello")
-    refute(nil  == :hi)
-    refute(nil  == [])
-    refute(nil  == [1, 2])
-    refute(nil  == {})
-    refute(nil  == {a: 1})
+    assert(nil  == true).is_false
+    assert(nil  == false).is_false
+    assert(nil  == 0).is_false
+    assert(nil  == 1).is_false
+    assert(nil  == 0.0).is_false
+    assert(nil  == 1.0).is_false
+    assert(nil  == "hello").is_false
+    assert(nil  == :hi).is_false
+    assert(nil  == []).is_false
+    assert(nil  == [1, 2]).is_false
+    assert(nil  == {}).is_false
+    assert(nil  == {a: 1}).is_false
   end
 end
 
 
 describe("Nil#!=") do
   it("returns false only if the operand is nil") do
-    refute(nil != nil)
+    assert(nil != nil).is_false
   end
 
   it("returns true if the operand is not exactly nil") do
-    assert(nil  != true)
-    assert(nil  != false)
-    assert(nil  != 0)
-    assert(nil  != 1)
-    assert(nil  != 0.0)
-    assert(nil  != 1.0)
-    assert(nil  != "hello")
-    assert(nil  != :hi)
-    assert(nil  != [])
-    assert(nil  != [1, 2])
-    assert(nil  != {})
-    assert(nil  != {a: 1})
+    assert(nil  != true).is_true
+    assert(nil  != false).is_true
+    assert(nil  != 0).is_true
+    assert(nil  != 1).is_true
+    assert(nil  != 0.0).is_true
+    assert(nil  != 1.0).is_true
+    assert(nil  != "hello").is_true
+    assert(nil  != :hi).is_true
+    assert(nil  != []).is_true
+    assert(nil  != [1, 2]).is_true
+    assert(nil  != {}).is_true
+    assert(nil  != {a: 1}).is_true
   end
 end
 
 
 describe("Nil#to_s") do
   it("returns an empty string") do
-    assert(nil.to_s == "")
+    assert(nil.to_s).equals("")
   end
 end

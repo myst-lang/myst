@@ -1,7 +1,7 @@
-require "./spec/dsl.mt"
 require "./spec/errors.mt"
 require "./spec/single_spec.mt"
 require "./spec/describe_container.mt"
+require "./assert.mt"
 require "./colored.mt"
 
 include Spec
@@ -29,7 +29,6 @@ include Spec
 # use case, but a basic Spec library does not require it.
 defmodule Spec
   describe_stack = []
-  include DSL
 
   def it(name, &block)
     spec = %SingleSpec{name}

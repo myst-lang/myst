@@ -1,10 +1,10 @@
 require "stdlib/spec.mt"
 
 include Spec
-include Spec.DSL
 
 # TODO: add Dir globbing to automatically detect and require all `*_spec.mt`
 # files under this directory.
+require "./assert_spec.mt"
 require "./boolean_spec.mt"
 require "./enumerable_spec.mt"
 require "./file_spec.mt"

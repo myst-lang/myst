@@ -3,14 +3,14 @@ require "stdlib/spec.mt"
 
 describe("IO#read") do
   it("raises an error if not implemented by a subtype") do
-    expect_raises{ %IO{}.read(1) }
+    assert{ %IO{}.read(1) }.raises
   end
 end
 
 
 describe("IO#write") do
   it("raises an error if not implemented by a subtype") do
-    expect_raises{ %IO{}.write("content") }
+    assert{ %IO{}.write("content") }.raises
   end
 end
 
@@ -55,7 +55,7 @@ describe("IO#puts") do
       io = %MockIO{}
 
       io.puts
-      assert(io.write_content == "\n")
+      assert(io.write_content).equals("\n")
     end
   end
 
@@ -72,27 +72,27 @@ describe("IO#puts") do
       io = %MockIO{}
       foo = %Foo{}
       io.puts(foo)
-      assert(foo.called_to_s == true)
+      assert(foo.called_to_s).is_true
     end
 
     it("outputs the stringified argument, followed by a newline character") do
       io = %MockIO{}
       io.puts("hello, world!")
-      assert(io.write_content == "hello, world!\n")
+      assert(io.write_content).equals("hello, world!\n")
     end
   end
 
   describe("with multiple arguments") do
     it("accepts arguments with different types") do
       io = %MockIO{}
-      io.puts(1, false, :hello)
+      assert{ io.puts(1, false, :hello) }.succeeds
     end
 
     it("outputs each argument in order") do
       io = %MockIO{}
       io.puts(1, 2, 3)
 
-      assert(io.write_content == "1\n2\n3\n")
+      assert(io.write_content).equals("1\n2\n3\n")
     end
   end
 end
@@ -111,13 +111,13 @@ describe("IO#print") do
     io = %MockIO{}
     foo = %Foo{}
     io.print(foo)
-    assert(foo.called_to_s == true)
+    assert(foo.called_to_s).is_true
   end
 
   it("outputs the stringified argument") do
     io = %MockIO{}
     io.print("hello, world!")
-    assert(io.write_content == "hello, world!")
+    assert(io.write_content).equals("hello, world!")
   end
 end
 
@@ -126,20 +126,20 @@ describe("IO#gets") do
   it("reads characters from the IO until a newline character is found") do
     io = %MockIO{"hello\nworld"}
     content = io.gets
-    assert(content == "hello")
+    assert(content).equals("hello")
   end
 
   it("reads through the entire IO if no newline character is found") do
     io = %MockIO{"this buffer content does not contain newlines"}
     content = io.gets
 
-    assert(content == "this buffer content does not contain newlines")
+    assert(content).equals("this buffer content does not contain newlines")
   end
 
   it("returns an empty string if the next character is a newline") do
     io = %MockIO{"\n"}
     content = io.gets
 
-    assert(content == "")
+    assert(content).equals("")
   end
 end
