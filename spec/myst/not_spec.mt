@@ -2,16 +2,16 @@ require "stdlib/spec.mt"
 
 describe("Not operator") do
   it("works on boolean") do
-    assert(!true == false)
-    assert(!false == true)
+    assert(!true).is_false
+    assert(!false).is_true
   end
 
   it("works on array") do
-    assert(![] == false)
+    assert(![]).is_false
   end
 
   it("works on string") do
-    assert(!"Hello" == false)
+    assert(!"Hello").is_false
   end
 
   it("calls `!` on custom types") do
@@ -21,10 +21,10 @@ describe("Not operator") do
       end
     end
 
-    assert(!%Foo{} == :called_not)
+    assert(!%Foo{}).equals(:called_not)
   end
 
   it("can be chained to booleanize a value") do
-    assert(!!"hello" == true)
+    assert(!!"hello").is_true
   end
 end

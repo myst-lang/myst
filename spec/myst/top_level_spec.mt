@@ -8,7 +8,7 @@ describe("NativeLib - Top level methods") do
       passed = (Time.now.millisecond - start.millisecond)
 
       # Assert 10 milliseconds has passed, with a 5 millisecond tolerance
-      assert(passed > 5 && passed < 15)
+      assert(passed).between(5, 15)
     end
 
     # This time its an Integer as argument
@@ -19,7 +19,7 @@ describe("NativeLib - Top level methods") do
       passed = (Time.now.millisecond - start.millisecond)
 
       # Assert 0 milliseconds has passed, with a 5 millisecond tolerance
-      assert(passed > -5 && passed < 5)
-    end     
+      assert(passed).between(-5, 5)
+    end
   end
 end
