@@ -1,7 +1,7 @@
 require "stdlib/spec.mt"
 
 def test_assert(value)
-  value || (raise "Test Assertion Failed.")
+  value || raise "Test Assertion Failed."
 end
 
 def test_raises(&block)

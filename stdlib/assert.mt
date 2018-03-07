@@ -37,7 +37,7 @@ defmodule Assert
     #
     # Asserts that the value is truthy (not `false` or `nil`).
     def is_truthy
-      @value || (raise %AssertionFailure{@value, true, "truthy"})
+      @value || raise %AssertionFailure{@value, true, "truthy"}
       self
     end
 
@@ -45,7 +45,7 @@ defmodule Assert
     #
     # Asserts that the value is falsey (either `false` or `nil`).
     def is_falsey
-      @value && (raise %AssertionFailure{@value, false, "falsey"})
+      @value && raise %AssertionFailure{@value, false, "falsey"}
       self
     end
 
@@ -53,7 +53,7 @@ defmodule Assert
     #
     # Asserts that the value is exactly the boolean value `true`.
     def is_true
-      @value == true || (raise %AssertionFailure{@value, true, "exactly true"})
+      @value == true || raise %AssertionFailure{@value, true, "exactly true"}
       self
     end
 
@@ -61,7 +61,7 @@ defmodule Assert
     #
     # Asserts that the value is exactly the boolean value `false`.
     def is_false
-      @value == false || (raise %AssertionFailure{@value, false, "exactly false"})
+      @value == false || raise %AssertionFailure{@value, false, "exactly false"}
       self
     end
 
@@ -69,7 +69,7 @@ defmodule Assert
     #
     # Asserts that the value is `nil` (false is not allowed).
     def is_nil
-      @value == nil || (raise %AssertionFailure{@value, nil, "nil"})
+      @value == nil || raise %AssertionFailure{@value, nil, "nil"}
       self
     end
 
@@ -77,7 +77,7 @@ defmodule Assert
     #
     # Asserts that the value is not `nil` (false is allowed).
     def is_not_nil
-      @value != nil || (raise %AssertionFailure{@value, nil, "not nil"})
+      @value != nil || raise %AssertionFailure{@value, nil, "not nil"}
       self
     end
 
