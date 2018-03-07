@@ -406,6 +406,40 @@ describe "Parser" do
   it_parses %q("hello" * 2),    Call.new(l("hello"), "*", [l(2)], infix: true)
   it_parses %q([1] - [2]),      Call.new(l([1]), "-", [l([2])], infix: true)
 
+  # Infix expressions allow top-level expressions on the right hand side.
+  it_parses %q(1 || raise :foo),  Or.new(l(1), Raise.new(l(:foo)))
+  it_parses %q(1 || break),       Or.new(l(1), Break.new)
+  it_parses %q(1 || break :foo),  Or.new(l(1), Break.new(l(:foo)))
+  it_parses %q(1 || next),        Or.new(l(1), Next.new)
+  it_parses %q(1 || next :foo),   Or.new(l(1), Next.new(l(:foo)))
+  it_parses %q(1 || return),      Or.new(l(1), Return.new)
+  it_parses %q(1 || return :foo), Or.new(l(1), Return.new(l(:foo)))
+  it_parses %q(1 && raise :foo),  And.new(l(1), Raise.new(l(:foo)))
+  it_parses %q(1 && break),       And.new(l(1), Break.new)
+  it_parses %q(1 && break :foo),  And.new(l(1), Break.new(l(:foo)))
+  it_parses %q(1 && next),        And.new(l(1), Next.new)
+  it_parses %q(1 && next :foo),   And.new(l(1), Next.new(l(:foo)))
+  it_parses %q(1 && return),      And.new(l(1), Return.new)
+  it_parses %q(1 && return :foo), And.new(l(1), Return.new(l(:foo)))
+  # These expressions take control of the expression, similar to infix assignments.
+  it_parses %q(1 || raise :foo || :bar),  Or.new(l(1), Raise.new(Or.new(l(:foo), l(:bar))))
+  it_parses %q(1 || break :foo || :bar),  Or.new(l(1), Break.new(Or.new(l(:foo), l(:bar))))
+  it_parses %q(1 || next :foo || :bar),   Or.new(l(1), Next.new(Or.new(l(:foo), l(:bar))))
+  it_parses %q(1 || return :foo || :bar), Or.new(l(1), Return.new(Or.new(l(:foo), l(:bar))))
+  it_parses %q(1 || raise :foo && :bar),  Or.new(l(1), Raise.new(And.new(l(:foo), l(:bar))))
+  it_parses %q(1 || break :foo && :bar),  Or.new(l(1), Break.new(And.new(l(:foo), l(:bar))))
+  it_parses %q(1 || next :foo && :bar),   Or.new(l(1), Next.new(And.new(l(:foo), l(:bar))))
+  it_parses %q(1 || return :foo && :bar), Or.new(l(1), Return.new(And.new(l(:foo), l(:bar))))
+  it_parses %q(1 && raise :foo || :bar),  And.new(l(1), Raise.new(Or.new(l(:foo), l(:bar))))
+  it_parses %q(1 && break :foo || :bar),  And.new(l(1), Break.new(Or.new(l(:foo), l(:bar))))
+  it_parses %q(1 && next :foo || :bar),   And.new(l(1), Next.new(Or.new(l(:foo), l(:bar))))
+  it_parses %q(1 && return :foo || :bar), And.new(l(1), Return.new(Or.new(l(:foo), l(:bar))))
+  it_parses %q(1 && raise :foo && :bar),  And.new(l(1), Raise.new(And.new(l(:foo), l(:bar))))
+  it_parses %q(1 && break :foo && :bar),  And.new(l(1), Break.new(And.new(l(:foo), l(:bar))))
+  it_parses %q(1 && next :foo && :bar),   And.new(l(1), Next.new(And.new(l(:foo), l(:bar))))
+  it_parses %q(1 && return :foo && :bar), And.new(l(1), Return.new(And.new(l(:foo), l(:bar))))
+
+
   # Precedence
   it_parses %q(1 && 2 || 3),    Or.new(And.new(l(1), l(2)), l(3))
   it_parses %q(1 || 2 && 3),    Or.new(l(1), And.new(l(2), l(3)))
@@ -1702,6 +1736,10 @@ describe "Parser" do
     it_does_not_parse %q(
       {{keyword}} 1, 2
     )
+
+    # Flow control has a lower precedence than assignment, meaning an assignment
+    # can be used as the value of a control expression.
+    it_parses %q({{keyword}} foo = :bar),   {{node}}.new(SimpleAssign.new(v("foo"), l(:bar)))
   {% end %}
 
 

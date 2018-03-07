@@ -125,8 +125,6 @@ module Myst
         parse_extend
       when Token::Type::REQUIRE
         parse_require
-      when Token::Type::RETURN, Token::Type::BREAK, Token::Type::NEXT, Token::Type::RAISE
-        parse_flow_control
       when Token::Type::WHEN, Token::Type::UNLESS
         parse_conditional
       when Token::Type::WHILE, Token::Type::UNTIL
@@ -447,33 +445,6 @@ module Myst
       return Require.new(path).at(start.location).at_end(path)
     end
 
-    def parse_flow_control
-      node =
-        case
-        when token = accept(Token::Type::RETURN)
-          Return.new.at(token.location)
-        when token = accept(Token::Type::BREAK)
-          Break.new.at(token.location)
-        when token = accept(Token::Type::NEXT)
-          Next.new.at(token.location)
-        when token = accept(Token::Type::RAISE)
-          Raise.new.at(token.location)
-        else
-          raise ParseError.new(current_location, "Expected one of return, break, or next, got #{current_token.inspect}")
-        end
-
-      skip_space
-
-      unless current_token.type.delimiter?
-        node.value = parse_expression
-      end
-
-      if node.is_a?(Raise) && !node.value?
-        raise ParseError.new(current_location, "`raise` must be given a value.")
-      end
-
-      return node
-    end
 
     def parse_conditional
       case
@@ -554,7 +525,7 @@ module Myst
     end
 
     def parse_logical_and
-      left = parse_equality
+      left = parse_flow_control
       skip_space
 
       if accept(Token::Type::ANDAND)
@@ -564,6 +535,34 @@ module Myst
       end
 
       return left
+    end
+
+    def parse_flow_control
+      node =
+        case
+        when token = accept(Token::Type::RETURN)
+          Return.new.at(token.location)
+        when token = accept(Token::Type::BREAK)
+          Break.new.at(token.location)
+        when token = accept(Token::Type::NEXT)
+          Next.new.at(token.location)
+        when token = accept(Token::Type::RAISE)
+          Raise.new.at(token.location)
+        else
+          return parse_equality
+        end
+
+      skip_space
+
+      unless current_token.type.delimiter?
+        node.value = parse_expression
+      end
+
+      if node.is_a?(Raise) && !node.value?
+        raise ParseError.new(current_location, "`raise` must be given a value.")
+      end
+
+      return node
     end
 
     def parse_equality
