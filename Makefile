@@ -38,7 +38,7 @@ info ?= true
 
 info_log = $(if $(subst false,,$(info)),$(info $(1)))
 
-# Make convention 
+# Makefile convention 
 all: $(O)/myst $(O)/spec
 
 .PHONY: spec
