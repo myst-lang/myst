@@ -1,7 +1,7 @@
 *~
 
-# Files created by sentry
-*sentry*
+# Local files
+/local/
 
 # Build artifacts and dependencies
 /lib/
@@ -10,7 +10,9 @@
 
 # Crystal generated docs
 /docs/
+
 # The myst executable
 /myst
+
 # DWARF file from compiling on macOS
-/myst.dwarf
+*.dwarf
