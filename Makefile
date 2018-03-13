@@ -28,7 +28,7 @@ MYSTBUILD				 ?= myst
 
 O ?= bin
 
-verbose ?= true
+info ?= true
 
 # If another default is intentionally wished for,
 # set it in local/*.mk, like this:
@@ -36,13 +36,16 @@ verbose ?= true
 # 
 .DEFAULT_GOAL ?= spec
 
-verbose_log = $(if $(subst false,,$(verbose)), $(info $(1)))
+info_log = $(if $(subst false,,$(info)),$(info $(1)))
+
+# Make convention 
+all: $(O)/myst $(O)/spec
 
 .PHONY: spec
 spec: $(O)/myst $(O)/spec ## Runs all specs
-	@$(call verbose_log,Running interpreter spec)
+	$(call info_log,Running interpreter spec)
 	$(O)/spec
-	@$(call verbose_log,Running in-language spec)
+	$(call info_log,Running in-language spec)
 	$(O)/myst $(MYST_IN_LANG_SPEC)
 
 myst-spec: $(O)/myst ## Runs just the in-language specs
@@ -59,26 +62,28 @@ myst-spec_with_build: ## Runs the in-language specs with MYSTBUILD
 	$(MYSTBUILD) $(MYST_IN_LANG_SPEC)
 
 $(O)/myst: $(SOURCE_FILES)
-	@$(call verbose_log,Building myst...)
-	@mkdir -p $(O)
+	$(call info_log,Building myst...)
+	mkdir -p $(O)
 	crystal build -o $(O)/myst $(MYST_CLI)
 
 $(O)/spec: $(ALL_FILES)
-	@$(call verbose_log,Building specs...)
-	@mkdir -p $(O)
+	$(call info_log,Building specs...)
+	mkdir -p $(O)
 	crystal build -o $(O)/spec $(MYST_INTERPRETER_SPEC)
 
 $(INSTALL_LOCATION): $(SOURCE_FILES)
-	@mkdir -p $(dir $(INSTALL_LOCATION))
+	$(call info_log,Installing myst to $(INSTALL_LOCATION) ...)
+	mkdir -p $(dir $(INSTALL_LOCATION))	
 	sudo crystal build --release -o $(INSTALL_LOCATION) $(MYST_CLI)	
 
 .PHONY: clean
 clean: ## Cleans (deletes) docs and executables	
 ifdef O	
-	@[ -f $(O)/myst ] && rm $(O)/myst
-	@[ -f $(O)/spec ] && rm $(O)/spec
+	@[ -f $(O)/myst ] && rm -f $(O)/myst*
+	@[ -f $(O)/spec ] && rm -f $(O)/spec*
 endif
 	@rm -rf docs
+	@
 
 # Thanks https://stackoverflow.com/questions/4219255/how-do-you-get-the-list-of-targets-in-a-makefile/26339924#26339924
 define TARGET_LIST =
