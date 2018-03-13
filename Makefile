@@ -2,21 +2,13 @@
 # some extremely weird shell
 SHELL = bash
 
-# Parse makefiles named *.mk in the dir `local`
-# for local extra makefile targets if wanted.
-# It is smart to set MYSTBUILD to your myst dev-build there
--include local/*.mk
-
 # https://www.gnu.org/software/make/manual/html_node/One-Shell.html
 .ONESHELL:
-
-# The docs says i should do this
-.SUFFIXES: .cr .mt
 
 MYST_CLI = src/myst_cli.cr
 
 MYST_INTERPRETER_SPEC = spec/all_spec.cr
-MYST_IN_LANG_SPEC 		= spec/myst/spec.mt
+MYST_IN_LANG_SPEC     = spec/myst/spec.mt
 
 SOURCE_FILES := $(shell find src    -type f -name '*.cr')
 SPEC_FILES   := $(shell find spec   -type f -name '*.cr' -o -name '*.mt')
@@ -24,52 +16,57 @@ STDLIB_FILES := $(shell find stdlib -type f -name '*.mt')
 ALL_FILES    := $(SPEC_FILES) $(STDLIB_FILES) $(SOURCE_FILES)
 
 INSTALL_LOCATION ?= /usr/local/bin/myst
-MYSTBUILD				 ?= myst
+MYSTBUILD        ?= myst
 
-O ?= bin
+OUT ?= bin
 
 info ?= true
 
-# If another default is intentionally wished for,
+# If another default is wished for,
 # set it in local/*.mk, like this:
 # .DEFAULT_GOAL = goal
 # 
-.DEFAULT_GOAL ?= spec
+.DEFAULT_GOAL = spec
+
+# Parse makefiles named *.mk in the dir `local`
+# for local extra makefile targets if wanted.
+# It is smart to set MYSTBUILD to your myst dev-build there
+-include local/*.mk
 
 info_log = $(if $(subst false,,$(info)),$(info $(1)))
 
 # Makefile convention 
-all: $(O)/myst $(O)/spec
+all: $(OUT)/myst $(OUT)/spec
 
 .PHONY: spec
-spec: $(O)/myst $(O)/spec ## Runs all specs
+spec: $(OUT)/myst $(OUT)/spec ## Runs all specs
 	$(call info_log,Running interpreter spec)
-	$(O)/spec
+	$(OUT)/spec
 	$(call info_log,Running in-language spec)
-	$(O)/myst $(MYST_IN_LANG_SPEC)
+	$(OUT)/myst $(MYST_IN_LANG_SPEC)
 
-myst-spec: $(O)/myst ## Runs just the in-language specs
-	$(O)/myst $(MYST_IN_LANG_SPEC)
+myst-spec: $(OUT)/myst ## Runs just the in-language specs
+	$(OUT)/myst $(MYST_IN_LANG_SPEC)
 
 .PHONY: install
 install: $(INSTALL_LOCATION) ## Install myst to INSTALL_LOCATION		
 
 .PHONY: build
-build: $(O)/myst ## Builds myst into an executable
+build: $(OUT)/myst ## Builds myst into an executable
 
 .PHONY: myst-spec_with_build
 myst-spec_with_build: ## Runs the in-language specs with MYSTBUILD
 	$(MYSTBUILD) $(MYST_IN_LANG_SPEC)
 
-$(O)/myst: $(SOURCE_FILES)
+$(OUT)/myst: $(SOURCE_FILES)
 	$(call info_log,Building myst...)
-	mkdir -p $(O)
-	crystal build -o $(O)/myst $(MYST_CLI)
+	mkdir -p $(OUT)
+	crystal build -o $(OUT)/myst $(MYST_CLI)
 
-$(O)/spec: $(ALL_FILES)
+$(OUT)/spec: $(ALL_FILES)
 	$(call info_log,Building specs...)
-	mkdir -p $(O)
-	crystal build -o $(O)/spec $(MYST_INTERPRETER_SPEC)
+	mkdir -p $(OUT)
+	crystal build -o $(OUT)/spec $(MYST_INTERPRETER_SPEC)
 
 $(INSTALL_LOCATION): $(SOURCE_FILES)
 	$(call info_log,Installing myst to $(INSTALL_LOCATION) ...)
@@ -78,9 +75,9 @@ $(INSTALL_LOCATION): $(SOURCE_FILES)
 
 .PHONY: clean
 clean: ## Cleans (deletes) docs and executables	
-ifdef O	
-	@[ -f $(O)/myst ] && rm -f $(O)/myst*
-	@[ -f $(O)/spec ] && rm -f $(O)/spec*
+ifdef OUT	
+	@[ -f $(OUT)/myst ] && rm -f $(OUT)/myst*
+	@[ -f $(OUT)/spec ] && rm -f $(OUT)/spec*
 endif
 	@rm -rf docs
 	@
