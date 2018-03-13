@@ -1,5 +1,8 @@
 *~
 
+# Local files
+/local/
+
 # Build artifacts and dependencies
 /lib/
 /bin/
@@ -7,7 +10,9 @@
 
 # Crystal generated docs
 /docs/
+
 # The myst executable
 /myst
+
 # DWARF file from compiling on macOS
-/myst.dwarf
+*.dwarf
