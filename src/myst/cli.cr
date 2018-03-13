@@ -1,7 +1,7 @@
 require "option_parser"
 
 module Myst
-  class Cli
+  class CLI
     def self.run
       source = ""
       show_ast = false
