@@ -754,8 +754,12 @@ module Myst
   #   'end'
   class AnonymousFunction < Node
     property clauses : Array(Block)
+    # `internal_name` is used as the name of the function for use in stack
+    # traces and other reporting mechanisms. This should not be used for any
+    # other public functionality.
+    property internal_name : String
 
-    def initialize(@clauses = [] of Block)
+    def initialize(@clauses = [] of Block, @internal_name : String = "anonymous function")
     end
 
     def accept_children(visitor)

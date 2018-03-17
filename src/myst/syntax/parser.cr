@@ -313,7 +313,7 @@ module Myst
 
         # Anonymous functions _must_ contain at least one clause definition, so
         # a stab is always expected.
-        expect(Token::Type::STAB)
+        clause_start = expect(Token::Type::STAB)
         skip_space
 
         push_var_scope
@@ -338,11 +338,11 @@ module Myst
           end
 
         skip_space_and_newlines
-        expect(closing_brace)
+        clause_finish = expect(closing_brace)
 
         skip_space_and_newlines
         pop_var_scope
-        func.clauses << block
+        func.clauses << block.at(clause_start.location).at_end(clause_finish.location)
 
         # Anonymous functions are closed by an `end` keyword. Once that is
         # encountered, the loop for clauses can end.
@@ -358,7 +358,7 @@ module Myst
     def parse_match
       start = expect(Token::Type::MATCH)
 
-      match = Match.new
+      match = Match.new.at(start.location)
       loop do
         skip_space
         match.arguments << parse_expression
@@ -380,7 +380,7 @@ module Myst
 
         # Anonymous functions _must_ contain at least one clause definition, so
         # a stab is always expected.
-        expect(Token::Type::STAB)
+        clause_start = expect(Token::Type::STAB)
         skip_space
 
         push_var_scope
@@ -405,11 +405,11 @@ module Myst
           end
 
         skip_space_and_newlines
-        expect(closing_brace)
+        clause_finish = expect(closing_brace)
 
         skip_space_and_newlines
         pop_var_scope
-        match.clauses << block
+        match.clauses << block.at(clause_start.location).at_end(clause_finish.location)
 
         # Anonymous functions are closed by an `end` keyword. Once that is
         # encountered, the loop for clauses can end.
