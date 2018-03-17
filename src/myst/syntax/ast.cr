@@ -506,6 +506,10 @@ module Myst
   # An until expression. This is functionally the same as the `while`
   # expression, but executes its body until the condition evaluates to a
   # truthy value.
+  #
+  #   'until' condition
+  #     body
+  #   'end'
   class Until < Node
     property condition  : Node
     property body       : Node
@@ -759,6 +763,35 @@ module Myst
     end
 
     def_equals_and_hash clauses
+  end
+
+  # A match expression. Match expressions are a syntax sugar representing an
+  # anonymous function definition and immediate invocation with the
+  # arguments.
+  #
+  # A match expression must be given at least one argument and one clause to
+  # be considered valid.
+  #
+  #   'match' [ argument [ ',' argument ]* ]
+  #     [
+  #       '->' '(' [ param [ ',' param ]* ]? ')' [ '{' | 'do' ]
+  #         body
+  #       [ '}' | 'end' ]
+  #     ]+
+  #   'end'
+  class Match < Node
+    property arguments : Array(Node) = [] of Node
+    property clauses : Array(Block)
+
+    def initialize(@arguments = [] of Node, @clauses = [] of Block)
+    end
+
+    def accept_children(visitor)
+      arguments.each(&.accept(visitor))
+      clauses.each(&.accept(visitor))
+    end
+
+    def_equals_and_hash arguments, clauses
   end
 
   # A module definition. The name of the module must be a Constant (i.e., it

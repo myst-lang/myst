@@ -119,6 +119,8 @@ module Myst
         parse_type_def
       when Token::Type::FN
         parse_anonymous_function
+      when Token::Type::MATCH
+        parse_match
       when Token::Type::INCLUDE
         parse_include
       when Token::Type::EXTEND
@@ -276,7 +278,7 @@ module Myst
         param.pattern = to_pattern(parse_postfix)
         param.at(param.pattern)
         skip_space
-        if accept(Token::Type::MATCH)
+        if accept(Token::Type::MATCH_OP)
           skip_space
           name = expect(Token::Type::IDENT)
           push_local_var(name.value)
@@ -342,8 +344,8 @@ module Myst
         pop_var_scope
         func.clauses << block
 
-        # Anonymous functions are closed by an `end` keyword. Once that is encountered, the
-        # loop for clauses can end.
+        # Anonymous functions are closed by an `end` keyword. Once that is
+        # encountered, the loop for clauses can end.
         if finish = accept(Token::Type::END)
           func.at_end(finish.location)
           break
@@ -351,6 +353,74 @@ module Myst
       end
 
       return func
+    end
+
+    def parse_match
+      start = expect(Token::Type::MATCH)
+
+      match = Match.new
+      loop do
+        skip_space
+        match.arguments << parse_expression
+        skip_space
+        # Since there are no parentheses around `match` arguments, only an
+        # expression delimiter indicates the end of the argument list.
+        break if accept_delimiter
+        # Otherwise, the next expression
+        expect(Token::Type::COMMA)
+      end
+
+      skip_space_and_newlines
+      if accept(Token::Type::END)
+        raise ParseError.new(current_location, "No clause given for match; at least one is required.")
+      end
+
+      loop do
+        skip_space_and_newlines
+
+        # Anonymous functions _must_ contain at least one clause definition, so
+        # a stab is always expected.
+        expect(Token::Type::STAB)
+        skip_space
+
+        push_var_scope
+        block = Block.new
+        parse_param_list(into: block, require_parens: true)
+        skip_space
+
+        closing_brace =
+          case
+          when accept(Token::Type::DO)
+            skip_space_and_newlines
+            block.body = parse_exception_handler
+
+            Token::Type::END
+          when accept(Token::Type::LCURLY)
+            skip_space_and_newlines
+            block.body = parse_code_block(Token::Type::RCURLY)
+
+            Token::Type::RCURLY
+          else
+            raise ParseError.new(current_location, "Expected `{` or `do` to start a block body. Got #{current_token.type}.")
+          end
+
+        skip_space_and_newlines
+        expect(closing_brace)
+
+        skip_space_and_newlines
+        pop_var_scope
+        match.clauses << block
+
+        # Anonymous functions are closed by an `end` keyword. Once that is
+        # encountered, the loop for clauses can end.
+        if finish = accept(Token::Type::END)
+          match.at_end(finish.location)
+          break
+        end
+      end
+
+
+      return match
     end
 
     def parse_module_def
@@ -650,7 +720,7 @@ module Myst
         else
           return SimpleAssign.new(target, value).at(target).at_end(value)
         end
-      when accept(Token::Type::MATCH)
+      when accept(Token::Type::MATCH_OP)
         skip_space_and_newlines
         value = parse_expression
         return MatchAssign.new(to_pattern(target), value).at(target).at_end(value)

@@ -21,6 +21,7 @@ module Myst
       DEF           # def
       DEFSTATIC     # defstatic
       FN            # fn
+      MATCH         # match
       DO            # do
       UNLESS        # unless
       ELSE          # else
@@ -54,7 +55,7 @@ module Myst
       MODULO        # %
 
       EQUAL         # =
-      MATCH         # =:
+      MATCH_OP      # =:
       NOT           # !
       LESS          # <
       LESSEQUAL     # <=
@@ -109,7 +110,8 @@ module Myst
 
       def self.keywords
         [ REQUIRE, INCLUDE, EXTEND,
-          DEFMODULE, DEFTYPE, DEF, DEFSTATIC, FN, DO, END,
+          DEFMODULE, DEFTYPE, DEF, DEFSTATIC, FN, MATCH,
+          DO, END,
           WHEN, UNLESS, ELSE,
           WHILE, UNTIL,
           TRUE, FALSE, NIL,
@@ -130,6 +132,7 @@ module Myst
           "def" => DEF,
           "defstatic" => DEFSTATIC,
           "fn" => FN,
+          "match" => MATCH,
           "do" => DO,
           "end" => END,
           "when" => WHEN,
