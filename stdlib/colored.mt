@@ -1,26 +1,4 @@
 defmodule Color
-  def ansi_from_symbol(sym)
-    when sym == :black
-      return ANSI_BLACK
-    when sym == :red
-      return ANSI_RED
-    when sym == :green
-      return ANSI_GREEN
-    when sym == :yellow
-      return ANSI_YELLOW
-    when sym == :blue
-      return ANSI_BLUE
-    when sym == :purple
-      return ANSI_PURPLE
-    when sym == :cyan
-      return ANSI_CYAN
-    when sym == :white
-      return ANSI_WHITE
-    else
-      raise ":\"<(sym)>\" is not a valid color"
-    end
-  end
-
   ANSI_RESET  = "\e[0m"
 
   ANSI_BLACK  = "\e[0;30m"
@@ -32,8 +10,22 @@ defmodule Color
   ANSI_CYAN   = "\e[0;36m"
   ANSI_WHITE  = "\e[0;37m"
 
+  def ansi_from_symbol(sym)
+    match sym
+      ->(:black)  { ANSI_BLACK }
+      ->(:red)    { ANSI_RED }
+      ->(:green)  { ANSI_GREEN }
+      ->(:yellow) { ANSI_YELLOW }
+      ->(:blue)   { ANSI_BLUE }
+      ->(:purple) { ANSI_PURPLE }
+      ->(:cyan)   { ANSI_CYAN }
+      ->(:white)  { ANSI_WHITE }
+      ->(sym) { raise ":\"<(sym)>\" is not a valid color" }
+    end
+  end
+
   def colored(string, sym : Symbol)
-    color = ansi_from_symbol(sym) 
+    color = ansi_from_symbol(sym)
     "<(color)><(string)><(ANSI_RESET)>"
   end
 end
