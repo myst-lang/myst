@@ -220,7 +220,7 @@ module Myst
           @current_token.type = Token::Type::EQUALEQUAL
           read_char
         when ':'
-          @current_token.type = Token::Type::MATCH
+          @current_token.type = Token::Type::MATCH_OP
           read_char
         end
       when '!'

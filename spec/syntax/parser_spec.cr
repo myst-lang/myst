@@ -3221,4 +3221,758 @@ describe "Parser" do
     foo(&bar) do
     end
   ),                /captured function/
+
+
+
+
+
+
+  # Match
+
+  # Match expressions are a syntax sugar around creating and invoking an
+  # anonymous function immediately. As such, the body of a `match` can be any
+  # valid anonymous function body, and the arguments can be any series of
+  # inline expressions.
+  it_parses %q(
+    match 1
+      ->() { }
+    end
+  ),                          Match.new([l(1)], [Block.new])
+  it_parses %q(
+    match 1
+      ->() do
+      end
+    end
+  ),                          Match.new([l(1)], [Block.new(style: :doend)])
+
+  it_parses %q(
+    match 1
+      ->(a, b) { a + b }
+    end
+  ),                          Match.new([l(1)], [Block.new([p("a"), p("b")], e(Call.new(v("a"), "+", [v("b")] of Node)))])
+  it_parses %q(
+    match 1
+      ->(a, b) do
+        a + b
+      end
+    end
+  ),                          Match.new([l(1)], [Block.new([p("a"), p("b")], e(Call.new(v("a"), "+", [v("b")] of Node)), style: :doend)])
+
+  it_parses %q(
+    match 1
+      ->(1, :hi) { true || false }
+    end
+  ),                          Match.new([l(1)], [Block.new([p(nil, l(1)), p(nil, l(:hi))], e(Or.new(l(true), l(false))))])
+
+  # Spacing around the arguments is negligible
+  it_parses %q(
+    match       1
+      ->() { }
+    end
+  ),                          Match.new([l(1)], [Block.new])
+
+  # Expection handling on matches can be done with the do...end block syntax
+  it_parses %q(
+    match 1
+      ->() do
+        raise :error
+      rescue
+        :rescue
+      end
+
+      ->(n : Integer) do
+        :success
+      end
+
+      ->(3) { :got_3 }
+    end
+  ), Match.new([l(1)], [
+       Block.new(body: ExceptionHandler.new(Raise.new(l(:error)), [Rescue.new(l(:rescue))])),
+       Block.new([p("n", restriction: c("Integer"))], l(:success)),
+       Block.new([p(nil, l(3))], l(:got_3))
+     ])
+
+  # Exception handling is not allowed with {... } syntax
+  it_does_not_parse %q(
+    match 1
+      ->() {
+        raise :error
+      rescue
+          :rescued
+      }
+    end
+  )
+
+  # The bodies of each clause may contain multiple expressions
+  it_parses %q(
+    match 1
+      ->(1, :hi) { 1 + 1; 2 + 2; }
+    end
+  ),                        Match.new([l(1)], [Block.new([p(nil, l(1)), p(nil, l(:hi))], e(Call.new(l(1), "+", [l(1)]), Call.new(l(2), "+", [l(2)])))])
+  it_parses %q(
+    match 1
+      ->(1, :hi) do
+        1 + 1
+        2 + 2
+      end
+    end
+  ),                        Match.new([l(1)], [Block.new([p(nil, l(1)), p(nil, l(:hi))], e(Call.new(l(1), "+", [l(1)]), Call.new(l(2), "+", [l(2)])), style: :doend)])
+
+  # Multiple clauses can be given in a row.
+  it_parses %q(
+    match 1
+      ->(a) { }
+      ->(b) { }
+    end
+  ),                        Match.new([l(1)], [Block.new([p("a")]), Block.new([p("b")])])
+
+  # Blank lines between clauses are also allowed
+  it_parses %q(
+    match 1
+      ->(a) { }
+
+
+      ->(b) { }
+    end
+  ),                        Match.new([l(1)], [Block.new([p("a")]), Block.new([p("b")])])
+
+  # Bracing styles can be mixed in the same definition.
+  it_parses %q(
+    match 1
+      ->() { }
+      ->() do
+      end
+    end
+  ),                        Match.new([l(1)], [Block.new, Block.new(style: :doend)])
+
+  # The parameter syntax is just like normal functions. Pattern matching and all.
+  it_parses %q(
+    match 1
+      ->([a, *_, b] =: p, &block) { }
+    end
+  ),                       Match.new([l(1)], [Block.new([p("p", l([v("a"), Splat.new(u("_")), v("b")])), p("block", block: true)])])
+
+  # Matches can not be compressed to one line
+  it_does_not_parse %q(match 1 ->()  {}    end)
+  it_does_not_parse %q(match 1 ->(a) { 1 } end)
+
+  # It is invalid for a match expression to contain less than 1 clause.
+  it_does_not_parse %q(
+    match 1
+    end
+  ),                              /no clause/
+
+  # All clauses must include parentheses, even if no parameters are given
+  it_does_not_parse %q(
+    match 1
+      -> {}
+    end
+  )
+  it_does_not_parse %q(
+    match 1
+      -> do
+      end
+    end
+  )
+
+  # The parentheses for a clause must start on the same line as the stab, but are
+  # allowed to span multiple lines.
+  it_does_not_parse %q(
+    match 1
+      ->
+        () { }
+    end
+  )
+
+  it_parses %q(
+    match 1
+      ->(
+        a,
+        c
+      ) { }
+    end
+  ),              Match.new([l(1)], [Block.new([p("a"), p("b")])])
+
+  # Similarly, the start of the block must appear on the same line as the closing
+  # parenthesis of the parameter list.
+  it_does_not_parse %q(
+    match 1
+      ->()
+        { }
+    end
+  )
+  it_does_not_parse %q(
+    match 1
+      ->()
+        do
+      end
+    end
+  )
+
+  # All clauses must have their bodies wrapped with a bracing construct, even for
+  # single-expression bodies.
+  it_does_not_parse %q(
+    match 1
+      ->(a) a + 1
+    end
+  )
+  it_does_not_parse %q(
+    match 1
+      ->(1) { 1 }
+      ->(a) a + 1
+    end
+  )
+
+  # Match arguments can be any valid expression
+  it_parses %q(
+    match foo(1, 2)
+      ->() { }
+    end
+  ),                Match.new([Call.new(nil, "foo", [l(1), l(2)] of Node)] of Node, [Block.new])
+  it_parses %q(
+    match 1 + 2
+      ->() { }
+    end
+  ),                Match.new([Call.new(l(1), "+", [l(2)] of Node, infix: true)] of Node, [Block.new])
+  it_parses %q(
+    match a || b
+      ->() { }
+    end
+  ),                Match.new([Or.new(Call.new(nil, "a"), Call.new(nil, "b"))] of Node, [Block.new])
+  it_parses %q(
+    match Foo
+      ->() { }
+    end
+  ),                Match.new([c("Foo")] of Node, [Block.new])
+  it_parses %q(
+    match <:why>
+      ->() { }
+    end
+  ),                Match.new([i(l(:why))] of Node, [Block.new])
+
+
+  # Matches can be given multiple arguments to match against as a comma-separated list
+  it_parses %q(
+    match 1, 2, 3
+      ->() { }
+    end
+  ),                Match.new([l(1), l(2), l(3)] of Node, [Block.new([p("a"), p("b"), p("c")], body: e(l(:respect)))])
+  it_parses %q(
+    match 1 + 2, 2 || 3
+      ->() { }
+    end
+  ),                Match.new([Call.new(l(1), "+", [l(2)] of Node, infix: true), Or.new(l(2), l(3))] of Node, [Block.new])
+  # Match arguments can also be splatted into multiple arguments
+  it_parses %q(
+    match *args
+      ->() { }
+    end
+  ),                Match.new([Splat.new(Call.new(nil, "args"))] of Node, [Block.new])
+  it_parses %q(
+    match 1, *args, 3
+      ->() { }
+    end
+  ),                Match.new([l(1), Splat.new(Call.new(nil, "args")), l(3)] of Node, [Block.new])
+
+
+  ##
+  # Exception handling on matches
+  #
+  it_parses %q(
+    match 1
+      ->() do
+      rescue
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new]))])
+  # The trailing clauses may contain any valid Expressions node.
+  it_parses %q(
+    match 1
+      ->() do
+      rescue
+        1 + 2
+        a = 1
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(e(Call.new(l(1), "+", [l(2)], infix: true), SimpleAssign.new(v("a"), l(1))))]))])
+  it_parses %q(
+    match 1
+      ->() do rescue; a; end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(e(Call.new(nil, "a")))]))])
+
+  # `rescue` can also accept a single Param (with the same syntax as Def) to restrict what Exceptions it can handle.
+  it_parses %q(
+    match 1
+      ->() do
+      rescue nil
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p(nil, l(nil)))]))])
+  it_parses %q(
+    match 1
+      ->() do
+      rescue [1, a]
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p(nil, l([1, v("a")])))]))])
+  it_parses %q(
+    match 1
+      ->() do
+      rescue {a: 1, b: b}
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p(nil, l({ :a => 1, :b => v("b") })))]))])
+  # Patterns can also be followed by a name to capture the entire argument.
+  it_parses %q(
+    match 1
+      ->() do
+      rescue [1, a] =: b
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p("b", l([1, v("a")])))]))])
+  it_parses %q(
+    match 1
+      ->() do
+      rescue <other> =: _
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p("_", i(Call.new(nil, "other"))))]))])
+
+  # Splats within patterns are allowed.
+  it_parses %q(
+    match 1
+      ->() do
+      rescue [1, *_, 3]
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p(nil, l([1, Splat.new(u("_")), 3])))]))])
+
+  # Type restrictions can be appended to any parameter to restrict the parameter
+  # to an exact type. The type must be a constant.
+  it_parses %q(
+    match 1
+      ->() do
+      rescue a : Integer
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p("a", restriction: c("Integer")))]))])
+  it_does_not_parse %q(
+    match 1
+      ->() do
+      rescue a : 123
+      end
+    end
+  )
+  it_does_not_parse %q(
+    match 1
+      ->() do
+      rescue a : nil
+      end
+    end
+  )
+  it_does_not_parse %q(
+    match 1
+      ->() do
+      rescue a : [1, 2]
+      end
+    end
+  )
+  it_does_not_parse %q(
+    match 1
+      ->() do
+      rescue a : b
+      end
+    end
+  )
+  it_does_not_parse %q(
+    match 1
+      ->() do
+      rescue a : 1 + 2
+      end
+    end
+  )
+  it_does_not_parse %q(
+    match 1
+      ->() do
+      rescue a : <thing>
+      end
+    end
+  )
+  it_does_not_parse %q(
+    match 1
+      ->() do
+      rescue a : (A + B)
+      end
+    end
+  )
+  # Simple patterns
+  it_parses %q(
+    match 1
+      ->() do
+      rescue 1 : Integer
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p(nil, l(1), restriction: c("Integer")))]))])
+  it_parses %q(
+    match 1
+      ->() do
+      rescue nil : Integer
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p(nil, l(nil), restriction: c("Integer")))]))])
+  it_parses %q(
+    match 1
+      ->() do
+      rescue <call> : Integer
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p(nil, i(Call.new(nil, "call")), restriction: c("Integer")))]))])
+  it_parses %q(
+    match 1
+      ->() do
+      rescue <a.b> : Integer
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p(nil, i(Call.new(Call.new(nil, "a"), "b")), restriction: c("Integer")))]))])
+  it_parses %q(
+    match 1
+      ->() do
+      rescue <a[0]> : Integer
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p(nil, i(Call.new(Call.new(nil, "a"), "[]", [l(0)])), restriction: c("Integer")))]))])
+  it_parses %q(
+    match 1
+      ->() do
+      rescue [1, 2] : Integer
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p(nil, l([1, 2]), restriction: c("Integer")))]))])
+  # Patterns and names
+  it_parses %q(
+    match 1
+      ->() do
+      rescue 1 =: a : Integer
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p("a", l(1), restriction: c("Integer")))]))])
+  it_parses %q(
+    match 1
+      ->() do
+      rescue 1 =: a : Nil
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p("a", l(1), restriction: c("Nil")))]))])
+  it_parses %q(
+    match 1
+      ->() do
+      rescue 1 =: a : Thing
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p("a", l(1), restriction: c("Thing")))]))])
+  it_parses %q(
+    match 1
+      ->() do
+      rescue nil =: a : Integer
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p("a", l(nil), restriction: c("Integer")))]))])
+  it_parses %q(
+    match 1
+      ->() do
+      rescue nil =: a : Nil
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p("a", l(nil), restriction: c("Nil")))]))])
+  it_parses %q(
+    match 1
+      ->() do
+      rescue nil =: a : Thing
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p("a", l(nil), restriction: c("Thing")))]))])
+  it_parses %q(
+    match 1
+      ->() do
+      rescue <call> =: a : Integer
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p("a", i(Call.new(nil, "call")), restriction: c("Integer")))]))])
+  it_parses %q(
+    match 1
+      ->() do
+      rescue <call> =: a : Nil
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p("a", i(Call.new(nil, "call")), restriction: c("Nil")))]))])
+  it_parses %q(
+    match 1
+      ->() do
+      rescue <call> =: a : Thing
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p("a", i(Call.new(nil, "call")), restriction: c("Thing")))]))])
+  it_parses %q(
+    match 1
+      ->() do
+      rescue <a.b> : Integer
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p(nil, i(Call.new(Call.new(nil, "a"), "b")), restriction: c("Integer")))]))])
+  it_parses %q(
+    match 1
+      ->() do
+      rescue <a.b> : Nil
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p(nil, i(Call.new(Call.new(nil, "a"), "b")), restriction: c("Nil")))]))])
+  it_parses %q(
+    match 1
+      ->() do
+      rescue <a.b> : Thing
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p(nil, i(Call.new(Call.new(nil, "a"), "b")), restriction: c("Thing")))]))])
+  it_parses %q(
+    match 1
+      ->() do
+      rescue <a[0]> : Integer
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p(nil, i(Call.new(Call.new(nil, "a"), "[]", [l(0)])), restriction: c("Integer")))]))])
+  it_parses %q(
+    match 1
+      ->() do
+      rescue <a[0]> : Nil
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p(nil, i(Call.new(Call.new(nil, "a"), "[]", [l(0)])), restriction: c("Nil")))]))])
+  it_parses %q(
+    match 1
+      ->() do
+      rescue <a[0]> : Thing
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p(nil, i(Call.new(Call.new(nil, "a"), "[]", [l(0)])), restriction: c("Thing")))]))])
+  it_parses %q(
+    match 1
+      ->() do
+      rescue [1, 2] =: a : Integer
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p("a", l([1, 2]), restriction: c("Integer")))]))])
+  it_parses %q(
+    match 1
+      ->() do
+      rescue [1, 2] =: a : Nil
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p("a", l([1, 2]), restriction: c("Nil")))]))])
+  it_parses %q(
+    match 1
+      ->() do
+      rescue [1, 2] =: a : Thing
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p("a", l([1, 2]), restriction: c("Thing")))]))])
+  # Only the top level parameters may have retrictions.
+  it_does_not_parse %q(
+    match 1
+      ->() do
+      rescue [1, a : List]
+      end
+    end
+  )
+  it_does_not_parse %q(
+    match 1
+      ->() do
+      rescue [1, _ : List]
+      end
+    end
+  )
+  it_does_not_parse %q(
+    match 1
+      ->() do
+      rescue [1, [a, b] : List]
+      end
+    end
+  )
+  it_does_not_parse %q(
+    match 1
+      ->() do
+      rescue [1, a : List] =: c
+      end
+    end
+  )
+  it_does_not_parse %q(
+    match 1
+      ->() do
+      rescue [1, _ : List] =: c
+      end
+    end
+  )
+  it_does_not_parse %q(
+    match 1
+      ->() do
+      rescue [1, [a, b] : List] =: c
+      end
+    end
+  )
+  # Block and Splat parameters may not have restrictions
+  it_does_not_parse %q(
+    match 1
+      ->() do
+      rescue *a : List
+      end
+    end
+  )
+  it_does_not_parse %q(
+    match 1
+      ->() do
+      rescue &block : Block
+      end
+    end
+  )
+  # All components of a parameter must appear inline with the previous component
+  it_does_not_parse %q(
+    match 1
+      ->() do
+      rescue a :
+                List
+      end
+    end
+  )
+  it_does_not_parse %q(
+    match 1
+      ->() do
+      rescue a
+              : List
+      end
+    end
+  )
+  it_does_not_parse %q(
+    match 1
+      ->() do
+      rescue <(1+2)> =:
+                        a
+      end
+    end
+  )
+  it_does_not_parse %q(
+    match 1
+      ->() do
+      rescue <(1+2)>
+                    =: a
+      end
+    end
+  )
+  # Individual components of a parameter _may_ span multiple lines, but should
+  # avoid it where possible.
+  it_parses %q(
+    match 1
+      ->() do
+      rescue <(1 +
+                  2)> =: a : Integer
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p("a", i(Call.new(l(1), "+", [l(2)], infix: true)), restriction: c("Integer")))]))])
+
+
+  # Multiple `rescue` clauses can be specified.
+  it_parses %q(
+    match 1
+      ->() do
+      rescue
+      rescue
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new, Rescue.new]))])
+
+  it_parses %q(
+    match 1
+      ->() do
+      rescue Error1
+      rescue Error2
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p(nil, c("Error1"))), Rescue.new(Nop.new, p(nil, c("Error2")))]))])
+
+  it_parses %q(
+    match 1
+      ->() do
+      rescue {msg: msg} : Error
+      rescue Error2
+      rescue
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new(Nop.new, p(nil, l({:msg => v("msg")}), restriction: c("Error"))), Rescue.new(Nop.new, p(nil, c("Error2"))), Rescue.new]))])
+
+  # `ensure` can be used on its own or after a `rescue`.
+  it_parses %q(
+    match 1
+      ->() do
+      ensure
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, ensure: Nop.new))])
+  it_parses %q(
+    match 1
+      ->() do
+      rescue
+      ensure
+      end
+    end
+  ),                Match.new([l(1)] of Node, [Block.new(body: ExceptionHandler.new(Nop.new, [Rescue.new], ensure: Nop.new))])
+
+  # `ensure` _must_ be the last clause of an ExceptionHandler.
+  it_does_not_parse %q(
+    match 1
+      ->() do
+      ensure
+      rescue
+      end
+    end
+  ),                /ensure/
+  it_does_not_parse %q(
+    match 1
+      ->() do
+      rescue
+      ensure
+      rescue
+      end
+    end
+  ),                /ensure/
+  # Only 1 `ensure` clause may be given
+  it_does_not_parse %q(
+    match 1
+      ->() do
+      ensure
+      ensure
+      end
+    end
+  ),                /ensure/
+
+  # `ensure` does not take any arguments
+  it_does_not_parse %q(
+    match 1
+      ->() do
+      ensure x
+      end
+    end
+  )
+  it_does_not_parse %q(
+    match 1
+      ->() do
+      ensure [1, 2] =: a
+      end
+    end
+  )
+  it_does_not_parse %q(
+    match 1
+      ->() do
+      ensure ex : Exception
+      end
+    end
+  )
 end
