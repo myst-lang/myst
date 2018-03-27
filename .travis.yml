@@ -3,7 +3,9 @@ script: make spec
 
 os:
   - linux
-  - osx
+  # TODO: Re-add OS X when Travis improves run times.
+  # Alternatively: introduce OS X builds only on master, not on PRs
+  # - osx
 crystal:
   - latest
   - nightly
