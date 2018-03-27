@@ -50,59 +50,59 @@ And that's it! You should now have a `myst` executable in your `$PATH` that can 
 
 There is currently no native package manager solution for Myst on linux systems. Instead, you'll need to build and install the binary manually. Luckily it's not too complicated.
 
-_Note that you'll need `crystal` installed for the build to succeed. This dependency is automatically managed on macOS._ To install `crystal`, follow these steps :
+_Note that you'll need `crystal` installed for the build to succeed. This dependency is automatically managed on macOS._ To install `crystal`, follow these steps:
 
-	# apt-get install dirmngr
-	# curl https://dist.crystal-lang.org/apt/setup.sh | bash
-	# apt-get install crystal
+```shell
+sudo apt-get install dirmngr
+sudo curl https://dist.crystal-lang.org/apt/setup.sh | bash
+sudo apt-get install crystal
+```
 
 Now, install `myst`. `cd` to your prefered root dir, then :
 
-First, download the [latest release](https://github.com/myst-lang/myst/releases/latest) or the development (master) reposirtory :
+First, download the [latest release](https://github.com/myst-lang/myst/releases/latest) or the development (master) repository:
 
-	$ wget https://github.com/myst-lang/myst/archive/v0.1.0.tar.gz
-	or
-	$ wget https://github.com/myst-lang/myst/archive/master.tar.gz
+```shell
+$ wget https://github.com/myst-lang/myst/archive/v0.1.0.tar.gz
+or
+$ wget https://github.com/myst-lang/myst/archive/master.tar.gz
+```
 
 then untar it somewhere and go to the extracted directory
 
-	```
-	$ tar xvf v0.1.0.tar.gz
-	or 
-	$ tar xvf master.tar.gz
-	
-	$ cd myst-0.1.0/
-	$ shards build
-	```
+```shell
+$ tar xvf v0.1.0.tar.gz
+or 
+$ tar xvf master.tar.gz
 
-This will give you a `bin` folder with a `myst` executable inside of it. Now, there are two options:
+$ cd myst-0.1.0/
+$ shards build
+```
 
-1. Simply add the bin/ directory to your PATH environment variable at the end
-   of your *~/.bash_profile* file :
+This will give you a `bin` folder with a `myst` executable inside of it. Now, there are a few options:
 
-		export PATH="$PATH:/path/to/bin/myst"
+1. Simply add the `bin/` directory to your PATH environment variable at the end
+   of your `~/.bash_profile` file:
 
-  Then, update your current profile using the `source ~/.bashrc` command.
+       export PATH="$PATH:/path/to/bin/myst"
 
-2. The second option is to create a symlink from `/usr/local/bin` or some other folder on your `$PATH` to the `bin` folder that `shards build` generated.
+   Then, update your current profile using the `source ~/.bashrc` command.
 
-  ```
-  ln -s /path/to/bin/myst /usr/local/bin/myst
-  ```
+2. Create a symlink from `/usr/local/bin` or some other folder on your `$PATH` to the `bin` folder that `shards build` generated.
+
+       ln -s /path/to/bin/myst /usr/local/bin/myst
   
-3. The third option is to move the entire Myst folder to a folder on your `$PATH`. The executable needs to be in a folder that is a sibling to the `stdlib` folder at the root of this project. For example:
+3. Move the entire Myst folder to a folder on your `$PATH`. The executable needs to be in a folder that is a sibling to the `stdlib` folder at the root of this project. For example:
 
-  ```
-  root
-  |- bin
-  |  |- myst
-  |- stdlib
-  |  |- enumerable.mt
-  |  |- ...
-  |  |- prelude.mt
-  ```
+       root
+       |- bin
+       |  |- myst
+       |- stdlib
+       |  |- enumerable.mt
+       |  |- ...
+       |  |- prelude.mt
 
-  As long as this structure is maintained, the executable should work as expected. Otherwise, you will see an error along the lines of "No file or directory `stlib/prelude.mt`". Full instructions TBD.
+    As long as this structure is maintained, the executable should work as expected. Otherwise, you will see an error along the lines of "No file or directory `stlib/prelude.mt`". Full instructions TBD.
 
 Help with improving these installation instructions, making pre-built binaries, and/or managing releases would be greatly appreciated :)
 
