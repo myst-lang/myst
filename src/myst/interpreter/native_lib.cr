@@ -44,6 +44,46 @@ module Myst
       end
     end
 
+    # Generate the code needed to create a passthrough method for some native
+    # Crystal method. `call` is a `Call` node representing the structure of the
+    # method being wrapped. For example:
+    #
+    #   NativeLib.passthrough File.basename(path : String)
+    #
+    # This will generate the code:
+    #
+    #   NativeLib.method :passthrough_File_basename, MTValue, path : String do
+    #     File.basename(path)
+    #   end
+    #
+    # If a method is expected to return nil, set `return_nil` to true. This will
+    # ensure that the method _explicitly_ returns Myst's `TNil` value.
+    #
+    # If the native method may raise an error, set `may_raise` to the type of the
+    # expected errors. This will ensure that any raised error is captured and
+    # instead raised as a Myst runtime error (meaning users will be able to catch
+    # it at runtime). Errors that are not of the given type will _not_ be captured
+    # and will be shown as Interpreter Errors to the user.
+    #
+    # Note that using this method _requires_ that the given Call provide type
+    # restrictions for every argument.
+    macro passthrough(call, return_nil=false, may_raise=nil)
+      NativeLib.method :passthrough_{{call.receiver}}_{{call.name}}, MTValue, {{*call.args}} do
+        {{call.receiver}}.{{call.name}}({{ *call.args.map{ |a| a.var } }})
+        {% if return_nil %}
+          TNil.new
+        {% end %}
+
+      {% begin %}
+        {% if may_raise %}
+          rescue ex : {{may_raise}}
+            __raise_runtime_error(ex.message || "Unknown error in native method `{{call.name}}`")
+        {% end %}
+      {% end %}
+
+      end
+    end
+
     macro def_method(type, name, impl_name)
       {{type}}.scope["{{name.id}}"] = TFunctor.new("{{name.id}}", [
         ->{{impl_name.id}}(MTValue, Array(MTValue), TFunctor?).as(Callable)
