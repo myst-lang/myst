@@ -6,5 +6,6 @@ deftype File
     %File{name, mode}
   end
 
+  def path; @path; end
   def mode; @mode; end
 end

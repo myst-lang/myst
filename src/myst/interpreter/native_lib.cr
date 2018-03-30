@@ -82,6 +82,7 @@ module Myst
       {% end %}
 
       end
+
     end
 
     macro def_method(type, name, impl_name)
