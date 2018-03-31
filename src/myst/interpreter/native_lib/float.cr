@@ -47,6 +47,14 @@ module Myst
       end
     end
 
+    NativeLib.method :float_to_i, Float64 do
+      this.to_i64
+    end
+
+    NativeLib.method :float_round, Float64 do
+      this.round
+    end
+
     NativeLib.method :float_to_s, Float64 do
       this.to_s
     end
@@ -103,19 +111,21 @@ module Myst
       float_type = TType.new("Float", kernel.scope)
       float_type.instance_scope["type"] = float_type
 
-      NativeLib.def_instance_method(float_type, :+,     :float_add)
-      NativeLib.def_instance_method(float_type, :-,     :float_subtract)
-      NativeLib.def_instance_method(float_type, :*,     :float_multiply)
-      NativeLib.def_instance_method(float_type, :/,     :float_divide)
-      NativeLib.def_instance_method(float_type, :%,     :float_modulo)
-      NativeLib.def_instance_method(float_type, :==,    :float_eq)
-      NativeLib.def_instance_method(float_type, :!=,    :float_not_eq)
-      NativeLib.def_instance_method(float_type, :to_s,  :float_to_s)
-      NativeLib.def_instance_method(float_type, :negate,:float_negate)
-      NativeLib.def_instance_method(float_type, :<,     :float_lt)
-      NativeLib.def_instance_method(float_type, :<=,    :float_lte)
-      NativeLib.def_instance_method(float_type, :>,     :float_gt)
-      NativeLib.def_instance_method(float_type, :>=,    :float_gte)
+      NativeLib.def_instance_method(float_type, :+,       :float_add)
+      NativeLib.def_instance_method(float_type, :-,       :float_subtract)
+      NativeLib.def_instance_method(float_type, :*,       :float_multiply)
+      NativeLib.def_instance_method(float_type, :/,       :float_divide)
+      NativeLib.def_instance_method(float_type, :%,       :float_modulo)
+      NativeLib.def_instance_method(float_type, :==,      :float_eq)
+      NativeLib.def_instance_method(float_type, :!=,      :float_not_eq)
+      NativeLib.def_instance_method(float_type, :to_i,    :float_to_i)
+      NativeLib.def_instance_method(float_type, :round,   :float_round)
+      NativeLib.def_instance_method(float_type, :to_s,    :float_to_s)
+      NativeLib.def_instance_method(float_type, :negate,  :float_negate)
+      NativeLib.def_instance_method(float_type, :<,       :float_lt)
+      NativeLib.def_instance_method(float_type, :<=,      :float_lte)
+      NativeLib.def_instance_method(float_type, :>,       :float_gt)
+      NativeLib.def_instance_method(float_type, :>=,      :float_gte)
 
       float_type
     end

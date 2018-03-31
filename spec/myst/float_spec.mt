@@ -317,6 +317,58 @@ describe("Float#%") do
 end
 
 
+describe("Float#to_i") do
+  it("returns a new Integer representing the Float") do
+    assert(1.0.to_i).equals(1)
+    assert(100.0.to_i).equals(100)
+  end
+
+  it("truncates decimals to create the Integer") do
+    assert(1.4.to_i).equals(1)
+    assert(123.456.to_i).equals(123)
+  end
+
+  it("does not perform rounding when truncating") do
+    assert(1.7.to_i).equals(1)
+    assert(10.5.to_i).equals(10)
+  end
+
+  it("raises an error if the Float cannot fit into an Integer value") do
+    # This number is larger than the maximum storable in a 64-bit integer.
+    assert{ 9_223_372_036_854_775_810.0.to_i }.raises
+  end
+end
+
+
+describe("Float#round") do
+  it("returns a new Integer representing the Float") do
+    assert(1.0.round).equals(1)
+    assert(100.0.round).equals(100)
+  end
+
+  it("rounds to the nearest Integer") do
+    assert(1.4.round).equals(1)
+    assert(123.789.round).equals(124)
+  end
+
+  it("rounds .5 decimals to the higher nearest Integer") do
+    assert(1.5.round).equals(2)
+    assert(214.5.round).equals(215)
+  end
+
+  it("accurately rounds decimals around *.5") do
+    assert(100.49999.round).equals(100)
+    assert(100.50000.round).equals(101)
+    assert(100.50001.round).equals(101)
+  end
+
+  it("raises an error if the Float cannot fit into an Integer value") do
+    # This number is larger than the maximum storable in a 64-bit integer.
+    assert{ 9_223_372_036_854_775_810.0.round }.raises
+  end
+end
+
+
 describe("Float#to_s") do
   it("returns the string representation of the number") do
     assert(1.0.to_s).equals("1.0")

@@ -19,6 +19,23 @@ module Myst
       end
     end
 
+    NativeLib.method :string_to_i, String, base : Int64? do
+      begin
+        base = 10 if base.nil?
+        this.to_i64(base: base, whitespace: true, underscore: true, prefix: true, strict: true)
+      rescue ex : ArgumentError
+        __raise_runtime_error(ex.message.not_nil!)
+      end
+    end
+
+    NativeLib.method :string_to_f, String, base : Int64? do
+      begin
+        this.to_f64(whitespace: true, strict: true)
+      rescue ex : ArgumentError
+        __raise_runtime_error(ex.message.not_nil!)
+      end
+    end
+
     NativeLib.method :string_to_s, String do
       this
     end
@@ -117,6 +134,8 @@ module Myst
       NativeLib.def_instance_method(string_type, :==,        :string_eq)
       NativeLib.def_instance_method(string_type, :!=,        :string_not_eq)
       NativeLib.def_instance_method(string_type, :[],        :string_at)
+      NativeLib.def_instance_method(string_type, :to_i,      :string_to_i)
+      NativeLib.def_instance_method(string_type, :to_f,      :string_to_f)
       NativeLib.def_instance_method(string_type, :to_s,      :string_to_s)
       NativeLib.def_instance_method(string_type, :size,      :string_size)
       NativeLib.def_instance_method(string_type, :split,     :string_split)

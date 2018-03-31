@@ -50,6 +50,10 @@ module Myst
       end
     end
 
+    NativeLib.method :int_to_f, Int64 do
+      this.to_f64
+    end
+
     NativeLib.method :int_to_s, Int64 do
       this.to_s
     end
@@ -113,6 +117,7 @@ module Myst
       NativeLib.def_instance_method(integer_type, :%,     :int_modulo)
       NativeLib.def_instance_method(integer_type, :==,    :int_eq)
       NativeLib.def_instance_method(integer_type, :!=,    :int_not_eq)
+      NativeLib.def_instance_method(integer_type, :to_f,  :int_to_f)
       NativeLib.def_instance_method(integer_type, :to_s,  :int_to_s)
       NativeLib.def_instance_method(integer_type, :negate,:int_negate)
       NativeLib.def_instance_method(integer_type, :<,     :int_lt)
