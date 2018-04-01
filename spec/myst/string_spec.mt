@@ -137,6 +137,88 @@ describe("String#empty?") do
 end
 
 
+describe("String#to_i") do
+  it("returns the Integer represented in the String") do
+    assert("100".to_i).equals(100)
+  end
+
+  it("defaults to parsing in base 10") do
+    assert("1234567890".to_i).equals(1234567890)
+  end
+
+  it("allows whitespace on either side of the integer") do
+    assert("   100   ".to_i).equals(100)
+    assert("100   \t ".to_i).equals(100)
+    assert("   \t 100".to_i).equals(100)
+    assert("\n\n100\n\n".to_i).equals(100)
+  end
+
+  it("allows underscores in the integer value") do
+    assert("1_00_0".to_i).equals(1000)
+    assert("1_000".to_i).equals(1000)
+  end
+
+  it("allows prefixes to change the base") do
+    assert("0b10".to_i).equals(2)
+    assert("010".to_i).equals(8)
+    assert("0x10".to_i).equals(16)
+  end
+
+  it("raises an error if the string does not represent an integer") do
+    assert{ "hello".to_i }.raises
+  end
+
+  it("raises an error if the string contains a float value") do
+    assert{ "1.0".to_i }.raises
+  end
+
+  it("raises an error if the String contains extraneous characters after the integer") do
+    assert{ "100abc".to_i }.raises
+  end
+
+  describe("with a base argument") do
+    it("interprets the integer in the given base") do
+      assert("111".to_i(2)).equals(7)
+      assert("777".to_i(8)).equals(511)
+    end
+
+    it("expects the argument to be an Integer") do
+      assert{ "1".to_i(:f) }.raises
+    end
+  end
+end
+
+
+describe("String#to_f") do
+  it("returns the Float represented in the String") do
+    assert("100.123".to_f).equals(100.123)
+  end
+
+  it("defaults to parsing in base 10") do
+    assert("123450.6789".to_f).equals(123450.6789)
+  end
+
+  it("allows whitespace on either side of the Float") do
+    assert("   1.2   ".to_f).equals(1.2)
+    assert("1.2   \t ".to_f).equals(1.2)
+    assert("   \t 1.2".to_f).equals(1.2)
+    assert("\n\n1.2\n".to_f).equals(1.2)
+  end
+
+  it("can parse an integer value into a Float") do
+    assert("100".to_f).equals(100.0)
+  end
+
+  it("raises an error if the string does not represent an integer") do
+    assert{ "hello".to_f }.raises
+  end
+
+  it("raises an error if the String contains extraneous characters after the integer") do
+    assert{ "100abc".to_f }.raises
+  end
+end
+
+
 describe("String#to_s") do
   it("returns itself") do
     assert("".to_s).equals("")
@@ -146,12 +228,14 @@ describe("String#to_s") do
   end
 end
 
+
 describe("String#chars") do
   it("Returns a List with chars in a string") do
     assert("abc".chars).equals(["a", "b", "c"])
     assert("yay".chars).equals(["y", "a", "y"])
   end
 end
+
 
 describe("String#downcase") do
   it("returns a lowercased version of itself") do

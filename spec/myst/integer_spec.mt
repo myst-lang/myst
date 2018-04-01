@@ -346,6 +346,14 @@ describe("Integer#times") do
 end
 
 
+describe("Integer#to_f") do
+  it("returns a new Float representing the Integer") do
+    assert(1.to_f).equals(1.0)
+    assert(100.to_f).equals(100.0)
+  end
+end
+
+
 describe("Integer#to_s") do
   it("returns the string representation of the integer") do
     assert(1.to_s).equals("1")
