@@ -26,83 +26,25 @@ Some of the high-level features include:
 
 # Installation
 
-_NOTE: Due to Crystal's current limitations with compiling on Windows, Myst 
+_NOTE: Due to Crystal's current limitations with compiling on Windows, Myst
 only works on macOS and Linux systems._
 
-### macOS
+The recommended method of installing Myst is with `mtenv`, the official version manager for the Myst language. It is available [here](https://github.com/myst-lang/mtenv) and has installation instructions available in the README.
 
-The distribution of Myst is currently maintained through a custom homebrew tap at https://github.com/myst-lang/homebrew-tap.
+For now, you will need to have Crystal installed to be able to install Myst. See [Crystal's installation instructions](https://crystal-lang.org/docs/installation/) for how to get started.
 
-Installation is pretty simple - you don't even have to add the tap if you don't want to:
-
-```bash
-# If you're okay with adding the tap:
-brew tap myst-lang/tap
-brew install myst-lang
-
-# Or, if you would rather not add the tap:
-brew install myst-lang/tap/myst-lang
-```
-
-And that's it! You should now have a `myst` executable in your `$PATH` that can be used anywhere.
-
-### Linux/without `brew`
-
-There is currently no native package manager solution for Myst on linux systems. Instead, you'll need to build and install the binary manually. Luckily it's not too complicated.
-
-_Note that you'll need `crystal` installed for the build to succeed. This dependency is automatically managed on macOS._ To install `crystal`, follow these steps:
+Once Crystal and `mtenv` are installed, installing Myst is as simple as running `mtenv install`:
 
 ```shell
-sudo apt-get install dirmngr
-sudo curl https://dist.crystal-lang.org/apt/setup.sh | bash
-sudo apt-get install crystal
+# Make sure mtenv is properly set up
+mtenv setup
+# Install v0.6.0 of Myst
+mtenv install v0.6.0
+# Make it the active version
+mtenv use v0.6.0
 ```
 
-Now, install `myst`. `cd` to your prefered root dir, then :
-
-First, download the [latest release](https://github.com/myst-lang/myst/releases/latest) or the development (master) repository:
-
-```shell
-$ wget https://github.com/myst-lang/myst/archive/v0.1.0.tar.gz
-or
-$ wget https://github.com/myst-lang/myst/archive/master.tar.gz
-```
-
-then untar it somewhere and go to the extracted directory
-
-```shell
-$ tar xvf v0.1.0.tar.gz
-or 
-$ tar xvf master.tar.gz
-
-$ cd myst-0.1.0/
-$ shards build
-```
-
-This will give you a `bin` folder with a `myst` executable inside of it. Now, there are a few options:
-
-1. Simply add the `bin/` directory to your PATH environment variable at the end
-   of your `~/.bash_profile` file:
-
-       export PATH="$PATH:/path/to/bin/myst"
-
-   Then, update your current profile using the `source ~/.bashrc` command.
-
-2. Create a symlink from `/usr/local/bin` or some other folder on your `$PATH` to the `bin` folder that `shards build` generated.
-
-       ln -s /path/to/bin/myst /usr/local/bin/myst
-  
-3. Move the entire Myst folder to a folder on your `$PATH`. The executable needs to be in a folder that is a sibling to the `stdlib` folder at the root of this project. For example:
-
-       root
-       |- bin
-       |  |- myst
-       |- stdlib
-       |  |- enumerable.mt
-       |  |- ...
-       |  |- prelude.mt
-
-    As long as this structure is maintained, the executable should work as expected. Otherwise, you will see an error along the lines of "No file or directory `stlib/prelude.mt`". Full instructions TBD.
+With that, `myst` should now be installed and ready to go!
 
 Help with improving these installation instructions, making pre-built binaries, and/or managing releases would be greatly appreciated :)
 
