@@ -23,9 +23,8 @@ module Myst
     end
 
 
-    def init_symbol(kernel : TModule)
-      symbol_type = TType.new("Symbol", kernel.scope)
-      symbol_type.instance_scope["type"] = symbol_type
+    def init_symbol
+      symbol_type = __make_type("Symbol", @kernel.scope)
 
       NativeLib.def_instance_method(symbol_type, :to_s,  :symbol_to_s)
       NativeLib.def_instance_method(symbol_type, :==,    :symbol_eq)

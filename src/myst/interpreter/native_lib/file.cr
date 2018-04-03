@@ -110,9 +110,8 @@ module Myst
 
 
 
-    def init_file(kernel : TModule, fd_type : TType)
-      file_type = TType.new("File", kernel.scope, fd_type)
-      kernel.scope["File"] = file_type
+    def init_file(fd_type : TType)
+      file_type = __make_type("File", @kernel.scope, parent_type: fd_type)
 
       NativeLib.def_method(file_type, :basename,    :passthrough_File_basename)
       NativeLib.def_method(file_type, :chmod,       :passthrough_File_chmod)

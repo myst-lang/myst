@@ -29,9 +29,8 @@ module Myst
       TNil.new
     end
 
-    def init_tcp_socket(kernel : TModule, io_type)
-      tcp_socket_type = TType.new("TCPSocket", kernel.scope, io_type)
-      tcp_socket_type.instance_scope["type"] = tcp_socket_type
+    def init_tcp_socket(io_type)
+      tcp_socket_type = __make_type("TCPSocket", @kernel.scope, parent_type: io_type)
 
       NativeLib.def_instance_method(tcp_socket_type, :initialize, :tcp_socket_init)
       NativeLib.def_instance_method(tcp_socket_type, :read,       :tcp_socket_read)

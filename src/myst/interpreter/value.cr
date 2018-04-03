@@ -88,17 +88,28 @@ module Myst
     property! supertype      : TType?
     property  extended_modules = [] of TModule
 
-    def initialize(@name : String, parent : Scope?=nil, @supertype : TType? = nil)
+    def initialize(@name : String, @supertype : TType?, parent : Scope?=nil)
       @scope = Scope.new(parent)
       @instance_scope = Scope.new(parent)
       # TODO: revist this when base object for TType is in place
       # Currently this prevents to_s from being overriden on Types
-      @scope["to_s"] = TFunctor.new("to_s", [
-        ->ttype_to_s(MTValue, Array(MTValue), TFunctor?)] of Callable)
+      # @scope["to_s"] = TFunctor.new("to_s", [
+      #     ->ttype_to_s(MTValue, Array(MTValue), TFunctor?)] of Callable)
+      # @scope["=="] = TFunctor.new("==", [
+      #     ->ttype_eq(MTValue, Array(MTValue), TFunctor?)] of Callable)
     end
 
     def ttype_to_s(_a, _b, _c)
       @name.as(MTValue)
+    end
+
+    def ttype_eq(_a, args, _c)
+      case other = args[0]
+      when TType
+        self == other
+      else
+        false
+      end.as(MTValue)
     end
 
     def type_name

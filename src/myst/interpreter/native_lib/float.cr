@@ -107,9 +107,8 @@ module Myst
       end
     end
 
-    def init_float(kernel : TModule)
-      float_type = TType.new("Float", kernel.scope)
-      float_type.instance_scope["type"] = float_type
+    def init_float
+      float_type = __make_type("Float", @kernel.scope)
 
       NativeLib.def_instance_method(float_type, :+,       :float_add)
       NativeLib.def_instance_method(float_type, :-,       :float_subtract)

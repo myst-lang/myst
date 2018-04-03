@@ -22,9 +22,8 @@ module Myst
       end
     end
 
-    def init_time(kernel : TModule)
-      time_type = TType.new("Time", kernel.scope)
-      time_type.instance_scope["type"] = time_type
+    def init_time
+      time_type = __make_type("Time", @kernel.scope)
 
       NativeLib.def_method(time_type, :now, :static_time_now)
       NativeLib.def_instance_method(time_type, :to_s,  :time_to_s)

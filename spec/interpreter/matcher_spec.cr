@@ -138,7 +138,7 @@ describe "Interpreter - #match" do
       # end
       itr = Interpreter.new
       mod_foo   = TModule.new("Foo")
-      type_bar  = TType.new("Bar")
+      type_bar  = TType.new("Bar", nil)
       type_bar.insert_ancestor(mod_foo)
 
       itr.current_scope.assign("Foo", mod_foo)
@@ -151,7 +151,7 @@ describe "Interpreter - #match" do
       itr = Interpreter.new
       mod_foo   = TModule.new("Foo")
       mod_bar   = TModule.new("Bar")
-      type_baz  = TType.new("Baz")
+      type_baz  = TType.new("Baz", nil)
       mod_bar.insert_ancestor(mod_foo)
       type_baz.insert_ancestor(mod_bar)
 
@@ -167,7 +167,7 @@ describe "Interpreter - #match" do
       itr = Interpreter.new
       mod_foo   = TModule.new("Foo")
       mod_bar   = TModule.new("Bar")
-      type_baz  = TType.new("Baz")
+      type_baz  = TType.new("Baz", nil)
       type_baz.insert_ancestor(mod_foo)
       type_baz.insert_ancestor(mod_bar)
 
@@ -181,7 +181,7 @@ describe "Interpreter - #match" do
       # end
       itr = Interpreter.new
       mod_foo   = TModule.new("Foo")
-      type_bar  = TType.new("Bar")
+      type_bar  = TType.new("Bar", nil)
       type_bar.extend_module(mod_foo)
 
       itr.current_scope.assign("Foo", mod_foo)

@@ -18,10 +18,10 @@ module Myst
             end
             typ
           else
-            nil
+            @base_type
           end
 
-        type = TType.new(node.name, current_scope, supertype: supertype)
+        type = __make_type(node.name, current_scope, supertype)
         current_scope.assign(node.name, type)
       end
 

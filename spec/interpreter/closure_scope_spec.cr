@@ -96,7 +96,7 @@ describe "Interpreter - ClosureScope" do
     it "removes all entries from the scope" do
       scope = ClosureScope.new(Scope.new)
       scope["a"] = TNil.new
-      scope["Thing"] = TType.new("Thing")
+      scope["Thing"] = TType.new("Thing", nil, nil)
       scope["x"] = 100_i64
 
       scope.values.size.should eq(3)

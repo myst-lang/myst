@@ -63,6 +63,14 @@ module Myst
       end
     end
 
+    # Create a new, fully initialized TType object. This takes care of setting
+    # the lexical scope, inheriting from the base type and more.
+    def __make_type(name : String, lexical_scope : Scope?, parent_type = @base_type)
+      typ = TType.new(name, parent_type, lexical_scope)
+      typ.instance_scope["type"] = typ
+      typ
+    end
+
 
     # Lookup a value under the given name in the current scope or one of its
     # ancestors. If the value is not found, a `No variable or method`

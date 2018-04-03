@@ -106,9 +106,8 @@ module Myst
       end
     end
 
-    def init_integer(kernel : TModule)
-      integer_type = TType.new("Integer", kernel.scope)
-      integer_type.instance_scope["type"] = integer_type
+    def init_integer
+      integer_type = __make_type("Integer", @kernel.scope)
 
       NativeLib.def_instance_method(integer_type, :+,     :int_add)
       NativeLib.def_instance_method(integer_type, :-,     :int_subtract)

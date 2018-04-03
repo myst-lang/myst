@@ -12,9 +12,8 @@ module Myst
       this != other
     end
 
-    def init_boolean(kernel : TModule)
-      boolean_type = TType.new("Boolean", kernel.scope)
-      boolean_type.instance_scope["type"] = boolean_type
+    def init_boolean
+      boolean_type = __make_type("Boolean", @kernel.scope)
 
       NativeLib.def_instance_method(boolean_type, :to_s,  :bool_to_s)
       NativeLib.def_instance_method(boolean_type, :==,    :bool_eq)
