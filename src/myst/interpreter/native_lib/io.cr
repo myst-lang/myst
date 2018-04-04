@@ -21,11 +21,13 @@ module Myst
       NativeLib.def_instance_method(io_type, :write, :io_write)
 
       fd_type = init_file_descriptor(io_type)
-      file_type = init_file(fd_type)
+      io_type.scope["FileDescriptor"] = fd_type
 
       @kernel.scope["STDIN"]    = make_io_fd(fd_type, 0)
       @kernel.scope["STDOUT"]   = make_io_fd(fd_type, 1)
       @kernel.scope["STDERR"]   = make_io_fd(fd_type, 2)
+
+      file_type = init_file(fd_type)
       @kernel.scope["File"]     = file_type
 
       io_type

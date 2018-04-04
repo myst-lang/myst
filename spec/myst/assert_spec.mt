@@ -7,7 +7,7 @@ end
 def test_raises(&block)
   block()
 rescue ex
-  test_assert(ex.type.to_s == "AssertionFailure")
+  test_assert(ex.type == Assert.AssertionFailure)
 end
 
 describe("Assert") do
@@ -17,11 +17,11 @@ describe("Assert") do
 
     describe("#is_truthy") do
       it("returns the assertion object when the assertion succeeds") do
-        test_assert(true_subject.is_truthy.type.to_s == "Assertion")
+        test_assert(true_subject.is_truthy.type == Assert.Assertion)
       end
 
       it("passes when the value is anything truthy") do
-        test_assert(assert([]).is_truthy.type.to_s == "Assertion")
+        test_assert(assert([]).is_truthy.type == Assert.Assertion)
       end
 
       it("raises an AssertionFailure if the value is not truthy") do
@@ -31,12 +31,12 @@ describe("Assert") do
 
     describe("#is_falsey") do
       it("returns the assertion object when the assertion succeeds") do
-        test_assert(false_subject.is_falsey.type.to_s == "Assertion")
+        test_assert(false_subject.is_falsey.type == Assert.Assertion)
       end
 
 
       it("passes when the value is anything nil") do
-        test_assert(assert(nil).is_falsey.type.to_s == "Assertion")
+        test_assert(assert(nil).is_falsey.type == Assert.Assertion)
       end
 
       it("raises an AssertionFailure if the value is not truthy") do
@@ -46,7 +46,7 @@ describe("Assert") do
 
     describe("#is_true") do
       it("returns the assertion object when the assertion succeeds") do
-        test_assert(true_subject.is_true.type.to_s == "Assertion")
+        test_assert(true_subject.is_true.type == Assert.Assertion)
       end
 
       it("does not pass unless the value is exactly `true`") do
@@ -60,7 +60,7 @@ describe("Assert") do
 
     describe("#is_false") do
       it("returns the assertion object when the assertion succeeds") do
-        test_assert(false_subject.is_false.type.to_s == "Assertion")
+        test_assert(false_subject.is_false.type == Assert.Assertion)
       end
 
       it("does not pass unless the value is exactly `false`") do
@@ -74,7 +74,7 @@ describe("Assert") do
 
     describe("#is_nil") do
       it("returns the assertion object when the assertion succeeds") do
-        test_assert(assert(nil).is_nil.type.to_s == "Assertion")
+        test_assert(assert(nil).is_nil.type == Assert.Assertion)
       end
 
       it("raises an AssertionFailure if the value is not `nil`") do
@@ -84,11 +84,11 @@ describe("Assert") do
 
     describe("#is_not_nil") do
       it("returns the assertion object when the assertion succeeds") do
-        test_assert(assert(true).is_not_nil.type.to_s == "Assertion")
+        test_assert(assert(true).is_not_nil.type == Assert.Assertion)
       end
 
       it("passes when the value is `false`") do
-        test_assert(assert(false).is_not_nil.type.to_s == "Assertion")
+        test_assert(assert(false).is_not_nil.type == Assert.Assertion)
       end
 
       it("raises an AssertionFailure if the value is `nil`") do
@@ -99,7 +99,7 @@ describe("Assert") do
 
     describe("#equals") do
       it("returns the assertion object when the assertion succeeds") do
-        test_assert(assert(true).equals(true).type.to_s == "Assertion")
+        test_assert(assert(true).equals(true).type == Assert.Assertion)
       end
 
       it("raises an AssertionFailure if the value is not equal to its argument") do
@@ -109,7 +109,7 @@ describe("Assert") do
 
     describe("#does_not_equal") do
       it("returns the assertion object when the assertion succeeds") do
-        test_assert(assert(true).does_not_equal(false).type.to_s == "Assertion")
+        test_assert(assert(true).does_not_equal(false).type == Assert.Assertion)
       end
 
       it("raises an AssertionFailure if the value is equal to its argument") do
@@ -120,7 +120,7 @@ describe("Assert") do
 
     describe("#less_than") do
       it("returns the assertion object when the assertion succeeds") do
-        test_assert(assert(1).less_than(2).type.to_s == "Assertion")
+        test_assert(assert(1).less_than(2).type == Assert.Assertion)
       end
 
       it("does not pass when the values are equal") do
@@ -134,11 +134,11 @@ describe("Assert") do
 
     describe("#less_or_equal") do
       it("returns the assertion object when the assertion succeeds") do
-        test_assert(assert(1).less_or_equal(2).type.to_s == "Assertion")
+        test_assert(assert(1).less_or_equal(2).type == Assert.Assertion)
       end
 
       it("passes when the values are equal") do
-        test_assert(assert(1).less_or_equal(1).type.to_s == "Assertion")
+        test_assert(assert(1).less_or_equal(1).type == Assert.Assertion)
       end
 
       it("raises an AssertionFailure if the value is not less or equal than its argument") do
@@ -148,11 +148,11 @@ describe("Assert") do
 
     describe("#greater_or_equal") do
       it("returns the assertion object when the assertion succeeds") do
-        test_assert(assert(2).greater_or_equal(1).type.to_s == "Assertion")
+        test_assert(assert(2).greater_or_equal(1).type == Assert.Assertion)
       end
 
       it("passes when the values are equal") do
-        test_assert(assert(1).greater_or_equal(1).type.to_s == "Assertion")
+        test_assert(assert(1).greater_or_equal(1).type == Assert.Assertion)
       end
 
       it("raises an AssertionFailure if the value is not greater or equal than its argument") do
@@ -162,7 +162,7 @@ describe("Assert") do
 
     describe("#greater_than") do
       it("returns the assertion object when the assertion succeeds") do
-        test_assert(assert(2).greater_than(1).type.to_s == "Assertion")
+        test_assert(assert(2).greater_than(1).type == Assert.Assertion)
       end
 
       it("does not pass when the values are equal") do
@@ -177,7 +177,7 @@ describe("Assert") do
 
     describe("#between") do
       it("returns the assertion object when the assertion succeeds") do
-        test_assert(assert(1).between(0, 2).type.to_s == "Assertion")
+        test_assert(assert(1).between(0, 2).type == Assert.Assertion)
       end
 
       it("passes when the value is equal to the lower argument") do
@@ -196,7 +196,7 @@ describe("Assert") do
 
     describe("#<") do
       it("acts like #less_than") do
-        test_assert(assert(1).less_than(2).type.to_s == "Assertion")
+        test_assert(assert(1).less_than(2).type == Assert.Assertion)
         test_raises{ assert(1).less_than(1) }
         test_raises{ assert(2).less_than(1) }
       end
@@ -204,37 +204,37 @@ describe("Assert") do
 
     describe("#<=") do
       it("acts like #less_or_equal") do
-        test_assert(assert(1).less_or_equal(2).type.to_s == "Assertion")
-        test_assert(assert(1).less_or_equal(1).type.to_s == "Assertion")
+        test_assert(assert(1).less_or_equal(2).type == Assert.Assertion)
+        test_assert(assert(1).less_or_equal(1).type == Assert.Assertion)
         test_raises{ assert(2).less_or_equal(1) }
       end
     end
 
     describe("#==") do
       it("acts like #equals") do
-        test_assert(assert(true).equals(true).type.to_s == "Assertion")
+        test_assert(assert(true).equals(true).type == Assert.Assertion)
         test_raises{ assert(true).equals(false) }
       end
     end
 
     describe("#!=") do
       it("acts like #does_not_equal") do
-        test_assert(assert(true).does_not_equal(false).type.to_s == "Assertion")
+        test_assert(assert(true).does_not_equal(false).type == Assert.Assertion)
         test_raises{ assert(true).equals(true) }
       end
     end
 
     describe("#>=") do
       it("acts like #greater_or_equal") do
-        test_assert(assert(2).greater_or_equal(1).type.to_s == "Assertion")
-        test_assert(assert(1).greater_or_equal(1).type.to_s == "Assertion")
+        test_assert(assert(2).greater_or_equal(1).type == Assert.Assertion)
+        test_assert(assert(1).greater_or_equal(1).type == Assert.Assertion)
         test_raises{ assert(1).greater_or_equal(2) }
       end
     end
 
     describe("#>") do
       it("acts like #greater_than") do
-        test_assert(assert(2).greater_than(1).type.to_s == "Assertion")
+        test_assert(assert(2).greater_than(1).type == Assert.Assertion)
         test_raises{ assert(1).greater_than(1) }
         test_raises{ assert(1).greater_than(1) }
       end
@@ -250,7 +250,7 @@ describe("Assert") do
     describe("#raises") do
       describe("with no arguments") do
         it("returns the blockassertion object when the block raises any error") do
-          test_assert(raising_subject.raises.type.to_s == "BlockAssertion")
+          test_assert(raising_subject.raises.type == Assert.BlockAssertion)
         end
 
         it("raises an AssertionFailure when the block does not raise an error") do
@@ -260,7 +260,7 @@ describe("Assert") do
 
       describe("with an error argument") do
         it("returns the blockassertion object if the block raises the given error") do
-          test_assert(raising_subject.raises(:foo).type.to_s == "BlockAssertion")
+          test_assert(raising_subject.raises(:foo).type == Assert.BlockAssertion)
         end
 
         it("raises an AssertionFailure when the block does not raise an error") do
@@ -275,7 +275,7 @@ describe("Assert") do
 
     describe("#succeeds") do
       it("returns the blockassertion object when the block does not raise an error") do
-        test_assert(passing_subject.succeeds.type.to_s == "BlockAssertion")
+        test_assert(passing_subject.succeeds.type == Assert.BlockAssertion)
       end
 
       it("raises an AssertionFailure when the block does raise an error") do
@@ -285,7 +285,7 @@ describe("Assert") do
 
     describe("#returns") do
       it("returns the blockassertion object when the block returns the expected value") do
-        test_assert(passing_subject.returns(:passing).type.to_s == "BlockAssertion")
+        test_assert(passing_subject.returns(:passing).type == Assert.BlockAssertion)
       end
 
       it("raises an AssertionFailure when the block does not return the expected value") do

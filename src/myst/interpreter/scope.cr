@@ -57,5 +57,11 @@ module Myst
 
     # Remove all values from this scope. Parent scopes are not affected.
     delegate each, clear, to: @values
+
+    def inspect(io : IO)
+      io << "<<Scope(#{@values.inspect} parent="
+      @parent.inspect(io)
+      io << ")>>"
+    end
   end
 end

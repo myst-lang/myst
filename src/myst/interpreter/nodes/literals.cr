@@ -42,7 +42,7 @@ module Myst
         else
           visit(piece)
           expr_result = stack.pop
-          value_to_s = __scopeof(expr_result)["to_s"].as(TFunctor)
+          value_to_s = recursive_lookup(expr_result, "to_s").as(TFunctor)
           result = Invocation.new(
             self,
             value_to_s,

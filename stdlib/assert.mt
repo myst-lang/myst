@@ -204,6 +204,29 @@ defmodule Assert
     def >(other)
       greater_than(other)
     end
+
+    # is_a(type) -> self
+    #
+    # Assert that the value is an instance of `type`.
+    def is_a(other : Type)
+      unless [@value.type, *@value.type.ancestors].any?{ |anc| anc == other }
+        raise %AssertionFailure{
+          "<(@value.type)> (<(@value.ancestors.map{ |t| t.to_s }.join(","))>)",
+          other,
+          "value is not an instance or subtype of <(other)>"
+        }
+      end
+    end
+
+    # includes(element) -> self
+    #
+    # Assert that the value includes `element`. This requires that the value is
+    # Enumerable (implements `#each`)
+    def includes(element)
+      unless @value.any?{ |e| e == element }
+        raise %AssertionFailure{@value, element, "value does not include the requested element"}
+      end
+    end
   end
 
 
