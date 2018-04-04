@@ -25,7 +25,7 @@ module Myst
     end
 
     def init_file_descriptor(io_type : TType)
-      io_fd_type = __make_type("FileDescriptor", @kernel.scope, parent_type: io_type)
+      io_fd_type = __make_type("FileDescriptor", io_type.scope, parent_type: io_type)
 
       NativeLib.def_instance_method(io_fd_type, :initialize,  :io_fd_init)
       NativeLib.def_instance_method(io_fd_type, :read,        :io_fd_read)
