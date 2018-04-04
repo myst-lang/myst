@@ -30,6 +30,24 @@ module Myst
       this.to_s
     end
 
+    NativeLib.method :inst_eq, TInstance, other : MTValue do
+      case other
+      when TInstance
+        this == other
+      else
+        false
+      end
+    end
+
+    NativeLib.method :inst_not_eq, TInstance, other : MTValue do
+      case other
+      when TInstance
+        this != other
+      else
+        false
+      end
+    end
+
 
     def init_base_type
       NativeLib.def_method(@base_type, :to_s,       :static_type_to_s)
@@ -37,7 +55,9 @@ module Myst
       NativeLib.def_method(@base_type, :!=,         :static_type_not_eq)
       NativeLib.def_method(@base_type, :ancestors,  :static_type_ancestors)
 
-      NativeLib.def_instance_method(@base_type, :to_s,        :inst_to_s)
+      NativeLib.def_instance_method(@base_type, :to_s,    :inst_to_s)
+      NativeLib.def_instance_method(@base_type, :==,      :inst_eq)
+      NativeLib.def_instance_method(@base_type, :!=,      :inst_not_eq)
 
       @base_type
     end
