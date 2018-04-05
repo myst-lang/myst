@@ -10,8 +10,8 @@ module Myst
       end
     end
 
-    def init_random(kernel : TModule)
-      random_module = TModule.new("Random", kernel.scope)
+    def init_random
+      random_module = TModule.new("Random", @kernel.scope)
 
       NativeLib.def_method(random_module, :rand, :random_rand)
 

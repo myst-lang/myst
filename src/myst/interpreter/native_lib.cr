@@ -13,7 +13,7 @@ module Myst
     # Same as `call_func`, but the function to call is given as a name to
     # look up on the given receiver.
     def call_func_by_name(itr, receiver : MTValue, name : String, args : Array(MTValue))
-      func = itr.__scopeof(receiver)[name].as(TFunctor)
+      func = itr.recursive_lookup(receiver, name).as(TFunctor)
       Invocation.new(itr, func, receiver, args, nil).invoke
     end
 

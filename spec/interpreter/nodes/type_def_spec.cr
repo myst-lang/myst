@@ -17,7 +17,7 @@ describe "Interpreter - TypeDef" do
     end
   ) do |typ, itr|
     typ.should be_a(Myst::TType)
-    typ.scope.values.size.should eq(1)
+    typ.scope.values.size.should eq(0)
     typ.scope.parent.should eq(itr.current_scope)
   end
 

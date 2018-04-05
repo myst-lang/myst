@@ -23,9 +23,8 @@ module Myst
     end
 
 
-    def init_nil(kernel : TModule)
-      nil_type = TType.new("Nil", kernel.scope)
-      nil_type.instance_scope["type"] = nil_type
+    def init_nil
+      nil_type = __make_type("Nil", @kernel.scope)
 
       NativeLib.def_instance_method(nil_type, :to_s,  :nil_to_s)
       NativeLib.def_instance_method(nil_type, :==,    :nil_eq)

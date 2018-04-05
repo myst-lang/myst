@@ -125,9 +125,8 @@ module Myst
       this.reverse
     end
 
-    def init_string(kernel : TModule)
-      string_type = TType.new("String", kernel.scope)
-      string_type.instance_scope["type"] = string_type
+    def init_string
+      string_type = __make_type("String", @kernel.scope)
 
       NativeLib.def_instance_method(string_type, :+,         :string_add)
       NativeLib.def_instance_method(string_type, :*,         :string_multiply)

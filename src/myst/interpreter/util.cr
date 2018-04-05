@@ -63,6 +63,14 @@ module Myst
       end
     end
 
+    # Create a new, fully initialized TType object. This takes care of setting
+    # the lexical scope, inheriting from the base type and more.
+    def __make_type(name : String, lexical_scope : Scope?, parent_type = @base_type)
+      typ = TType.new(name, parent_type, lexical_scope)
+      typ.instance_scope["type"] = typ
+      typ
+    end
+
 
     # Lookup a value under the given name in the current scope or one of its
     # ancestors. If the value is not found, a `No variable or method`
@@ -82,21 +90,21 @@ module Myst
     # The method will return `nil` if no matching entry is found.
     def recursive_lookup(receiver, name, check_current = true)
       func = current_scope[name] if check_current && current_scope.has_key?(name)
-      if func.nil?
+      unless func
         func = __scopeof(receiver)[name]?
       end
 
-      if func.nil?
+      unless func
         case receiver
         when TType
-          func ||= receiver.extended_ancestors.each do |anc|
-            unless (found = __scopeof(anc)[name]?).nil?
+          func = receiver.extended_ancestors.each do |anc|
+            if found = __scopeof(anc)[name]?
               break found
             end
           end
         else
-          func ||= __typeof(receiver).ancestors.each do |anc|
-            unless (found = __scopeof(anc, prefer_instance_scope: true)[name]?).nil?
+          func = __typeof(receiver).ancestors.each do |anc|
+            if found = __scopeof(anc, prefer_instance_scope: true)[name]?
               break found
             end
           end
@@ -111,7 +119,7 @@ module Myst
       type_name = __typeof(value).name
       error_message = "No variable or method `#{name}` for #{type_name}"
 
-      if value_to_s = __scopeof(value)["to_s"]?
+      if value_to_s = recursive_lookup(value, "to_s")
         value_str = NativeLib.call_func_by_name(self, value, "to_s", [] of MTValue)
         error_message = "No variable or method `#{name}` for #{value_str}:#{type_name}"
       end

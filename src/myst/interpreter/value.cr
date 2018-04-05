@@ -80,6 +80,12 @@ module Myst
     end
 
     def_equals_and_hash scope
+
+    def inspect(io : IO)
+      io << "%#{@name}("
+      @scope.inspect(io)
+      io << ")"
+    end
   end
 
   class TType < ContainerType
@@ -88,17 +94,9 @@ module Myst
     property! supertype      : TType?
     property  extended_modules = [] of TModule
 
-    def initialize(@name : String, parent : Scope?=nil, @supertype : TType? = nil)
+    def initialize(@name : String, @supertype : TType?, parent : Scope?=nil)
       @scope = Scope.new(parent)
       @instance_scope = Scope.new(parent)
-      # TODO: revist this when base object for TType is in place
-      # Currently this prevents to_s from being overriden on Types
-      @scope["to_s"] = TFunctor.new("to_s", [
-        ->ttype_to_s(MTValue, Array(MTValue), TFunctor?)] of Callable)
-    end
-
-    def ttype_to_s(_a, _b, _c)
-      @name.as(MTValue)
     end
 
     def type_name
@@ -138,6 +136,14 @@ module Myst
     end
 
     def_equals_and_hash name, scope, instance_scope
+
+    def inspect(io : IO)
+      io << "##{@name}(static="
+      @scope.inspect(io)
+      io << ", instance="
+      @instance_scope.inspect(io)
+      io << ")"
+    end
   end
 
   class TInstance < MutableValue
@@ -157,6 +163,12 @@ module Myst
     end
 
     def_equals_and_hash type, scope
+
+    def to_s(io : IO)
+      io << "<##{type_name} "
+      @ivars.inspect(io)
+      io << ">"
+    end
   end
 
   class TNil < MutableValue
@@ -293,5 +305,13 @@ module Myst
     end
 
     def_equals_and_hash name, clauses, lexical_scope
+
+    def inspect(io : IO)
+      if closure?
+        io << "&&#{name}/#{clauses.size}"
+      else
+        io << "&#{name}/#{clauses.size}"
+      end
+    end
   end
 end

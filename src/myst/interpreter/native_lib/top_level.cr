@@ -16,11 +16,9 @@ module Myst
       TNil.new
     end
 
-    def init_top_level(kernel : TModule)
-      NativeLib.def_method(kernel, :exit, :mt_exit)
-      NativeLib.def_method(kernel, :sleep, :mt_sleep)
-
-      kernel
+    def init_top_level
+      NativeLib.def_method(@kernel, :exit, :mt_exit)
+      NativeLib.def_method(@kernel, :sleep, :mt_sleep)
     end
   end
 end

@@ -70,7 +70,7 @@ describe "Interpreter - Scope" do
     it "removes all entries from the scope" do
       scope = Scope.new
       scope["a"] = TNil.new
-      scope["Thing"] = TType.new("Thing")
+      scope["Thing"] = TType.new("Thing", nil)
       scope["x"] = 100_i64
 
       scope.values.size.should eq(3)
