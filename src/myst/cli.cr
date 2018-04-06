@@ -5,9 +5,10 @@ module Myst
     def self.run
       source = ""
       show_ast = false
-      generate_docs = false
       eval = false
       stop_evaluation = false
+      generate_docs = false
+      docs_directory = Dir.current
 
       OptionParser.parse! do |opts|
         opts.banner = "Usage: myst [filename] [options]"
@@ -32,9 +33,9 @@ module Myst
           stop_evaluation = true
         end
 
-        opts.on("--docs", "Generate a JSON file containing documentation for the input file.") do
+        opts.on("--docs DIRECTORY", "Generate a JSON file containing documentation for the input file.") do |directory|
           generate_docs = true
-          stop_evaluation = true
+          docs_directory = directory
         end
 
         opts.on("-e", "--eval", "Eval code from args") do
@@ -68,7 +69,7 @@ module Myst
       end
 
       if generate_docs
-        vm.generate_docs
+        DocGenerator.auto_document(docs_directory)
         exit
       end
 

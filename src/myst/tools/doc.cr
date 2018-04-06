@@ -7,7 +7,6 @@ module Myst
   # Currently only operates on the given source, does not follow `require`s or
   # other imports.
   class DocGenerator
-    property io : IO
     property printer : Printer
 
     enum DocType
@@ -31,7 +30,7 @@ module Myst
 
       JSON.mapping(
         name: String,
-        doc: Doc?,
+        doc: { type: Doc?, emit_null: true },
         type: DocType,
         children: DocContext
       )
@@ -41,16 +40,36 @@ module Myst
     end
 
 
-    def initialize(@io : IO)
-      @printer = Printer.new(io)
+    # Automatically scan everything in the current directory to find Myst files
+    # that can be documented.
+    def self.auto_document(directory = Dir.current)
+      generator = self.new
+      Dir[directory, directory+"/*", directory+"/**/*"].each do |entry|
+        # Only consider files that end with the `.mt` extension
+        if entry.ends_with?(".mt")
+          file_ast = Parser.for_file(entry).parse
+          generator.document(file_ast)
+        end
+      end
+
+      puts generator.json
+    end
+
+
+    def initialize
+      @printer = Printer.new
       @docs = DocContext.new
       @current_doc = @docs
     end
 
+
     def document(node : Node)
       visit(node)
+    end
 
-      @io.puts @docs.to_json
+    # Return a JSON representation of the current documentation structure.
+    def json
+      @docs.to_json
     end
 
     # Automatically recurse through all non-special nodes

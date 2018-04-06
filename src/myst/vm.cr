@@ -58,7 +58,7 @@ module Myst
     end
 
     def generate_docs(io : IO = STDOUT)
-      visitor = DocGenerator.new(io)
+      visitor = DocGenerator.new
       docs = visitor.document(@program.not_nil!)
     end
 
