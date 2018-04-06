@@ -5,7 +5,9 @@ module Myst
     def self.run
       source = ""
       show_ast = false
+      generate_docs = false
       eval = false
+      stop_evaluation = false
 
       OptionParser.parse! do |opts|
         opts.banner = "Usage: myst [filename] [options]"
@@ -27,6 +29,12 @@ module Myst
 
         opts.on("--ast", "Display the parsed AST for the input file. Code will not be executed if set.") do
           show_ast = true
+          stop_evaluation = true
+        end
+
+        opts.on("--docs", "Generate a JSON file containing documentation for the input file.") do
+          generate_docs = true
+          stop_evaluation = true
         end
 
         opts.on("-e", "--eval", "Eval code from args") do
@@ -57,7 +65,14 @@ module Myst
       if show_ast
         vm.print_ast
         exit
-      else
+      end
+
+      if generate_docs
+        vm.generate_docs
+        exit
+      end
+
+      unless stop_evaluation
         vm.run
       end
     end

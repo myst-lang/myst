@@ -15,8 +15,8 @@ module Myst
       replacements[node.object_id] = new_node
     end
 
-    def print(node)
-      visit(node, @output)
+    def print(node, io : IO = @output)
+      visit(node, io)
     end
 
 

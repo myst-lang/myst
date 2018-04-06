@@ -13,7 +13,7 @@ module Myst
       # Just telling warn() we're not in test mode (test  declaration in
       # spec/spec_helper.cr)
       ENV["MYST_ENV"] = product? ? "prod" : "test"
-      
+
       @interpreter = Interpreter.new
       @semantic_visitor = Semantic::Visitor.new
 
@@ -55,6 +55,11 @@ module Myst
     def print_ast(io : IO = STDOUT)
       visitor = ASTViewer.new(io)
       @program.not_nil!.accept(visitor)
+    end
+
+    def generate_docs(io : IO = STDOUT)
+      visitor = DocGenerator.new(io)
+      docs = visitor.document(@program.not_nil!)
     end
 
     # Tries to run the provided string as a myst program
