@@ -4066,6 +4066,15 @@ describe "Parser" do
     #doc a#b#c
   )
 
+  # References can start with a path indicator to disambiguate static and
+  # instance methods in the current scope.
+  it_parses %q(
+    #doc #foo
+  ),                            doc(ref("foo", static: false))
+  it_parses %q(
+    #doc .foo
+  ),                            doc(ref("foo", static: true))
+
   # Doc comments can also specify a return value after a stab (`->`) on the header line.
   it_parses %q(
     #doc File.open -> file

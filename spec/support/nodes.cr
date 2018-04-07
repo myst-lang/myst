@@ -105,6 +105,6 @@ end
 def ref(receiver : String, value : String, static=true)
   ref(ref(receiver), value, static)
 end
-def ref(value : String)
-  ref(nil, value)
+def ref(value : String, static=true)
+  ref(nil, value, static)
 end

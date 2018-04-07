@@ -1343,8 +1343,18 @@ module Myst
 
     def parse_doc_reference
       start = current_token
+      style =
+        case
+        when accept(Token::Type::HASH)
+          DocReference::Style::INSTANCE
+        when accept(Token::Type::POINT)
+          DocReference::Style::STATIC
+        else
+          DocReference::Style::STATIC
+        end
+
       name, location = parse_doc_reference_name
-      receiver = DocReference.new(nil, DocReference::Style::STATIC, name).at(location)
+      receiver = DocReference.new(nil, style, name).at(location)
 
       reference = loop do
         receiver =
