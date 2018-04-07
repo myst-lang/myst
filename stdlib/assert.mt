@@ -1,8 +1,8 @@
 defmodule Assert
-  # AssertionFailure
-  #
-  # An AssertionFailure is a container object that is raised when an assertion
-  # fails to complete.
+  #doc Assert.AssertionFailure
+  #|
+  #| An AssertionFailure is a container object that is raised when an assertion
+  #| fails to complete.
   deftype AssertionFailure
     def initialize(@left, @right, @message : String); end
     def initialize(@left, @right)
@@ -20,30 +20,27 @@ defmodule Assert
   end
 
 
-  # Assertion
-  #
-  # An object representing a pending assertion for a static value.
-  # Instantiating an `Assertion` object only stores the "left-hand" value.
-  # Making actual assertions is done with the instance methods on the object.
-  # For example, equality can be asserted with `%Assertion{true}.equals(true)`.
-  #
-  # When an assertion succeeds, the method will return normally, but if the
-  # assertion fails, the method will raise an `AssertionFailure` object with
-  # information about the failure.
+  #doc Assertion
+  #| An object representing a pending assertion for a static value.
+  #| Instantiating an `Assertion` object only stores the "left-hand" value.
+  #| Making actual assertions is done with the instance methods on the object.
+  #| For example, equality can be asserted with `%Assertion{true}.equals(true)`.
+  #|
+  #| When an assertion succeeds, the method will return normally, but if the
+  #| assertion fails, the method will raise an `AssertionFailure` object with
+  #| information about the failure.
   deftype Assertion
     def initialize(@value); end
 
-    # truthy -> self
-    #
-    # Asserts that the value is truthy (not `false` or `nil`).
+    #doc is_truthy -> self
+    #| Asserts that the value is truthy (not `false` or `nil`).
     def is_truthy
       @value || raise %AssertionFailure{@value, true, "truthy"}
       self
     end
 
-    # falsey -> self
-    #
-    # Asserts that the value is falsey (either `false` or `nil`).
+    #doc is_falsey -> self
+    #| Asserts that the value is falsey (either `false` or `nil`).
     def is_falsey
       @value && raise %AssertionFailure{@value, false, "falsey"}
       self

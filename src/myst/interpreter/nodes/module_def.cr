@@ -7,7 +7,6 @@ module Myst
         _module = current_scope[node.name].as(TModule)
       else
         _module = TModule.new(node.name, current_scope)
-        _module.doc = node.doc?
         current_scope.assign(node.name, _module)
       end
 

@@ -23,8 +23,10 @@ module Myst
     property tokens : Array(Token)
     # List of currently-unmatched braces in the source.
     property brace_stack : Array(Char)
-    # Buffer for holding doc comment contents
-    property doc_buffer : IO::Memory
+
+    # When true, hash characters (`#`) are considered a unique token, rather
+    # than as the start of a comment.
+    property hash_as_token = false
 
 
     enum Context
@@ -57,7 +59,6 @@ module Myst
 
       @brace_stack = [] of Char
       @context_stack = [Context::NORMAL]
-      @doc_buffer = IO::Memory.new
     end
 
     def lex_all
@@ -288,11 +289,29 @@ module Myst
         end
       when '\n'
         @current_token.type = Token::Type::NEWLINE
+        reset_line_based_properties!
         read_char
       when '#'
-        @current_token.type = Token::Type::COMMENT
         read_char
-        consume_comment
+        case current_char
+        when 'd'
+          if read_char == 'o' && read_char == 'c'
+            @current_token.type = Token::Type::DOC_START
+            read_char
+            @hash_as_token = true
+          end
+        when '|'
+          @current_token.type = Token::Type::DOC_CONTENT
+          read_char
+          consume_comment
+        else
+          if hash_as_token
+            @current_token.type = Token::Type::HASH
+          else
+            @current_token.type = Token::Type::COMMENT
+            consume_comment
+          end
+        end
       when '"'
         skip_char
         push_brace(:double_quote)
@@ -435,22 +454,8 @@ module Myst
       @reader.buffer.clear
       @reader.buffer << current_char
 
-      attach_docs_to_token
-
       @tokens << @current_token
       @current_token
-    end
-
-    def attach_docs_to_token
-      if (Token::Type.whitespace + [Token::Type::NEWLINE]).includes?(@current_token.type)
-        return nil
-      end
-
-      unless @doc_buffer.empty?
-        @current_token.doc = Doc.new(@doc_buffer.to_s.chomp)
-      end
-
-      @doc_buffer.clear
     end
 
 
@@ -535,14 +540,7 @@ module Myst
     end
 
     def consume_comment
-      # Exclude the first space on each comment line from the doc buffer.
-      unless current_char == ' '
-        @doc_buffer << current_char
-      end
-
-      until ['\n', '\0'].includes?(current_char)
-        @doc_buffer << read_char
-      end
+      until ['\n', '\0'].includes?(current_char); read_char; end
     end
 
     def consume_whitespace
@@ -602,6 +600,12 @@ module Myst
       end
 
       @current_token.value = @reader.buffer_value
+    end
+
+
+    # Reset any contextual properties that only apply for a single line.
+    private def reset_line_based_properties!
+      @hash_as_token = false
     end
   end
 end

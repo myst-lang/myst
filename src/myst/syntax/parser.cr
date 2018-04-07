@@ -80,7 +80,12 @@ module Myst
       skip_space_and_newlines
       until accept(Token::Type::EOF)
         program.children << parse_expression
-        expect_delimiter_or_eof
+        # Doc comments are not (can not be) delimited by newlines since they
+        # do not have an explicit closing token, so skip the expectation of a
+        # delimiter if the previous expression was a doc comment.
+        unless program.children.last.is_a?(DocComment)
+          expect_delimiter_or_eof
+        end
         skip_space_and_newlines
       end
 
@@ -95,13 +100,18 @@ module Myst
       until terminators.includes?(current_token.type)
         block ||= Expressions.new
         block.children << parse_expression
+        skip_space
         # In a code block, the last expression does not require a delimiter.
         # For example, `call{ a = 1; a + 2 } is valid, even though `a + 2` is
         # not followed by a delimiter. So, if the next significant token is a
         # terminator, stop expecting expressions/delimiters.
-        skip_space
         break if terminators.includes?(current_token.type)
-        expect_delimiter_or_eof
+        # Additionally, doc comments are not (can not be) delimited by newlines
+        # since they do not have an explicit closing token, so skip that
+        # expectation if the previous expression was a doc comment.
+        unless block.children.last.is_a?(DocComment)
+          expect_delimiter_or_eof
+        end
         skip_space_and_newlines
       end
 
@@ -110,8 +120,6 @@ module Myst
     end
 
     def parse_expression
-      doc = current_token.doc
-
       expr_node =
         case current_token.type
         when Token::Type::DEF, Token::Type::DEFSTATIC
@@ -138,11 +146,12 @@ module Myst
           parse_function_capture
         when Token::Type::MAGIC_FILE, Token::Type::MAGIC_LINE, Token::Type::MAGIC_DIR
           parse_magic_constant
+        when Token::Type::DOC_START
+          parse_doc_comment
         else
           parse_logical_or
         end
 
-      expr_node.doc = doc
       expr_node
     end
 
@@ -1281,6 +1290,95 @@ module Myst
       return FunctionCapture.new(value).at(start.location).at_end(value)
     end
 
+    def parse_doc_comment
+      start = expect(Token::Type::DOC_START)
+      skip_space
+      reference = parse_doc_reference
+      skip_space
+
+      returns = nil
+      if accept(Token::Type::STAB)
+        skip_space
+        returns = String.build do |str|
+          until accept(Token::Type::NEWLINE)
+            str << current_token.value
+            read_token
+          end
+        end.strip
+      end
+
+      last_content_token = start
+      content = String.build do |str|
+        loop do
+          skip_space_and_newlines
+          if token = accept(Token::Type::DOC_CONTENT)
+            # Remove the leading `#| ` from the comment, as well as any white
+            # space at the end of the line.
+            str << token.value.gsub(/(^\#\| ?)|(\s+$)/, "")
+            # removing the whitespace above will also trim the last newline
+            # character. To simplify the auto-formatting done later, this
+            # newline is re-added to separate each DOC_CONTENT line.
+            str << "\n"
+            last_content_token = token
+          else
+            break
+          end
+        end
+      end
+
+      content =
+        # Apply the formatting rules for doc comments to the content:
+        content.strip.
+          # - whitespace at the beginning and end of the comment are removed.
+          gsub(/(^\s+)|(\s+$)/, "").
+          # - empty lines have all interior whitspace stripped.
+          gsub(/\n\s*\n/, "\n\n").
+          # - single newlines are converted to single spaces.
+          gsub(/(?<!\n)\n(?!\n)/, ' ').
+          # - double newlines are converted to single newlines.
+          gsub(/\n\n/, '\n')
+
+      return DocComment.new(reference, returns, content).at(start.location).at_end(last_content_token.location)
+    end
+
+    def parse_doc_reference
+      start = current_token
+      name, location = parse_doc_reference_name
+      receiver = DocReference.new(nil, DocReference::Style::STATIC, name).at(location)
+
+      reference = loop do
+        receiver =
+          case
+          when point = accept(Token::Type::POINT)
+            name, location = parse_doc_reference_name
+            DocReference.new(receiver, DocReference::Style::STATIC, name).at(point.location).at_end(location)
+          when hash = accept(Token::Type::HASH)
+            name, location = parse_doc_reference_name
+            # Instance references can only be used as the final entry in the
+            # reference path, so break out of the loop if it is encountered.
+            break DocReference.new(receiver, DocReference::Style::INSTANCE, name).at(hash.location).at_end(location)
+          else
+            break receiver
+          end
+      end
+
+      reference
+    end
+
+    # Returns a 2-tuple of the parsed name and a location for that name.
+    def parse_doc_reference_name
+      start = current_token.location
+      name =
+        case
+        when token = accept(Token::Type::CONST)
+          start = token.location
+          token.value
+        else
+          parse_def_name
+        end
+
+      {name, start}
+    end
 
 
     ###

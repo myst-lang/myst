@@ -56,6 +56,12 @@ module Myst
         end
       end
 
+
+      if generate_docs
+        DocGenerator.auto_document(docs_directory)
+        exit
+      end
+
       if source.empty?
         STDERR.puts("No#{eval ? "thing to evaluate" : " source file"} given.")
         exit 1
@@ -65,11 +71,6 @@ module Myst
 
       if show_ast
         vm.print_ast
-        exit
-      end
-
-      if generate_docs
-        DocGenerator.auto_document(docs_directory)
         exit
       end
 

@@ -92,6 +92,10 @@ module Myst
       POINT         # .
       COLON         # :
       SEMI          # ;
+      HASH          # #
+
+      DOC_START     # #doc
+      DOC_CONTENT   # #| ...
 
       COMMENT       # # comment
       NEWLINE       # \n
@@ -214,10 +218,9 @@ module Myst
     property value    : String?
     property raw      : String
     property location : Location
-    property doc      : Doc?
 
 
-    def initialize(@type=Type::UNKNOWN, @value=nil, @raw="", *, @location, @doc=nil)
+    def initialize(@type=Type::UNKNOWN, @value=nil, @raw="", *, @location)
     end
 
 

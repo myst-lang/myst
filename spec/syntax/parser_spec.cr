@@ -26,30 +26,6 @@ private def it_does_not_parse(source, message=nil, file=__FILE__, line=__LINE__,
   end
 end
 
-private def it_documents(source, expected_doc : String, file=__FILE__, line=__LINE__, end_line=__END_LINE__)
-  it_documents(source, Doc.new(expected_doc), file, line, end_line)
-end
-
-private def it_documents(source, expected_doc : Doc?, file=__FILE__, line=__LINE__, end_line=__END_LINE__)
-  it %Q(parses documentation for `#{source}`), file, line, end_line do
-    result = parse_program(source)
-    if (doc = result.children.first.doc?)
-      doc.should eq(expected_doc)
-    else
-      if expected_doc
-        fail("Expected documentation of #{expected_doc}, but the parsed node had none.")
-      end
-    end
-  end
-end
-
-private def it_documents(source, file=__FILE__, line=__LINE__, end_line=__END_LINE__, &block : Node ->)
-  it %Q(parses documentation for `#{source}`), file, line, end_line do
-    block.call(parse_program(source).children.first)
-  end
-end
-
-
 
 private def test_calls_with_receiver(receiver_source, receiver_node)
   it_parses %Q(#{receiver_source}call),             Call.new(receiver_node, "call")
@@ -4003,114 +3979,146 @@ describe "Parser" do
 
   # Nodes can be documented with "doc comments" - comments which appear on the
   # lines immediately preceding the node.
-  it_documents %q(
-    # This is a doc comment.
+  it_parses %q(
+    #doc foo
+    #| This is a doc comment.
+  ),                            doc(ref("foo"), content: "This is a doc comment.")
+  # Doc comments with hard newlines will have the newlines replaced with spaces.
+  it_parses %q(
+    #doc foo
+    #| This is a multi-
+    #| line doc comment.
+  ),                            doc(ref("foo"), content: "This is a multi- line doc comment.")
+  # Two consecutive newlines are chomped down to a single newline.
+  it_parses %q(
+    #doc foo
+    #| This doc has two parts.
+    #|
+    #| This is the second part.
+  ),                            doc(ref("foo"), content: "This doc has two parts.\nThis is the second part.")
+  # Non-doc comments within a doc comment are ignored.
+  it_parses %q(
+    #doc foo
+    #| This doc has a normal
+    # ignore me
+    #| comment inside it.
+  ),                            doc(ref("foo"), content: "This doc has a normal comment inside it.")
+  # Leading blank lines are stripped from the content
+  it_parses %q(
+    #doc foo
+    #|
+    #|
+    #| The first two lines of this doc are stripped.
+  ),                            doc(ref("foo"), content: "The first two lines of this doc are stripped.")
+
+  # Doc comments must explicitly name what they reference on the first line.
+  # The reference can be any valid identifier
+  it_parses %q(
+    #doc Assert
+  ),                            doc(ref("Assert"))
+  it_parses %q(
+    #doc io
+  ),                            doc(ref("io"))
+  it_parses %q(
+    #doc truthy?
+  ),                            doc(ref("truthy?"))
+  it_parses %q(
+    #doc fail!
+  ),                            doc(ref("fail!"))
+  it_parses %q(
+    #doc __privatize_me
+  ),                            doc(ref("__privatize_me"))
+  it_parses %q(
+    #doc raise123
+  ),                            doc(ref("raise123"))
+  # References can specify operators
+  it_parses %q(
+    #doc []
+  ),                            doc(ref("[]"))
+  it_parses %q(
+    #doc ==
+  ),                            doc(ref("=="))
+  it_parses %q(
+    #doc +
+  ),                            doc(ref("+"))
+
+  # References can also be paths to values, like normal module paths
+  it_parses %q(
+    #doc IO.FileDescriptor
+  ),                            doc(ref(ref("IO"), "FileDescriptor"))
+  it_parses %q(
+    #doc File.open
+  ),                            doc(ref(ref("File"), "open"))
+  # And can be nested arbitrarily deep
+  it_parses %q(
+    #doc A._b.c.D
+  ),                            doc(ref(ref(ref(ref("A"), "_b"), "c"), "D"))
+
+  # References can also specify instance methods on types using the `#` notation.
+  it_parses %q(
+    #doc List#each
+  ),                            doc(ref(ref("List"), "each", static: false))
+  # Instance references can only be used as the final reference
+  it_parses %q(
+    #doc Assert.Assertion#is_truthy
+  ),                            doc(ref(ref(ref("Assert"), "Assertion"), "is_truthy", static: false))
+  it_does_not_parse %q(
+    #doc a#b#c
+  )
+
+  # Doc comments can also specify a return value after a stab (`->`) on the header line.
+  it_parses %q(
+    #doc File.open -> file
+  ),                            doc(ref(ref("File"), "open"), returns: "file")
+  # The return value can be any string of text
+  it_parses %q(
+    #doc File.open -> a new file object
+  ),                            doc(ref(ref("File"), "open"), returns: "a new file object")
+  it_parses %q(
+    #doc List#[] -> element | nil
+  ),                            doc(ref(ref("List"), "[]", static: false), returns: "element | nil")
+
+  # Doc comment content is simply parsed as raw text. There is no required format.
+  it_parses %q(
+    #doc foo
+    #|
+    #| Letters, 12345, ^!#$(*&!#)%(^*)\n\t
+    #| %.###131
+  ),                           doc(ref("foo"), content: %q(Letters, 12345, ^!#$(*&!#)%(^*)\n\t %.###131))
+
+  # Doc comments do not affect parsing outside of their content. A doc comment placed
+  # immediately above or below another expression should not affect that expression.
+  it_parses %q(
+    #doc foo
     def foo; end
-  ),                            "This is a doc comment."
-  # Doc comments can span multiple lines, and those newlines will be preserved.
-  it_documents %q(
-    # This is a multi-
-    # line doc comment.
-    def foo; end
-  ),                            "This is a multi-\nline doc comment."
-  it_documents %q(
-    # Documenting a Type.
+  ),                          doc(ref("foo")), Def.new("foo")
+  it_parses %q(
+    #doc Foo
     deftype Foo; end
-  ),                            "Documenting a Type."
-  it_documents %q(
-    # Documenting a Module.
-    defmodule Bar; end
-  ),                            "Documenting a Module."
-
-  # Multi-line doc comments can included padding lines, so long as they continue
-  # the comment chain with a leading hash.
-  it_documents %q(
-    # included.
-    #
-    # continued with padding.
-    def foo; end
-  ),                            "included.\n\ncontinued with padding."
-
-  # For now, only *Def nodes fully implement doc comments, but the parser will
-  # allow any expression-level node to be documented in this style.
-  it_documents %q(
-    # Documenting addition.
+  ),                          doc(ref("Foo")), TypeDef.new("Foo")
+  it_parses %q(
+    #doc Foo
+    defmodule Foo; end
+  ),                          doc(ref("Foo")), ModuleDef.new("Foo")
+  it_parses %q(
+    #doc addition
     1 + 1
-  ),                            "Documenting addition."
+  ),                          doc(ref("addition")), Call.new(l(1), "+", [l(1)], infix: true)
 
-  # All padding whitespace and hashes from each line (after the first "# ") is preserved.
-  it_documents %q(
-    ##### Too many hashes.
-    # Even with different numbers.
+  it_parses %q(
     def foo; end
-  ),                            "#### Too many hashes.\nEven with different numbers."
-  it_documents %q(
-    #     Spaces, too.
-    #  who would do that though?
-    def foo; end
-  ),                            "    Spaces, too.\n who would do that though?"
-  it_documents %Q(
-    #\t\t \tEven tab characters.
-    def foo; end
-  ),                            "\t\t \tEven tab characters."
-  it_documents %Q(
-    # Padding on the right is preserved, too.\t  \t \t
-    def foo; end
-  ),                            "Padding on the right is preserved, too.\t  \t \t"
-  it_documents %Q(
-    # And trailing hashes. ###
-    def foo; end
-  ),                            "And trailing hashes. ###"
-
-  # Functions within a module/type can also be documented
-  it_documents %q(
-    defmodule Foo
-      # Docs inside module.
-      def foo; end
-    end
-  ) do |module_def|
-    func_def = module_def.as(ModuleDef).body.as(Expressions).children.first
-    func_def.doc.content.should eq("Docs inside module.")
-  end
-  it_documents %q(
-    deftype Foo
-      # Docs inside type.
-      def foo; end
-    end
-  ) do |type_def|
-    func_def = type_def.as(TypeDef).body.as(Expressions).children.first
-    func_def.doc.content.should eq("Docs inside type.")
-  end
-  it_documents %q(
-    deftype Foo
-      # Docs inside type.
-      defstatic foo; end
-    end
-  ) do |type_def|
-    func_def = type_def.as(TypeDef).body.as(Expressions).children.first
-    func_def.doc.content.should eq("Docs inside type.")
-  end
-
-  # Same goes for definitions inside of blocks
-  it_documents %q(
-    foo do |e|
-      # Docs inside type.
-      def foo; end
-    end
-  ) do |call|
-    block = call.as(Call).block.as(Block)
-    func_def = block.body.as(Expressions).children.first
-    func_def.doc.content.should eq("Docs inside type.")
-  end
-
-  it_documents %q(
-    # this is not a doc
-    when a == b
-      def foo; end
-    end
-  ) do |when_node|
-    when_node = when_node.as(When)
-    func_def  = when_node.body.as(Expressions).children.first
-    func_def.doc?.should eq(nil)
-  end
+    #doc foo
+  ),                          Def.new("foo"), doc(ref("foo"))
+  it_parses %q(
+    deftype Foo; end
+    #doc Foo
+  ),                          TypeDef.new("Foo"), doc(ref("Foo"))
+  it_parses %q(
+    defmodule Foo; end
+    #doc Foo
+  ),                          ModuleDef.new("Foo"), doc(ref("Foo"))
+  it_parses %q(
+    1 + 1
+    #doc addition
+  ),                          Call.new(l(1), "+", [l(1)], infix: true), doc(ref("addition"))
 end

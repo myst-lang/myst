@@ -78,7 +78,7 @@ module Myst
     end
 
     def visit(node : ModuleDef)
-      entry = Entry.new(name: node.name, doc: node.doc?, type: DocType::MODULE)
+      entry = Entry.new(name: node.name, doc: nil, type: DocType::MODULE)
       entry.children = child_context do
         node.accept_children(self)
       end
@@ -87,7 +87,7 @@ module Myst
     end
 
     def visit(node : TypeDef)
-      entry = Entry.new(name: node.name, doc: node.doc?, type: DocType::TYPE)
+      entry = Entry.new(name: node.name, doc: nil, type: DocType::TYPE)
       entry.children = child_context do
         node.accept_children(self)
       end
@@ -99,7 +99,7 @@ module Myst
       name = String.build{ |s| printer.print(node, s) }
       entry = Entry.new(
         name: name,
-        doc: node.doc?,
+        doc: nil,
         type: node.static? ? DocType::STATIC_METHOD : DocType::METHOD
       )
 

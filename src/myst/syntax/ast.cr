@@ -2,7 +2,6 @@ module Myst
   abstract class Node
     property  location      : Location?
     property  end_location  : Location?
-    property! doc : Doc?
 
     def at(@location : Location)
       self
@@ -960,6 +959,8 @@ module Myst
   # interpreter to immediately start backtracking up the callstack until a node
   # capable of handling the Exception is encountered (i.e., has an attached
   # `rescue` clause).
+  #
+  #   'raise' value
   class Raise < ControlExpr
     def_equals_and_hash
   end
@@ -968,6 +969,9 @@ module Myst
   # `raise`. Rescues may also provide a parameter (with all the same syntax as
   # parameters used in Defs) to restrict what Exceptions can be handled by the
   # expression.
+  #
+  #   'rescue' [ param [ ':' type_restriction ] ]
+  #     body
   class Rescue < Node
     property! param : Param?
     property  body  : Node
@@ -987,6 +991,11 @@ module Myst
   # Whenever a `rescue` or `ensure` is encountered at the end of a Def, Block,
   # or Begin, the existing node is wrapped in an ExceptionHandler, and the
   # handling blocks are parsed into this node.
+  #
+  #   body
+  #   [ rescue_expression ]*
+  #   [ else_expression ]
+  #   [ ensure_expression ]
   class ExceptionHandler < Node
     property  body     : Node
     property  rescues  : Array(Rescue)
@@ -1019,5 +1028,54 @@ module Myst
     end
 
     def_equals_and_hash body, rescues, else?, ensure?
+  end
+
+  # A full documentation comment. Documentation comments are distinct
+  # entities that can attach to other objects via a `reference`. References
+  # are evaluated based on the current lexical context
+  #
+  #   '#doc' reference [ '->' reference ]
+  #   [ '#|' content ]*
+  class DocComment < Node
+    property reference  : DocReference
+    property returns    : String?
+    property content    : String?
+
+    def initialize(@reference : DocReference, @returns : String?, @content : String?)
+    end
+
+    def_equals_and_hash reference, returns, content
+  end
+
+  # A reference expression. References are the standard way of referring to
+  # an object in Myst code. Any normal identifier is a valid reference.
+  # Static references are written with the `.` notation (e.g., `File.open` or
+  # `IO.FileDescriptor`). Instance references are written using the `#`
+  # notation (e.g., `List#each`). References can also be nested recursively
+  # (e.g., `Assert.Assertion#is_truthy`).
+  #
+  #   reference '.' identifier
+  # |
+  #   reference '#' identifier
+  # |
+  #   identifier
+  class DocReference < Node
+    enum Style
+      # A static reference, normally represented using `.`. For example,
+      # `File.open` or `IO.FileDescriptor`.
+      STATIC
+      # An instance reference, normally represented using `#`. For example,
+      # `List#each` or `Assertion#is_truthy`.
+      INSTANCE
+    end
+
+    property receiver : DocReference?
+    property style    : Style
+    property value    : String
+
+    def initialize(@receiver : DocReference?, @style : Style, @value : String)
+    end
+
+    def_equals_and_hash receiver, style, value
   end
 end
