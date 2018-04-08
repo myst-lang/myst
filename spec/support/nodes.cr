@@ -88,23 +88,6 @@ end
 # doc(reference, returns=nil, content="")
 #
 # Generate a DocComment node from the reference, return value, and content.
-def doc(reference, returns=nil, content="")
-  DocComment.new(reference, returns, content)
-end
-
-# ref(receiver=nil, value, static: true)
-#
-# Generate a DocReference node from the receiver and value. `receiver` can be
-# either a Node or an existing DocReference. If `static` is true, the reference
-# node will assume the `.` notation. With `false` it will use the `#` instance
-# notation instead.
-def ref(receiver : DocReference?, value : String, static=true)
-  style = static ? DocReference::Style::STATIC : DocReference::Style::INSTANCE
-  DocReference.new(receiver, style, value)
-end
-def ref(receiver : String, value : String, static=true)
-  ref(ref(receiver), value, static)
-end
-def ref(value : String, static=true)
-  ref(nil, value, static)
+def doc(header, content="", target=NilLiteral.new)
+  DocComment.new(header, content, target)
 end

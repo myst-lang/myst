@@ -28,12 +28,24 @@ describe("NativeLib - Top level methods") do
     #| Documentation for method foo.
     def foo; end
 
+    it("returns the doc comment for a function definition") do
+      assert(doc((&foo))).equals("Documentation for method foo.")
+    end
+
     #doc Foo
     #| Documentation for module Foo.
     defmodule Foo
       #doc foo
       #| method foo within Foo.
       def foo; end
+    end
+
+    it("returns the doc comment for a module definition") do
+      assert(doc(Foo)).equals("Documentation for module Foo.")
+    end
+
+    it("returns the doc comment for a method within a module") do
+      assert(doc((&Foo.foo))).equals("method foo within Foo.")
     end
 
     #doc Bar
@@ -50,28 +62,16 @@ describe("NativeLib - Top level methods") do
       end
     end
 
-    it("returns the doc comment for a function definition") do
-      assert(doc("foo")).equals("Documentation for method foo.")
-    end
-
-    it("returns the doc comment for a module definition") do
-      assert(doc("Foo")).equals("Documentation for module Foo.")
-    end
-
     it("returns the doc comment for a type definition") do
-      assert(doc("Bar")).equals("Documentation for type Bar.")
-    end
-
-    it("returns the doc comment for a method within a module") do
-      assert(doc("Foo.foo")).equals("method foo within Foo.")
+      assert(doc(Bar)).equals("Documentation for type Bar.")
     end
 
     it("returns the doc comment for a static method within a type") do
-      assert(doc("Bar.baz")).equals("static method baz within Bar.")
+      assert(doc((&Bar.baz))).equals("static method baz within Bar.")
     end
 
     it("returns the doc comment for an instance method within a type") do
-      assert(doc("Bar#baz")).equals("instance method baz within Bar.")
+      assert(doc((&%Bar{}.baz))).equals("instance method baz within Bar.")
     end
   end
 end

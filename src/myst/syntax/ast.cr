@@ -1030,66 +1030,24 @@ module Myst
     def_equals_and_hash body, rescues, else?, ensure?
   end
 
-  # A full documentation comment. Documentation comments are distinct
-  # entities that can attach to other objects via a `reference`. References
-  # are evaluated based on the current lexical context
+  # A full documentation comment. Documentation comments are distinct entities
+  # that automatically attach to whatever expression follows them. Doc
+  # comments are available at runtime by inspecting values, or can be parsed
+  # out statically. In the AST, DocComment nodes wrap around whatever their
+  # target expression is so that the target expression can be interpreted
+  # consistently.
   #
-  #   '#doc' reference [ '->' reference ]
+  #   '#doc' [ content ]
   #   [ '#|' content ]*
+  #   target
   class DocComment < Node
-    property reference  : DocReference
-    property returns    : String?
-    property content    : String?
+    property header : String?
+    property content  : String
+    property target   : Node
 
-    def initialize(@reference : DocReference, @returns : String?, @content : String?)
+    def initialize(@header : String?, @content : String, @target : Node)
     end
 
-    def_equals_and_hash reference, returns, content
-  end
-
-  # A reference expression. References are the standard way of referring to
-  # an object in Myst code. Any normal identifier is a valid reference.
-  # Static references are written with the `.` notation (e.g., `File.open` or
-  # `IO.FileDescriptor`). Instance references are written using the `#`
-  # notation (e.g., `List#each`). References can also be nested recursively
-  # (e.g., `Assert.Assertion#is_truthy`).
-  #
-  #   reference '.' identifier
-  # |
-  #   reference '#' identifier
-  # |
-  #   identifier
-  class DocReference < Node
-    enum Style
-      # A static reference, normally represented using `.`. For example,
-      # `File.open` or `IO.FileDescriptor`.
-      STATIC
-      # An instance reference, normally represented using `#`. For example,
-      # `List#each` or `Assertion#is_truthy`.
-      INSTANCE
-    end
-
-    property receiver : DocReference?
-    property style    : Style
-    property value    : String
-
-    def initialize(@receiver : DocReference?, @style : Style, @value : String)
-    end
-
-    def_equals_and_hash receiver, style, value
-
-    # Appends the full path represented by this reference to the given IO.
-    def to_s(io : IO)
-      receiver.to_s(io) if receiver
-
-      case style
-      when Style::STATIC
-        io << "."
-      when Style::INSTANCE
-        io << "#"
-      end
-
-      io << value
-    end
+    def_equals_and_hash header, content, target
   end
 end

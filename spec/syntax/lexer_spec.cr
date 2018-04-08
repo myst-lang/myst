@@ -185,13 +185,7 @@ describe "Lexer" do
   end
 
   it "lexes '#doc' as a DOC_START" do
-    assert_single_token("#doc", Token::Type::DOC_CONTENT)
-  end
-
-  it "lexes '#' as a HASH" do
-    lexer = Lexer.new(IO::Memory.new("#"), File.join(Dir.current, "test_source.mt"))
-    lexer.hash_as_token = true
-    lexer.read_token.type.should eq(Token::Type::HASH)
+    assert_single_token("#doc", Token::Type::DOC_START)
   end
 
   it "lexes '#|' as a DOC_CONTENT" do
@@ -207,7 +201,7 @@ describe "Lexer" do
     it "is not terminated by any special characters" do
       token = tokenize(%Q(#| .4#$@!%^*&()}\t \t{[]->=~!#\n)).first
       token.type.should eq(Token::Type::DOC_CONTENT)
-      token.value.should eq(%Q(#| .4#$@!%^*&()}\t \t{[]->=~!#))
+      token.value.should eq(%Q(.4#$@!%^*&()}\t \t{[]->=~!#))
     end
   end
 end

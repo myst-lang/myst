@@ -3982,110 +3982,50 @@ describe "Parser" do
   it_parses %q(
     #doc foo
     #| This is a doc comment.
-  ),                            doc(ref("foo"), content: "This is a doc comment.")
+    nil
+  ),                            doc("foo", "This is a doc comment.")
+  # The header of a doc comment is optional.
+  it_parses %q(
+    #doc
+    #| some documentation
+    nil
+  ),                            doc("", "some documentation")
+  # The content is also optional.
+  it_parses %q(
+    #doc
+    nil
+  ),                            doc("")
   # Doc comments with hard newlines will have the newlines replaced with spaces.
   it_parses %q(
     #doc foo
     #| This is a multi-
     #| line doc comment.
-  ),                            doc(ref("foo"), content: "This is a multi- line doc comment.")
+    nil
+  ),                            doc("foo", "This is a multi- line doc comment.")
   # Two consecutive newlines are chomped down to a single newline.
   it_parses %q(
     #doc foo
     #| This doc has two parts.
     #|
     #| This is the second part.
-  ),                            doc(ref("foo"), content: "This doc has two parts.\nThis is the second part.")
+    nil
+  ),                            doc("foo", "This doc has two parts.\nThis is the second part.")
   # Non-doc comments within a doc comment are ignored.
   it_parses %q(
     #doc foo
     #| This doc has a normal
     # ignore me
     #| comment inside it.
-  ),                            doc(ref("foo"), content: "This doc has a normal comment inside it.")
+    nil
+  ),                            doc("foo", "This doc has a normal comment inside it.")
   # Leading blank lines are stripped from the content
   it_parses %q(
     #doc foo
     #|
     #|
     #| The first two lines of this doc are stripped.
-  ),                            doc(ref("foo"), content: "The first two lines of this doc are stripped.")
-
-  # Doc comments must explicitly name what they reference on the first line.
-  # The reference can be any valid identifier
-  it_parses %q(
-    #doc Assert
-  ),                            doc(ref("Assert"))
-  it_parses %q(
-    #doc io
-  ),                            doc(ref("io"))
-  it_parses %q(
-    #doc truthy?
-  ),                            doc(ref("truthy?"))
-  it_parses %q(
-    #doc fail!
-  ),                            doc(ref("fail!"))
-  it_parses %q(
-    #doc __privatize_me
-  ),                            doc(ref("__privatize_me"))
-  it_parses %q(
-    #doc raise123
-  ),                            doc(ref("raise123"))
-  # References can specify operators
-  it_parses %q(
-    #doc []
-  ),                            doc(ref("[]"))
-  it_parses %q(
-    #doc ==
-  ),                            doc(ref("=="))
-  it_parses %q(
-    #doc +
-  ),                            doc(ref("+"))
-
-  # References can also be paths to values, like normal module paths
-  it_parses %q(
-    #doc IO.FileDescriptor
-  ),                            doc(ref(ref("IO"), "FileDescriptor"))
-  it_parses %q(
-    #doc File.open
-  ),                            doc(ref(ref("File"), "open"))
-  # And can be nested arbitrarily deep
-  it_parses %q(
-    #doc A._b.c.D
-  ),                            doc(ref(ref(ref(ref("A"), "_b"), "c"), "D"))
-
-  # References can also specify instance methods on types using the `#` notation.
-  it_parses %q(
-    #doc List#each
-  ),                            doc(ref(ref("List"), "each", static: false))
-  # Instance references can only be used as the final reference
-  it_parses %q(
-    #doc Assert.Assertion#is_truthy
-  ),                            doc(ref(ref(ref("Assert"), "Assertion"), "is_truthy", static: false))
-  it_does_not_parse %q(
-    #doc a#b#c
-  )
-
-  # References can start with a path indicator to disambiguate static and
-  # instance methods in the current scope.
-  it_parses %q(
-    #doc #foo
-  ),                            doc(ref("foo", static: false))
-  it_parses %q(
-    #doc .foo
-  ),                            doc(ref("foo", static: true))
-
-  # Doc comments can also specify a return value after a stab (`->`) on the header line.
-  it_parses %q(
-    #doc File.open -> file
-  ),                            doc(ref(ref("File"), "open"), returns: "file")
-  # The return value can be any string of text
-  it_parses %q(
-    #doc File.open -> a new file object
-  ),                            doc(ref(ref("File"), "open"), returns: "a new file object")
-  it_parses %q(
-    #doc List#[] -> element | nil
-  ),                            doc(ref(ref("List"), "[]", static: false), returns: "element | nil")
+    nil
+  ),                            doc("foo", "The first two lines of this doc are stripped.")
 
   # Doc comment content is simply parsed as raw text. There is no required format.
   it_parses %q(
@@ -4093,41 +4033,41 @@ describe "Parser" do
     #|
     #| Letters, 12345, ^!#$(*&!#)%(^*)\n\t
     #| %.###131
-  ),                           doc(ref("foo"), content: %q(Letters, 12345, ^!#$(*&!#)%(^*)\n\t %.###131))
+    nil
+  ),                           doc("foo", %q(Letters, 12345, ^!#$(*&!#)%(^*)\n\t %.###131))
+
+  # Doc comments are only valid if followed by an expression
+  it_does_not_parse %q(
+    #doc foo
+  )
+  it_does_not_parse %q(
+    #doc foo
+    #| some documentation.
+  )
+
+  # Whitespace between a doc comment and its target is ignored
+  it_parses %q(
+    #doc foo
+
+    nil
+  ),                          doc("foo")
 
   # Doc comments do not affect parsing outside of their content. A doc comment placed
   # immediately above or below another expression should not affect that expression.
   it_parses %q(
     #doc foo
     def foo; end
-  ),                          doc(ref("foo")), Def.new("foo")
+  ),                          doc("foo", target: Def.new("foo"))
   it_parses %q(
     #doc Foo
     deftype Foo; end
-  ),                          doc(ref("Foo")), TypeDef.new("Foo")
+  ),                          doc("Foo", target: TypeDef.new("Foo"))
   it_parses %q(
     #doc Foo
     defmodule Foo; end
-  ),                          doc(ref("Foo")), ModuleDef.new("Foo")
+  ),                          doc("Foo", target: ModuleDef.new("Foo"))
   it_parses %q(
     #doc addition
     1 + 1
-  ),                          doc(ref("addition")), Call.new(l(1), "+", [l(1)], infix: true)
-
-  it_parses %q(
-    def foo; end
-    #doc foo
-  ),                          Def.new("foo"), doc(ref("foo"))
-  it_parses %q(
-    deftype Foo; end
-    #doc Foo
-  ),                          TypeDef.new("Foo"), doc(ref("Foo"))
-  it_parses %q(
-    defmodule Foo; end
-    #doc Foo
-  ),                          ModuleDef.new("Foo"), doc(ref("Foo"))
-  it_parses %q(
-    1 + 1
-    #doc addition
-  ),                          Call.new(l(1), "+", [l(1)], infix: true), doc(ref("addition"))
+  ),                          doc("addition", target: Call.new(l(1), "+", [l(1)], infix: true))
 end

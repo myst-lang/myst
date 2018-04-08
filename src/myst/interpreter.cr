@@ -23,10 +23,9 @@ module Myst
     # The pool of open file descriptors used to avoid duplicating entries.
     getter fd_pool = {} of Int32 => IO
 
-    # A table containing all parsed documentation from the codebase.
-    property doc_table : Hash(String, DocEntry)
-    # An array of identifiers used to build absolute doc references.
-    property doc_stack : Array(String)
+    # A mapping of values to documentation about that value. Mostly applied
+    # to modules, types, and methods.
+    property doc_table : Hash(MTValue, DocComment)
 
 
     def initialize(input : IO = STDIN, output : IO = STDOUT, errput : IO = STDERR)
@@ -46,8 +45,7 @@ module Myst
       @self_stack = [@kernel] of MTValue
       @warnings = 0
 
-      @doc_table = {} of String => DocEntry
-      @doc_stack = [] of String
+      @doc_table = Hash(MTValue, DocComment).new
     end
 
     # input, output, and errput properties. These delegate to the entries in

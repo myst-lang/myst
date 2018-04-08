@@ -1,7 +1,7 @@
 module Myst
   class Interpreter
-    NativeLib.method :mt_doc, MTValue, path : String do
-      if doc = self.doc_table[path]?
+    NativeLib.method :mt_doc, MTValue, value : MTValue do
+      if doc = @doc_table[value]?
         doc.content
       else
         TNil.new

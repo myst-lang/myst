@@ -1293,28 +1293,17 @@ module Myst
     def parse_doc_comment
       start = expect(Token::Type::DOC_START)
       skip_space
-      reference = parse_doc_reference
+      header = start.value.strip
       skip_space
-
-      returns = nil
-      if accept(Token::Type::STAB)
-        skip_space
-        returns = String.build do |str|
-          until accept(Token::Type::NEWLINE)
-            str << current_token.value
-            read_token
-          end
-        end.strip
-      end
 
       last_content_token = start
       content = String.build do |str|
         loop do
           skip_space_and_newlines
           if token = accept(Token::Type::DOC_CONTENT)
-            # Remove the leading `#| ` from the comment, as well as any white
-            # space at the end of the line.
-            str << token.value.gsub(/(^\#\| ?)|(\s+$)/, "")
+            # Remove trailing whitespace from the line (leading whitespace is)
+            # preserved.
+            str << token.value.rstrip
             # removing the whitespace above will also trim the last newline
             # character. To simplify the auto-formatting done later, this
             # newline is re-added to separate each DOC_CONTENT line.
@@ -1328,9 +1317,11 @@ module Myst
 
       content =
         # Apply the formatting rules for doc comments to the content:
-        content.strip.
+        content.
           # - whitespace at the beginning and end of the comment are removed.
-          gsub(/(^\s+)|(\s+$)/, "").
+          strip.
+          # - strip trailing whitespace from every line
+          gsub(/\h+\n/, '\n').
           # - empty lines have all interior whitspace stripped.
           gsub(/\n\s*\n/, "\n\n").
           # - single newlines are converted to single spaces.
@@ -1338,57 +1329,12 @@ module Myst
           # - double newlines are converted to single newlines.
           gsub(/\n\n/, '\n')
 
-      return DocComment.new(reference, returns, content).at(start.location).at_end(last_content_token.location)
+      # Doc comments expect to be followed by an expression. That expression is
+      # what the documentation will be attached to.
+      target = parse_expression
+      return DocComment.new(header, content, target).at(start.location).at_end(last_content_token.location)
     end
 
-    def parse_doc_reference
-      start = current_token
-      style =
-        case
-        when accept(Token::Type::HASH)
-          DocReference::Style::INSTANCE
-        when accept(Token::Type::POINT)
-          DocReference::Style::STATIC
-        else
-          DocReference::Style::STATIC
-        end
-
-      name, location = parse_doc_reference_name
-      receiver = DocReference.new(nil, style, name).at(location)
-
-      reference = loop do
-        receiver =
-          case
-          when point = accept(Token::Type::POINT)
-            name, location = parse_doc_reference_name
-            DocReference.new(receiver, DocReference::Style::STATIC, name).at(point.location).at_end(location)
-          when hash = accept(Token::Type::HASH)
-            name, location = parse_doc_reference_name
-            # Instance references can only be used as the final entry in the
-            # reference path, so break out of the loop if it is encountered.
-            break DocReference.new(receiver, DocReference::Style::INSTANCE, name).at(hash.location).at_end(location)
-          else
-            break receiver
-          end
-      end
-
-      reference
-    end
-
-    # Returns a 2-tuple of the parsed name and a location for that name.
-    def parse_doc_reference_name
-      start = current_token.location
-      name =
-        case
-        when token = accept(Token::Type::CONST)
-          start = token.location
-          token.value
-        else
-          parse_def_name
-        end
-
-      {name, start}
-    end
 
 
     ###

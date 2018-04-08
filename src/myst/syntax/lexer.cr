@@ -24,10 +24,6 @@ module Myst
     # List of currently-unmatched braces in the source.
     property brace_stack : Array(Char)
 
-    # When true, hash characters (`#`) are considered a unique token, rather
-    # than as the start of a comment.
-    property hash_as_token = false
-
 
     enum Context
       # Normal functioning context of the lexer.
@@ -292,25 +288,23 @@ module Myst
         reset_line_based_properties!
         read_char
       when '#'
-        read_char
+        skip_char
         case current_char
         when 'd'
-          if read_char == 'o' && read_char == 'c'
+          if skip_char == 'o' && skip_char == 'c'
             @current_token.type = Token::Type::DOC_START
-            read_char
-            @hash_as_token = true
+            skip_char
+            consume_comment
+          else
+            consume_comment
           end
         when '|'
           @current_token.type = Token::Type::DOC_CONTENT
-          read_char
+          skip_char
           consume_comment
         else
-          if hash_as_token
-            @current_token.type = Token::Type::HASH
-          else
-            @current_token.type = Token::Type::COMMENT
-            consume_comment
-          end
+          @current_token.type = Token::Type::COMMENT
+          consume_comment
         end
       when '"'
         skip_char
@@ -540,6 +534,12 @@ module Myst
     end
 
     def consume_comment
+      # If the first character of the comment is a space, it is ignored. Since
+      # standard comments are written with a padding space (`# comment`), the
+      # actual content of the comment should not include that space.
+      if current_char == ' '
+        skip_char
+      end
       until ['\n', '\0'].includes?(current_char); read_char; end
     end
 
