@@ -1,7 +1,6 @@
 deftype Integer
-  # times -> self
-  #
-  # Call block as many times as the value of this integer.
+  #doc times(&block) -> self
+  #| Call block as many times as the value of this integer.
   def times(&block)
     i = 0
 
