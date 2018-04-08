@@ -11,7 +11,9 @@ module Myst
       end
 
       push_self(_module)
+      @doc_stack.push(node.name)
       visit(node.body)
+      @doc_stack.pop
       pop_self
 
       # Evaluating the body of the module will leave the last expression

@@ -33,7 +33,6 @@ module Myst
 
 
   abstract class MutableValue
-    property! doc : Doc?
     # Instance variables are properties tied to the instance of an object.
     # For consistency between native (Integer, String, etc.) and language-
     # level types (IO, File, etc.), all values have an `ivars` property.

@@ -26,7 +26,9 @@ module Myst
       end
 
       push_self(type)
+      @doc_stack.push(node.name)
       visit(node.body)
+      @doc_stack.pop
       pop_self
 
 

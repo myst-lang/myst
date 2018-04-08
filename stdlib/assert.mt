@@ -32,14 +32,14 @@ defmodule Assert
   deftype Assertion
     def initialize(@value); end
 
-    #doc is_truthy -> self
+    #doc #is_truthy -> self
     #| Asserts that the value is truthy (not `false` or `nil`).
     def is_truthy
       @value || raise %AssertionFailure{@value, true, "truthy"}
       self
     end
 
-    #doc is_falsey -> self
+    #doc #is_falsey -> self
     #| Asserts that the value is falsey (either `false` or `nil`).
     def is_falsey
       @value && raise %AssertionFailure{@value, false, "falsey"}

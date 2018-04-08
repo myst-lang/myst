@@ -1077,5 +1077,19 @@ module Myst
     end
 
     def_equals_and_hash receiver, style, value
+
+    # Appends the full path represented by this reference to the given IO.
+    def to_s(io : IO)
+      receiver.to_s(io) if receiver
+
+      case style
+      when Style::STATIC
+        io << "."
+      when Style::INSTANCE
+        io << "#"
+      end
+
+      io << value
+    end
   end
 end
