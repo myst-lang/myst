@@ -57,11 +57,6 @@ module Myst
       @program.not_nil!.accept(visitor)
     end
 
-    def generate_docs(io : IO = STDOUT)
-      visitor = DocGenerator.new
-      docs = visitor.document(@program.not_nil!)
-    end
-
     # Tries to run the provided string as a myst program
     def eval(program : String)
       run(Parser.for_content(program).parse)

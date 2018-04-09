@@ -58,7 +58,7 @@ module Myst
 
 
       if generate_docs
-        DocGenerator.auto_document(docs_directory)
+        Doc::Generator.auto_document(docs_directory)
         exit
       end
 

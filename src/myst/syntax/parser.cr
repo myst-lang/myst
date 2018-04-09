@@ -120,39 +120,36 @@ module Myst
     end
 
     def parse_expression
-      expr_node =
-        case current_token.type
-        when Token::Type::DEF, Token::Type::DEFSTATIC
-          parse_def
-        when Token::Type::DEFMODULE
-          parse_module_def
-        when Token::Type::DEFTYPE
-          parse_type_def
-        when Token::Type::FN
-          parse_anonymous_function
-        when Token::Type::MATCH
-          parse_match
-        when Token::Type::INCLUDE
-          parse_include
-        when Token::Type::EXTEND
-          parse_extend
-        when Token::Type::REQUIRE
-          parse_require
-        when Token::Type::WHEN, Token::Type::UNLESS
-          parse_conditional
-        when Token::Type::WHILE, Token::Type::UNTIL
-          parse_loop
-        when Token::Type::AMPERSAND
-          parse_function_capture
-        when Token::Type::MAGIC_FILE, Token::Type::MAGIC_LINE, Token::Type::MAGIC_DIR
-          parse_magic_constant
-        when Token::Type::DOC_START
-          parse_doc_comment
-        else
-          parse_logical_or
-        end
-
-      expr_node
+      case current_token.type
+      when Token::Type::DEF, Token::Type::DEFSTATIC
+        parse_def
+      when Token::Type::DEFMODULE
+        parse_module_def
+      when Token::Type::DEFTYPE
+        parse_type_def
+      when Token::Type::FN
+        parse_anonymous_function
+      when Token::Type::MATCH
+        parse_match
+      when Token::Type::INCLUDE
+        parse_include
+      when Token::Type::EXTEND
+        parse_extend
+      when Token::Type::REQUIRE
+        parse_require
+      when Token::Type::WHEN, Token::Type::UNLESS
+        parse_conditional
+      when Token::Type::WHILE, Token::Type::UNTIL
+        parse_loop
+      when Token::Type::AMPERSAND
+        parse_function_capture
+      when Token::Type::MAGIC_FILE, Token::Type::MAGIC_LINE, Token::Type::MAGIC_DIR
+        parse_magic_constant
+      when Token::Type::DOC_START
+        parse_doc_comment
+      else
+        parse_logical_or
+      end
     end
 
     def parse_def

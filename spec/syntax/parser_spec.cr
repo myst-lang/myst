@@ -4052,6 +4052,24 @@ describe "Parser" do
     nil
   ),                          doc("foo")
 
+  # Docs can be attached to any kind of node, but generally only apply to modules, types, methods, and constants.
+  it_parses %q(
+    #doc foo
+    defmodule Foo; end
+  ),                          doc("foo", target: ModuleDef.new("Foo"))
+  it_parses %q(
+    #doc foo
+    deftype Foo; end
+  ),                          doc("foo", target: TypeDef.new("Foo"))
+  it_parses %q(
+    #doc foo
+    def foo; end
+  ),                          doc("foo", target: Def.new("foo"))
+  it_parses %q(
+    #doc foo
+    FOO = nil
+  ),                          doc("foo", target: SimpleAssign.new(c("FOO"), l(nil)))
+
   # Doc comments do not affect parsing outside of their content. A doc comment placed
   # immediately above or below another expression should not affect that expression.
   it_parses %q(

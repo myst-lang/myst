@@ -11,12 +11,8 @@ def assert_print(source : String, expected : String?=nil, file=__FILE__, line=__
   expected ||= source
 
   it "prints `#{source}` as `#{expected}`", file, line, end_line do
-    io = IO::Memory.new
     program = parse_program(source)
-    printer = Myst::Printer.new(output: io)
-    printer.print(program)
-
-    io.to_s.should eq(expected)
+    Printer.print(program).should eq(expected)
   end
 end
 
@@ -28,12 +24,10 @@ def assert_print(node : Node, expected : String?=nil, file=__FILE__, line=__LINE
   test_name += " as `#{expected}`" if expected
 
   it test_name, file, line, end_line do
-    io = IO::Memory.new
-    printer = Myst::Printer.new(output: io)
-    printer.print(node)
+    result = Printer.print(node)
 
     if expected
-      io.to_s.should eq(expected)
+      result.should eq(expected)
     end
   end
 end

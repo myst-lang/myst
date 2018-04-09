@@ -92,7 +92,6 @@ module Myst
       POINT         # .
       COLON         # :
       SEMI          # ;
-      HASH          # #
 
       DOC_START     # #doc
       DOC_CONTENT   # #| ...

@@ -285,7 +285,6 @@ module Myst
         end
       when '\n'
         @current_token.type = Token::Type::NEWLINE
-        reset_line_based_properties!
         read_char
       when '#'
         skip_char
@@ -600,12 +599,6 @@ module Myst
       end
 
       @current_token.value = @reader.buffer_value
-    end
-
-
-    # Reset any contextual properties that only apply for a single line.
-    private def reset_line_based_properties!
-      @hash_as_token = false
     end
   end
 end
