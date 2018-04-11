@@ -16,7 +16,7 @@ module Myst
       # that can be documented.
       def self.auto_document(directory = Dir.current)
         generator = self.new
-        Dir[directory, directory+"/*"].each do |entry|
+        Dir[directory, directory+"/**", directory+"/**/*"].uniq.each do |entry|
           # Only consider files that end with the `.mt` extension
           if entry.ends_with?(".mt")
             file_ast = Parser.for_file(entry).parse
