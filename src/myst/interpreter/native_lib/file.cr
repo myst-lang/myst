@@ -5,13 +5,13 @@ module Myst
     NativeLib.passthrough(File.delete(path : String), return_nil: true, may_raise: Errno)
     NativeLib.passthrough(File.directory?(path : String))
     NativeLib.passthrough(File.dirname(path : String))
-    NativeLib.passthrough(File.empty?(path : String))
+    NativeLib.passthrough(File.empty?(path : String), may_raise: Errno)
     NativeLib.passthrough(File.executable?(path : String))
     NativeLib.passthrough(File.exists?(path : String))
     NativeLib.passthrough(File.expand_path(path : String))
     NativeLib.passthrough(File.extname(path : String))
     NativeLib.passthrough(File.file?(path : String))
-    NativeLib.passthrough(File.read(path : String))
+    NativeLib.passthrough(File.read(path : String), may_raise: Errno)
     NativeLib.passthrough(File.readable?(path : String))
     NativeLib.passthrough(File.real_path(path : String))
     NativeLib.passthrough(File.symlink?(path : String))
@@ -30,6 +30,8 @@ module Myst
     NativeLib.method :passthrough_File_rename, MTValue, old_name : String, new_name : String do
       File.rename(old_name, new_name)
       TNil.new
+    rescue ex : Errno
+      __raise_runtime_error(ex.message || "Unknown error in native method `{{call.name}}`")
     end
 
     NativeLib.method :passthrough_File_symlink, MTValue, old_path : String, new_path : String do

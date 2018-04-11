@@ -1,7 +1,17 @@
 deftype Time
+  #doc Time.Util
+  #| A module containing utility functions and constants for performing
+  #| calculations with times. This module is primarily used by the `Time` type
+  #| to properly translate between componentized time objects and seconds or
+  #| nanoseconds.
   # Logic taken from Crystal::Time
   defmodule Util
+    #doc DAYS_MONTH
+    #| An array representing the number of days in each month of a normal year,
+    #| with January being month `0`.
     DAYS_MONTH      = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    #doc DAYS_MONTH_LEAP
+    #| Similar to `DAYS_MONTH`, but for the months of a leap year.
     DAYS_MONTH_LEAP = [0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
     SECONDS_PER_MINUTE  = 60
