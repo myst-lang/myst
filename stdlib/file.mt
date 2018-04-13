@@ -1,5 +1,6 @@
 # File extends IO.FileDescriptor, but is initialized in the native library,
 # so the extension is not repeated here.
+
 deftype File
   #doc open(path : String, mode : String) -> file
   #| Creates a new File object for the file specified by `path` and opens it

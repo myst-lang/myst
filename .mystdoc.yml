@@ -1,0 +1,6 @@
+project_name: Myst
+version: v0.6.0
+homepage_url: https://myst-lang.org
+logo_url: https://avatars2.githubusercontent.com/u/29179527?s=200&v=4
+doc: |
+  Myst is a dynamic, general-purpose programming language.

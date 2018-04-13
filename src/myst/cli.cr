@@ -9,6 +9,7 @@ module Myst
       stop_evaluation = false
       generate_docs = false
       docs_directory = Dir.current
+      docs_yml = "./.mystdoc.yml"
 
       OptionParser.parse! do |opts|
         opts.banner = "Usage: myst [filename] [options]"
@@ -38,6 +39,10 @@ module Myst
           docs_directory = directory
         end
 
+        opts.on("--doc-yml DOC_YML", "Use the given file in place of ./.mystdoc.yml when generating metadata for documentation.") do |yml_file|
+          docs_yml = yml_file
+        end
+
         opts.on("-e", "--eval", "Eval code from args") do
           eval = true
         end
@@ -58,7 +63,7 @@ module Myst
 
 
       if generate_docs
-        Doc::Generator.auto_document(docs_directory)
+        Doc::Generator.auto_document(docs_directory, docs_yml)
         exit
       end
 

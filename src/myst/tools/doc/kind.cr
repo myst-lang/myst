@@ -1,6 +1,7 @@
 module Myst
   module Doc
     enum Kind
+      ROOT
       CONSTANT
       METHOD
       MODULE

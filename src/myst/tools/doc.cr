@@ -4,7 +4,7 @@ require "./doc/*"
 
 module Myst
   module Doc
-    alias DocContext = ModuleDoc | TypeDoc
+    alias DocContext = ModuleDoc | TypeDoc | RootDoc
 
     # An AST visitor for parsing doc comments from Myst source code and emitting
     # the content in a JSON structure.
@@ -14,8 +14,8 @@ module Myst
     class Generator
       # Automatically scan everything in the current directory to find Myst files
       # that can be documented.
-      def self.auto_document(directory = Dir.current)
-        generator = self.new
+      def self.auto_document(directory, doc_yml)
+        generator = self.new(doc_yml)
         Dir[directory, directory+"/**", directory+"/**/*"].uniq.each do |entry|
           # Only consider files that end with the `.mt` extension
           if entry.ends_with?(".mt")
@@ -30,8 +30,14 @@ module Myst
 
       @current_context : DocContext
 
-      def initialize
-        @docs = ModuleDoc.new("Root", "Root", nil)
+      def initialize(doc_yml : String)
+        @docs =
+          if File.exists?(doc_yml)
+            RootDoc.from_yaml(File.read(doc_yml))
+          else
+            RootDoc.new
+          end
+
         @current_context = @docs
       end
 
@@ -74,7 +80,7 @@ module Myst
       def visit(node : Def, doc : String?=nil)
         container =
           case context = @current_context
-          when ModuleDoc
+          when ModuleDoc, RootDoc
             context.methods
           when TypeDoc
             case
@@ -133,7 +139,12 @@ module Myst
       end
 
       private def make_full_path(basename : String) : String
-        @current_context.full_name + "." + basename
+        case context = @current_context
+        when RootDoc
+          basename
+        else
+          context.full_name + "." + basename
+        end
       end
     end
   end
