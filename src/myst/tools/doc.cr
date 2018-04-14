@@ -100,7 +100,7 @@ module Myst
 
         is_instance = @current_context.is_a?(TypeDoc) && !node.static?
         # Make sure that a method entry for this clause exists.
-        container[node.name] ||= MethodDoc.new(node.name, make_full_path(node.name), is_instance ? "#" : ".", nil)
+        container[node.name] ||= MethodDoc.new(node.name, make_full_path(node.name, is_instance), is_instance ? "#" : ".", nil)
         method_doc = container[node.name]
 
         clause_doc = ClauseDoc.new(
@@ -140,12 +140,12 @@ module Myst
         context
       end
 
-      private def make_full_path(basename : String) : String
+      private def make_full_path(basename : String, is_instance = false) : String
         case context = @current_context
         when RootDoc
           basename
         else
-          context.full_name + "." + basename
+          context.full_name + (is_instance ? "#" : ".") + basename
         end
       end
     end
