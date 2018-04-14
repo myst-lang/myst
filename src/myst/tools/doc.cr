@@ -63,6 +63,7 @@ module Myst
       def visit(node : ModuleDef, doc : String?=nil)
         @current_context.submodules[node.name] ||= ModuleDoc.new(node.name, make_full_path(node.name), doc)
         module_doc = @current_context.submodules[node.name]
+        module_doc.doc ||= doc
         with_context(module_doc) do
           node.accept_children(self)
         end
@@ -71,7 +72,7 @@ module Myst
       def visit(node : TypeDef, doc : String?=nil)
         @current_context.subtypes[node.name] ||= TypeDoc.new(node.name, make_full_path(node.name), doc)
         type_doc = @current_context.subtypes[node.name]
-
+        type_doc.doc ||= doc
         with_context(type_doc) do
           node.accept_children(self)
         end

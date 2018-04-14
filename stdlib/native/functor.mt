@@ -3,7 +3,6 @@
 # here to allow the documentation generator to include native documentation.
 
 #doc Functor
-#|
 #| A Functor is an object representing a group of function clauses under the
 #| same name. Every function/method in Myst is stored as a Functor.
 #|
