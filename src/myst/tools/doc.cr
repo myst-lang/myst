@@ -97,8 +97,9 @@ module Myst
             raise "Unhandled DocContext type #{typeof(context)}."
           end
 
+        is_instance = @current_context.is_a?(TypeDoc) && !node.static?
         # Make sure that a method entry for this clause exists.
-        container[node.name] ||= MethodDoc.new(node.name, make_full_path(node.name), nil)
+        container[node.name] ||= MethodDoc.new(node.name, make_full_path(node.name), is_instance ? "#" : ".", nil)
         method_doc = container[node.name]
 
         clause_doc = ClauseDoc.new(
