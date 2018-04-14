@@ -10,6 +10,8 @@ deftype List
     "[" + join(",") + "]"
   end
 
+  #doc first -> value
+  #| Returns the element in the first position of this list.
   def first
     self[0]
   end
@@ -20,6 +22,8 @@ deftype List
     nil
   end
 
+  #doc last -> value
+  #| Returns the element in the last position of this list.
   def last
     self[self.size - 1]
   end
