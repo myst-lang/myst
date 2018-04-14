@@ -2,74 +2,79 @@
 # are implemented as part of the native library of Myst. They are reproduced
 # here to allow the documentation generator to include native documentation.
 
-#doc Float
-#| A Float is an object representing a 64-bit floating point number, as defined
-#| by IEEE 754.
+#doc Integer
+#| An Integer is an object representing a 64-bit integer number.
 #|
-#| New Float objects are created using float literals, which are represented as
-#| a series of one or more digits, a dot, and another series of one or more
-#| digits. Float literals may also contain underscore characters between any
-#| two digits to improve legibility.
+#| New Integer objects are created using integer literals, which are
+#| represented as a series of one or more digits. Integer literals may also
+#| contain underscore characters between any two digits to improve legibility.
 #|
-#| The following are all valid float literals: `0.0`, `123.456`, `10_000.00_000`.
+#| The following are all valid integer literals: `000`, `12_345__`, `10_000_00`.
 #|
-#| The following are not considered float literals: `.0`, `1.`, `1.2.3`.
-deftype Float
-  #doc + -> float
-  #| Returns the result of adding the value of `other` to this float. This
+#| The following are not considered integer literals: `1.0`, `1a1`, `abc1`.
+deftype Integer
+  #doc + -> integer | float
+  #| Returns the result of adding the value of `other` to this integer. This
   #| method is only valid when `other` is a float or an integer. Any other type
   #| will cause this method to raise a RuntimeError.
+  #|
+  #| If `other` is a Float, this method will return a Float instead of an
+  #| Integer.
   def +(other); end
 
-  #doc - -> float
-  #| Returns the result of subtracting the value of `other` from this float.
+  #doc - -> integer | float
+  #| Returns the result of subtracting the value of `other` from this integer.
   #| This method is only valid when `other` is a float or an integer. Any other
   #| type will cause this method to raise a RuntimeError.
+  #|
+  #| If `other` is a Float, this method will return a Float instead of an
+  #| Integer.
   def -(other); end
 
-  #doc * -> float
-  #| Returns the result of multiplying the value of `other` with this float. This
-  #| method is only valid when `other` is a float or an integer. Any other type
-  #| will cause this method to raise a RuntimeError.
+  #doc * -> integer | float
+  #| Returns the result of multiplying the value of `other` with this integer.
+  #| This method is only valid when `other` is a float or an integer. Any other
+  #| type will cause this method to raise a RuntimeError.
+  #|
+  #| If `other` is a Float, this method will return a Float instead of an
+  #| Integer.
   def *(other); end
 
-  #doc / -> float
-  #| Returns the result of dividing this float by the value of `other`. This
-  #| method is only valid when `other` is a float or an integer. Any other type
-  #| will cause this method to raise a RuntimeError.
+  #doc / -> integer | float
+  #| Returns the result of dividing this integer by the value of `other`.
+  #| This method is only valid when `other` is a float or an integer. Any other
+  #| type will cause this method to raise a RuntimeError.
+  #|
+  #| If `other` is a Float, this method will return a Float instead of an
+  #| Integer.
   #|
   #| This method will also raise a RuntimeError if the value of `other` would
   #| cause a division by zero.
   def /(other); end
 
-  #doc % -> float
-  #| Returns the remainder of the result of dividing this float by the value of
-  #| `other`. This method is only valid when `other` is a float or an integer.
-  #| Any other type will cause this method to raise a RuntimeError.
+  #doc % -> integer | float
+  #| Returns the result of adding the value of `other` to this integer. This
+  #| method is only valid when `other` is a float or an integer. Any other type
+  #| will cause this method to raise a RuntimeError.
+  #|
+  #| If `other` is a Float, this method will return a Float instead of an
+  #| Integer.
   #|
   #| This method will also raise a RuntimeError if the value of `other` would
   #| cause a division by zero.
   def %(other); end
 
-  #doc to_i -> integer
-  #| Returns the integer portion of this float as a new Integer object by
-  #| truncating the decimal portion from the value. As such, this method will
-  #| always "round down" to the largest integer not greater than this value.
-  def to_i; end
-
-  #doc round -> integer
-  #| Returns a new Integer object representing the integer that is nearest to
-  #| the value of this float. This method considers `.5` decimals nearer to the
-  #| upper integer.
-  def round; end
+  #doc to_f -> float
+  #| Returns a new Float object with the same value as this integer.
+  def to_f; end
 
   #doc to_s -> string
-  #| Returns a new String object representing this float in base 10. This
-  #| method does _not_ preserve underscores from float literals.
+  #| Returns a new String object representing this integer in base 10. This
+  #| method does _not_ preserve underscores from integer literals.
   def to_s; end
 
   #doc == -> boolean
-  #| Returns `true` if `other` has the same value as this float. This method
+  #| Returns `true` if `other` has the same value as this integer. This method
   #| considers integer-value Float objects as equal to their Integer
   #| counterparts.
   #|
@@ -86,9 +91,9 @@ deftype Float
   #| return `true`.
   def !=(other); end
 
-  #doc negate -> float
-  #| Returns a new Float object representing the result of multiplying this
-  #| float's value by `-1`.
+  #doc negate -> integer
+  #| Returns a new Integer object representing the result of multiplying this
+  #| integer's value by `-1`.
   def negate; end
 
   #doc < -> boolean
@@ -118,4 +123,5 @@ deftype Float
   #|
   #| If `other` is not a Float or an Integer, this method will raise a RuntimeError.
   def >=(other); end
+
 end
