@@ -1,8 +1,16 @@
 require "../spec_helper"
 
-private def assert_token_type(source, token_type)
-  token = tokenize(source).first
+private def assert_token_type(source, token_type, in_context : Lexer::Context? = nil)
+  token = tokenize(source, in_context).first
   token.type.should eq(token_type)
+end
+
+private def assert_single_token(source, token_type, in_context : Lexer::Context? = nil)
+  lexer = Lexer.new(IO::Memory.new(source), File.join(Dir.current, "test_source.mt"))
+  if in_context
+    lexer.push_context(in_context)
+  end
+  lexer.read_token
 end
 
 STATIC_TOKENS = {
@@ -41,6 +49,7 @@ STATIC_TOKENS = {
   Token::Type::LCURLY       =>  "{",
   Token::Type::RCURLY       =>  "}",
   Token::Type::STAB         =>  "->",
+  Token::Type::DOC_START    =>  "#doc",
   Token::Type::EOF          =>  "\0",
   Token::Type::NEWLINE      =>  "\n",
   Token::Type::WHITESPACE   =>  " ",
@@ -173,5 +182,26 @@ describe "Lexer" do
 
   it "lexes <()>" do
     assert_token_type %q("<()>"), Token::Type::INTERP_START
+  end
+
+  it "lexes '#doc' as a DOC_START" do
+    assert_single_token("#doc", Token::Type::DOC_START)
+  end
+
+  it "lexes '#|' as a DOC_CONTENT" do
+    assert_single_token("#|", Token::Type::DOC_CONTENT)
+  end
+
+  describe "DOC_CONTENT" do
+    it "consumes the entire line as part of the token" do
+      assert_single_token(%q(#| some documentation content), Token::Type::DOC_CONTENT)
+      assert_single_token(%Q(#| some documentation content\n), Token::Type::DOC_CONTENT)
+    end
+
+    it "is not terminated by any special characters" do
+      token = tokenize(%Q(#| .4#$@!%^*&()}\t \t{[]->=~!#\n)).first
+      token.type.should eq(Token::Type::DOC_CONTENT)
+      token.value.should eq(%Q(.4#$@!%^*&()}\t \t{[]->=~!#))
+    end
   end
 end

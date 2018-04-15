@@ -287,8 +287,24 @@ module Myst
         @current_token.type = Token::Type::NEWLINE
         read_char
       when '#'
-        @current_token.type = Token::Type::COMMENT
-        consume_comment
+        skip_char
+        case current_char
+        when 'd'
+          if skip_char == 'o' && skip_char == 'c'
+            @current_token.type = Token::Type::DOC_START
+            skip_char
+            consume_comment
+          else
+            consume_comment
+          end
+        when '|'
+          @current_token.type = Token::Type::DOC_CONTENT
+          skip_char
+          consume_comment
+        else
+          @current_token.type = Token::Type::COMMENT
+          consume_comment
+        end
       when '"'
         skip_char
         push_brace(:double_quote)
@@ -435,6 +451,7 @@ module Myst
       @current_token
     end
 
+
     # Attempt to lex the current buffer as a keyword. If one is found, the
     # token type will be set appropriately. If not, the token type will not
     # be changed.
@@ -443,8 +460,6 @@ module Myst
         @current_token.type = kw_type
       end
     end
-
-
 
     def consume_numeric
       has_decimal = false
@@ -475,7 +490,6 @@ module Myst
       @current_token.value = @reader.buffer_value.tr("_", "")
       @current_token.type = has_decimal ? Token::Type::FLOAT : Token::Type::INTEGER
     end
-
 
     def consume_symbol_or_colon
       # Read the starting colon
@@ -519,7 +533,13 @@ module Myst
     end
 
     def consume_comment
-      until ['\n', '\0'].includes?(read_char); end
+      # If the first character of the comment is a space, it is ignored. Since
+      # standard comments are written with a padding space (`# comment`), the
+      # actual content of the comment should not include that space.
+      if current_char == ' '
+        skip_char
+      end
+      until ['\n', '\0'].includes?(current_char); read_char; end
     end
 
     def consume_whitespace

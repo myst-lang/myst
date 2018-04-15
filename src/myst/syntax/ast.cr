@@ -1,7 +1,7 @@
 module Myst
   abstract class Node
-    property location      : Location?
-    property end_location  : Location?
+    property  location      : Location?
+    property  end_location  : Location?
 
     def at(@location : Location)
       self
@@ -959,6 +959,8 @@ module Myst
   # interpreter to immediately start backtracking up the callstack until a node
   # capable of handling the Exception is encountered (i.e., has an attached
   # `rescue` clause).
+  #
+  #   'raise' value
   class Raise < ControlExpr
     def_equals_and_hash
   end
@@ -967,6 +969,9 @@ module Myst
   # `raise`. Rescues may also provide a parameter (with all the same syntax as
   # parameters used in Defs) to restrict what Exceptions can be handled by the
   # expression.
+  #
+  #   'rescue' [ param [ ':' type_restriction ] ]
+  #     body
   class Rescue < Node
     property! param : Param?
     property  body  : Node
@@ -986,6 +991,11 @@ module Myst
   # Whenever a `rescue` or `ensure` is encountered at the end of a Def, Block,
   # or Begin, the existing node is wrapped in an ExceptionHandler, and the
   # handling blocks are parsed into this node.
+  #
+  #   body
+  #   [ rescue_expression ]*
+  #   [ else_expression ]
+  #   [ ensure_expression ]
   class ExceptionHandler < Node
     property  body     : Node
     property  rescues  : Array(Rescue)
@@ -1018,5 +1028,26 @@ module Myst
     end
 
     def_equals_and_hash body, rescues, else?, ensure?
+  end
+
+  # A full documentation comment. Documentation comments are distinct entities
+  # that automatically attach to whatever expression follows them. Doc
+  # comments are available at runtime by inspecting values, or can be parsed
+  # out statically. In the AST, DocComment nodes wrap around whatever their
+  # target expression is so that the target expression can be interpreted
+  # consistently.
+  #
+  #   '#doc' [ content ]
+  #   [ '#|' content ]*
+  #   target
+  class DocComment < Node
+    property header : String?
+    property content  : String
+    property target   : Node
+
+    def initialize(@header : String?, @content : String, @target : Node)
+    end
+
+    def_equals_and_hash header, content, target
   end
 end

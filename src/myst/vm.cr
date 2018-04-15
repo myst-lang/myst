@@ -13,7 +13,7 @@ module Myst
       # Just telling warn() we're not in test mode (test  declaration in
       # spec/spec_helper.cr)
       ENV["MYST_ENV"] = product? ? "prod" : "test"
-      
+
       @interpreter = Interpreter.new
       @semantic_visitor = Semantic::Visitor.new
 

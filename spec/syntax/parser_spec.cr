@@ -3224,9 +3224,6 @@ describe "Parser" do
 
 
 
-
-
-
   # Match
 
   # Match expressions are a syntax sugar around creating and invoking an
@@ -3975,4 +3972,120 @@ describe "Parser" do
       end
     end
   )
+
+
+
+  # Doc Comments
+
+  # Nodes can be documented with "doc comments" - comments which appear on the
+  # lines immediately preceding the node.
+  it_parses %q(
+    #doc foo
+    #| This is a doc comment.
+    nil
+  ),                            doc("foo", "This is a doc comment.")
+  # The header of a doc comment is optional.
+  it_parses %q(
+    #doc
+    #| some documentation
+    nil
+  ),                            doc("", "some documentation")
+  # The content is also optional.
+  it_parses %q(
+    #doc
+    nil
+  ),                            doc("")
+  # Doc comments with hard newlines will have the newlines replaced with spaces.
+  it_parses %q(
+    #doc foo
+    #| This is a multi-
+    #| line doc comment.
+    nil
+  ),                            doc("foo", "This is a multi- line doc comment.")
+  # Two consecutive newlines are chomped down to a single newline.
+  it_parses %q(
+    #doc foo
+    #| This doc has two parts.
+    #|
+    #| This is the second part.
+    nil
+  ),                            doc("foo", "This doc has two parts.\nThis is the second part.")
+  # Non-doc comments within a doc comment are ignored.
+  it_parses %q(
+    #doc foo
+    #| This doc has a normal
+    # ignore me
+    #| comment inside it.
+    nil
+  ),                            doc("foo", "This doc has a normal comment inside it.")
+  # Leading blank lines are stripped from the content
+  it_parses %q(
+    #doc foo
+    #|
+    #|
+    #| The first two lines of this doc are stripped.
+    nil
+  ),                            doc("foo", "The first two lines of this doc are stripped.")
+
+  # Doc comment content is simply parsed as raw text. There is no required format.
+  it_parses %q(
+    #doc foo
+    #|
+    #| Letters, 12345, ^!#$(*&!#)%(^*)\n\t
+    #| %.###131
+    nil
+  ),                           doc("foo", %q(Letters, 12345, ^!#$(*&!#)%(^*)\n\t %.###131))
+
+  # Doc comments are only valid if followed by an expression
+  it_does_not_parse %q(
+    #doc foo
+  )
+  it_does_not_parse %q(
+    #doc foo
+    #| some documentation.
+  )
+
+  # Whitespace between a doc comment and its target is ignored
+  it_parses %q(
+    #doc foo
+
+    nil
+  ),                          doc("foo")
+
+  # Docs can be attached to any kind of node, but generally only apply to modules, types, methods, and constants.
+  it_parses %q(
+    #doc foo
+    defmodule Foo; end
+  ),                          doc("foo", target: ModuleDef.new("Foo"))
+  it_parses %q(
+    #doc foo
+    deftype Foo; end
+  ),                          doc("foo", target: TypeDef.new("Foo"))
+  it_parses %q(
+    #doc foo
+    def foo; end
+  ),                          doc("foo", target: Def.new("foo"))
+  it_parses %q(
+    #doc foo
+    FOO = nil
+  ),                          doc("foo", target: SimpleAssign.new(c("FOO"), l(nil)))
+
+  # Doc comments do not affect parsing outside of their content. A doc comment placed
+  # immediately above or below another expression should not affect that expression.
+  it_parses %q(
+    #doc foo
+    def foo; end
+  ),                          doc("foo", target: Def.new("foo"))
+  it_parses %q(
+    #doc Foo
+    deftype Foo; end
+  ),                          doc("Foo", target: TypeDef.new("Foo"))
+  it_parses %q(
+    #doc Foo
+    defmodule Foo; end
+  ),                          doc("Foo", target: ModuleDef.new("Foo"))
+  it_parses %q(
+    #doc addition
+    1 + 1
+  ),                          doc("addition", target: Call.new(l(1), "+", [l(1)], infix: true))
 end

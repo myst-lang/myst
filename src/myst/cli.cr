@@ -6,6 +6,10 @@ module Myst
       source = ""
       show_ast = false
       eval = false
+      stop_evaluation = false
+      generate_docs = false
+      docs_directory = Dir.current
+      docs_yml = "./.mystdoc.yml"
 
       OptionParser.parse! do |opts|
         opts.banner = "Usage: myst [filename] [options]"
@@ -27,6 +31,16 @@ module Myst
 
         opts.on("--ast", "Display the parsed AST for the input file. Code will not be executed if set.") do
           show_ast = true
+          stop_evaluation = true
+        end
+
+        opts.on("--docs DIRECTORY", "Generate a JSON file containing documentation for the input file.") do |directory|
+          generate_docs = true
+          docs_directory = directory
+        end
+
+        opts.on("--doc-yml DOC_YML", "Use the given file in place of ./.mystdoc.yml when generating metadata for documentation.") do |yml_file|
+          docs_yml = yml_file
         end
 
         opts.on("-e", "--eval", "Eval code from args") do
@@ -47,6 +61,12 @@ module Myst
         end
       end
 
+
+      if generate_docs
+        Doc::Generator.auto_document(docs_directory, docs_yml)
+        exit
+      end
+
       if source.empty?
         STDERR.puts("No#{eval ? "thing to evaluate" : " source file"} given.")
         exit 1
@@ -57,7 +77,9 @@ module Myst
       if show_ast
         vm.print_ast
         exit
-      else
+      end
+
+      unless stop_evaluation
         vm.run
       end
     end

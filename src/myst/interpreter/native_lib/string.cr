@@ -1,22 +1,11 @@
 module Myst
   class Interpreter
-    NativeLib.method :string_add, String, other : MTValue do
-      case other
-      when String
-        this + other
-      else
-        __raise_runtime_error("invalid argument for String#+: #{__typeof(other).name}")
-      end
+    NativeLib.method :string_add, String, other : String do
+      this + other
     end
 
-    NativeLib.method :string_multiply, String, other : MTValue do
-      case other
-      when Int64
-        # String multiplication repeats `this` `arg` times.
-        this * other
-      else
-        __raise_runtime_error("invalid argument for String#*: #{__typeof(other).name}")
-      end
+    NativeLib.method :string_multiply, String, scale : Int64 do
+      this * scale
     end
 
     NativeLib.method :string_to_i, String, base : Int64? do
@@ -28,7 +17,7 @@ module Myst
       end
     end
 
-    NativeLib.method :string_to_f, String, base : Int64? do
+    NativeLib.method :string_to_f, String do
       begin
         this.to_f64(whitespace: true, strict: true)
       rescue ex : ArgumentError

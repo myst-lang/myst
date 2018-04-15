@@ -93,6 +93,9 @@ module Myst
       COLON         # :
       SEMI          # ;
 
+      DOC_START     # #doc
+      DOC_CONTENT   # #| ...
+
       COMMENT       # # comment
       NEWLINE       # \n
       WHITESPACE    # space, tab, etc.
@@ -101,11 +104,11 @@ module Myst
 
 
       def self.whitespace
-        [ COMMENT, WHITESPACE, UNKNOWN ]
+        [ WHITESPACE, UNKNOWN, COMMENT ]
       end
 
       def whitespace?
-        self.whitespace.includes?(self)
+        self.class.whitespace.includes?(self)
       end
 
       def self.keywords

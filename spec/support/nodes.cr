@@ -84,3 +84,10 @@ end
 def iv(name)
   IVar.new("@" + name)
 end
+
+# doc(reference, returns=nil, content="")
+#
+# Generate a DocComment node from the reference, return value, and content.
+def doc(header, content="", target=NilLiteral.new)
+  DocComment.new(header, content, target)
+end

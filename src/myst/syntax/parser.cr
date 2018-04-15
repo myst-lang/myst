@@ -80,7 +80,12 @@ module Myst
       skip_space_and_newlines
       until accept(Token::Type::EOF)
         program.children << parse_expression
-        expect_delimiter_or_eof
+        # Doc comments are not (can not be) delimited by newlines since they
+        # do not have an explicit closing token, so skip the expectation of a
+        # delimiter if the previous expression was a doc comment.
+        unless program.children.last.is_a?(DocComment)
+          expect_delimiter_or_eof
+        end
         skip_space_and_newlines
       end
 
@@ -95,13 +100,18 @@ module Myst
       until terminators.includes?(current_token.type)
         block ||= Expressions.new
         block.children << parse_expression
+        skip_space
         # In a code block, the last expression does not require a delimiter.
         # For example, `call{ a = 1; a + 2 } is valid, even though `a + 2` is
         # not followed by a delimiter. So, if the next significant token is a
         # terminator, stop expecting expressions/delimiters.
-        skip_space
         break if terminators.includes?(current_token.type)
-        expect_delimiter_or_eof
+        # Additionally, doc comments are not (can not be) delimited by newlines
+        # since they do not have an explicit closing token, so skip that
+        # expectation if the previous expression was a doc comment.
+        unless block.children.last.is_a?(DocComment)
+          expect_delimiter_or_eof
+        end
         skip_space_and_newlines
       end
 
@@ -135,6 +145,8 @@ module Myst
         parse_function_capture
       when Token::Type::MAGIC_FILE, Token::Type::MAGIC_LINE, Token::Type::MAGIC_DIR
         parse_magic_constant
+      when Token::Type::DOC_START
+        parse_doc_comment
       else
         parse_logical_or
       end
@@ -416,7 +428,6 @@ module Myst
           break
         end
       end
-
 
       return match
     end
@@ -1274,6 +1285,51 @@ module Myst
 
       value = parse_expression
       return FunctionCapture.new(value).at(start.location).at_end(value)
+    end
+
+    def parse_doc_comment
+      start = expect(Token::Type::DOC_START)
+      skip_space
+      header = start.value.strip
+      skip_space
+
+      last_content_token = start
+      content = String.build do |str|
+        loop do
+          skip_space_and_newlines
+          if token = accept(Token::Type::DOC_CONTENT)
+            # Remove trailing whitespace from the line (leading whitespace is)
+            # preserved.
+            str << token.value.rstrip
+            # removing the whitespace above will also trim the last newline
+            # character. To simplify the auto-formatting done later, this
+            # newline is re-added to separate each DOC_CONTENT line.
+            str << "\n"
+            last_content_token = token
+          else
+            break
+          end
+        end
+      end
+
+      content =
+        # Apply the formatting rules for doc comments to the content:
+        content.
+          # - whitespace at the beginning and end of the comment are removed.
+          strip.
+          # - strip trailing whitespace from every line
+          gsub(/\h+\n/, '\n').
+          # - empty lines have all interior whitspace stripped.
+          gsub(/\n\s*\n/, "\n\n").
+          # - single newlines are converted to single spaces.
+          gsub(/(?<!\n)\n(?!\n)/, ' ').
+          # - double newlines are converted to single newlines.
+          gsub(/\n\n/, '\n')
+
+      # Doc comments expect to be followed by an expression. That expression is
+      # what the documentation will be attached to.
+      target = parse_expression
+      return DocComment.new(header, content, target).at(start.location).at_end(last_content_token.location)
     end
 
 

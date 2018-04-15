@@ -1,9 +1,8 @@
 defmodule Enumerable
-  # map(&block) -> list
-  #
-  # Call `block` for each element of `self` and collect the result for each
-  # call into a new List. If `each` does not yield any elements, the result
-  # will be an empty List.
+  #doc map(&block) -> list
+  #| Call `block` for each element of `self` and collect the result for each
+  #| call into a new List. If `each` does not yield any elements, the result
+  #| will be an empty List.
   def map(&block)
     result = []
     each do |elem|
@@ -12,10 +11,9 @@ defmodule Enumerable
     result
   end
 
-  # join(delimiter) -> str
-  #
-  # Creates a new string from the result of calling `to_s` on every element of
-  # `self`, inserting `delimiter` between each element.
+  #doc join(delimiter) -> str
+  #| Creates a new string from the result of calling `to_s` on every element of
+  #| `self`, inserting `delimiter` between each element.
   def join(delimiter : String)
     str = ""
     first = true
@@ -30,10 +28,9 @@ defmodule Enumerable
     str
   end
 
-  # size -> integer
-  #
-  # Returns the size of the enumerable, as determined by the number of elements
-  # yielded by `each`.
+  #doc size -> integer
+  #| Returns the size of the enumerable, as determined by the number of
+  #| elements yielded by `each`.
   def size
     counter = 0
 
@@ -44,10 +41,9 @@ defmodule Enumerable
     counter
   end
 
-  # all?(&block) -> boolean
-  #
-  # Return true if all elements in the enumerable cause `block` to return a
-  # truthy value.
+  #doc all?(&block) -> boolean
+  #| Return true if all elements in the enumerable cause `block` to return a
+  #| truthy value.
   def all?(&block)
     result = nil
     each do |e|
@@ -61,10 +57,9 @@ defmodule Enumerable
     result
   end
 
-  # any?(&block) -> boolean
-  #
-  # Return true if at least one element in the enumerable evaluates to a
-  # truthy value for the given block.
+  #doc any?(&block) -> boolean
+  #| Return true if at least one element in the enumerable evaluates to a
+  #| truthy value for the given block.
   def any?(&block)
     result = nil
     each do |e|
@@ -78,10 +73,9 @@ defmodule Enumerable
     result
   end
 
-  # find(&block) -> element
-  #
-  # Iterate the enumerable, passing each element to `block`. Return the first
-  # element for which the block returns a truthy value.
+  #doc find(&block) -> element
+  #| Iterate the enumerable, passing each element to `block`. Return the first
+  #| element for which the block returns a truthy value.
   def find(&block)
     result = nil
     each do |e|
@@ -93,10 +87,9 @@ defmodule Enumerable
     result
   end
 
-  # select(&block) -> list
-  #
-  # Iterate the enumerable, passing each element to `block`. Return all
-  # elements for which the block returns a truthy value.
+  #doc select(&block) -> list
+  #| Iterate the enumerable, passing each element to `block`. Return all
+  #| elements for which the block returns a truthy value.
   def select(&block)
     result = []
 
@@ -109,9 +102,8 @@ defmodule Enumerable
     result
   end
 
-  # min -> element
-  #
-  # Returns the element with the lowest value as determined by <.
+  #doc min -> element
+  #| Returns the element with the lowest value as determined by <.
   def min
     value = nil
 
@@ -124,9 +116,8 @@ defmodule Enumerable
     value
   end
 
-  # max -> element
-  #
-  # Returns the element with the highest value as determined by >.
+  #doc max -> element
+  #| Returns the element with the highest value as determined by >.
   def max
     value = nil
 
@@ -139,9 +130,8 @@ defmodule Enumerable
     value
   end
 
-  # sort -> list
-  #
-  # Returns a sorted list of all elements.
+  #doc sort -> list
+  #| Returns a sorted list of all elements.
   def sort
     list = to_list
     when size < 2
@@ -166,9 +156,8 @@ defmodule Enumerable
     list
   end
 
-  # to_list -> list
-  #
-  # Returns a list containing all elements.
+  #doc to_list -> list
+  #| Returns a list containing all elements.
   def to_list
     list = []
 
@@ -179,11 +168,15 @@ defmodule Enumerable
     list
   end
 
-  # reduce -> element
-  #
-  # For every element in the enumerable, call block
-  # with the result of the previous call and the current
-  # element as arguments. Returns a single value.
+  #doc reduce(value=nil, &block) -> element
+  #| For every element in the enumerable, call block with the result of the
+  #| previous call and the current element as arguments. Returns a single
+  #| value.
+  #|
+  #| If an initial value is given, it will be used as the accumulator
+  #| argument for the block call with the first element. If an initial value is
+  #| not given, the first element will not be passed to the block and will be
+  #| be used as the accumulator for the block call with the second element.
   def reduce(&block)
     value = nil
 
@@ -197,10 +190,6 @@ defmodule Enumerable
 
     value
   end
-
-  # reduce -> element
-  #
-  # Same as above but an initial value is used.
   def reduce(value, &block)
     each do |e|
       value = block(value, e)

@@ -1,13 +1,23 @@
 module Myst
   class Printer
-    property output : IO
+    def self.print(node, io : IO)
+      Printer.new.print(node, io)
+    end
+
+    def self.print(node)
+      String.build do |str|
+        print(node, str)
+      end
+    end
+
     # `replacements` is a Hash containing mappings from Node instances
     # to other Nodes that should be used in their place when recursing through
     # a program tree. This is useful for performing code rewrites
     # programmatically without having to modify the original program.
     property replacements : Hash(UInt64, Node)
 
-    def initialize(@output : IO=STDOUT)
+
+    def initialize
       @replacements = {} of UInt64 => Node
     end
 
@@ -15,8 +25,12 @@ module Myst
       replacements[node.object_id] = new_node
     end
 
+    def print(node, io : IO)
+      visit(node, io)
+    end
+
     def print(node)
-      visit(node, @output)
+      String.build{ |str| print(node, str) }
     end
 
 
@@ -249,6 +263,18 @@ module Myst
     end
 
 
+    make_visitor ModuleDef do
+      io << "defmodule"
+      io << " "
+      io << node.name
+    end
+
+    make_visitor TypeDef do
+      io << "deftype"
+      io << " "
+      io << node.name
+    end
+
     make_visitor Def do
       io << (node.static? ? "defstatic" : "def")
       io << " "
@@ -270,7 +296,6 @@ module Myst
         io << ")"
       end
     end
-
 
 
     # Catch all for unimplemented nodes

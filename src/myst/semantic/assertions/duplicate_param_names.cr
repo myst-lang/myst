@@ -11,7 +11,7 @@ module Myst
 
         names_in_params.each do |name, nodes|
           if nodes.size > 1
-            original_str      = Myst::Printer.new(String::Builder.new).print(def_node).to_s
+            original_str  = Myst::Printer.print(def_node)
             resolved_str  = create_resolved_str(nodes)
 
             fail! def_node.location.not_nil!, <<-FAIL_MESSAGE
@@ -26,7 +26,7 @@ module Myst
       end
 
       private def create_resolved_str(nodes : Array(Node))
-        printer = Myst::Printer.new(String::Builder.new)
+        printer = Myst::Printer.new
         nodes[1..-1].each do |node|
           new_node = node.dup
 
@@ -44,7 +44,7 @@ module Myst
           printer.replace(node, new_node)
         end
 
-        printer.print(def_node).to_s
+        printer.print(def_node)
       end
 
       private def visit_param(param : Param)
