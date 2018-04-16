@@ -1,3 +1,10 @@
+#doc Enumerable
+#| The Enumerable module provides various methods for interacting with
+#| collections of values. Both `List` and `Map` include this module by default.
+#|
+#| The only requirement for including this module is to define an `each` method
+#| that accepts a block argument and calls that block for every element of the
+#| collection.
 defmodule Enumerable
   #doc map(&block) -> list
   #| Call `block` for each element of `self` and collect the result for each
@@ -30,7 +37,7 @@ defmodule Enumerable
 
   #doc size -> integer
   #| Returns the size of the enumerable, as determined by the number of
-  #| elements yielded by `each`.
+  #| times `each` yields an element to its block.
   def size
     counter = 0
 
@@ -103,7 +110,8 @@ defmodule Enumerable
   end
 
   #doc min -> element
-  #| Returns the element with the lowest value as determined by <.
+  #| Returns the element with the lowest value as determined by comparing
+  #| values with their `<` operator.
   def min
     value = nil
 
@@ -117,7 +125,8 @@ defmodule Enumerable
   end
 
   #doc max -> element
-  #| Returns the element with the highest value as determined by >.
+  #| Returns the element with the highest value as determined by comparing
+  #| values with their `>` operator.
   def max
     value = nil
 
@@ -131,7 +140,7 @@ defmodule Enumerable
   end
 
   #doc sort -> list
-  #| Returns a sorted list of all elements.
+  #| Returns a new, sorted List of all elements in the enumerable.
   def sort
     list = to_list
     when size < 2
@@ -157,7 +166,7 @@ defmodule Enumerable
   end
 
   #doc to_list -> list
-  #| Returns a list containing all elements.
+  #| Returns a new List containing all elements of the enumerable.
   def to_list
     list = []
 
@@ -168,15 +177,14 @@ defmodule Enumerable
     list
   end
 
-  #doc reduce(value=nil, &block) -> element
-  #| For every element in the enumerable, call block with the result of the
+  #doc reduce(&block) -> value
+  #| For every element in the enumerable, call `block` with the result of the
   #| previous call and the current element as arguments. Returns a single
-  #| value.
+  #| value: the result of the final call to `block`.
   #|
-  #| If an initial value is given, it will be used as the accumulator
-  #| argument for the block call with the first element. If an initial value is
-  #| not given, the first element will not be passed to the block and will be
-  #| be used as the accumulator for the block call with the second element.
+  #| For the first element of the enumerable, the block is _not_ called, and
+  #| the element is instead passed directly as the first argument of the
+  #| `block` call for the second element.
   def reduce(&block)
     value = nil
 
@@ -190,6 +198,9 @@ defmodule Enumerable
 
     value
   end
+  #doc reduce(value, &block) -> value
+  #| Use `value` as the initial value for the accumulator instead of the first
+  #| element, allowing `block` to be called for the first element as well.
   def reduce(value, &block)
     each do |e|
       value = block(value, e)
