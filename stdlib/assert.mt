@@ -310,13 +310,22 @@ end
 
 
 
-#doc assert(&block?) -> assertion object
-#| The global entrypoint to writing assertions. `assert` accepts any value or
-#| block as an argument, and returns the appropriate assertion object to write
-#| assertions with.
+#doc assert(value) -> assertion
+#| The global entrypoint to writing assertions about objects. This clause
+#| accepts any value as an argument, and returns an `Assertion` object to use
+#| for executing assertions about that object.
 def assert(value)
   %Assert.Assertion{value}
 end
+#doc assert(&block) -> block assertion
+#| The global entrypoint for writing assertions about blocks of code. This
+#| clause accepts a block argument containing the code to test and returns a
+#| `BlockAssertion` object to use for setting up calls and making assertions
+#| about the block of code.
+#|
+#| This clause also accepts function captures of pre-defined methods:
+#|
+#| `assert(&Foo.might_raise!).called_with_arguments(1, 2).raises(:some_error)`
 def assert(&block)
   %Assert.BlockAssertion{block}
 end
