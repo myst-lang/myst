@@ -11,15 +11,18 @@ include Spec
 #| `it`, providing either a name, a code block to test, or both. Multiple `it`s
 #| can be organized under a `describe` block for better visual clarity.
 #|
-#| The Spec library operates primarily through `assert`. Each spec can make
-#| multiple calls to `assert`, with an argument that is expected to be truthy.
-#| If the given argument is not truthy, the spec is considered failed, and the
-#| suite will not pass.
+#| When running an `it` spec, it is considered a "pass" so long as the given
+#| block runs without raising an unhandled error. If an error does propogate
+#| to outside of the `it` block, the spec is considered "failed".
 #|
-#| By default, a passing assertion will output a green `.` to the terminal,
-#| while a failing assertion will output a red `F`. For now, execution will
-#| immediately halt on the first assertion failure, and the program will exit
-#| with a non-zero status code.
+#| Specs are often best written using an assertion library (such as the
+#| standard library's `Assert` module) to remove boilerplate and better express
+#| the intention of each spec.
+#|
+#| By default, a passing spec will output a green `.` to the terminal, while a
+#| failing spec will output a red `F`. For now, execution will immediately halt
+#| on the first assertion failure, and the program will exit with a non-zero
+#| status code.
 defmodule Spec
   describe_stack = []
 

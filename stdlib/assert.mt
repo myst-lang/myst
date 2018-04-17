@@ -1,3 +1,28 @@
+#doc Assert
+#| The `Assert` module provides an interface for making assertions about Myst
+#| code and values.
+#|
+#| Interacting with this module is primarily done through the top-level
+#| `assert` method, providing either a value or code block to use as the
+#| subject of the assertions. This method wraps that value or code block into
+#| an assertion object (either `Assertion` or `BlockAssertion`), which is then
+#| used to actually perform the assertions.
+#|
+#| This module is designed with a fluid interface to simplify writing multiple
+#| assertions on the same subject. Every assertion method returns `self` when
+#| it succeeds or raises an Error when it fails, meaning assertions can easily
+#| be chained together.
+#|
+#| As a contrived example, `assert().between(a, b)` could also be written as
+#| two separate assertions chained together:
+#| `assert().greater_or_equal(a).less_or_equal(b)`.
+#|
+#| This module is primarily intended for use with the `Spec` module to write
+#| tests, but it also available for use by application code in cases where
+#| complex assertions about data are needed. That said, the language itself
+#| often provides cleaner, more idiomatic ways of making similar assertions
+#| that should be preferred (e.g. pattern matching, multiple function clauses,
+#| `match` expressions, etc.).
 defmodule Assert
   #doc AssertionFailure
   #| An AssertionFailure is a container object that is raised when an assertion
@@ -285,13 +310,22 @@ end
 
 
 
-#doc assert(&block?) -> assertion object
-#| The global entrypoint to writing assertions. `assert` accepts any value or
-#| block as an argument, and returns the appropriate assertion object to write
-#| assertions with.
+#doc assert(value) -> assertion
+#| The global entrypoint to writing assertions about objects. This clause
+#| accepts any value as an argument, and returns an `Assertion` object to use
+#| for executing assertions about that object.
 def assert(value)
   %Assert.Assertion{value}
 end
+#doc assert(&block) -> block assertion
+#| The global entrypoint for writing assertions about blocks of code. This
+#| clause accepts a block argument containing the code to test and returns a
+#| `BlockAssertion` object to use for setting up calls and making assertions
+#| about the block of code.
+#|
+#| This clause also accepts function captures of pre-defined methods:
+#|
+#| `assert(&Foo.might_raise!).called_with_arguments(1, 2).raises(:some_error)`
 def assert(&block)
   %Assert.BlockAssertion{block}
 end
