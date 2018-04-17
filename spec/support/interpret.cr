@@ -75,10 +75,8 @@ end
 # equal to expected
 def it_warns(source, expected, file=__FILE__, line=__LINE__, end_line=__END_LINE__)
   it "raises warning from `#{source}`", file, line, end_line do
-    interpreter=Interpreter.new
-    program = parse_program(source)
-    interpreter.run(program)
-    interpreter.warnings.should eq expected
+    itr = interpret_with_mocked_output(source)
+    itr.errput.to_s.should match(expected)
   end
 end
 

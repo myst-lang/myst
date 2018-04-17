@@ -86,7 +86,7 @@ describe "Interpreter - OpAssign" do
     end
 
     it "assigns new underscores" do
-      itr = parse_and_interpret %q(
+      itr = interpret_with_mocked_output %q(
         _a ||= 1
         _a
       )
@@ -199,7 +199,7 @@ describe "Interpreter - OpAssign" do
     end
 
     it "assigns new underscores as nil" do
-      itr = parse_and_interpret %q(
+      itr = interpret_with_mocked_output %q(
         _a &&= 1
         _a
       )
