@@ -27,6 +27,7 @@ module Myst
         <<-MESSAGE
         ParseError at #{@location}
           #{@message}
+
         MESSAGE
       )
     end
