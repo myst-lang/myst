@@ -10,10 +10,6 @@ module Myst
     def initialize(source : IO = IO::Memory.new, *, source_name : String = "eval_input", with_stdlib? : Bool = true,
                    use_stdios? : Bool = false, product? : Bool = true)
 
-      # Just telling warn() we're not in test mode (test  declaration in
-      # spec/spec_helper.cr)
-      ENV["MYST_ENV"] = product? ? "prod" : "test"
-
       @interpreter = Interpreter.new
       @semantic_visitor = Semantic::Visitor.new
 
