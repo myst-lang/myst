@@ -38,10 +38,10 @@ Once Crystal and `mtenv` are installed, installing Myst is as simple as running 
 ```shell
 # Make sure mtenv is properly set up
 mtenv setup
-# Install v0.6.0 of Myst
-mtenv install v0.6.0
+# Install v0.6.1 of Myst
+mtenv install v0.6.1
 # Make it the active version
-mtenv use v0.6.0
+mtenv use v0.6.1
 ```
 
 With that, `myst` should now be installed and ready to go!
