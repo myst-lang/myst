@@ -40,17 +40,20 @@ info_log = $(if $(subst false,,$(info)),$(info $(1)))
 all: $(OUT)/myst $(OUT)/spec
 
 .PHONY: spec
-spec: itr-spec myst-spec ## Runs all specs
+spec: crystal-spec myst-spec ## Runs all specs
 
 .PHONY: myst-spec
 myst-spec: $(OUT)/myst ## Runs just the in-language specs
 	$(call info_log,Running in-language spec)
 	$(OUT)/myst $(MYST_IN_LANG_SPEC)
 
-.PHONY: itr-spec
-itr-spec: $(OUT)/spec ## Runs just the interpreter specs
+.PHONY: crystal-spec
+crystal-spec: $(OUT)/spec ## Runs just the crystal specs
 	$(call info_log,Running interpreter spec)
 	$(OUT)/spec
+
+.PHONY: check
+check: myst-spec 
 
 .PHONY: install
 install: $(INSTALL_LOCATION) ## Install myst to INSTALL_LOCATION		
