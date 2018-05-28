@@ -1,8 +1,11 @@
 # Require statements function similarly to Ruby. They use the same syntax, but
 # the behavior is slightly different. In Myst, any path starting with `./` or
 # `../` is treated as a file-relative path (the equivalent of Ruby's
-# `require_relative`). All other paths will be searched for in the directories
-# defined in the `MYST_PATH` environment variable.
+# `require_relative`). All other paths will be searched for in the defined
+# "include directories" of the interpreter. This includes:
+#
+# - the current directory as determined by `pwd`.
+# - the directory specified by the `MYST_HOME` environment variable.
 #
 # `require`s act as simple extensions to the current file. Their contents are
 # essentially copy-pasted in place into the current file (most similar to the
@@ -18,7 +21,7 @@ require "./modules.mt"
 
 # The `modules` file loaded above defines a `SampleIO` module, which is now
 # available in the current scope.
-SampleSTDOUT.puts("calling required module method")
+SampleIO.puts("calling required module method")
 
 
 # Requiring a file inside of a module will import the contents into that scope.
