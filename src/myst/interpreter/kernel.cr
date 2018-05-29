@@ -19,6 +19,7 @@ module Myst
       @kernel.scope["TCPSocket"]  = init_tcp_socket(io_type)
       @kernel.scope["Time"]       = init_time
       @kernel.scope["Random"]     = init_random
+      @kernel.scope["ENV"]        = init_env
       @kernel
     end
   end
