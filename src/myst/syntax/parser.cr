@@ -168,6 +168,9 @@ module Myst
       parse_param_list(into: method_def)
 
       skip_space
+      method_def.return_type = parse_optional_type_restriction
+
+      skip_space
       expect_delimiter
       skip_space_and_newlines
 
@@ -298,16 +301,28 @@ module Myst
       end
 
       skip_space
-
-      # A type restriction can follow any non-splat/block parameter.
-      if accept(Token::Type::COLON)
-        skip_space
-        restriction = expect(Token::Type::CONST)
-        param.restriction = Const.new(restriction.value).at(restriction.location)
-        param.at_end(restriction.location)
+      if restriction = parse_optional_type_restriction
+        param.restriction = restriction
+        param.at_end(restriction)
       end
 
       return param
+    end
+
+    # This and `parse_type_path` could probably be merged together in some way.
+    def parse_optional_type_restriction
+      if accept(Token::Type::COLON)
+        skip_space
+        token = expect(Token::Type::CONST)
+        path = Const.new(token.value).at(token.location)
+        while accept(Token::Type::POINT)
+          next_path_part = expect(Token::Type::CONST)
+          path = Call.new(path, next_path_part.value).at(path.location).at_end(next_path_part.location)
+        end
+        path
+      else
+        nil
+      end
     end
 
     def parse_anonymous_function

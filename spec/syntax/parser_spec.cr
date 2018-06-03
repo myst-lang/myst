@@ -893,11 +893,11 @@ describe "Parser" do
   it_parses %q(def foo([1, *_, 3]); end),   Def.new("foo", [p(nil, l([1, Splat.new(u("_")), 3]))])
 
   # Type restrictions can be appended to any parameter to restrict the parameter
-  # to an exact type. The type must be a constant.
+  # to an exact type. The type must be a valid type path.
   # Simple names
   it_parses %q(def foo(a : Integer); end),          Def.new("foo", [p("a", restriction: c("Integer"))])
   it_parses %q(def foo(a : Nil); end),              Def.new("foo", [p("a", restriction: c("Nil"))])
-  it_parses %q(def foo(a : Thing); end),            Def.new("foo", [p("a", restriction: c("Thing"))])
+  it_parses %q(def foo(a : A.Foo); end),            Def.new("foo", [p("a", restriction: Call.new(c("A"), "Foo"))])
   it_does_not_parse %q(def foo(a : 123); end)
   it_does_not_parse %q(def foo(a : nil); end)
   it_does_not_parse %q(def foo(a : [1, 2]); end)
@@ -908,41 +908,41 @@ describe "Parser" do
   # Simple patterns
   it_parses %q(def foo(1 : Integer); end),        Def.new("foo", [p(nil, l(1), restriction: c("Integer"))])
   it_parses %q(def foo(1 : Nil); end),            Def.new("foo", [p(nil, l(1), restriction: c("Nil"))])
-  it_parses %q(def foo(1 : Thing); end),          Def.new("foo", [p(nil, l(1), restriction: c("Thing"))])
+  it_parses %q(def foo(1 : A.Foo); end),          Def.new("foo", [p(nil, l(1), restriction: Call.new(c("A"), "Foo"))])
   it_parses %q(def foo(nil : Integer); end),      Def.new("foo", [p(nil, l(nil), restriction: c("Integer"))])
   it_parses %q(def foo(nil : Nil); end),          Def.new("foo", [p(nil, l(nil), restriction: c("Nil"))])
-  it_parses %q(def foo(nil : Thing); end),        Def.new("foo", [p(nil, l(nil), restriction: c("Thing"))])
+  it_parses %q(def foo(nil : A.Foo); end),        Def.new("foo", [p(nil, l(nil), restriction: Call.new(c("A"), "Foo"))])
   it_parses %q(def foo(<call> : Integer); end),   Def.new("foo", [p(nil, i(Call.new(nil, "call")), restriction: c("Integer"))])
   it_parses %q(def foo(<call> : Nil); end),       Def.new("foo", [p(nil, i(Call.new(nil, "call")), restriction: c("Nil"))])
-  it_parses %q(def foo(<call> : Thing); end),     Def.new("foo", [p(nil, i(Call.new(nil, "call")), restriction: c("Thing"))])
+  it_parses %q(def foo(<call> : A.Foo); end),     Def.new("foo", [p(nil, i(Call.new(nil, "call")), restriction: Call.new(c("A"), "Foo"))])
   it_parses %q(def foo(<a.b> : Integer); end),    Def.new("foo", [p(nil, i(Call.new(Call.new(nil, "a"), "b")), restriction: c("Integer"))])
   it_parses %q(def foo(<a.b> : Nil); end),        Def.new("foo", [p(nil, i(Call.new(Call.new(nil, "a"), "b")), restriction: c("Nil"))])
-  it_parses %q(def foo(<a.b> : Thing); end),      Def.new("foo", [p(nil, i(Call.new(Call.new(nil, "a"), "b")), restriction: c("Thing"))])
+  it_parses %q(def foo(<a.b> : A.Foo); end),      Def.new("foo", [p(nil, i(Call.new(Call.new(nil, "a"), "b")), restriction: Call.new(c("A"), "Foo"))])
   it_parses %q(def foo(<a[0]> : Integer); end),   Def.new("foo", [p(nil, i(Call.new(Call.new(nil, "a"), "[]", [l(0)])), restriction: c("Integer"))])
   it_parses %q(def foo(<a[0]> : Nil); end),       Def.new("foo", [p(nil, i(Call.new(Call.new(nil, "a"), "[]", [l(0)])), restriction: c("Nil"))])
-  it_parses %q(def foo(<a[0]> : Thing); end),     Def.new("foo", [p(nil, i(Call.new(Call.new(nil, "a"), "[]", [l(0)])), restriction: c("Thing"))])
+  it_parses %q(def foo(<a[0]> : A.Foo); end),     Def.new("foo", [p(nil, i(Call.new(Call.new(nil, "a"), "[]", [l(0)])), restriction: Call.new(c("A"), "Foo"))])
   it_parses %q(def foo([1, 2] : Integer); end),   Def.new("foo", [p(nil, l([1, 2]), restriction: c("Integer"))])
   it_parses %q(def foo([1, 2] : Nil); end),       Def.new("foo", [p(nil, l([1, 2]), restriction: c("Nil"))])
-  it_parses %q(def foo([1, 2] : Thing); end),     Def.new("foo", [p(nil, l([1, 2]), restriction: c("Thing"))])
+  it_parses %q(def foo([1, 2] : A.Foo); end),     Def.new("foo", [p(nil, l([1, 2]), restriction: Call.new(c("A"), "Foo"))])
   # Patterns and names
   it_parses %q(def foo(1 =: a : Integer); end),       Def.new("foo", [p("a", l(1), restriction: c("Integer"))])
   it_parses %q(def foo(1 =: a : Nil); end),           Def.new("foo", [p("a", l(1), restriction: c("Nil"))])
-  it_parses %q(def foo(1 =: a : Thing); end),         Def.new("foo", [p("a", l(1), restriction: c("Thing"))])
+  it_parses %q(def foo(1 =: a : A.Foo); end),         Def.new("foo", [p("a", l(1), restriction: Call.new(c("A"), "Foo"))])
   it_parses %q(def foo(nil =: a : Integer); end),     Def.new("foo", [p("a", l(nil), restriction: c("Integer"))])
   it_parses %q(def foo(nil =: a : Nil); end),         Def.new("foo", [p("a", l(nil), restriction: c("Nil"))])
-  it_parses %q(def foo(nil =: a : Thing); end),       Def.new("foo", [p("a", l(nil), restriction: c("Thing"))])
+  it_parses %q(def foo(nil =: a : A.Foo); end),       Def.new("foo", [p("a", l(nil), restriction: Call.new(c("A"), "Foo"))])
   it_parses %q(def foo(<call> =: a : Integer); end),  Def.new("foo", [p("a", i(Call.new(nil, "call")), restriction: c("Integer"))])
   it_parses %q(def foo(<call> =: a : Nil); end),      Def.new("foo", [p("a", i(Call.new(nil, "call")), restriction: c("Nil"))])
-  it_parses %q(def foo(<call> =: a : Thing); end),    Def.new("foo", [p("a", i(Call.new(nil, "call")), restriction: c("Thing"))])
+  it_parses %q(def foo(<call> =: a : A.Foo); end),    Def.new("foo", [p("a", i(Call.new(nil, "call")), restriction: Call.new(c("A"), "Foo"))])
   it_parses %q(def foo(<a.b> : Integer); end),        Def.new("foo", [p(nil, i(Call.new(Call.new(nil, "a"), "b")), restriction: c("Integer"))])
   it_parses %q(def foo(<a.b> : Nil); end),            Def.new("foo", [p(nil, i(Call.new(Call.new(nil, "a"), "b")), restriction: c("Nil"))])
-  it_parses %q(def foo(<a.b> : Thing); end),          Def.new("foo", [p(nil, i(Call.new(Call.new(nil, "a"), "b")), restriction: c("Thing"))])
+  it_parses %q(def foo(<a.b> : A.Foo); end),          Def.new("foo", [p(nil, i(Call.new(Call.new(nil, "a"), "b")), restriction: Call.new(c("A"), "Foo"))])
   it_parses %q(def foo(<a[0]> : Integer); end),       Def.new("foo", [p(nil, i(Call.new(Call.new(nil, "a"), "[]", [l(0)])), restriction: c("Integer"))])
   it_parses %q(def foo(<a[0]> : Nil); end),           Def.new("foo", [p(nil, i(Call.new(Call.new(nil, "a"), "[]", [l(0)])), restriction: c("Nil"))])
-  it_parses %q(def foo(<a[0]> : Thing); end),         Def.new("foo", [p(nil, i(Call.new(Call.new(nil, "a"), "[]", [l(0)])), restriction: c("Thing"))])
+  it_parses %q(def foo(<a[0]> : A.Foo); end),         Def.new("foo", [p(nil, i(Call.new(Call.new(nil, "a"), "[]", [l(0)])), restriction: Call.new(c("A"), "Foo"))])
   it_parses %q(def foo([1, 2] =: a : Integer); end),  Def.new("foo", [p("a", l([1, 2]), restriction: c("Integer"))])
   it_parses %q(def foo([1, 2] =: a : Nil); end),      Def.new("foo", [p("a", l([1, 2]), restriction: c("Nil"))])
-  it_parses %q(def foo([1, 2] =: a : Thing); end),    Def.new("foo", [p("a", l([1, 2]), restriction: c("Thing"))])
+  it_parses %q(def foo([1, 2] =: a : A.Foo); end),    Def.new("foo", [p("a", l([1, 2]), restriction: Call.new(c("A"), "Foo"))])
   # Only the top level parameters may have retrictions.
   it_does_not_parse %q(def foo([1, a : List]); end)
   it_does_not_parse %q(def foo([1, _ : List]); end)
@@ -996,6 +996,49 @@ describe "Parser" do
     it_parses %Q(def #{op}(other); end),  Def.new(op, [p("other")])
     it_parses %Q(def #{op}(a, b); end),   Def.new(op, [p("a"), p("b")])
   end
+
+  # Methods can also specify a return type with a restriction placed after the parameters
+  it_parses %q(def foo : Integer; end),   Def.new("foo", return_type: c("Integer"))
+  it_parses %q(
+    def foo : Integer
+    end
+  ),                Def.new("foo", return_type: c("Integer"))
+  it_parses %q(def foo : Foo; end),         Def.new("foo", return_type: c("Foo"))
+  it_parses %q(def foo() : Foo; end),       Def.new("foo", return_type: c("Foo"))
+  # The return type can be any valid type path
+  it_parses %q(def foo : Thing.Other; end), Def.new("foo", return_type: Call.new(c("Thing"), "Other"))
+  it_parses %q(def foo() : A.B.C; end), Def.new("foo", return_type: Call.new(Call.new(c("A"), "B"), "C"))
+  # The return type must appear on the same line as the parenthesis that closes the parameter list
+  it_parses %q(
+    def foo(
+            ) : Foo
+    end
+  ),                Def.new("foo", return_type: c("Foo"))
+  it_does_not_parse %q(
+    def foo()
+      : Foo
+    end
+  )
+  it_does_not_parse %q(
+    def foo
+      : Foo
+    end
+  )
+  # The return type must be a type expression
+  it_does_not_parse %q(def foo : 1; end)
+  it_does_not_parse %q(def foo : nil; end)
+  it_does_not_parse %q(def foo : a + b; end)
+  it_does_not_parse %q(def foo : a.b; end)
+  it_does_not_parse %q(def foo : Foo.a; end)
+  it_does_not_parse %q(def foo : a; end)
+  it_does_not_parse %q(def foo : _nothing; end)
+  it_does_not_parse %q(def foo : false; end)
+  # And the expression must not be empty
+  it_does_not_parse %q(def foo : ; end)
+
+  # Types for parameters and a return type can all be given for one definition
+  it_parses %q(def foo(a : Foo, b) : Foo; end), Def.new("foo", [p("a", restriction: c("Foo")), p("b")], return_type: c("Foo"))
+
 
 
   # Module definitions
