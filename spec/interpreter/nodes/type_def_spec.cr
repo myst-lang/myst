@@ -228,4 +228,17 @@ describe "Interpreter - TypeDef" do
     # supertype is the same, it will still fail.
     deftype Bar : Foo; end
   )
+
+  # All types automatically inherit from `Type`.
+  it_interprets_the_type %q(
+    deftype Foo; end
+  ) do |typ, itr|
+    typ.ancestors.map(&.name).should eq(["Type", "Object"])
+  end
+  # When inheriting another type, it is prepended to the ancestor list
+  it_interprets_the_type %q(
+    deftype Foo : Integer; end
+  ) do |typ, itr|
+    typ.ancestors.map(&.name).should eq(["Integer", "Type", "Object"])
+  end
 end
