@@ -12,22 +12,24 @@ deftype File
   #|
   #| This should be the preferred method for creating new File objects, rather
   #| than directly instantiating new File objects.
-  defstatic open(path : String, mode : String)
+  defstatic open(path : String, mode : String) : File
     %File{path, mode}
   end
   #doc open(path : String) -> file
   #| Opens the file specified by `path` in reading mode (`"r"`).
-  defstatic open(path : String); open(path, "r"); end
+  defstatic open(path : String) : File
+    open(path, "r")
+  end
 
 
   #doc path -> string
   #| Returns the path specified when opening this File. The path will not be
   #| expanded or modified from what was given to the initializer for this File
   #| object.
-  def path; @path; end
+  def path : String; @path; end
 
   #doc mode -> string
   #| Returns the mode that this File was opened with; one of `"r"`, `"w"`,
   #| `"a"`, or `"b"`.
-  def mode; @mode; end
+  def mode : String; @mode; end
 end

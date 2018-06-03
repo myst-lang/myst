@@ -10,16 +10,16 @@ deftype List
   #| that element of the list as the argument.
   #|
   #| Returns the original, unmodified List after completion.
-  def each(&block); end
+  def each(&block) : List; end
 
   #doc size -> integer
   #| Returns the number of elements contained in this List as an integer.
-  def size; end
+  def size : Integer; end
 
   #doc * -> self
   #| The splat operation. For Lists, this is a no-op and simply returns the
   #| List itself.
-  def *; end
+  def * : List; end
 
   #doc == -> boolean
   #| Returns `true` if `other` is also a List, has the same number of elements,
@@ -28,7 +28,7 @@ deftype List
   #|
   #| If `other` is not a List, or if any of those conditions are not met, this
   #| method will return `false`.
-  def ==(other); end
+  def ==(other) : Boolean; end
 
   #doc != -> boolean
   #| Returns `false` only if `other` is also a List, has the same number of
@@ -37,12 +37,12 @@ deftype List
   #|
   #| If `other` is not a List, or if any of those conditions are not met, this
   #| method will return `true`.
-  def !=(other); end
+  def !=(other) : Boolean; end
 
   #doc + -> list
   #| Returns a new List object with the elements of `other` appended to the end
   #| of this list.
-  def +(other : List); end
+  def +(other : List) : List; end
 
   #doc [] -> value?
   #| Returns the element of the list at position `index`. If this list does not
@@ -59,7 +59,7 @@ deftype List
 
   #doc - -> list
   #| Returns a new List object with the elements of `other` removed from this list.
-  def -(other : List); end
+  def -(other : List) : List; end
 
   #doc < -> boolean
   #| Returns `true` if this list is a proper subset of `other`. That is, if
@@ -67,7 +67,7 @@ deftype List
   #| contains at least one other element.
   #|
   #| The order of elements in the lists is not important for this method.
-  def <(other : List); end
+  def <(other : List) : Boolean; end
 
   #doc <= -> boolean
   #| Returns `true` if this list is a subset of `other`. That is, if every
@@ -75,13 +75,13 @@ deftype List
   #| to contain any other elements.
   #|
   #| The order of elements in the lists is not important for this method.
-  def <=(other : List); end
+  def <=(other : List) : Boolean; end
 
   #doc push(*args) -> self
   #| Adds the given elements to the end of this list as individual entries.
   #|
   #| Returns the same list object with the new elements added.
-  def push(*args); end
+  def push(*args) : List; end
 
   #doc pop -> value?
   #| Attempts to remove the last element from this list and return it. If the
@@ -98,7 +98,7 @@ deftype List
   #|
   #| Note that with multiple arguments, this method preserves their ordering.
   #| For example: `[1, 2].unshift(3, 4)` will result in the list `[3, 4, 1, 2]`.
-  def unshift(*args); end
+  def unshift(*args) : List; end
 
   #doc shift -> value?
   #| Similar to `pop`, but attempts to remove and return the first element of

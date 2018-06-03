@@ -10,14 +10,14 @@ deftype TCPSocket
   #doc initialize(host, port) -> self
   #| Initializes a new socket to reference the TCP server specified at `host`
   #| on the given `port`.
-  def initialize(host : String, port : Integer); end
+  def initialize(host : String, port : Integer) : TCPSocket; end
 
   #doc read(size : Integer) -> string
   #| Reads `size` bytes from the socket and returns them as a new String.
-  def read(size : Integer); end
+  def read(size : Integer) : String; end
 
   #doc write(content : String) -> nil
   #| Writes the bytes of `content` to the socket. The socket is not guaranteed
   #| to be flushed after this operation.
-  def write(content : String); end
+  def write(content : String) : Nil; end
 end

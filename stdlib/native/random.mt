@@ -10,11 +10,11 @@
 defmodule Random
   #doc rand -> float
   #| Returns a random Float value in the range `[0, 1]`.
-  def rand; end
+  def rand : Float; end
   #doc rand(max : Integer) -> integer
   #| Returns a random Integer value in the range `[0, max)`.
-  def rand(max : Integer); end
-  #doc rand(max : Float) -> integer
+  def rand(max : Integer) : Integer; end
+  #doc rand(max : Float) -> float
   #| Returns a random Float value in the range `[0, max)`.
-  def rand(max : Float); end
+  def rand(max : Float) : Float; end
 end

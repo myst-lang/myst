@@ -19,19 +19,22 @@ deftype Float
   #| Returns the result of adding the value of `other` to this float. This
   #| method is only valid when `other` is a float or an integer. Any other type
   #| will cause this method to raise a RuntimeError.
-  def +(other); end
+  def +(other : Integer) : Float; end
+  def +(other : Float) : Float; end
 
   #doc - -> float
   #| Returns the result of subtracting the value of `other` from this float.
   #| This method is only valid when `other` is a float or an integer. Any other
   #| type will cause this method to raise a RuntimeError.
-  def -(other); end
+  def -(other : Integer) : Float; end
+  def -(other : Float) : Float; end
 
   #doc * -> float
   #| Returns the result of multiplying the value of `other` with this float. This
   #| method is only valid when `other` is a float or an integer. Any other type
   #| will cause this method to raise a RuntimeError.
-  def *(other); end
+  def *(other : Integer) : Float; end
+  def *(other : Float) : Float; end
 
   #doc / -> float
   #| Returns the result of dividing this float by the value of `other`. This
@@ -40,7 +43,8 @@ deftype Float
   #|
   #| This method will also raise a RuntimeError if the value of `other` would
   #| cause a division by zero.
-  def /(other); end
+  def /(other : Integer) : Float; end
+  def /(other : Float) : Float; end
 
   #doc % -> float
   #| Returns the remainder of the result of dividing this float by the value of
@@ -49,24 +53,25 @@ deftype Float
   #|
   #| This method will also raise a RuntimeError if the value of `other` would
   #| cause a division by zero.
-  def %(other); end
+  def %(other : Integer) : Float; end
+  def %(other : Float) : Float; end
 
   #doc to_i -> integer
   #| Returns the integer portion of this float as a new Integer object by
   #| truncating the decimal portion from the value. As such, this method will
   #| always "round down" to the largest integer not greater than this value.
-  def to_i; end
+  def to_i : Integer; end
 
   #doc round -> integer
   #| Returns a new Integer object representing the integer that is nearest to
   #| the value of this float. This method considers `.5` decimals nearer to the
   #| upper integer.
-  def round; end
+  def round : Integer; end
 
   #doc to_s -> string
   #| Returns a new String object representing this float in base 10. This
   #| method does _not_ preserve underscores from float literals.
-  def to_s; end
+  def to_s : String; end
 
   #doc == -> boolean
   #| Returns `true` if `other` has the same value as this float. This method
@@ -75,7 +80,7 @@ deftype Float
   #|
   #| If `other` is not either a Float or an Integer, this method
   #| will always return `false`.
-  def ==(other); end
+  def ==(other) : Boolean; end
 
   #doc != -> boolean
   #| Returns `true` if `other` has any value other than the value of this
@@ -84,38 +89,42 @@ deftype Float
   #|
   #| If `other` is not either a Float or an Integer, this method will always
   #| return `true`.
-  def !=(other); end
+  def !=(other) : Boolean; end
 
   #doc negate -> float
   #| Returns a new Float object representing the result of multiplying this
   #| float's value by `-1`.
-  def negate; end
+  def negate : Float; end
 
   #doc < -> boolean
   #| Returns `true` if `other` is a Float or an Integer, and has a value that
   #| is mathematically less than this float.
   #|
   #| If `other` is not a Float or an Integer, this method will raise a RuntimeError.
-  def <(other); end
+  def <(other : Integer) : Boolean; end
+  def <(other : Float) : Boolean; end
 
   #doc <= -> boolean
   #| Returns `true` if `other` is a Float or an Integer, and has a value that
   #| is mathematically less than or equal to this float.
   #|
   #| If `other` is not a Float or an Integer, this method will raise a RuntimeError.
-  def <=(other); end
+  def <=(other : Integer) : Boolean; end
+  def <=(other : Float) : Boolean; end
 
   #doc > -> boolean
   #| Returns `true` if `other` is a Float or an Integer, and has a value that
   #| is mathematically greater than or equal to this float.
   #|
   #| If `other` is not a Float or an Integer, this method will raise a RuntimeError.
-  def >(other); end
+  def >(other : Integer) : Boolean; end
+  def >(other : Float) : Boolean; end
 
   #doc >= -> boolean
   #| Returns `true` if `other` is a Float or an Integer, and has a value that
   #| is mathematically greater than this float.
   #|
   #| If `other` is not a Float or an Integer, this method will raise a RuntimeError.
-  def >=(other); end
+  def >=(other : Integer) : Boolean; end
+  def >=(other : Float) : Boolean; end
 end

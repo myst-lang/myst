@@ -10,7 +10,7 @@ defmodule Enumerable
   #| Call `block` for each element of `self` and collect the result for each
   #| call into a new List. If `each` does not yield any elements, the result
   #| will be an empty List.
-  def map(&block)
+  def map(&block) : List
     result = []
     each do |elem|
       result.push(block(elem))
@@ -21,7 +21,7 @@ defmodule Enumerable
   #doc join(delimiter) -> str
   #| Creates a new string from the result of calling `to_s` on every element of
   #| `self`, inserting `delimiter` between each element.
-  def join(delimiter : String)
+  def join(delimiter : String) : String
     str = ""
     first = true
     each do |e|
@@ -38,7 +38,7 @@ defmodule Enumerable
   #doc size -> integer
   #| Returns the size of the enumerable, as determined by the number of
   #| times `each` yields an element to its block.
-  def size
+  def size : Integer
     counter = 0
 
     each do |e|
@@ -51,7 +51,7 @@ defmodule Enumerable
   #doc all?(&block) -> boolean
   #| Return true if all elements in the enumerable cause `block` to return a
   #| truthy value.
-  def all?(&block)
+  def all?(&block) : Boolean
     result = nil
     each do |e|
       when block(e)
@@ -67,7 +67,7 @@ defmodule Enumerable
   #doc any?(&block) -> boolean
   #| Return true if at least one element in the enumerable evaluates to a
   #| truthy value for the given block.
-  def any?(&block)
+  def any?(&block) : Boolean
     result = nil
     each do |e|
       when block(e)
@@ -97,7 +97,7 @@ defmodule Enumerable
   #doc select(&block) -> list
   #| Iterate the enumerable, passing each element to `block`. Return all
   #| elements for which the block returns a truthy value.
-  def select(&block)
+  def select(&block) : List
     result = []
 
     each do |e|
@@ -141,7 +141,7 @@ defmodule Enumerable
 
   #doc sort -> list
   #| Returns a new, sorted List of all elements in the enumerable.
-  def sort
+  def sort : List
     list = to_list
     when size < 2
       return list
@@ -167,7 +167,7 @@ defmodule Enumerable
 
   #doc to_list -> list
   #| Returns a new List containing all elements of the enumerable.
-  def to_list
+  def to_list : List
     list = []
 
     each do |e|

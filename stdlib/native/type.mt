@@ -9,36 +9,36 @@
 deftype Type
   #doc to_s -> string
   #| Returns the original name given to this type as a String.
-  defstatic to_s; end
+  defstatic to_s : String; end
 
   #doc ==(other) -> boolean
   #| Returns `true` if `other` represents the same Type as this type.
-  defstatic ==(other); end
+  defstatic ==(other) : Boolean; end
 
   #doc !=(other) -> boolean
   #| Returns `false` if `other` represents the same Type as this type.
-  defstatic !=(other); end
+  defstatic !=(other) : Boolean; end
 
   #doc ancestors -> list
   #| Returns a flat list of supertypes, included modules, and extended modules
   #| for this type. This list will _always_ contain the base `Type`, but will
   #| _not_ contain the original type itself.
-  defstatic ancestors; end
+  defstatic ancestors : List; end
 
   #doc to_s -> string
   #| Returns a new String with some debug information about the instance. This
   #| method should be overridden by any type that wants to serialize its content.
-  def to_s; end
+  def to_s : String; end
 
   #doc ==(other) -> boolean
   #| Returns `true` only if `other` represents the same instance as this instance.
   #| Two different instances with the same content will _not_ be considered equal
   #| by this method.
-  def ==(other); end
+  def ==(other) : Boolean; end
 
   #doc !=(other) -> boolean
   #| Returns `false` only if `other` represents the same instance as this instance.
   #| Two different instances with the same content will _not_ be considered equal
   #| by this method.
-  def !=(other); end
+  def !=(other) : Boolean; end
 end

@@ -1,7 +1,7 @@
 deftype Map
-  #doc empty? -> bool
+  #doc empty? -> boolean
   #| Return `true` if the Map contains 0 entries. Return `false` otherwise.
-  def empty?
+  def empty? : Boolean
     size == 0
   end
 

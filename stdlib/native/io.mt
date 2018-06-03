@@ -20,7 +20,7 @@ deftype IO
   #| Reads `size` bytes from the underlying stream and returns them as a single
   #| String object. The exact semantics regarding errors is dependent on the
   #| implementing type.
-  def read(size : Integer); end
+  def read(size : Integer) : String; end
 
   #doc write -> nil
   #| This method must be overridden by types that inherit from IO.
@@ -29,5 +29,5 @@ deftype IO
   #| method is generally best used by providing a String value to write.
   #|
   #| The exact semantics regarding errors is dependent on the implementing type.
-  def write(content); end
+  def write(content) : Nil; end
 end

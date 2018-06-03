@@ -17,6 +17,5 @@ deftype Functor
   #|
   #| This method is mainly intended for debugging purposes where the name of
   #| the Functor may be useful. It is _not_ a serialization of the Functor.
-  def to_s
-  end
+  def to_s : String; end
 end
