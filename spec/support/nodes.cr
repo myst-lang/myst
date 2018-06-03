@@ -77,6 +77,7 @@ end
 def e(*nodes : Node)
   Expressions.new(*nodes)
 end
+def e; Expressions.new; end
 
 # iv(name)
 #

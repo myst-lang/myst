@@ -345,6 +345,8 @@ module Myst
         block = Block.new
         parse_param_list(into: block, require_parens: true)
         skip_space
+        block.return_type = parse_optional_type_restriction
+        skip_space
 
         closing_brace =
           case

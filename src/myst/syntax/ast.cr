@@ -733,7 +733,7 @@ module Myst
     # style used, as shown above.
     property  style  : Symbol
 
-    def initialize(@params = [] of Param, @body=Nop.new, @block_param=nil, @splat_index=nil, @style=:brace)
+    def initialize(@params = [] of Param, @body=Nop.new, *, @return_type=nil, @block_param=nil, @splat_index=nil, @style=:brace)
       @name = ""
       @static = false
     end

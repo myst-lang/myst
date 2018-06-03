@@ -2612,6 +2612,24 @@ describe "Parser" do
     end
   ),                          AnonymousFunction.new([Block.new([p(nil, l(1)), p(nil, l(:hi))], e(Or.new(l(true), l(false))))])
 
+  # Like regular functions, anonymous functions can set type restrictions on their parameters
+  it_parses %q(
+    fn
+      ->(a : Integer) { }
+      ->(a : Float) { }
+    end
+  ),                          AnonymousFunction.new([Block.new([p("a", restriction: c("Integer"))], e()), Block.new([p("a", restriction: c("Float"))], e())])
+
+  # They can also specify return types after the parenthesis that closes the parameters.
+  it_parses %q(
+    fn
+      ->(a) : A.B { }
+      ->(a) : Foo { }
+    end
+  ),                          AnonymousFunction.new([Block.new([p("a")], e(), return_type: Call.new(c("A"), "B")), Block.new([p("a")], e(), return_type: c("Foo"))])
+
+
+
   # Exception handling is not allowed with {... } syntax, but only with do... end
   it_does_not_parse %q(
     fn
