@@ -92,3 +92,11 @@ end
 def doc(header, content="", target=NilLiteral.new)
   DocComment.new(header, content, target)
 end
+
+# tu(*nodes)
+#
+# Generate a TypeUnion node for the given type nodes
+def tu(*nodes : TypePath)
+  nodes = nodes.map(&.as(TypePath)).to_a
+  TypeUnion.new(nodes)
+end

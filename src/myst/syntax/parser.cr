@@ -261,7 +261,7 @@ module Myst
       end
     end
 
-    def parse_param(allow_splat = true)
+    def parse_param(allow_splat = true, is_block = false)
       param = Param.new
 
       case
@@ -301,7 +301,7 @@ module Myst
       end
 
       skip_space
-      if restriction = parse_optional_type_restriction
+      if restriction = parse_optional_type_restriction(pipe_is_ambiguous: is_block)
         param.restriction = restriction
         param.at_end(restriction)
       end
@@ -309,19 +309,56 @@ module Myst
       return param
     end
 
-    # This and `parse_type_path` could probably be merged together in some way.
-    def parse_optional_type_restriction
-      if accept(Token::Type::COLON)
+    # This should use `parse_type_path` to avoid nested looping in this method.
+    def parse_single_type_path
+      token = expect(Token::Type::CONST)
+      path = Const.new(token.value).at(token.location)
+
+      while accept(Token::Type::POINT)
+        next_path_part = expect(Token::Type::CONST)
+        path = Call.new(path, next_path_part.value).at(path.location).at_end(next_path_part.location)
+      end
+
+      return path
+    end
+
+    def parse_optional_type_restriction(pipe_is_ambiguous=false)
+      unless accept(Token::Type::COLON)
+        return nil
+      end
+      skip_space
+
+      # For block parameters with type restrictions, the pipe character is
+      # ambiguous as either starting a union or ending the parameter list. In
+      # this case, a union is only allowed if the restriction is wrapped in
+      # parentheses.
+      parenthesized_union = !!accept(Token::Type::LPAREN)
+      can_union = pipe_is_ambiguous ? parenthesized_union : true
+      skip_space
+
+      # If a union is not allowed, just try parsing one type path and return it.
+      unless can_union
+        return parse_single_type_path
+      end
+
+      paths = [] of TypePath
+      loop do
+        paths.push(parse_single_type_path)
         skip_space
-        token = expect(Token::Type::CONST)
-        path = Const.new(token.value).at(token.location)
-        while accept(Token::Type::POINT)
-          next_path_part = expect(Token::Type::CONST)
-          path = Call.new(path, next_path_part.value).at(path.location).at_end(next_path_part.location)
-        end
-        path
+        break unless accept(Token::Type::PIPE)
+        skip_space_and_newlines
+      end
+
+      if parenthesized_union
+        expect(Token::Type::RPAREN)
+      end
+
+      # If only one type is given, return that type alone. Otherwise, create
+      # a TypeUnion from the given paths and return that
+      if paths.size == 1
+        paths.first
       else
-        nil
+        TypeUnion.new(paths).at(paths.first).at_end(paths.last)
       end
     end
 
@@ -986,7 +1023,7 @@ module Myst
           param_index = 0
           loop do
             skip_space_and_newlines
-            next_param = parse_param(allow_splat)
+            next_param = parse_param(allow_splat, is_block: true)
             skip_space_and_newlines
             # Only one splat collector is allowed in a parameter list.
             if next_param.splat?
