@@ -1,6 +1,6 @@
 require "stdlib/spec.mt"
 
-initial_env = ENV.to_m
+initial_env = ENV.to_map
 
 # Keys and values used for testing
 SHAKE_KEY = "Shakespeare"
@@ -100,17 +100,17 @@ describe("ENV.keys") do
   end
 end
 
-describe("ENV.to_m") do
+describe("ENV.to_map") do
   it("returns a map of the current environment") do
     set_test_env
-    assert(ENV.to_m) == TEST_ENV
+    assert(ENV.to_map) == TEST_ENV
   end
 end
 
 describe("ENV.set") do
   it("sets the environment to given map") do
     set_test_env
-    assert(ENV.to_m) == TEST_ENV
+    assert(ENV.to_map) == TEST_ENV
   end
 end
 

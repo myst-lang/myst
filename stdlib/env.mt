@@ -7,7 +7,7 @@ defmodule ENV
     end
   end
 
-  def to_m
+  def to_map
     map = {}
     each do |k,v|
       map[k] = v
