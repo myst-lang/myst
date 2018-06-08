@@ -216,3 +216,23 @@ describe("Map#empty?") do
     assert({key: 1, b: "hello"}.empty?).is_false
   end
 end
+
+describe("Map#keys") do
+  it("returns a list of the maps keys") do
+    assert({foo: :a, bar: :b}.keys) == [:foo, :bar]
+  end
+
+  it("returns an empty list when the map is empty") do
+    assert({}.keys) == []
+  end
+end
+
+describe("Map#values") do
+  it("returns a list of the maps values") do
+    assert({foo: :a, bar: :b}.values) == [:a, :b]
+  end
+
+  it("returns an empty list when the map is empty") do
+    assert({}.values) == []
+  end
+end
