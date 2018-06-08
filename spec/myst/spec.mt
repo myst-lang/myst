@@ -22,6 +22,7 @@ require "./symbol_spec.mt"
 require "./type_spec.mt"
 require "./time_spec.mt"
 require "./top_level_spec.mt"
+require "./env_spec.mt"
 
 # The only way to reach this point is if all of the Specs passed. Any failures
 # will immediately exit the program, so reaching here implies success.
