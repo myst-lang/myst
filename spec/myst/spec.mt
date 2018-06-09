@@ -7,6 +7,7 @@ include Spec
 require "./assert_spec.mt"
 require "./boolean_spec.mt"
 require "./enumerable_spec.mt"
+require "./env_spec.mt"
 require "./file_spec.mt"
 require "./float_spec.mt"
 require "./integer_spec.mt"
