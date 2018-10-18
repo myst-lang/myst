@@ -2,7 +2,7 @@ module Myst
   class Interpreter
     NativeLib.method :static_time_now, MTValue do
       seconds, nanoseconds = Crystal::System::Time.compute_utc_seconds_and_nanoseconds
-      offset = Crystal::System::Time.compute_utc_offset(seconds)
+      offset = Time.new(seconds: seconds, nanoseconds: nanoseconds, location: Time::Location.local).offset
 
       instance = NativeLib.instantiate(self, this.as(TType), [
         seconds + offset,
@@ -35,7 +35,7 @@ module Myst
       Time.new(
         seconds: myst_time.ivars["@seconds"].as(Int64),
         nanoseconds: myst_time.ivars["@nanoseconds"].as(Int64).to_i32,
-        kind: Time::Kind::Unspecified
+        location: Time::Location.local
       )
     end
   end
