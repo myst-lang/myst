@@ -81,7 +81,11 @@ module Myst
     end
 
     NativeLib.method :static_File_lines, MTValue, file_name : String do
-      TList.new(File.each_line(file_name).map{ |l| l.as(MTValue) }.to_a)
+      lines = File.open(file_name) do |file| 
+        file.each_line.map { |l| l.as(MTValue) }.to_a
+      end
+
+      TList.new(lines)
     end
 
 
