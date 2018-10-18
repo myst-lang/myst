@@ -18,7 +18,7 @@ module Myst
       if format
        crystal_time.to_s(format)
       else
-       crystal_time.to_s
+       crystal_time.to_s("%Y-%m-%d %H:%M:%S")
       end
     end
 
@@ -35,7 +35,7 @@ module Myst
       Time.new(
         seconds: myst_time.ivars["@seconds"].as(Int64),
         nanoseconds: myst_time.ivars["@nanoseconds"].as(Int64).to_i32,
-        location: Time::Location.local
+        location: Time::Location::UTC
       )
     end
   end
