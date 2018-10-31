@@ -81,6 +81,36 @@ TYPE_DEFS = %q(
   end
 )
 
+RESTRICTED_DEFS = %{
+  def foo(a : Integer, b : Integer)
+    :two_ints
+  end
+
+  def foo(a : Integer, b)
+    :a_is_int
+  end
+
+  def foo(a, b : String)
+    :b_is_string
+  end
+
+  def foo(a, b)
+    :no_restriction
+  end
+
+  def bar(a : Integer | String)
+    :int_or_string
+  end
+
+  def bar(a : Integer | Nil)
+    :nil
+  end
+
+  def bar(a)
+    :no_restriction
+  end
+}
+
 
 private def it_invokes(prelude, call, expected, file=__FILE__, line=__LINE__, end_line=__END_LINE__)
   itr = parse_and_interpret(prelude)
@@ -108,13 +138,22 @@ describe "Interpreter - Invocation" do
   it_invokes FOO_DEFS, "foo(1, nil, nil, 4)",     val(:middle_splat)
   it_invokes FOO_DEFS, "foo(nil, nil, nil, nil)", val(:splat_all)
 
-
   it_invokes MODULE_DEFS, "Foo.foo(1)",     val(:one_arg)
   it_invokes MODULE_DEFS, "Foo.foo(1, 2)",  val(:two_args)
   it_invokes MODULE_DEFS, "Foo.bar",        val(:bar)
 
   it_invokes TYPE_DEFS, "Foo.foo",    val(:static_foo)
   it_invokes TYPE_DEFS, "%Foo{}.foo", val(:instance_foo)
+
+  # Tests around type restrictions on method parameters
+  it_invokes RESTRICTED_DEFS, %q(foo(1, 2)),          val(:two_ints)
+  it_invokes RESTRICTED_DEFS, %q(foo(1, nil)),        val(:a_is_int)
+  it_invokes RESTRICTED_DEFS, %q(foo(nil, "hello")),  val(:b_is_string)
+  it_invokes RESTRICTED_DEFS, %q(foo(nil, nil)),      val(:no_restriction)
+
+  it_invokes RESTRICTED_DEFS, %q(bar(1)), val(:int_or_string)
+  it_invokes RESTRICTED_DEFS, %q(bar("string")), val(:int_or_string)
+  it_invokes RESTRICTED_DEFS, %q(bar(nil)), val(:nil)
 
 
   it "restores the value of `self` after executing with a receiver" do
