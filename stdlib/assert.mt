@@ -210,6 +210,12 @@ defmodule Assert
 
     #doc is_a(other : Type) -> self
     #| Assert that the value is an instance of `type`.
+    # TODO: this first clause matching `Object` is a hack around the fact that
+    # `Object` does not inherit from `Type`. Because everything in Myst is an
+    # Object, an `is_a(Object)` assertion will _always_ pass, so this
+    # implementation is accurate, but should probably be addressed in the
+    # interpreter to be consistent with the fact that Object _is_ a Type.
+    def is_a(Object) : Assertion; self; end
     def is_a(other : Type) : Assertion
       unless [@value.type, *@value.type.ancestors].any?{ |anc| anc == other }
         raise %AssertionFailure{
