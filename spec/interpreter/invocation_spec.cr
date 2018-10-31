@@ -109,6 +109,22 @@ RESTRICTED_DEFS = %{
   def bar(a)
     :no_restriction
   end
+
+  deftype Bar
+  end
+
+  defmodule Foo
+    deftype Bar
+    end
+  end
+
+  def nested(a : Bar)
+    :top_bar
+  end
+
+  def nested(a : Foo.Bar | String)
+    :nested_bar_or_string
+  end
 }
 
 
@@ -154,6 +170,10 @@ describe "Interpreter - Invocation" do
   it_invokes RESTRICTED_DEFS, %q(bar(1)), val(:int_or_string)
   it_invokes RESTRICTED_DEFS, %q(bar("string")), val(:int_or_string)
   it_invokes RESTRICTED_DEFS, %q(bar(nil)), val(:nil)
+
+  it_invokes RESTRICTED_DEFS, %q(nested(%Bar{})), val(:top_bar)
+  it_invokes RESTRICTED_DEFS, %q(nested(%Foo.Bar{})), val(:nested_bar_or_string)
+  it_invokes RESTRICTED_DEFS, %q(nested("hi")), val(:nested_bar_or_string)
 
 
   it "restores the value of `self` after executing with a receiver" do
