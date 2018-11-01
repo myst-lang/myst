@@ -22,7 +22,7 @@ defmodule Color
   ANSI_CYAN   = "\e[0;36m"
   ANSI_WHITE  = "\e[0;37m"
 
-  def ansi_from_symbol(sym)
+  def ansi_from_symbol(sym) : String
     match sym
       ->(:black)  { ANSI_BLACK }
       ->(:red)    { ANSI_RED }
@@ -46,7 +46,7 @@ defmodule Color
   #| via interpolation (i.e., by calling `to_s` on it).
   #|
   #| This method may raise an error if `color` is not a valid color name.
-  def colored(content, color : Symbol)
+  def colored(content, color : Symbol) : String
     color = ansi_from_symbol(color)
     "<(color)><(content)><(ANSI_RESET)>"
   end

@@ -13,13 +13,13 @@
 deftype Symbol
   #doc to_s -> string
   #| Returns the name used to identify this symbol as a String.
-  def to_s; end
+  def to_s : String; end
 
   #doc ==(other) -> boolean
   #| Returns `true` if `other` is the same Symbol as this symbol.
-  def ==(other); end
+  def ==(other) : Boolean; end
 
   #doc !=(other) -> boolean
   #| Returns `false` if `other` is the same Symbol as this symbol.
-  def !=(other); end
+  def !=(other) : Boolean; end
 end

@@ -295,6 +295,11 @@ module Myst
         io << param_strs.join(", ")
         io << ")"
       end
+
+      if node.return_type?
+        io << " : "
+        visit(node.return_type, io)
+      end
     end
 
 

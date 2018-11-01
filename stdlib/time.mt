@@ -27,7 +27,7 @@ deftype Time
     DAYS_PER_4_YEARS    = 365 * 4 + 1
 
 
-    def leap_year?(year)
+    def leap_year?(year) : Boolean
       (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)
     end
 

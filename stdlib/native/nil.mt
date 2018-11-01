@@ -15,13 +15,13 @@
 deftype Nil
   #doc to_s -> string
   #| Returns the string object `"nil"`.
-  def to_s; end
+  def to_s : String; end
 
   #doc == -> boolean
   #| Returns `false` unless `other` is also the value `nil`.
-  def ==(other); end
+  def ==(other) : Boolean; end
 
   #doc != -> boolean
   #| Returns `true` unless `other` is also the value `nil`.
-  def !=(other); end
+  def !=(other) : Boolean; end
 end

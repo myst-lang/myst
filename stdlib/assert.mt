@@ -36,7 +36,7 @@ defmodule Assert
     def left; @left; end
     def right; @right; end
 
-    def to_s
+    def to_s : String
       "Assertion failed: `<(@message)>`\n" +
       "     left: <(@left)>\n" +
       "    right: <(@right)>\n"
@@ -58,42 +58,42 @@ defmodule Assert
 
     #doc is_truthy -> self
     #| Asserts that the value is truthy (not `false` or `nil`).
-    def is_truthy
+    def is_truthy : Assertion
       @value || raise %AssertionFailure{@value, true, "truthy"}
       self
     end
 
     #doc is_falsey -> self
     #| Asserts that the value is falsey (either `false` or `nil`).
-    def is_falsey
+    def is_falsey : Assertion
       @value && raise %AssertionFailure{@value, false, "falsey"}
       self
     end
 
     #doc is_true -> self
     #| Asserts that the value is exactly the boolean value `true`.
-    def is_true
+    def is_true : Assertion
       @value == true || raise %AssertionFailure{@value, true, "exactly true"}
       self
     end
 
     #doc is_false -> self
     #| Asserts that the value is exactly the boolean value `false`.
-    def is_false
+    def is_false : Assertion
       @value == false || raise %AssertionFailure{@value, false, "exactly false"}
       self
     end
 
     #doc is_nil -> self
     #| Asserts that the value is `nil` (false is not allowed).
-    def is_nil
+    def is_nil : Assertion
       @value == nil || raise %AssertionFailure{@value, nil, "nil"}
       self
     end
 
     #doc is_not_nil -> self
     #| Asserts that the value is not `nil` (false is allowed).
-    def is_not_nil
+    def is_not_nil : Assertion
       @value != nil || raise %AssertionFailure{@value, nil, "not nil"}
       self
     end
@@ -101,7 +101,7 @@ defmodule Assert
 
     #doc equals(other) -> self
     #| Assert that the value is equal to `other` using its `==` method.
-    def equals(other)
+    def equals(other) : Assertion
       unless @value == other
         raise %AssertionFailure{@value, other, "left == right"}
       end
@@ -111,7 +111,7 @@ defmodule Assert
 
     #doc does_not_equal(other) -> self
     #| Assert that the value is not equal to `other` using its `!=` method.
-    def does_not_equal(other)
+    def does_not_equal(other) : Assertion
       unless @value != other
         raise %AssertionFailure{@value, other, "left != right"}
       end
@@ -121,7 +121,7 @@ defmodule Assert
 
     #doc less_than(other) -> self
     #| Assert that the value is less than `other` using its `<` method.
-    def less_than(other)
+    def less_than(other) : Assertion
       unless @value < other
         raise %AssertionFailure{@value, other, "left < right"}
       end
@@ -132,7 +132,7 @@ defmodule Assert
     #doc less_or_equal(other) -> self
     #| Assert that the value is less than or equal to `other` using its `<=`
     #| method.
-    def less_or_equal(other)
+    def less_or_equal(other) : Assertion
       unless @value <= other
         raise %AssertionFailure{@value, other, "left <= right"}
       end
@@ -143,7 +143,7 @@ defmodule Assert
     #doc greater_or_equal(other) -> self
     #| Assert that the value is greater than or equal to `other` using its `>=`
     #| method.
-    def greater_or_equal(other)
+    def greater_or_equal(other) : Assertion
       unless @value >= other
         raise %AssertionFailure{@value, other, "left >= right"}
       end
@@ -153,7 +153,7 @@ defmodule Assert
 
     #doc greater_than(other) -> self
     #| Assert that the value is greater than `other` using its `>` method.
-    def greater_than(other)
+    def greater_than(other) : Assertion
       unless @value > other
         raise %AssertionFailure{@value, other, "left > right"}
       end
@@ -164,7 +164,7 @@ defmodule Assert
     #doc between(lower, upper) -> self
     #| Assert that the value is between `lower` and `upper` (inclusively), using
     #| only the `<=`operator on the value for comparisons.
-    def between(lower, upper)
+    def between(lower, upper) : Assertion
       unless lower <= @value && @value <= upper
         raise %AssertionFailure{@value, [lower, upper], "lower <= value <= upper"}
       end
@@ -174,43 +174,49 @@ defmodule Assert
 
     #doc <(other) -> self
     #| Operator alias for `less_than(other)`.
-    def <(other)
+    def <(other) : Assertion
       less_than(other)
     end
 
     #doc <=(other) -> self
     #| Operator alias for `less_or_equal(other)`.
-    def <=(other)
+    def <=(other) : Assertion
       less_or_equal(other)
     end
 
     #doc ==(other) -> self
     #| Operator alias for `equals(other)`.
-    def ==(other)
+    def ==(other) : Assertion
       equals(other)
     end
 
     #doc <=(other) -> self
     #| Operator alias for `does_not_equal(other)`.
-    def !=(other)
+    def !=(other) : Assertion
       does_not_equal(other)
     end
 
     #doc >=(other) -> self
     #| Operator alias for `greater_or_equal(other)`.
-    def >=(other)
+    def >=(other) : Assertion
       greater_or_equal(other)
     end
 
     #doc >(other) -> self
     #| Operator alias for `greater_than(other)`.
-    def >(other)
+    def >(other) : Assertion
       greater_than(other)
     end
 
     #doc is_a(other : Type) -> self
     #| Assert that the value is an instance of `type`.
-    def is_a(other : Type)
+    # TODO: this first clause matching `Object` is a hack around the fact that
+    # `Object` does not inherit from `Type`. Because everything in Myst is an
+    # Object, an `is_a(Object)` assertion will _always_ pass, so this
+    # implementation is accurate, but should probably be addressed in the
+    # interpreter to be consistent with the fact that Object _is_ a Type.
+    def is_a(Object) : Assertion; self; end
+    def is_a(other : Type) : Assertion
       unless [@value.type, *@value.type.ancestors].any?{ |anc| anc == other }
         raise %AssertionFailure{
           "<(@value.type)> (<(@value.ancestors.map{ |t| t.to_s }.join(","))>)",
@@ -223,7 +229,7 @@ defmodule Assert
     #doc includes(element) -> self
     #| Assert that the value includes `element`. This requires that the value
     #| is Enumerable (implements `#each`)
-    def includes(element)
+    def includes(element) : Assertion
       unless @value.any?{ |e| e == element }
         raise %AssertionFailure{@value, element, "value does not include the requested element"}
       end
@@ -250,7 +256,7 @@ defmodule Assert
     #|
     #| The block will be called with whatever arguments have been set with
     #| `called_with_arguments`. By default, no arguments will be given.
-    def raises(expected_error)
+    def raises(expected_error) : BlockAssertion
       @block(*@arguments_for_call)
       raise %AssertionFailure{"block(<(@arguments_for_call.join(", "))>)", expected_error, "expected the block to raise an error"}
     rescue <expected_error>
@@ -265,7 +271,7 @@ defmodule Assert
       raise %AssertionFailure{expected_error, actual_error, "error from block did not match expected"}
     end
 
-    def raises
+    def raises : BlockAssertion
       block(*@arguments_for_call)
       raise %AssertionFailure{"block(<(@arguments_for_call.join(", "))>)", "any error", "expected the block to raise an error"}
     rescue ex : AssertionFailure
@@ -280,7 +286,7 @@ defmodule Assert
     #doc succeeds -> self
     #| Assert that calling the block completes successfully (does not raise an
     #| error).
-    def succeeds
+    def succeeds : BlockAssertion
       @block(*@arguments_for_call)
       self
     rescue err
@@ -289,7 +295,7 @@ defmodule Assert
 
     #doc returns(value) -> self
     #| Assert that calling the block returns the given value.
-    def returns(expected_result)
+    def returns(expected_result) : BlockAssertion
       unless @block(*@arguments_for_call) == expected_result
         raise %AssertionFailure{"block(<(@arguments_for_call.join(", "))>)", expected_result, "return value from block did not match expected value"}
       end
@@ -301,7 +307,7 @@ defmodule Assert
 
     #doc called_with_arguments(*args) -> self
     #| Set the arguments to be used when calling the block for an assertion.
-    def called_with_arguments(*args)
+    def called_with_arguments(*args) : BlockAssertion
       @arguments_for_call = args
       self
     end
@@ -314,7 +320,7 @@ end
 #| The global entrypoint to writing assertions about objects. This clause
 #| accepts any value as an argument, and returns an `Assertion` object to use
 #| for executing assertions about that object.
-def assert(value)
+def assert(value) : Assert.Assertion
   %Assert.Assertion{value}
 end
 #doc assert(&block) -> block assertion
@@ -326,6 +332,6 @@ end
 #| This clause also accepts function captures of pre-defined methods:
 #|
 #| `assert(&Foo.might_raise!).called_with_arguments(1, 2).raises(:some_error)`
-def assert(&block)
+def assert(&block) : Assert.BlockAssertion
   %Assert.BlockAssertion{block}
 end

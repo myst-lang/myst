@@ -23,6 +23,8 @@ module Myst
         # Constants can't be re-assigned, so they are matched as if they were
         # literal values
         match_value(pattern, value)
+      when TypeUnion
+        match_type_union(pattern, value)
       else
         __raise_runtime_error(MatchError.new(callstack))
       end
@@ -49,6 +51,15 @@ module Myst
         end
 
       success || __raise_runtime_error(MatchError.new(callstack))
+    end
+
+    private def match_type_union(pattern : TypeUnion, right : MTValue)
+      has_match =
+        pattern.types.any? do |type_path|
+          match_value(type_path, right) rescue false
+        end
+
+      has_match || __raise_runtime_error(MatchError.new(callstack))
     end
 
     private def match_list(pattern : ListLiteral, value : MTValue)

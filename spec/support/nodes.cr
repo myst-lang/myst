@@ -77,6 +77,7 @@ end
 def e(*nodes : Node)
   Expressions.new(*nodes)
 end
+def e; Expressions.new; end
 
 # iv(name)
 #
@@ -90,4 +91,12 @@ end
 # Generate a DocComment node from the reference, return value, and content.
 def doc(header, content="", target=NilLiteral.new)
   DocComment.new(header, content, target)
+end
+
+# tu(*nodes)
+#
+# Generate a TypeUnion node for the given type nodes
+def tu(*nodes : TypePath)
+  nodes = nodes.map(&.as(TypePath)).to_a
+  TypeUnion.new(nodes)
 end

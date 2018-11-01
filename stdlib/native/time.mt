@@ -11,14 +11,14 @@
 deftype Time
   #doc now -> time
   #| Create and return a new Time object using the current system time.
-  defstatic now; end
+  defstatic now : Time; end
 
   #doc to_s(format : String) -> string
   #| Returns a new String using the given `format` string to determine the
   #| content. `format` can contain any combination of the directives listed
   #| here: https://crystal-lang.org/api/0.24.2/Time/Format.html.
-  def to_s(format : String); end
+  def to_s(format : String) : String; end
   #doc to_s -> string
   #| Renders the string using the default Unix timestamp format.
-  def to_s; end
+  def to_s : String; end
 end

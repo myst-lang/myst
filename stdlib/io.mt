@@ -3,7 +3,7 @@ deftype IO
   #| Writes the given value through this IO, in order. The value will be
   #| converted to a string by calling `to_s` on it, then written to the IO
   #| using `write`.
-  def print(value)
+  def print(value) : IO
     write("<(value)>")
   end
 
@@ -15,12 +15,11 @@ deftype IO
   #| Unlike `print`, each value will also be succeeded by a newline character.
   #| If no arguments are given, a single newline character will be written to
   #| the IO.
-  def puts
+  def puts : IO
     write("\n")
     self
   end
-
-  def puts(*values)
+  def puts(*values) : IO
     values.each do |val|
       write("<(val)>\n")
     end
@@ -33,7 +32,7 @@ deftype IO
   #|
   #| If a `read` call returns an empty String before a newline character is
   #| found, the characters up until that point will be returned.
-  def gets
+  def gets : String
     buffer = ""
     last_char = ""
 

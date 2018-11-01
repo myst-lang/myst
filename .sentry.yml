@@ -6,7 +6,7 @@
 display_name: myst specs
 info: true
 # `|| echo` makes sure that sentry keeps running even if there the specs fail.
-build: crystal spec --no-debug || echo ''
+build: crystal spec || echo ''
 run: # nothing to do
 watch:
   - ./src/myst/**/*.cr

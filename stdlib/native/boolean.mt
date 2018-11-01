@@ -9,17 +9,17 @@
 deftype Boolean
   #doc to_s -> string
   #| Returns either `"true"` or `"false"` depending on this Boolean's value.
-  def to_s; end
+  def to_s : String; end
 
   #doc ==(other) -> boolean
   #| Returns `true` if `other` has the same value as this Boolean (i.e., both
   #| are `true` or both are `false`). If `other` is _not_ a Boolean, this
   #| method will return `false`.
-  def ==(other); end
+  def ==(other) : Boolean; end
 
   #doc !=(other) -> boolean
   #| Returns `true` if `other` has any value other than the value of this
   #| Boolean. Only returns `false` if `other` is a Boolean and has the same
   #| value as this Boolean.
-  def !=(other); end
+  def !=(other) : Boolean; end
 end

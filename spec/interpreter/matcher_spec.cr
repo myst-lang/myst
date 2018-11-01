@@ -129,6 +129,13 @@ describe "Interpreter - #match" do
   it_matches c("String"),   val("hello world")
   it_matches c("Nil"),      val(nil)
 
+  # Type matching also works with TypeUnion patterns
+  it_matches tu(c("Integer"), c("Nil")), val(1)
+  it_matches tu(c("Integer"), c("Nil")), val(nil)
+  it_matches tu(c("Integer"), c("String"), c("Float")), val(1.0)
+  it_does_not_match tu(c("Integer"), c("Nil")),     val("hello")
+  it_does_not_match tu(c("Integer"), c("String")),  val(nil)
+
 
   # When matching a Type, all ancestors of the value type are considered.
   describe "type pattern" do

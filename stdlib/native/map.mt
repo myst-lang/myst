@@ -10,17 +10,17 @@ deftype Map
   #| with the key and value of that pair as the arguments.
   #|
   #| Returns the original, unmodified Map after completion.
-  def each; end
+  def each : Map; end
 
   #doc size -> integer
   #| Returns the number of entries contained in this Map as an integer.
-  def size; end
+  def size : Integer; end
 
   #doc +(other) -> map
   #| Returns a new Map object with the key-value pairs of `other` added to this
   #| map. If this map and `other` both contain the a given key, it will be
   #| given the value from `other`.
-  def +(other : Map); end
+  def +(other : Map) : Map; end
 
   #doc ==(other) -> boolean
   #| Returns `true` if `other` is also a Map, has the same number entries,
@@ -29,7 +29,7 @@ deftype Map
   #|
   #| If `other` is not a Map, or if any of those conditions are not met, this
   #| method will return `false`.
-  def ==(other); end
+  def ==(other) : Boolean; end
 
   #doc !=(other) -> boolean
   #| Returns `false` only if `other` is also a Map, has the same number entries,
@@ -38,7 +38,7 @@ deftype Map
   #|
   #| If `other` is not a Map, or if any of those conditions are not met, this
   #| method will return `true`.
-  def !=(other); end
+  def !=(other) : Boolean; end
 
   #doc [] -> value?
   #| Returns the value of the entry in this map with the given `key`. If this
@@ -58,11 +58,11 @@ deftype Map
   #| Returns `true` if this map is a proper subset of `other`. That is, if
   #| every key-value pair of this map is also present in `other`, _and_ `other`
   #| also contains at least one other entry.
-  def <(other : Map); end
+  def <(other : Map) : Boolean; end
 
   #doc <=(other -> boolean
   #| Returns `true` if this map is a subset of `other`. That is, if every
   #| key-value pair of this map is also present in `other`. `other` does not
   #| have to contain any other entries.
-  def <=(other : Map); end
+  def <=(other : Map) : Boolean; end
 end

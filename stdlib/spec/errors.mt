@@ -14,7 +14,7 @@ defmodule Spec
     def expected; @expected;  end
     def got;      @got;       end
 
-    def to_s
+    def to_s : String
       "Assertion failed.\n" +
       "    Expected: <(@expected)>\n" +
       "         Got: <(@got)>\n"

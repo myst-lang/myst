@@ -657,11 +657,11 @@ module Myst
   # |
   #   '&' name
   # |
-  #   [ pattern '=:' ] name [ ':' const ] [ '|' guard ]
+  #   [ pattern '=:' ] name [ ':' type_path ] [ '|' guard ]
   class Param < Node
     property! pattern     : Node?
     property! name        : String?
-    property! restriction : Const?
+    property! restriction : Node?
     property! guard       : Node?
     property? splat       : Bool
     property? block       : Bool
@@ -684,11 +684,14 @@ module Myst
   # defined as "static" - or related to the type, rather than instances of the
   # type - using the alternate keyword `defstatic`.
   #
-  #   [ 'def' | 'defstatic' ] name '(' [ param [ ',' param ]* ] ')'
+  # For any definition, the return type can be specified as a type restriction
+  # on the method itself using the `: Type` syntax, similar to the parameters.
+  #
+  #   [ 'def' | 'defstatic' ] name '(' [ param [ ',' param ]* ] ')' [ ':' return_type ]
   #     body
   #   'end'
   # |
-  #   [ 'def' | 'defstatic' ] name
+  #   [ 'def' | 'defstatic' ] name [ ':' return_type ]
   #     body
   #   'end'
   class Def < Node
@@ -696,10 +699,11 @@ module Myst
     property  params        : Array(Param)
     property! block_param   : Param?
     property  body          : Node
+    property! return_type   : Node?
     property! splat_index   : Int32?
     property? static        : Bool
 
-    def initialize(@name, @params = [] of Param, @body=Nop.new, @block_param=nil, @splat_index=nil, @static=false)
+    def initialize(@name, @params = [] of Param, @body=Nop.new, *, @return_type=nil, @block_param=nil, @splat_index=nil, @static=false)
     end
 
     def accept_children(visitor)
@@ -729,7 +733,7 @@ module Myst
     # style used, as shown above.
     property  style  : Symbol
 
-    def initialize(@params = [] of Param, @body=Nop.new, @block_param=nil, @splat_index=nil, @style=:brace)
+    def initialize(@params = [] of Param, @body=Nop.new, *, @return_type=nil, @block_param=nil, @splat_index=nil, @style=:brace)
       @name = ""
       @static = false
     end
@@ -818,6 +822,8 @@ module Myst
     def_equals_and_hash name, body
   end
 
+  alias TypePath = Call | Const
+
   # A type definition. TypeDefs are similar to ModuleDefs, but define a data
   # type that can be instantiated similar to how Literals create primitives.
   #
@@ -827,7 +833,7 @@ module Myst
   class TypeDef < Node
     property  name       : String
     property  body       : Node
-    property! supertype  : Call | Const | ValueInterpolation | Nil
+    property! supertype  : TypePath | ValueInterpolation | Nil
 
     def initialize(@name, @body=Nop.new, @supertype=nil)
     end
@@ -837,6 +843,21 @@ module Myst
     end
 
     def_equals_and_hash name, body
+  end
+
+  # A union of two or more types. Unions are written as multiple type paths
+  # joined together using pipe characters ('|'), and are generally used in
+  # type restrictions to represent one or more types that are allowed for a
+  # parameter, rather than needing multiple clauses for the same functionality.
+  #
+  #   path [ '|' path ]+
+  class TypeUnion < Node
+    property types : Array(TypePath)
+
+    def initialize(@types : Array(TypePath))
+    end
+
+    def_equals_and_hash types
   end
 
   # An instantiation of a type. Instantiations create new instances of the
@@ -886,9 +907,9 @@ module Myst
   #
   #   'include' path
   class Include < Node
-    property path : Node
+    property path : TypePath
 
-    def initialize(@path : Node); end
+    def initialize(@path : TypePath); end
 
     def accept_children(visitor)
       path.accept(visitor)
@@ -903,9 +924,9 @@ module Myst
   #
   #   'extend' path
   class Extend < Node
-    property path : Node
+    property path : TypePath
 
-    def initialize(@path : Node); end
+    def initialize(@path : TypePath); end
 
     def accept_children(visitor)
       path.accept(visitor)

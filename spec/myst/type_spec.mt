@@ -117,12 +117,20 @@ describe("Type") do
       assert(RootType.ancestors).includes(Type)
     end
 
-    it("is empty when called on Type") do
-      assert(Type.ancestors).equals([])
+    it("includes the base Object") do
+      assert(RootType.ancestors).includes(Object)
+    end
+
+    it("includes Object when called on Type") do
+      assert(Type.ancestors).equals([Object])
+    end
+
+    it("is empty when called on Object") do
+      assert(Object.ancestors).equals([])
     end
 
     it("includes all supertypes of the type") do
-      assert(SubType1.ancestors).equals([RootType, Type])
+      assert(SubType1.ancestors).equals([RootType, Type, Object])
     end
 
     it("does not include subtypes of the type") do

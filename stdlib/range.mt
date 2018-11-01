@@ -45,7 +45,7 @@ deftype Range
   #doc each(&block) -> self
   #| Iterates forward through the Range (starting at `first` and incrementing
   #| to `last`), calling the block for every element in the interval.
-  def each(&block)
+  def each(&block) : Range
     current = @first
     while current <= @last
       block(current)
@@ -58,7 +58,7 @@ deftype Range
   #doc reverse_each(&block) -> self
   #| Iterates backward through the Range (starting at `last` and decrementing
   #| to `first`), calling the block for every element in the interval.
-  def reverse_each(&block)
+  def reverse_each(&block) : Range
     current = @last
     while @first <= current
       block(current)
@@ -74,7 +74,7 @@ deftype Range
   #|
   #| This method has an `O(1)` implementation using only comparisons with the
   #| bounds of the interval.
-  def includes?(value)
+  def includes?(value) : Boolean
     !!(@first <= value && value <= @last)
   end
 
@@ -83,7 +83,7 @@ deftype Range
   #| Returns an abstract string representation of the interval covered by this
   #| Range. Note that this does _not_ return a string of all the values in the
   #| interval.
-  def to_s
+  def to_s : String
     "(<(@first)>..<(@last)>)"
   end
 end

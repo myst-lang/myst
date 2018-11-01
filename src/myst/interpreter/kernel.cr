@@ -4,6 +4,7 @@ module Myst
       @kernel.scope.clear
       init_top_level
       @kernel.scope["Kernel"]     = @kernel
+      @kernel.scope["Object"]     = @base_object
       @kernel.scope["Type"]       = @base_type
       @kernel.scope["Nil"]        = init_nil
       @kernel.scope["Boolean"]    = init_boolean
