@@ -1,6 +1,6 @@
 name: myst
-version: 0.3.0
-crystal: 0.26.1
+version: 0.6.2
+crystal: 0.27.0
 license: MIT
 authors:
   - Jon Egeland <jonegeland@gmail.com>

@@ -31,17 +31,17 @@ only works on macOS and Linux systems._
 
 The recommended method of installing Myst is with `mtenv`, the official version manager for the Myst language. It is available [here](https://github.com/myst-lang/mtenv) and has installation instructions available in the README.
 
-For now, you will need to have Crystal installed to be able to install Myst. See [Crystal's installation instructions](https://crystal-lang.org/docs/installation/) for how to get started.
+For now, you will need to have Crystal installed to be able to install Myst. See [Crystal's installation instructions](https://crystal-lang.org/docs/installation/) for how to get started. Myst currently runs on Crystal 0.27.0.
 
 Once Crystal and `mtenv` are installed, installing Myst is as simple as running `mtenv install`:
 
 ```shell
 # Make sure mtenv is properly set up
 mtenv setup
-# Install v0.6.1 of Myst
-mtenv install v0.6.1
+# Install v0.6.2 of Myst
+mtenv install v0.6.2
 # Make it the active version
-mtenv use v0.6.1
+mtenv use v0.6.2
 ```
 
 With that, `myst` should now be installed and ready to go!
