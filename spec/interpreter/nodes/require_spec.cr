@@ -64,7 +64,7 @@ Dir.cd(__DIR__) do
       itr.stack.pop.should eq(val(true))
     end
 
-    it "must be given a String value as a path" do
+    context "must be given a String value as a path" do
       it_does_not_interpret %q(
         require true
       )

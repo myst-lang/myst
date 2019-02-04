@@ -26,7 +26,7 @@ describe "Interpreter - SimpleAssign" do
     interpreter.current_scope["THING"].should eq(val(2))
   end
 
-  it "does not allow re-assignment to constants" do
+  context "does not allow re-assignment to constants" do
     it_does_not_interpret %q(
       THING = 1
       THING = 2
