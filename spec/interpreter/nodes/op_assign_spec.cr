@@ -19,7 +19,7 @@ describe "Interpreter - OpAssign" do
         itr.errput.to_s.downcase.should match(/no variable or method `a`/)
       end
 
-      it "does not allow re-assignment to constants" do
+      context "does not allow re-assignment to constants" do
         it_does_not_interpret %Q(
           THING = 1
           THING #{op} 2
