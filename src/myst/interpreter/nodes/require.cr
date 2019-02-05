@@ -50,28 +50,10 @@ module Myst
     # The set of directories that should be considered when performing lookups
     # with bare paths (not explicitly relative).
     def load_dirs
-      @load_dirs ||= begin
-        paths = [] of String
-        # Use any specified environment paths first.
-        if env_paths = ENV["MYST_PATH"]?
-          paths.concat(env_paths.split(':'))
-        end
-        paths.concat([
-          # Then add the current working directory.
-          Dir.current,
-          # Finally, the directory where the executable is installed. This is
-          # not _guaranteed_ on all systems, but support is good enough, so a
-          # non-nil assertion is made.
-          #
-          # This assumes that the executable exists under a `bin/` folder. The
-          # path added here will be the directory that contains `bin`.
-          #
-          # This is needed to locate the stdlib.
-          File.dirname(File.dirname(File.join(Process.executable_path.not_nil!)))
-        ])
-
-        paths
-      end.as(Array(String))
+      @load_dirs ||= [
+        Dir.current,
+        ENV["MYST_HOME"]?
+      ].compact.as(Array(String))
     end
 
 

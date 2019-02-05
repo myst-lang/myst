@@ -1,7 +1,17 @@
 require "spec"
 require "../src/myst/**"
 
+
 include Myst
+
+
+# This should resolve to the root directory of this project. This file lives at
+# ./spec/spec_helper.cr, so the root is the dirname of the dir of this file.
+#
+# This is probably not absolutely necessary, but should avoid any potential
+# variance based on user's environments.
+ENV["MYST_HOME"] = File.dirname(__DIR__)
+
 
 # Run the Myst parser on the given source code, returning the AST that the
 # parser generates for it.

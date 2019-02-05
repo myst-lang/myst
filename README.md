@@ -49,6 +49,29 @@ With that, `myst` should now be installed and ready to go!
 Help with improving these installation instructions, making pre-built binaries, and/or managing releases would be greatly appreciated :)
 
 
+# Embedding as a Shard
+
+Myst can be embedded into any other Crystal program as a shard dependency. This could be useful for adding scripting support to your applications, or creating new tools for Myst that have full access to every part of the interpreter.
+
+To add Myst as a shard for your project, simply add it as a dependency in your `shard.yml`:
+
+```yml
+dependencies:
+  myst:
+    github: myst-lang/myst
+```
+
+You can also specify an exact version to use by adding a `version` under the `github` entry.
+
+After running `shards install`, you should be able to include Myst in your project with a simple `require`:
+
+```crystal
+require "myst"
+```
+
+Everything in Myst is namespaced under the `Myst` module, so there is very little concern of leaking behavior.
+
+
 # Get Involved
 
 If you have an idea for a new feature or find a bug in Myst, _please_ [file an issue for it!](https://github.com/myst-lang/myst/issues/new). Using the language and finding bugs are the best ways to help Myst improve. Any and all help here is appreciated, even if that just means trying out the language for a day.
