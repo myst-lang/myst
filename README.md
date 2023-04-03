@@ -1,5 +1,7 @@
 # Myst
 
+**UNMAINTAINED:** After more than 5 years sitting stagnant, Myst is definitively dormant and the website/domain has not been renewed. Thanks for your interest over the years.
+
 **A structured, dynamic, general-purpose language.**
 
 ```ruby
